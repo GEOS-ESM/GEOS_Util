@@ -1,0 +1,24 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+# Order is important; the last matching pattern takes the most
+# precedence.
+
+# Everything in GEOS_Util is owned by the geos-util-team.
+* @GEOS-ESM/geos-util-team
+
+# Cmake team manages the circleci and github dirs
+/.circleci/ @GEOS-ESM/cmake-team
+/.github/ @GEOS-ESM/cmake-team
+
+# Postprocessing team is the CODEOWNER for plots and post
+/plots/ @GEOS-ESM/postprocessing-team
+/post/ @GEOS-ESM/postprocessing-team
+
+# Preprocessing team is the CODEOWNER for pre
+/pre/ @GEOS-ESM/preprocessing-team
+
+# Yuri owns the coupled plots
+/coupled_diagnostics/ @yvikhlya
+
+# The GEOS CMake Team is the CODEOWNER for the CMakeLists.txt files in this repository
+CMakeLists.txt @GEOS-ESM/cmake-team
