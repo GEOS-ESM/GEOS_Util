@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.0.1] - 2023-01-20
+
+### Fixed
+
+- Fixed a Readme file in coupled diagnostics/geospy to point to GEOS_Util repo instead of GEOS_Shared.
+
 ## [1.0.0] - 2023-01-20
 
 ### Added
