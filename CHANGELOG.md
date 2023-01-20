@@ -17,3 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.0.0] - 2023-01-20
+
+### Added
+
+- Initial release of GEOS_Util based on GEOS_Util code from GMAO_Shared v1.6.5
