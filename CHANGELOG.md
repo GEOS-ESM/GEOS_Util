@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Plot updates for MOIST variables.
+
 ### Changed
 
 - Moved `regrid.pl` and the Python `remap_*` scripts from `post/` to `pre/`
 
 ### Fixed
+
+- Plot updates to fix QBO labeling.
 
 ### Removed
 
