@@ -44,15 +44,9 @@ set (perlscripts
   ecmwf2geos.pl
   g5fcst_stats.pl
   ncep2geos.pl
-  regrid.pl
   )
 install(
    PROGRAMS ${perlscripts} ec2grd.csh
-   DESTINATION bin)
-
-file(GLOB pythonscripts CONFIGURE_DEPENDS ./remap_restart/remap*)
-install(
-   PROGRAMS ${pythonscripts} 
    DESTINATION bin)
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
@@ -157,7 +151,7 @@ install (
    )
 
 install (
-   FILES stats.rc time_ave.rc statsNx.rc 
+   FILES stats.rc time_ave.rc statsNx.rc
    DESTINATION etc
    )
 
