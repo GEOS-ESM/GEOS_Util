@@ -2,6 +2,7 @@ function count  (args)
 season  = subwrd(args,1)
 begdate = subwrd(args,2)
 enddate = subwrd(args,3)
+field   = subwrd(args,5)
 
 'getdates'
 if( begdate != "" & enddate != "" )
@@ -10,9 +11,12 @@ if( begdate != "" & enddate != "" )
 endif
 
 'getinfo tmin'
-         tmin = result
+         tmin  = result
 'getinfo tmax'
-         tmax = result
+         tmax  = result
+'getinfo undef'
+         undef = result
+
 quote = '"'
 t = tmin
 n = 0
@@ -21,6 +25,17 @@ while( t<=tmax )
 'getinfo month'
          month = result
 
+         defined = true
+     if( field != '' )
+        'minmax.simple 'field
+         fmax = subwrd(result,1)
+         fmin = subwrd(result,2)
+         if( fmin = fmax & fmin = undef )
+             defined = false
+         endif
+     endif
+
+     if( defined = true )
      if( quote''month''quote = season ) ; n = n + 1 ; endif
 
      if( season = quote''DJF''quote )
@@ -62,6 +77,7 @@ while( t<=tmax )
      if( quote''month''quote = quote''DEC''quote  ) ; n = n + 1 ; endif
      endif
 
+     endif
 t = t + 1
 endwhile
 

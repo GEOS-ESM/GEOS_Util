@@ -388,14 +388,14 @@ c ------------------------
       real        A   (IM,LM)
       real*4      TEM (IM)
       DO  L=1,LM
-      DO  I=1,IM
-      if( abs(a(i,L)).gt.1.e-20 ) then
-      TEM (I) = A(I,L)
-      else
-      TEM (I) = 0.
-      endif
-      ENDDO
-      WRITE(KTP)  TEM
+          DO  I=1,IM
+              if( abs(a(i,L)).gt.1.e-20 ) then
+                  TEM (I) = A(I,L)
+              else
+                  TEM (I) = 0.
+              endif
+          ENDDO
+          WRITE(KTP)  TEM
       ENDDO
       RETURN
       END
@@ -446,7 +446,7 @@ c ------------------------
       real      f(jm)
       real    dum(jm)
       integer method
-      real airmw,runiv,cpd,rgas,akap
+      real airmw,runiv,cpd,rgas,akap, sum
 
       PARAMETER ( AIRMW  = MAPL_AIRMW  )
       PARAMETER ( RUNIV  = MAPL_RUNIV  )
@@ -522,6 +522,14 @@ c ---------------------------
             psim(j,L) = 2*pi*a*cos(phi)/g * dum(j)
          enddo
       enddo
+
+      sum = 0.0
+      do k=1,lm
+      do j=1,jm
+      sum = sum + abs( psim(j,k) )
+      enddo
+      enddo
+      if( sum.eq.0.0 ) psim = undef
 
 c Define Eddy Streamfunction:  psie = vpthp/dthdp
 c -----------------------------------------------
@@ -622,6 +630,14 @@ c -------------------------------------------------------
             psi1(j,L) = 2*pi*a*cos(phi)/g * dum(j)
          enddo
       enddo
+
+      sum = 0.0
+      do k=1,lm
+      do j=1,jm
+      sum = sum + abs( psi1(j,k) )
+      enddo
+      enddo
+      if( sum.eq.0.0 ) psi1 = undef
 
 
 c Compute Residual Streamfunction (Method 2)
@@ -770,7 +786,7 @@ c -------------------------------------------------------------------
       real  v(jm,lm), v0(jm,lm)
       real  s(jm,lm)
       real p0(jm,lm),  p(jm,lm)
-      real dum(jm)
+      real dum(jm), sum
 
       real  ple(jm,0:lm)
       real delp(jm,  lm)
@@ -802,16 +818,24 @@ c ------------------------------------
 
       do k=1,lm
          dum(:) = 0.0
-      do L=1,k
-      do j=1,jm
-      phi = -pi/2+(j-1)*dp
-      if( abs(v(j,L)-undef).gt.0.1 ) then
-                  dum(j) = dum(j) + v(j,L)*cos(phi)*delp(j,L)
-      endif
-      enddo
-      enddo
+         do L=1,k
+         do j=1,jm
+         phi = -pi/2+(j-1)*dp
+         if( abs(v(j,L)-undef).gt.0.1 ) then
+               dum(j) = dum(j) + v(j,L)*cos(phi)*delp(j,L)
+         endif
+         enddo
+         enddo
          s(:,k) = dum(:)*const
       enddo
+
+      sum = 0.0
+      do k=1,lm
+      do j=1,jm
+      sum = sum + abs( s(j,k) )
+      enddo
+      enddo
+      if( sum.eq.0.0 ) s = undef
 
 c Invert Streamfunction for grads output (in order to be bottom=>top)
 c -------------------------------------------------------------------
@@ -834,7 +858,7 @@ c -------------------------------------------------------------------
       implicit none
       integer j,k,L,jm,lm
       real pi,dp,a,g,H,ps,ts,rhos,z,phi,undef
-      real airmw,runiv,cpd,rgas,akap
+      real airmw,runiv,cpd,rgas,akap, sum
        
       real     v0(jm,lm),   v(jm,lm)
       real     w0(jm,lm),   w(jm,lm)
@@ -995,6 +1019,14 @@ c --------------------------------------------
          enddo
          res(:,k) = dum(:,1)
       enddo
+
+      sum = 0.0
+      do k=1,lm
+      do j=1,jm
+      sum = sum + abs( res(j,k) )
+      enddo
+      enddo
+      if( sum.eq.0.0 ) res = undef
 
 c Invert Streamfunction and Vstar for grads output (in order to be bottom=>top)
 c -----------------------------------------------------------------------------
