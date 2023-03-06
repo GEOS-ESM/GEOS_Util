@@ -11,8 +11,10 @@ setenv RUN_CMD "$GEOSBIN/esma_mpirun -np "
 
 if ($?SLURM_NTASKS) then
         set NCPUS = $SLURM_NTASKS
+        set   RUN = "$RUN_CMD $NCPUS $GEOSBIN/3CH_mpi.x "
 else
         set NCPUS = 1
+        set   RUN = "$GEOSBIN/3CH.x "
 endif
 
 # ----------------------------------------------------
@@ -32,38 +34,27 @@ set command_line = " "
 
 @ n = 1
 while( $n <= $numexps )
-set expid = `cat 3CH.rc | grep -v \# | grep expid_$n | cut -d: -f2`
-set files = `cat 3CH.rc | grep -v \# | grep files_$n | cut -d: -f2`
+   set expid = `cat 3CH.rc | grep -v \# | grep expid_$n | cut -d: -f2`
+   set files = `cat 3CH.rc | grep -v \# | grep files_$n | cut -d: -f2`
 
-/bin/rm -f exp_files.$n
-touch      exp_files.$n
+   echo "Corner $n  EXPID: $expid"
 
-set command_line = "$command_line -exp"$n" $expid "
+   # Check for Time template
+   # -----------------------
+   set  hourly = `echo $files | grep %h2`
+   set   daily = `echo $files | grep %d2`
 
-set nymd = $nymdb
-set nhms = 000000
-while( $nymd <= $nymde )
-        set year  = `echo $nymd | cut -b1-4`
-        set month = `echo $nymd | cut -b5-6`
-        set day   = `echo $nymd | cut -b7-8`
-        set hour  = `echo $nhms | cut -b1-2`
-        set dir = `echo $files | sed -e "s/%y4/$year/g" | sed -e "s/%m2/$month/g" | sed -e "s/%d2/$day/g" | sed -e "s/%h2/$hour/g"`
-        echo Looking for $dir ...
-        set list = `/bin/ls -1 ${dir}* | grep -v daily_mean`
-        echo $list >> exp_files.$n
-        set date = `tick $nymd $nhms $ndt`
-        set nymd = $date[1]
-        set nhms = $date[2]
+   if( $hourly == $files ) then
+       set nsecs = $ndt
+   else if( $daily == $files ) then
+       set nsecs = 86400
+   else
+       set nsecs = -999
+   endif
+
+   set command_line = "$command_line -exp"$n" $expid $files "
+@  n = $n + 1
 end
-set dum = `cat exp_files.$n`
-
-set command_line = "$command_line $dum "
-
-echo " "
-@ n = $n + 1
-end
-
-/bin/rm -f exp_files.*
 
 set im     = `cat 3CH.rc | grep -v \# | grep  im:     | cut -d: -f2` ; if( "$im"     != '' ) set im     = "-im     $im"
 set jm     = `cat 3CH.rc | grep -v \# | grep  jm:     | cut -d: -f2` ; if( "$jm"     != '' ) set jm     = "-jm     $jm"
@@ -86,8 +77,9 @@ endif
 # Perform 3CH Calculation
 # ----------------------------------------------------
 
-$RUN_CMD $NCPUS $GEOSBIN/3CH_mpi.x $command_line $im $jm $levs $fields $method \
-                                   -nymdb $nymdb -nhmsb $nhmsb -nymde $nymde -nhmse $nhmse -ndt $ndt  
+
+ $RUN $command_line $im $jm $levs $fields $method \
+      -nymdb $nymdb -nhmsb $nhmsb -nymde $nymde -nhmse $nhmse -ndt $ndt  
 
 # ----------------------------------------------------
 # Convert grads to nc4 file

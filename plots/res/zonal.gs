@@ -210,7 +210,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  vfile != "NULL" ) ; 'd ' vname'z0' ; else ; 'd zerosz' ; endif
+   if(  vfile != "NULL" ) ; 'd ' vname'z0' ; else ; say  vname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -218,7 +218,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd ' tname'z0' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd ' tname'z0' ; else ; say  tname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -226,7 +226,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd    vstsz0' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz0' ; else ; say 'vsts not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -250,7 +250,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd ' uname'z0' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd ' uname'z0' ; else ; say  uname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -258,7 +258,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     usvsz0' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     usvsz0' ; else ; say 'usvs not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -266,7 +266,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     uswsz0' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     uswsz0' ; else ; say 'usws not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -274,7 +274,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  wfile != "NULL" ) ; 'd ' wname'z0' ; else ; 'd zerosz' ; endif
+   if(  wfile != "NULL" ) ; 'd ' wname'z0' ; else ; say wname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -449,6 +449,7 @@ else
        'sety'
        'setz'
        'set t 'tmin' 'tmax
+        say 'vsts not found, setting to zero ... '
        'define vstsz'num' = zerosz'
 endif
 
@@ -463,6 +464,7 @@ else
        'sety'
        'setz'
        'set t 'tmin' 'tmax
+        say 'usvs not found, setting to zero ... '
        'define usvsz'num' = zerosz'
 endif
 
@@ -477,6 +479,7 @@ else
        'sety'
        'setz'
        'set t 'tmin' 'tmax
+        say 'usws not found, setting to zero ... '
        'define uswsz'num' = zerosz'
 endif
 
@@ -507,7 +510,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  vfile != "NULL" ) ; 'd ' vname'z'num ; else ; 'd zerosz' ; endif
+   if(  vfile != "NULL" ) ; 'd ' vname'z'num ; else ; say vname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -515,7 +518,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd ' tname'z'num ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd ' tname'z'num ; else ; say tname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -523,7 +526,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd    vstsz'num ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz'num ; else ; say 'vsts not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -547,7 +550,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd ' uname'z'num ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd ' uname'z'num ; else ; say uname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -555,7 +558,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     usvsz'num ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     usvsz'num ; else ; say 'usvs not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -563,7 +566,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     uswsz'num ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     uswsz'num ; else ; say 'usws not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -571,7 +574,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  wfile != "NULL" ) ; 'd ' wname'z'num ; else ; 'd zerosz' ; endif
+   if(  wfile != "NULL" ) ; 'd ' wname'z'num ; else ; say wname' not found, setting to zero ... ' ; 'd zerosz' ; endif
    z=z+1
    endwhile
 

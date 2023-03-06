@@ -6,6 +6,7 @@
             character*256              ::  expid
             integer                    ::  nfiles
             integer                    ::  ndates
+            character*256              ::  template
             character*256, allocatable ::  fnames(:)
             integer                    ::  im,jm,lm
             real                       ::  undef
@@ -21,6 +22,11 @@
 ! -------------------------------------------------------------------------------
 
       program Main
+
+      use ESMF
+      use ESMF_CFIOMOD, only:  ESMF_CFIOstrTemplate
+      use MAPL_Mod
+
       use dynamics_lattice_module
       use ThreeCornerHat_mod
       use iso_fortran_env, only: REAL64
@@ -84,6 +90,8 @@
       integer, allocatable ::    cc(:,:,:,:)   !  Time-Mean Counters
 
       character*256, allocatable ::  arg(:)
+      character*256, allocatable :: dummynames(:)
+      character*256              :: filename
       character*256              :: dummy
       character*256              :: tag
       character*256, allocatable :: field(:)
@@ -104,6 +112,9 @@
       integer nvars
       integer imax, jmax
       integer method
+
+      integer                   :: RC,STATUS
+
 
       real, pointer :: zlev (:)
 
@@ -221,25 +232,10 @@
                  endif
 
                  k = n+1
-                 experiment(nexps)%expid = arg(k)
+                 experiment(nexps)%expid    = arg(k)
+                 experiment(nexps)%template = arg(k+1)
 
-                 nfiles = 1
-                 read(arg(k+nfiles),fmt='(a1)') char1
-                 do while (char1.ne.'-' .and. n+nfiles.ne.nargs )
-                 nfiles = nfiles+1
-                 read(arg(k+nfiles),fmt='(a1)') char1
-                 enddo
-                 if( char1.eq.'-' ) nfiles = nfiles-1
-
-                 experiment(nexps)%nfiles = nfiles
-                 allocate ( experiment(nexps)%fnames(nfiles) )
-
-                 if(root) print *, 'EXP: ',nexps
-                 do m=1,nfiles
-                 experiment(nexps)%fnames(m) = arg(k+m)
-                 if(root) write(*,'("   FILES: ",a)' ) trim(experiment(nexps)%fnames(m))
-                 enddo
-                 if(root) print *
+                 if(root) write(*,'("EXPNUM: ",i2," EXPID: ",a," TEMPLATE: ",a)' ) nexps,trim(experiment(nexps)%expid),trim(experiment(nexps)%template)
             endif
 
             if( trim(arg(n)).eq.'-levs' ) then
@@ -297,6 +293,59 @@
           call my_finalize
           stop
       endif
+
+! Create File Lists for Each Experiment
+! -------------------------------------
+      if(root) print *
+      do n=1,nexps
+         nymd = nymdb
+         nhms = nhmsb
+
+         nfiles = 1
+         allocate ( experiment(n)%fnames(nfiles) )
+     
+         call ESMF_CFIOstrTemplate ( experiment(n)%fnames(nfiles), experiment(n)%template, 'GRADS', nymd=nymd, nhms=nhms, stat=STATUS )
+         IF (STATUS.ne.0) THEN
+             if(root) print *, 'Error in finding ',experiment(n)%expid,' dataset for: ',nymd,' ',nhms
+             call my_finalize
+             stop
+         ENDIF
+
+         call tick( nymd,nhms,ndt )
+
+         do while( (nymd.lt.nymde) .or. (nymd.eq.nymde .and. nhms.le.nhmse) )
+
+            call ESMF_CFIOstrTemplate ( filename, experiment(n)%template, 'GRADS', nymd=nymd, nhms=nhms, stat=STATUS )
+            IF (STATUS.ne.0) THEN
+                if(root) print *, 'Error in finding ',experiment(n)%expid,' dataset for: ',nymd,' ',nhms
+                call my_finalize
+                stop
+            ENDIF
+
+            if( filename.ne.experiment(n)%fnames(nfiles) ) then
+                  allocate( dummynames(nfiles) )
+                            dummynames = experiment(n)%fnames
+                deallocate( experiment(n)%fnames )
+                  allocate( experiment(n)%fnames(nfiles+1) )
+                            experiment(n)%fnames(1:nfiles) = dummynames
+                            nfiles = nfiles + 1
+                            experiment(n)%fnames(nfiles) = filename
+                deallocate( dummynames )
+             endif
+
+         call tick( nymd,nhms,ndt )
+         enddo
+         experiment(n)%nfiles = nfiles
+
+         if(root) then
+            print *, 'EXP: ',n
+            do m=1,nfiles
+            write(*,'("   FILES: ",a)' ) trim(experiment(n)%fnames(m))
+            enddo
+            print *
+         endif
+
+      enddo
 
 ! **********************************************************************
 ! ****        Initialize Dates Associated with Each Experiment      ****
@@ -2570,9 +2619,9 @@
       write(*, '()' )
       write(*, '(" Usage:  ")' )
       write(*, '(" ------  ")' )
-      write(*, '(" 3CH.x -exp1  expid plus filelist for 1st 3CH Triplet member (exp1:exp2:exp3)")' )
-      write(*, '("       -exp2  expid plus filelist for 2nd 3CH Triplet member (exp1:exp2:exp3)")' )
-      write(*, '("       -exp3  expid plus filelist for 3rd 3CH Triplet member (exp1:exp2:exp3)")' )
+      write(*, '(" 3CH.x -exp1  expid1 plus filelist1 template for 1st 3CH Triplet member (exp1:exp2:exp3)")' )
+      write(*, '("       -exp2  expid2 plus filelist2 template for 2nd 3CH Triplet member (exp1:exp2:exp3)")' )
+      write(*, '("       -exp3  expid3 plus filelist3 template for 3rd 3CH Triplet member (exp1:exp2:exp3)")' )
       write(*, '()' )
       write(*, '("       -nymdb Beginning Date for 3CH computation")' )
       write(*, '("       -nhmsb Beginning Time for 3CH computation")' )
@@ -2581,11 +2630,11 @@
       write(*, '()' )
       write(*, '(" Optional Arguments:  ")' )
       write(*, '(" -------------------  ")' )
-      write(*, '("      <-exp4  expid plus filelist for 3rd 3CH Triplet member of 2nd Triplet (exp1:exp2:exp4)>")' )
-      write(*, '("      <-exp5  expid plus filelist for 3rd 3CH Triplet member of 3rd Triplet (exp1:exp2:exp5)>")' )
+      write(*, '("      <-exp4  expid4 plus filelist4 template for 3rd 3CH Triplet member of 2nd Triplet (exp1:exp2:exp4)>")' )
+      write(*, '("      <-exp5  expid5 plus filelist5 template for 3rd 3CH Triplet member of 3rd Triplet (exp1:exp2:exp5)>")' )
       write(*, '("         .")' )
       write(*, '("         .")' )
-      write(*, '("      <-expN  expid plus filelist for 3rd 3CH Triplet member of N-2 Triplet (exp1:exp2:expN)>")' )
+      write(*, '("      <-expN  expidN plus filelistN template for 3rd 3CH Triplet member of N-2 Triplet (exp1:exp2:expN)>")' )
       write(*, '()' )
       write(*, '("      <-ndt   Time Frequency in seconds  (Default:  21600)>")' )
       write(*, '()' )

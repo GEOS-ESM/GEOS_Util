@@ -12,8 +12,8 @@ debug    = subwrd(args,3)
 'set clab off'
 'c'
 
-* Get RAD Budget Variables
-* ------------------------
+* Get RAD Budget Variables  Note: alias names are hardwired
+* ---------------------------------------------------------
 numvar = 0
 
 'run getvar OLR IRRAD'
@@ -49,6 +49,8 @@ if( rc = numvar ) ; return ; endif
 'getinfo undef'
          undef = result
 
+* ------------------------------------------------------------------------
+
 * Experiment Datasets
 * -------------------
 n = 1
@@ -62,18 +64,21 @@ while( n<=numvar )
 
 'set undef 'undef
 
+* Compute Global Average Time-Series:  'alias.n'g
+* -----------------------------------------------
 if( qname.n != 'NULL' )
-'make_ts -FUNCTION 'qname.n' -NAME 'alias.n
-
-'set x 1'
-'set y 1'
-'set z 1'
-'sett'
-'seasonal 'alias.n'g'
+   'make_ts -FUNCTION 'qname.n' -NAME 'alias.n
+   'set x 1'
+   'set y 1'
+   'set z 1'
+   'sett'
+   'seasonal 'alias.n'g'
 endif
 
 n = n+1
 endwhile
+
+* ------------------------------------------------------------------------
 
 'set dfile 'qfile.1
 'sett'
@@ -97,6 +102,8 @@ say 'EXP DATEMAX: 'mdatemax
 'set z 1'
 'set t 1'
 
+* Define Climatological Averages using Hardwired Aliases
+* ------------------------------------------------------
 'getinfo year'
          year = result
 
