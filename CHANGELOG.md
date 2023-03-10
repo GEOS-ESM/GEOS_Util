@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-## [1.0.3] - 2023-03-10
+## [1.1.0] - 2023-03-10
 
 - Plot updates for MOIST variables.
 - Add stretched grid to regrid and remap_restarts
