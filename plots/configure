@@ -32,7 +32,7 @@ if( $arch == 'Linux'    ) then
                               setenv PATH         ${PATH}:${ImagMag_bin}
                               set    path =     ( ${path} ${ImagMag_bin} )
     else if( $host == 'discover' ) then
-                              setenv TOPODIR      /discover/nobackup/ltakacs/bcs/Ganymed-4_0/TOPO
+                              setenv TOPODIR      /discover/nobackup/projects/gmao/bcs_shared/legacy_bcs/Ganymed-4_0/TOPO
                               setenv NCCS_SHARE   ${SHARE}/gmao_ops/
                               setenv VERIFICATION ${NCCS_SHARE}/verification
                               setenv OPENGADIR    ${SHARE}/gmao_ops/opengrads/Contents
