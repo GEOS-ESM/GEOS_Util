@@ -70,14 +70,14 @@ class analysis(remap_base):
        fname    = os.path.basename(f)
        out_name = fname.replace(expid_in + '.', expid_out)
        f_tmp = tmpdir+'/'+out_name
-       local_fs.append(f_tmp) 
+       local_fs.append(f_tmp)
        shutil.copy(f,f_tmp)
        if out_name.find('satbias') != -1 :
          if (aqua):
             f_ = open(f_tmp, 'w')
             for line in fileinput.input(f):
                f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
-            f_.close() 
+            f_.close()
 
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
@@ -93,7 +93,7 @@ class analysis(remap_base):
      for f in local_fs:
        fname = os.path.basename(f)
        shutil.move(f, out_dir+'/'+fname)
-    # write lcv 
+    # write lcv
      lcv = config['output']['analysis']['lcv']
      if lcv :
        ymd_ = yyyymmddhh_[0:8]
@@ -115,12 +115,13 @@ class analysis(remap_base):
      hgrd['C48']   = 'b'
      hgrd['C90']   = 'c'
      hgrd['C180']  = 'd'
+     hgrd['C270']  = 'd'
      hgrd['C360']  = 'd'
-     hgrd['C500']  = 'd'
+     hgrd['C540']  = 'd'
      hgrd['C720']  = 'e'
-     hgrd['C1000'] = 'e'
+     hgrd['C1080'] = 'e'
      hgrd['C1440'] = 'e'
-     hgrd['C2000'] = 'e'
+     hgrd['C2160'] = 'e'
      hgrd['C2880'] = 'e'
      hgrd['C5760'] = 'e'
      return hgrd[grid]
