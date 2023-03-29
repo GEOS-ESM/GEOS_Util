@@ -122,25 +122,25 @@ class upperair(remap_base):
 
      log_name = out_dir+'/remap_upper_log'
 
-    # We need to create an input.nml file which is different if we are running stretched grid
-    # First, let's define a boolean for whether we are running stretched grid
-    # If we are running with imout of 270, 540, 1080, or 2160, then we are running stretched grid
-    stretched_grid = False
-    if imout in [270, 540, 1080, 2160]:
+     # We need to create an input.nml file which is different if we are running stretched grid
+     # First, let's define a boolean for whether we are running stretched grid
+     # If we are running with imout of 270, 540, 1080, or 2160, then we are running stretched grid
+     stretched_grid = False
+     if imout in [270, 540, 1080, 2160]:
         stretched_grid = True
 
-    # Now, let's create the input.nml file
-    # We need to create a namelist for the upper air remapping
-    # All resolutions get an &fms_nml namelist
-    nml_file ="""
+     # Now, let's create the input.nml file
+     # We need to create a namelist for the upper air remapping
+     # All resolutions get an &fms_nml namelist
+     nml_file ="""
 &fms_nml
     print_memory_usage=.false.
     domains_stack_size = 24000000
 /
 """
 
-    # If we are running stretched grid, we need to add an &fv_core_nml namelist as well
-    if stretched_grid:
+     # If we are running stretched grid, we need to add an &fv_core_nml namelist as well
+     if stretched_grid:
         nml_file += """
 &fv_core_nml
      do_schmidt  = .true.
@@ -150,12 +150,11 @@ class upperair(remap_base):
 /
 """
 
-    # Now, let's write the input.nml file
-    with open('input.nml', 'w') as f:
+     # Now, let's write the input.nml file
+     with open('input.nml', 'w') as f:
         f.write(nml_file)
 
-     remap_template="""
-#!/bin/csh -xf
+     remap_template="""#!/bin/csh -xf
 #SBATCH --account={account}
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
