@@ -62,8 +62,10 @@ class catchANDcn(remap_base):
         NPE = 40      
      elif (max_tilenum <= 1684725) : #M09
         NPE = 80
-     else:
+     elif (max_tilenum <= 2496756) : #C720
         NPE = 120
+     else:
+        NPE = 160
     
      account    = config['slurm']['account']
      # even the input is binary, the output si nc4
@@ -132,7 +134,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
        ntasks = os.getenv('SLURM_NTASKS', default = None)
        if ( not ntasks):
          nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
-         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
+         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '40'))
          ntasks = nnodes * ncpus
        ntasks = int(ntasks)
 
