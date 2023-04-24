@@ -79,12 +79,12 @@ class upperair(remap_base):
        subprocess.call(shlex.split(cmd))
 
      # link topo file
-     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*')[0]
+     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
-     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*')[0]
+     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
