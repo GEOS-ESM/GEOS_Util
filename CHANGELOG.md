@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.1.2] - 2023-04-24
+
+### Fixed
+
+- Fixed issue with `remap_upper.py` where nc4 files were being linked instead of binary files which FV routines require
+
 ## [1.1.1] - 2023-03-29
 
 ### Fixed
