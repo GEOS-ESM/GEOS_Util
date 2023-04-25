@@ -117,6 +117,49 @@ def merra2_expid(config):
 
    return config
 
+def get_config_from_command_line(cml):
+ 
+   gridID = {}
+   gridID['c']  = '360X180'
+   gridID['e']  = '1440x720'
+   gridID['f']  = '2880x1440'
+   gridID['CS'] = 'CS'
+   gridID['aa'] = '72x36'
+   gridID['bb'] = '360x200'
+   gridID['dd'] = '720x410'
+   gridID['ee'] = '1440x1080'
+
+   answers = {}
+   answers["input:shared:MERRA-2"]     = cml.merra2
+   answers["input:shared:yyyymmddhh"]  = cml.ymd + cml.hr
+   answers["output:shared:agrid"]      = cml.grout
+   answers["output:air:nlevel"]        = cml.levsout
+   answers["output:shared:out_dir"]    = cml.outdir + '/'
+   answers["input:shared:rst_dir"]     = cml.d + '/'
+   answers["output:shared:expid"]      = cml.newid
+
+   answers["input:shared:tag"]         = cml.tagin
+   answers["output:shared:tag"]        = cml.tagout
+
+   answers["input:shared:model"]       = cml.ocnmdlin 
+   answers["output:shared:model"]      = cml.ocnmdlout
+   answers["input:shared:ogrid"]       = gridID[cml.oceanin]
+   answers["output:shared:ogrid"]      = gridID[cml.oceanout]
+ 
+   answers["output:analysis:bkg"]      = cml.bkg     
+   answers["output:analysis:lcv"]      = cml.lcv
+
+   if cml.rs == 1:
+     answers["output:air:remap"]     = True
+   if cml.rs == 2:     
+     answers["output:surface:remap"] = True
+   if cml.rs == 3:     
+     answers["output:surface:remap"] = True
+     answers["output:air:remap"]     = True
+     
+
+   return flatten
+
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
    print_config(config)
