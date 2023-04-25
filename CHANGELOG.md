@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue with `remap_upper.py` where nc4 files were being linked instead of binary files which FV routines require
 
+### Changed
+
+- Moved to pass in stretched grid factors to `interp_restarts.x` rather than using a namelist file
+
 ## [1.1.1] - 2023-03-29
 
 ### Fixed

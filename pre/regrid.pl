@@ -85,7 +85,7 @@ $imo{"e"} = "1440"; $jmo{"e"} = "720";     # MERRA-2
 $imo{"f"} = "2880"; $jmo{"f"} = "1440";    # OSTIA
 $imo{"CS"} = 1;                            # OSTIA cubed-sphere
 
-foreach (qw/ 90 180 270 360 540 720 1080 1440 2160 2880 5760 /) {
+foreach (qw/ 90 180 270 360 540 720 1080 1440 1536 2160 2880 5760 /) {
     $CSo{"C$_"} = $_;
     $imo{"C$_"} = $_;
     $jmo{"C$_"} = 6*$_;
@@ -109,7 +109,7 @@ $coupled_model_dir = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
 # atmosphere cubed-sphere grids
 #------------------------------
-foreach (qw/ 12 24 48 90 180 270 360 540 720 1080 1440 2160 2880 5760 /) {
+foreach (qw/ 12 24 48 90 180 270 360 540 720 1080 1440 1536 2160 2880 5760 /) {
     $CS{"C$_"} = $_;
     $im{"C$_"} = $_;
     $jm{"C$_"} = 6*$_;
@@ -139,6 +139,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
           "C720"  => "e",
           "C1080" => "e",
           "C1440" => "e",
+          "C1536" => "e",
           "C2160" => "e",
           "C2880" => "e",
           "C5760" => "e" );
@@ -701,8 +702,8 @@ sub check_inputs {
         .    "a = 4 deg           C12     C180     C1000      C270  - 13km to 100km \n"
         .    "b = 2 deg           C24     C360     C1440      C540  -  7km to  50km \n"
         .    "c = 1 deg           C48     C500     C2880      C1080 -  3km to  25km \n"
-        .    "d = 1/2 deg         C90     C720     C5760      C2160 -  1km to  12km \n"
-        .    "e = 1/4 deg\n\n");
+        .    "d = 1/2 deg         C90     C720     C5760      C1536 -  2km to  18km \n"
+        .    "e = 1/4 deg                                     C2160 -  1km to  12km \n\n");
 
     print "FVCORE: $fvrst\n"
         . "Getting atmosphere grid resolution from INPUT fvcore file ... ";
@@ -2135,6 +2136,18 @@ sub set_IN_OUT {
         elsif ($atmosID2 eq "270x1620") {
             $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/CF0270x6C_CF0270x6C";
         }
+        elsif ($atmosID2 eq "540x3240") {
+            $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/CF0540x6C_CF0540x6C";
+        }
+        elsif ($atmosID2 eq "1080x6480") {
+            $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/CF1080x6C_CF1080x6C";
+        }
+        elsif ($atmosID2 eq "1536x7680") {
+            $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/CF1536x6C_CF1536x6C";
+        }
+        elsif ($atmosID2 eq "2160x12960") {
+            $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/CF2160x6C_CF2160x6C";
+        }
         elsif ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
             $bcsdir = "$bcsHEAD/Icarus-NLv3/$bcsTAG/$gridID";
         }
@@ -2407,6 +2420,7 @@ sub regrid_upperair_rsts_CS {
     my ($HEMCO, $SSCHEM, $DUCHEM, $NICHEM, $SUCHEM, $CABRCHEM, $CABCCHEM, $CAOCCHEM);
     my ($moist, $newrst, $rst, $status);
     my (%allowedConstraint);
+    my ($stretched_grid, $target_lat, $target_lon, $stretch_fac, $stretched_str);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2420,6 +2434,7 @@ sub regrid_upperair_rsts_CS {
     elsif ($im eq  "720") { $NPE = 192; $nwrit = 2 }
     elsif ($im eq "1080") { $NPE = 384; $nwrit = 2 }
     elsif ($im eq "1440") { $NPE = 576; $nwrit = 2 }
+    elsif ($im eq "1536") { $NPE = 576; $nwrit = 2 }
     elsif ($im eq "2160") { $NPE = 768; $nwrit = 2 }
     elsif ($im eq "2880") { $NPE = 5400; $nwrit = 6 }
     elsif ($im eq "5760") { $NPE = 5400; $nwrit = 6 }
@@ -2521,27 +2536,7 @@ sub regrid_upperair_rsts_CS {
 
     # write input.nml file
     #---------------------
-    if ( ($im eq "270") or ($im eq "540") or ($im eq "1080") or ($im eq "2160") ) {
-    $input_nml = "$workdir/input.nml";
-    open NML, "> $input_nml" or die "Error. Unable to open $input_nml; $!";
-    $FH = select;
-    select NML;
-    print <<"EOF";
-&fv_core_nml   
-     do_schmidt  = .true.
-     stretch_fac = 2.5
-     target_lat  = 39.5
-     target_lon  = -98.35
-/   
-&fms_nml
-      print_memory_usage=.false.
-      domains_stack_size = 24000000
-/   
-EOF
-;   
-    close NML; 
-    select $FH;
-    } else {
+
     $input_nml = "$workdir/input.nml";
     open NML, "> $input_nml" or die "Error. Unable to open $input_nml; $!";
     $FH = select;
@@ -2555,6 +2550,30 @@ EOF
 ;
     close NML;
     select $FH;
+
+    # Now we construct the stretched grid parameters to pass into interp_restarts.x
+    if ( ($im eq "270") or ($im eq "540") or ($im eq "1080") or ($im eq "2160") ) {
+       $stretched_grid = 1;
+       $target_lat = 39.5;
+       $target_lon = -98.35;
+       $stretch_fac = 2.5;
+    } elsif ( ($im eq "1536") ) {
+       $stretched_grid = 1;
+       $target_lat = 39.5;
+       $target_lon = -98.35;
+       $stretch_fac = 3.0;
+    } else {
+       $stretched_grid = 0;
+    }
+
+    # Now, if we are on a stretched grid, we need to create a string of options to pass
+    # to interp_restarts.x:
+    #   -stretched_grid target_lon target_lat stretch_fac
+    # otherwise, we pass nothing.
+    if ($stretched_grid) {
+       $stretched_str = "-stretched_grid $target_lon $target_lat $stretch_fac";
+    } else {
+       $stretched_str = "";
     }
 
     # write regrid.j file
@@ -2660,7 +2679,7 @@ else
 endif
 
 $ESMABIN/esma_mpirun -np $NPE $interp_restartsX -im \$im -lm $levsOUT \\
-   -do_hydro \$HYDROSTATIC \$ioflag \$dmflag -nwriter $nwrit
+   -do_hydro \$HYDROSTATIC \$ioflag \$dmflag -nwriter $nwrit $stretched_str
 
 exit
 

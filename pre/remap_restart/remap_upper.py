@@ -125,9 +125,27 @@ class upperair(remap_base):
      # We need to create an input.nml file which is different if we are running stretched grid
      # First, let's define a boolean for whether we are running stretched grid
      # If we are running with imout of 270, 540, 1080, or 2160, then we are running stretched grid
-     stretched_grid = False
      if imout in [270, 540, 1080, 2160]:
         stretched_grid = True
+        target_lat = 39.5
+        target_lon = -98.35
+        stretch_fac = 2.5
+     elif imout in [1536]:
+        stretched_grid = True
+        target_lat = 39.5
+        target_lon = -98.35
+        stretch_fac = 3.0
+     else:
+        stretched_grid = False
+
+     # If we are running stretched grid, we need to pass in the target lat, lon, and stretch factor
+     # to interp_restarts.x. Per the code we use:
+     #  -stretched_grid target_lon target_lat stretch_fac
+     # If we are not running stretched grid, we should pass in a blank string
+     if stretched_grid:
+        stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
+     else:
+        stretch_str = ""
 
      # Now, let's create the input.nml file
      # We need to create a namelist for the upper air remapping
@@ -138,18 +156,6 @@ class upperair(remap_base):
     domains_stack_size = 24000000
 /
 """
-
-     # If we are running stretched grid, we need to add an &fv_core_nml namelist as well
-     if stretched_grid:
-        nml_file += """
-&fv_core_nml
-     do_schmidt  = .true.
-     stretch_fac = 2.5
-     target_lat  = 39.5
-     target_lon  = -98.35
-/
-"""
-
      # Now, let's write the input.nml file
      with open('input.nml', 'w') as f:
         f.write(nml_file)
@@ -214,7 +220,7 @@ else
 endif
 
 {Bin}/esma_mpirun -np {NPE} $interp_restartsX -im {imout} -lm {nlevel} \\
-   -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit}
+   -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
 
 """
      account = config['slurm']['account']
@@ -225,7 +231,8 @@ endif
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic)
+             QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic,
+             stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
 
