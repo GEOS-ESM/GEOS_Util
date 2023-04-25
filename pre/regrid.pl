@@ -2407,6 +2407,7 @@ sub regrid_upperair_rsts_CS {
     my ($HEMCO, $SSCHEM, $DUCHEM, $NICHEM, $SUCHEM, $CABRCHEM, $CABCCHEM, $CAOCCHEM);
     my ($moist, $newrst, $rst, $status);
     my (%allowedConstraint);
+    my ($stretched_grid, $target_lat, $target_lon, $stretch_fac, $stretched_str);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2521,27 +2522,7 @@ sub regrid_upperair_rsts_CS {
 
     # write input.nml file
     #---------------------
-    if ( ($im eq "270") or ($im eq "540") or ($im eq "1080") or ($im eq "2160") ) {
-    $input_nml = "$workdir/input.nml";
-    open NML, "> $input_nml" or die "Error. Unable to open $input_nml; $!";
-    $FH = select;
-    select NML;
-    print <<"EOF";
-&fv_core_nml   
-     do_schmidt  = .true.
-     stretch_fac = 2.5
-     target_lat  = 39.5
-     target_lon  = -98.35
-/   
-&fms_nml
-      print_memory_usage=.false.
-      domains_stack_size = 24000000
-/   
-EOF
-;   
-    close NML; 
-    select $FH;
-    } else {
+
     $input_nml = "$workdir/input.nml";
     open NML, "> $input_nml" or die "Error. Unable to open $input_nml; $!";
     $FH = select;
@@ -2555,6 +2536,30 @@ EOF
 ;
     close NML;
     select $FH;
+
+    # Now we construct the stretched grid parameters to pass into interp_restarts.x
+    if ( ($im eq "270") or ($im eq "540") or ($im eq "1080") or ($im eq "2160") ) {
+       $stretched_grid = 1;
+       $target_lat = 39.5;
+       $target_lon = -98.35;
+       $stretch_fac = 2.5;
+    } elsif ( ($im eq 1536)) {
+       $stretched_grid = 1;
+       $target_lat = 39.5;
+       $target_lon = -98.35;
+       $stretch_fac = 3.0;
+    } else {
+       $stretched_grid = 0;
+    }
+
+    # Now, if we are on a stretched grid, we need to create a string of options to pass
+    # to interp_restarts.x:
+    #   -stretched_grid target_lon target_lat stretch_fac
+    # otherwise, we pass nothing.
+    if ($stretched_grid) {
+       $stretched_str = "-stretched_grid $target_lon $target_lat $stretch_fac";
+    } else {
+       $stretched_str = "";
     }
 
     # write regrid.j file
@@ -2660,7 +2665,7 @@ else
 endif
 
 $ESMABIN/esma_mpirun -np $NPE $interp_restartsX -im \$im -lm $levsOUT \\
-   -do_hydro \$HYDROSTATIC \$ioflag \$dmflag -nwriter $nwrit
+   -do_hydro \$HYDROSTATIC \$ioflag \$dmflag -nwriter $nwrit $stretched_str
 
 exit
 
