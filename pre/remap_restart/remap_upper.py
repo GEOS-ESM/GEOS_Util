@@ -124,7 +124,7 @@ class upperair(remap_base):
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # First, let's define a boolean for whether we are running stretched grid
-     # If we are running with imout of 270, 540, 1080, or 2160, then we are running stretched grid
+     # If we are running with imout of 270, 540, 1080, 1536 or 2160, then we are running stretched grid
      if imout in [270, 540, 1080, 2160]:
         stretched_grid = True
         target_lat = 39.5
