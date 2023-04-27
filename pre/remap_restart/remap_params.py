@@ -221,7 +221,7 @@ class remap_params(object):
      self.tagsRank['Icarus-NLv3_Reynolds'] = 18
      self.tagsRank['Icarus-NLv3_MERRA-2']  = 19
      self.tagsRank['Icarus-NLv3_Ostia']    = 20
-     for tag in newStructure: self.tagsRank[tag] = 21
+     for tag in self.newStructure: self.tagsRank[tag] = 21
 
      self.bcbase={}
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
