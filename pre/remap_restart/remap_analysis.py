@@ -35,8 +35,6 @@ class analysis(remap_base):
 
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
