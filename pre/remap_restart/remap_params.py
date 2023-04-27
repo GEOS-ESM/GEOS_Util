@@ -171,6 +171,7 @@ class remap_params(object):
      GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
      D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
                       'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
+     self.newStructure = ('NL3', 'NL4', 'NL5', 'NL6', 'NL7', 'NL8', 'NL9')
 
      self.bcsTag={}
      for tag in F14:   self.bcsTag[tag]= "Fortuna-1_4"
@@ -185,6 +186,7 @@ class remap_params(object):
      for tag in GITOL: self.bcsTag[tag]= "Icarus_Reynolds"
      for tag in INL:   self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
      for tag in GITNL: self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
+     for tag in self.newStructure: self.bcsTag[tag]= tag
 
      
      for tag in D214:  self.bcsTag[tag]= "Fortuna-1_4"
@@ -219,11 +221,13 @@ class remap_params(object):
      self.tagsRank['Icarus-NLv3_Reynolds'] = 18
      self.tagsRank['Icarus-NLv3_MERRA-2']  = 19
      self.tagsRank['Icarus-NLv3_Ostia']    = 20
+     for tag in self.newStructure: self.tagsRank[tag] = 21
 
      self.bcbase={}
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
+     self.bcbase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
 
   def init_time(self):
      ymdh = self.common_in.get('yyyymmddhh')
@@ -251,17 +255,20 @@ class remap_params(object):
      
      if opt.upper() == 'IN':
         model = self.common_in.get('model')
+        base  = self.common_in.get('bc_base')
+        if base == 'discover_ns':
+           return self.bcbase[base]
+           
         if model == 'MOM6' or model == 'MOM5':
           base = 'discover_couple'
-        else:
-          base  = self.common_in.get('bc_base')
 
      if opt.upper() == 'OUT':
         model = self.common_out.get('model')
+        base = self.common_out.get('bc_base')
+        if base == 'discover_ns':
+           return self.bcbase[base]
         if model == 'MOM6' or model == 'MOM5':
           base = 'discover_couple'
-        else:
-          base = self.common_out.get('bc_base')
      assert base, 'please specify bc_base: discover_ops, discover_lt, discover_couple or an absolute path'
      if base == 'discover_ops' or base == 'discover_lt' or base=='discover_couple':
         return self.bcbase[base]
@@ -283,7 +290,10 @@ class remap_params(object):
        bc_base = self.get_bcbase(opt)
        bctag = self.get_bcTag(tag,ogrid)
        tagrank = self.tagsRank[bctag]
-       if (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
+
+       if (tagrank >= self.tagsRank['NL3']) :
+          bcdir = bc_base+'/'+ bctag+'/geometry/'
+       elif (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
           bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
           if model == 'MOM6' or model == 'MOM5':
              bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
@@ -319,7 +329,7 @@ class remap_params(object):
        namex = []
        if (grid[0].upper() == 'C'):
          n = int(grid[1:])
-         s1 ='{n}x6C'.format(n=n)
+         s1 ='{:04d}x6C'.format(n)
          j=n*6
          s2 =str(n)
          s3 =str(j)
@@ -329,7 +339,7 @@ class remap_params(object):
            if(a_o == 'a'):
              name = aoname.split('_')[0]
            else:
-             name = aoname.split('_')[1]
+             name = aoname.split('_')[-1]
            if (name.find(s1) != -1 or (name.find(s2) != -1 and name.find(s3) != -1 )):
               namex.append(aoname)
        else:
@@ -341,18 +351,21 @@ class remap_params(object):
            if(a_o == 'a'):
              name = aoname.split('_')[0]
            else:
-             name = aoname.split('_')[1]
+             name = aoname.split('_')[-1]
            if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(aoname)
        return namex
      #v3.5
      #dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
      #v2.7
      dirnames = [f for f in os.listdir(bcdir) if os.path.isdir(os.path.join(bcdir,f))]
-     agrid_ = self.common_in['agrid']   
-     ogrid_ = self.common_in['ogrid'] 
+     
+     agrid_  = self.common_in['agrid']   
+     ogrid_  = self.common_in['ogrid'] 
+     omodel_ = self.common_in.get('model')
      if opt.upper() == "OUT" :
-       agrid_ = self.common_out['agrid']   
-       ogrid_ = self.common_out['ogrid'] 
+       agrid_  = self.common_out['agrid']   
+       ogrid_  = self.common_out['ogrid'] 
+       omodel_ = self.common_out.get('model')
           
      anames = get_name_with_grid(agrid_, dirnames, 'a')
      gridID = get_name_with_grid(ogrid_, anames, 'o')
@@ -360,19 +373,30 @@ class remap_params(object):
        exit("cannot find the grid subdirctory of agrid: " +agrid_+ " and ogrid " + ogrid_ + " under "+ bcdir)
      g = ''
      if len(gridID) == 1 : g = gridID[0]
-     if len(gridID) >=2 :
-       print("find too many grid strings in " + bcdir)
-       print(" gridIDs found", gridID)
-       for g_ in gridID:
-         if g_.count('_') == 1 :
-           g = g_ 
-           #WY note, found many string in couple model
-           print(" pick the first directory with only one '_' " + g)
-           break
+
+     if len(gridID) == 2 :
+        print(" gridIDs found", gridID)
+        assert omodel_ == 'MOM5' or omodel_ == 'MOM6', "found two subdirestories"
+        for g_ in gridID :
+          if omodel_ == 'MOM5':
+             if '_M5_' in g_ : g = g_
+          if omodel_ == 'MOM6':
+             if '_M6_' in g_ : g = g_
+
+     if len(gridID) >= 3 :
+        print("find too many grid strings in " + bcdir)
+        print(" gridIDs found", gridID)
+        for g_ in gridID:
+          if g_.count('_') == 1 :
+            g = g_ 
+            #WY note, found many string in the directory
+            print(" pick the first directory with only one '_' " + g)
+            break
      return g
 
   def get_bcTag(self, tag, ogrid):
     bctag = self.bcsTag[tag]
+    if bctag in self.newStructure : return bctag
     if ogrid[0].upper() == "C": 
        bctag=bctag.replace('_Reynolds','_Ostia')
     else:

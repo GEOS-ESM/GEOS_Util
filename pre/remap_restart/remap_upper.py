@@ -8,6 +8,14 @@ import shutil
 import glob
 from remap_base import remap_base
 
+def get_topodir(bcsdir):
+  k = bcsdir.find('/geometry/')
+  if k != -1 :
+     while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
+     agrid_name = os.path.basename(bcsdir).split('_')[0]
+     bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name + '/smoothed'
+  return bcsdir
+
 class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
@@ -77,14 +85,19 @@ class upperair(remap_base):
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
+ 
 
+     in_bcsdir=get_topodir(in_bcsdir)
+
+     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
-     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*')[0]
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
-     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*')[0]
+
+     out_bcsdir=get_topodir(out_bcsdir)
+     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
