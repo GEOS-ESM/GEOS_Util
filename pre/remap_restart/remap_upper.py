@@ -89,7 +89,7 @@ class upperair(remap_base):
 
      in_bcsdir=get_topodir(in_bcsdir)
 
-     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')
+     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
