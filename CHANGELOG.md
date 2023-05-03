@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.1.1] - 2023-03-29
+
+### Fixed
+
+- Fixed bad indentation in remap_restarts.py
+
+## [1.1.0] - 2023-03-10
+
+- Plot updates for MOIST variables.
+- Add stretched grid to regrid and remap_restarts
+
+### Fixed
+
+- Plot updates to fix QBO labeling.
+
 ## [1.0.2] - 2023-03-07
 
 ### Added

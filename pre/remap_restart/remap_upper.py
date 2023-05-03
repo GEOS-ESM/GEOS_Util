@@ -16,7 +16,7 @@ class upperair(remap_base):
   def remap(self):
      if not self.config['output']['air']['remap'] :
         return
-     self.air_restarts =["fvcore_internal_rst"      , 
+     self.air_restarts =["fvcore_internal_rst"      ,
                     "moist_internal_rst"       ,
                     "agcm_import_rst"          ,
                     "agcm_internal_rst"        ,
@@ -46,8 +46,8 @@ class upperair(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir'] 
-     out_bcsdir = config['output']['shared']['bcs_dir'] 
+     in_bcsdir  = config['input']['shared']['bcs_dir']
+     out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
@@ -71,13 +71,13 @@ class upperair(remap_base):
         types = 'z.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
-     
+
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
- 
+
      # link topo file
      topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*')[0]
      cmd = '/bin/ln -s ' + topoin + ' .'
@@ -103,27 +103,58 @@ class upperair(remap_base):
        NPE = 12; nwrit = 1
      elif (imout<=180):
        NPE = 24; nwrit = 1
-     elif (imout<=500):
+     elif (imout<=540):
        NPE = 96; nwrit = 1
-     elif (imout==720):
+     elif (imout<=720):
        NPE = 192; nwrit = 2
-     elif (imout==1000):
+     elif (imout<=1080):
        NPE = 384; nwrit = 2
-     elif (imout==1440):
+     elif (imout<=1440):
        NPE = 576; nwrit = 2
-     elif (imout==2000):
+     elif (imout< 2880):
        NPE = 768; nwrit = 2
      elif (imout>=2880):
        NPE = 5400; nwrit= 6
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
      if NPE > 532: QOS = "###" + QOS
-     CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']    
+     CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']
 
      log_name = out_dir+'/remap_upper_log'
 
+     # We need to create an input.nml file which is different if we are running stretched grid
+     # First, let's define a boolean for whether we are running stretched grid
+     # If we are running with imout of 270, 540, 1080, or 2160, then we are running stretched grid
+     stretched_grid = False
+     if imout in [270, 540, 1080, 2160]:
+        stretched_grid = True
+
+     # Now, let's create the input.nml file
+     # We need to create a namelist for the upper air remapping
+     # All resolutions get an &fms_nml namelist
+     nml_file ="""
+&fms_nml
+    print_memory_usage=.false.
+    domains_stack_size = 24000000
+/
+"""
+
+     # If we are running stretched grid, we need to add an &fv_core_nml namelist as well
+     if stretched_grid:
+        nml_file += """
+&fv_core_nml
+     do_schmidt  = .true.
+     stretch_fac = 2.5
+     target_lat  = 39.5
+     target_lon  = -98.35
+/
+"""
+
+     # Now, let's write the input.nml file
+     with open('input.nml', 'w') as f:
+        f.write(nml_file)
+
      remap_template="""#!/bin/csh -xf
-#!/bin/csh -xf
 #SBATCH --account={account}
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
@@ -138,7 +169,7 @@ cd {out_dir}/upper_data
 source {Bin}/g5_modules
 /bin/touch input.nml
 
-# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting 
+# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
 # HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
 
 if ($?I_MPI_ROOT) then
@@ -152,15 +183,6 @@ if ($?I_MPI_ROOT) then
   setenv I_MPI_EXTRA_FILESYSTEM 1
   setenv I_MPI_EXTRA_FILESYSTEM_FORCE gpfs
   setenv ROMIO_FSTYPE_FORCE "gpfs:"
-
-else if ($?MVAPICH2) then
-
-  setenv MV2_ENABLE_AFFINITY 0
-  setenv MV2_ENABLE_AFFINITY     0
-  setenv SLURM_DISTRIBUTION block
-  setenv MV2_MPIRUN_TIMEOUT 100
-  setenv MV2_GATHERV_SSEND_THRESHOLD 256
-
 endif
 set infiles = ()
 set outfils = ()
@@ -199,7 +221,7 @@ endif
      drymassFLG  = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
-     
+
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
@@ -223,11 +245,11 @@ endif
        ntasks = int(ntasks)
        if (ntasks < NPE ):
          print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
-         
+
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-     else : 
+     else :
        print('sbatch -W '+ script_name +'\n')
        subprocess.call(['sbatch', '-W', script_name])
 
@@ -267,7 +289,7 @@ endif
            fname = rst_dir+ '/'+f
            if os.path.exists(fname):
              restarts_in.append(fname)
-        
+
      return restarts_in
 
   def copy_merra2(self):
