@@ -2441,8 +2441,7 @@ sub regrid_upperair_rsts_CS {
     else { die "Error; cannot recognize output grid: $grOUT;" }
 
     $QOS = $qos;
-    $QOS = 0 if $QOS eq "debug" and $NPE > 532;
-    $QOS = "high" if $im > 2000 and ! $QOS;
+    $QOS = 0 if $QOS eq "debug" and $NPE > 1120;
 
     if ($QOS) { $QOSline = "SBATCH --qos=$QOS" }
     else      { $QOSline = "" }
