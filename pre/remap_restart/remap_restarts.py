@@ -28,14 +28,16 @@ def parse_args():
       There are three ways to use this script to remap restarts.
 
       1. Use an existing config file to remap:
-           ./remap_restarts.py -c my_config.yaml
+           ./remap_restarts.py config -c my_config.yaml
 
       2. Use questionary to convert template remap_params.tpl to
          remap_params.yaml and then remap:
            ./remap_restarts.py
 
       3. Use command line to input a flattened yaml file:
-           ./remap_restarts.py -o input:air:drymass=1 input:air:hydrostatic=0 ...
+          ./remap_restarts.py command_line -ymd 20040414 -hr 21 ....
+          To get help, please use 
+          ./remap_restarts.py command_line -h
 
       NOTE: Each individual script can be executed independently
         1. remap_questions.py generates raw_answer.yaml
@@ -109,7 +111,6 @@ def main():
   config        = ''
 
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
-  args, extra_args = parse_args()
 
   if (len(sys.argv) > 1) :
      args, extra_args = parse_args()
@@ -118,6 +119,9 @@ def main():
         config = yaml_to_config(args.config_yaml)     
      if sys.argv[1] == 'command_line':
         raw_config = get_config_from_command_line(args)
+        params = remap_params(raw_config)
+        config = params.config
+        question_flag = True
         print(raw_config)
   else:
       raw_config = get_config_from_questionary()

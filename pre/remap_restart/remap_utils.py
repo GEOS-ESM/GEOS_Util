@@ -119,15 +119,15 @@ def merra2_expid(config):
 
 def get_config_from_command_line(cml):
  
-   gridID = {}
-   gridID['c']  = '360X180'
-   gridID['e']  = '1440x720'
-   gridID['f']  = '2880x1440'
-   gridID['CS'] = 'CS'
-   gridID['aa'] = '72x36'
-   gridID['bb'] = '360x200'
-   gridID['dd'] = '720x410'
-   gridID['ee'] = '1440x1080'
+   ogridID = {}
+   ogridID['c']  = '360X180'
+   ogridID['e']  = '1440x720'
+   ogridID['f']  = '2880x1440'
+   ogridID['CS'] = 'CS'
+   ogridID['aa'] = '72x36'
+   ogridID['bb'] = '360x200'
+   ogridID['dd'] = '720x410'
+   ogridID['ee'] = '1440x1080'
 
    answers = {}
    answers["input:shared:MERRA-2"]     = cml.merra2
@@ -143,8 +143,8 @@ def get_config_from_command_line(cml):
 
    answers["input:shared:model"]       = cml.ocnmdlin 
    answers["output:shared:model"]      = cml.ocnmdlout
-   answers["input:shared:ogrid"]       = gridID[cml.oceanin]
-   answers["output:shared:ogrid"]      = gridID[cml.oceanout]
+   answers["input:shared:ogrid"]       = ogridID[cml.oceanin]
+   answers["output:shared:ogrid"]      = ogridID[cml.oceanout]
  
    answers["output:analysis:bkg"]      = cml.bkg     
    answers["output:analysis:lcv"]      = cml.lcv
@@ -157,8 +157,33 @@ def get_config_from_command_line(cml):
      answers["output:surface:remap"] = True
      answers["output:air:remap"]     = True
      
+   if not answers.get('input:shared:model') :
+      answers['input:shared:model'] = 'data'
+   if answers['input:shared:MERRA-2']:
+      answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
+   if answers.get('output:shared:ogrid') == 'CS':
+      answers['output:shared:ogrid'] = answers['output:shared:agrid']
+   answers['input:shared:rst_dir']   = os.path.abspath(answers['input:shared:rst_dir'])
+   answers['output:shared:out_dir']  = os.path.abspath(answers['output:shared:out_dir'])
 
-   return flatten
+   config  = {}
+   config['input'] = {}
+   config['input']['shared'] = {}
+   config['input']['surface'] = {}
+   config['output'] = {}
+   config['output']['shared'] = {}
+   config['output']['air'] = {}
+   config['output']['surface'] = {}
+   config['output']['analysis'] = {}
+   config['slurm'] = {}
+   for key, value in answers.items():
+     keys = key.split(":")
+     if len(keys) == 2:
+       config[keys[0]][keys[1]] = value
+     if len(keys) == 3:
+       config[keys[0]][keys[1]][keys[2]] = value
+        
+   return config
 
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
