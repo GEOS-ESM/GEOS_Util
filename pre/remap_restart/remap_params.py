@@ -171,7 +171,7 @@ class remap_params(object):
      GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
      D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
                       'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
-     self.newStructure = ('NL3', 'NL4', 'NL5', 'NL6', 'NL7', 'NL8', 'NL9')
+     self.newStructure = ('NL3', 'NL4', 'NL5', 'v06', 'v07', 'v08', 'v09')
 
      self.bcsTag={}
      for tag in F14:   self.bcsTag[tag]= "Fortuna-1_4"
