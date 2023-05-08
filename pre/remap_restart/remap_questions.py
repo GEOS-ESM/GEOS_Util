@@ -43,6 +43,7 @@ def data_ocean_default(resolution):
 def we_default(tag):
    default_ = '26'
    if tag in ['INL','GITNL', '525'] : default_ = '13'
+   if tag in ['NL3','NL4', 'NL5', 'NL6','NL6', 'NL6', 'NL9'] : default_ = '13'
    return default_
 
 def zoom_default(x):
