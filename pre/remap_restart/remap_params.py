@@ -225,7 +225,7 @@ class remap_params(object):
 
      self.bcbase={}
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
-     self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
+     self.bcbase['discover_legacy']  = "/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
      self.bcbase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
 
@@ -269,8 +269,8 @@ class remap_params(object):
            return self.bcbase[base]
         if model == 'MOM6' or model == 'MOM5':
           base = 'discover_couple'
-     assert base, 'please specify bc_base: discover_ops, discover_lt, discover_couple or an absolute path'
-     if base == 'discover_ops' or base == 'discover_lt' or base=='discover_couple':
+     assert base, 'please specify bc_base: discover_ops, discover_legacy, discover_couple or an absolute path'
+     if base == 'discover_ops' or base == 'discover_legacy' or base=='discover_couple':
         return self.bcbase[base]
      else:
         return base 
