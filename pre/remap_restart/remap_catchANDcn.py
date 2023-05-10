@@ -13,8 +13,8 @@ def get_landdir(bcsdir):
   k = bcsdir.find('/geometry/')
   if k != -1 :
      while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
-     agrid_name = os.path.basename(bcsdir).split('_')[0]
-     bcsdir = bcsdir[0:k]+'/land/'+agrid_name
+     sub_grids = os.path.basename(bcsdir)
+     bcsdir = bcsdir[0:k]+'/land/'+ sub_grids 
   return bcsdir
 
 class catchANDcn(remap_base):
