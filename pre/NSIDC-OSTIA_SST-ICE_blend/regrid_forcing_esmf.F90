@@ -166,6 +166,7 @@ contains
     integer                                :: DIMS(3)
     logical                                :: transformNeeded
     character(len=ESMF_MAXSTR)             :: TILINGFILE, OUTPUT_GRIDNAME, INPUT_GRIDNAME
+    character(len=ESMF_MAXSTR)             :: regrid_method
     integer                                :: NX, NY, output_im, output_jm, tdate
     integer                                :: yy,mm,dd,stat1,stat2
     type(ESMF_Config)                      :: cf
@@ -263,6 +264,9 @@ contains
     call ESMF_DistGridGet(distGRID, deLayout=layout, RC=STATUS)
     VERIFY_(STATUS)
 
+    call ESMF_ConfigGetAttribute(cf,regrid_method,label='REGRID_METHOD:',default='CONSERVE',RC=status)
+    VERIFY_(STATUS)
+
     call ESMF_ConfigGetAttribute(cf,output_gridname,label='OUTPUT_GRIDNAME:',RC=status)
     VERIFY_(STATUS)
     pgrid = grid_manager%make_grid(cf,prefix=trim(output_gridname)//".",rc=status)
@@ -299,7 +303,11 @@ contains
 !-------------------------------------
 
        if (mapl_am_I_root()) write(*,*)'Making transform'
-       privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_CONSERVE,rc=status)
+       if (trim(regrid_method) == 'CONSERVE') then
+         privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_CONSERVE,rc=status)
+       else
+         privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_BILINEAR,rc=status)
+       endif
        VERIFY_(status)
        if (mapl_am_I_root()) write(*,*)'Done making transform'
     end if
@@ -584,7 +592,7 @@ Subroutine do_regrid_forcing(rc)
 
 !  Initialize framework
 !  --------------------
-  call ESMF_Initialize(vm=vm, logKindFlag=ESMF_LOGKIND_NONE,rc=STATUS)
+  call ESMF_Initialize(vm=vm, logKindFlag=ESMF_LOGKIND_MULTI_ON_ERROR,rc=STATUS)
   VERIFY_(STATUS)
   call MAPL_Initialize(rc=status)
   VERIFY_(status)
