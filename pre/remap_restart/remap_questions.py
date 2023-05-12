@@ -113,7 +113,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:agrid",
-            "message": "Enter input atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160\n ",
+            "message": "Enter input atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
             "default": 'C360',
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
@@ -122,7 +122,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:agrid",
-            "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160\n ",
+            "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
             "default": 'C360',
         },
 
