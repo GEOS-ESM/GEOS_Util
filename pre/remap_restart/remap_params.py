@@ -372,26 +372,21 @@ class remap_params(object):
      if len(gridID) == 0 :
        exit("cannot find the grid subdirctory of agrid: " +agrid_+ " and ogrid " + ogrid_ + " under "+ bcdir)
      g = ''
-     if len(gridID) == 1 : g = gridID[0]
+     gridID.sort(key=len)
+     g = gridID[0]
 
-     if len(gridID) == 2 :
-        print(" gridIDs found", gridID)
-        assert omodel_ == 'MOM5' or omodel_ == 'MOM6', "found two subdirestories"
-        for g_ in gridID :
-          if omodel_ == 'MOM5':
-             if '_M5_' in g_ : g = g_
-          if omodel_ == 'MOM6':
-             if '_M6_' in g_ : g = g_
+     # For new structure BC
+     for g_ in gridID :
+       if omodel_ == 'MOM5':
+          if '_M5_' in g_ : g = g_
+       if omodel_ == 'MOM6':
+          if '_M6_' in g_ : g = g_
 
-     if len(gridID) >= 3 :
-        print("find too many grid strings in " + bcdir)
-        print(" gridIDs found", gridID)
-        for g_ in gridID:
-          if g_.count('_') == 1 :
-            g = g_ 
-            #WY note, found many string in the directory
-            print(" pick the first directory with only one '_' " + g)
-            break
+     if len(gridID) >= 2 :
+        print("\n Warning! Find many GridIDs in " + bcdir)
+        print(" GridIDs found: ", gridID)
+        #WY note, found many string in the directory
+        print(" This GridID is chosen: " + g)
      return g
 
   def get_bcTag(self, tag, ogrid):
