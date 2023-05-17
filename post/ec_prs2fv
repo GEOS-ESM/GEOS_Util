@@ -14,7 +14,7 @@ set ydim = 721
 
 set dynrst = `ls *fvcore_internal_rst.${nymd}_${hour}z.*`
 set mstrst = `ls *moist_internal_rst.${nymd}_${hour}z.*`
-set topo   = /discover/nobackup/ltakacs/bcs/Fortuna-2_1/${xdim}x${ydim}/topo_DYN_ave_${xdim}x${ydim}_DC.data
+set topo   = /discover/nobackup/projects/gmao/bcs_shared/legacy_bcs/Fortuna-2_1/${xdim}x${ydim}/topo_DYN_ave_${xdim}x${ydim}_DC.data
 
 
 # Link Original ECMWF.nc File
