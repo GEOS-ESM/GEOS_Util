@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Speedup remap_restarts.py package by adding more processes to catch tiles for fine resolutions.
+
 ### Removed
 
 ### Deprecated
