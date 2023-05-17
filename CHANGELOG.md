@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updates paths to the legacy bcs data by pointing to the new "bcs_shared" directory in the GMAO project space.
+
 ### Fixed
 
 ### Removed
