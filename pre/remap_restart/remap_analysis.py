@@ -35,8 +35,6 @@ class analysis(remap_base):
 
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
@@ -121,6 +119,7 @@ class analysis(remap_base):
      hgrd['C720']  = 'e'
      hgrd['C1080'] = 'e'
      hgrd['C1440'] = 'e'
+     hgrd['C1536'] = 'e'
      hgrd['C2160'] = 'e'
      hgrd['C2880'] = 'e'
      hgrd['C5760'] = 'e'
