@@ -26,7 +26,7 @@ my ($outdir, $gid, $workarea, $noprompt);
 my ($yyyy, %oResVals, %varVals, $workdir);
 my ($tiledir, $bcsdir, %variables, %resolutions);
 
-$tiledir = "/discover/nobackup/ltakacs/bcs/Icarus/Shared";
+$tiledir = "/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs/Icarus/Shared";
 
 $bcsdir = "/discover/nobackup/projects/gmao/share/dao_ops/fvInput/"
     .      "g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440";
