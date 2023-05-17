@@ -43,6 +43,7 @@ def data_ocean_default(resolution):
 def we_default(tag):
    default_ = '26'
    if tag in ['INL','GITNL', '525'] : default_ = '13'
+   if tag in ['NL3','NL4', 'NL5', 'v06','v07', 'v08', 'v09'] : default_ = '13'
    return default_
 
 def zoom_default(x):
@@ -200,10 +201,15 @@ def ask_questions():
         },
 
         {
-            "type": "text",
-            "name": "input:shared:tag",
-            "message": "Enter GCM or DAS tag for input: \n \
-Sample GCM tags \n \
+            "type": "select",
+            "name": "input:shared:bc_base",
+            "message": "Select bcs base \n \
+             discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
+             discover_legacy: /discover/nobackup/projects/gmao/bcs_shared/legacy_bcs \n \
+             discover_couple: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs \n \
+             discover_ns: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles \n \
+\n \
+Sample GCM tags for discover_ops, discover_legacy, discover_couple bc base :\n \
 --------------- \n \
 G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
 ICA   : Icarus  ..............  Jason \n \
@@ -211,32 +217,61 @@ GITOL : 10.3  ................  10.18 \n \
 INL   : Icarus-NL  ...........  Jason-NL \n \
 GITNL : 10.19  ...............  10.23 \n \
 \n \
-Sample DAS tags \n \
+Sample DAS tags for discover_ops, discover_legacy, discover_couple bc base :\n \
 --------------- \n \
 5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
 512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
 517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
-525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n",
-            "default": "INL",
-            "when": lambda x: not x["input:shared:MERRA-2"],
+525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+\n \
+Sample BC version for discover_ns ( new structure BC base): \n \
+-------------- \n \
+NL3   : Newland version 3 \n \
+NL4   : Newland version 4 \n \
+NL5   : Newland version 5 \n \
+v06   : Not generated yet \n",
+            "choices": ["discover_ops", "discover_legacy", "discover_couple","discover_ns", "other"],
+            "when": lambda x: not x['input:shared:MERRA-2'],
         },
+
+        {
+            "type": "text",
+            "name": "input:shared:tag",
+            "message": "Enter GCM or DAS tag for input:", 
+            "default": "INL",
+            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:bc_base"]== "discover_ns",
+        },
+
+        {
+            "type": "text",
+            "name": "input:shared:tag",
+            "message": "Enter BC version for input:",
+            "default": "NL3",
+            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_base"]== "discover_ns",
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_base",
+            "message": "Select bcs base for new restarts:",
+            "choices": ["discover_ops", "discover_legacy", "discover_couple","discover_ns", "other"],
+        },
+
         {
             "type": "text",
             "name": "output:shared:tag",
             "message": "Enter GCM or DAS tag for new restarts:",
             "default": "INL",
+            "when": lambda x:  not x["output:shared:bc_base"] == "discover_ns",
+        },
+        {
+            "type": "text",
+            "name": "output:shared:tag",
+            "message": "Enter BC version for new restarts:",
+            "default": "NL3",
+            "when": lambda x:  x["output:shared:bc_base"] == "discover_ns",
         },
 
-        {
-            "type": "select",
-            "name": "input:shared:bc_base",
-            "message": "Select bcs base \n \
-             discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
-             discover_lt: /discover/nobackup/ltakacs/bcs \n \
-             discover_couple: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs \n",
-            "choices": ["discover_ops", "discover_lt", "discover_couple", "other"],
-            "when": lambda x: not x['input:shared:MERRA-2'],
-        },
         {
             "type": "path",
             "name": "input:shared:alt_bcs",
@@ -244,12 +279,6 @@ Sample DAS tags \n \
             "when": lambda x: x.get("input:shared:bc_base")=="other",
         },
 
-        {
-            "type": "select",
-            "name": "output:shared:bc_base",
-            "message": "Select bcs base for new restarts:",
-            "choices": ["discover_ops", "discover_lt", "discover_couple", "other"],
-        },
         {
             "type": "path",
             "name": "output:shared:alt_bcs",

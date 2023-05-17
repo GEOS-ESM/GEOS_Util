@@ -9,6 +9,14 @@ import ruamel.yaml
 import shlex
 from remap_base import remap_base
 
+def get_landdir(bcsdir):
+  k = bcsdir.find('/geometry/')
+  if k != -1 :
+     while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
+     sub_grids = os.path.basename(bcsdir)
+     bcsdir = bcsdir[0:k]+'/land/'+ sub_grids 
+  return bcsdir
+
 class catchANDcn(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
@@ -75,6 +83,7 @@ class catchANDcn(remap_base):
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
 
+     out_bcsdir = get_landdir(out_bcsdir)
      log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
