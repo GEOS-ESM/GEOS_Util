@@ -8,6 +8,9 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
+    #the tag info here is not critical. It is for command_line options
+    tag: none
+    altbcs: false
     MERRA-2: false
     agrid:
     bcs_dir:
@@ -24,6 +27,9 @@ input:
     catch_tilefile: null
 output:
   shared:
+    #the tag info here is not critical. It is for command_line options
+    tag: none
+    altbcs: false
     agrid:
     bcs_dir:
     expid:
@@ -47,7 +53,6 @@ output:
     bkg: true
     aqua: False
     lcv: false
-
 slurm:
   account:
   qos:

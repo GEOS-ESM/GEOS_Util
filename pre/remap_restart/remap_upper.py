@@ -91,6 +91,7 @@ class upperair(remap_base):
 
      topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
+
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))

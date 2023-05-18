@@ -13,73 +13,7 @@ import ruamel.yaml
 import shutil
 import questionary
 import glob
-
-def fvcore_name(x):
-  ymdh = x['input:shared:yyyymmddhh']
-  time = ymdh[0:8] + '_'+ymdh[8:10]
-  rst_dir = x.get('input:shared:rst_dir')
-  if not rst_dir : return False
-  files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
-  if len(files) ==1 :
-    fname = files[0]
-    print('\nFound ' + fname)
-    return fname
-  else:
-    fname = rst_dir+'/fvcore_internal_rst'
-    if os.path.exists(fname):
-       print('\nFound ' + fname)
-       return fname
-    return False
-
-def tmp_merra2_dir(x):
-   tmp_merra2 = x['output:shared:out_dir']+ '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
-   return tmp_merra2
-
-def data_ocean_default(resolution):
-   default_ = 'CS'
-   if resolution in ['C12','C24', 'C48'] : default_ = '360X180'
-   return default_
-
-def we_default(tag):
-   default_ = '26'
-   if tag in ['INL','GITNL', '525'] : default_ = '13'
-   return default_
-
-def zoom_default(x):
-   zoom_ = '8'
-   fvcore = fvcore_name(x)
-   if fvcore :
-      fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-      cmd = fvrst + fvcore
-      print(cmd +'\n')
-      p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-      (output, err) = p.communicate()
-      p_status = p.wait()
-      ss = output.decode().split()
-      x['input:shared:agrid'] = "C"+ss[0] # save for air parameter
-      lat = int(ss[0])
-      lon = int(ss[1])
-      if (lon != lat*6) :
-         sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
-      ymdh  = x.get('input:shared:yyyymmddhh')
-      ymdh_ = str(ss[3]) + str(ss[4])[0:2]
-      if (ymdh_ != ymdh) :
-         print("Warning: The date in fvcore is different from the date you input\n")
-      zoom = lat /90.0
-      zoom_ = str(int(zoom))
-      if zoom < 1 : zoom_ = '1'
-      if zoom > 8 : zoom_ = '8'
-   if x['input:shared:MERRA-2'] :
-      zoom_ = '2'
-   return zoom_
-
-def get_account():
-   cmd = 'id -gn'
-   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (accounts, err) = p.communicate()
-   p_status = p.wait()
-   accounts = accounts.decode().split()
-   return accounts[0]
+from remap_utils import *
 
 def ask_questions():
 
@@ -119,6 +53,56 @@ def ask_questions():
         },
 
         {
+            "type": "select",
+            "name": "input:shared:model",
+            "message": "Select ocean model for input restarts:",
+            "choices": ["data", "MOM5", "MOM6"],
+            "default": "data",
+            "when": lambda x: not x['input:shared:MERRA-2']
+        },
+
+        {
+            "type": "select",
+            "name": "input:shared:ogrid",
+            "message": "Select Data Ocean Grid for input restarts:",
+            "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
+            "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
+            "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
+        },
+
+        {
+            "type": "select",
+            "name": "input:shared:ogrid",
+            "message": "Select Coupled (MOM5, MOM6) Ocean Grid for input restarts:",
+            "choices": ['72x36','360x200','720x410','1440x1080'],
+            "when": lambda x: x.get('input:shared:model') == 'MOM5' or x.get('input:shared:model')== 'MOM6'
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:model",
+            "message": "Select ocean model for new restarts:",
+            "choices": ["data", "MOM5", "MOM6"],
+            "default": "data",
+        },
+        {
+            "type": "select",
+            "name": "output:shared:ogrid",
+            "message": "Select Data Ocean Grid for new restarts:",
+            "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
+            "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
+            "when": lambda x: x['output:shared:model'] == 'data',
+        },
+        {
+            "type": "select",
+            "name": "output:shared:ogrid",
+            "message": "Select Couple Ocean Grid for new restarts:",
+            "choices": ['72x36','360x200','720x410','1440x1080'],
+            "when": lambda x: x['output:shared:model'] != 'data',
+        },
+
+
+        {
             "type": "text",
             "name": "output:shared:agrid",
             "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160\n ",
@@ -132,83 +116,14 @@ def ask_questions():
             "default": "72",
         },
 
-        {
-            "type": "select",
-            "name": "input:shared:model",
-            "message": "Select input ocean model:",
-            "choices": ["data", "MOM5", "MOM6"],
-            "default": "data",
-            "when": lambda x: not x['input:shared:MERRA-2']
-        },
+
 
         {
-            "type": "select",
-            "name": "input:shared:ogrid",
-            "message": "Input Ocean grid: \n \
-             Data Ocean Grids \n \
-             ------------------- \n \
-             360X180  (Reynolds) \n \
-             1440X720 (MERRA-2) \n \
-             2880X1440  (OSTIA) \n \
-             CS = same as atmosphere grid (OSTIA cubed-sphere) \n",
-            "choices": ['360X180','1440X720','2880X1440','CS'],
-            "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
-            "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
-        },
-
-        {
-            "type": "select",
-            "name": "output:shared:model",
-            "message": "Select ocean model for new restarts:",
-            "choices": ["data", "MOM5", "MOM6"],
-            "default": "data",
-        },
-        {
-            "type": "select",
-            "name": "output:shared:ogrid",
-            "message": "Select new ocean grid:",
-            "choices": ['360X180','1440X720','2880X1440','CS'],
-            "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
-            "when": lambda x: x['output:shared:model'] == 'data',
-        },
-
-        {
-            "type": "select",
-            "name": "input:shared:ogrid",
-            "message": "Input ocean grid: \n \
-             Coupled Ocean Grids \n \
-             ------------------- \n \
-             72X36 \n \
-             360X200 \n \
-             720X410 \n \
-             1440X1080 \n ",
-            "choices": ['72X36','360X200','720X410','1440X1080'],
-            "when": lambda x: x.get('input:shared:model') == 'MOM5' or x.get('input:shared:model')== 'MOM6'
-        },
-        {
-            "type": "select",
-            "name": "output:shared:ogrid",
-            "message": "Select new ocean grid: \n \
-             Coupled Ocean Grids \n \
-             ------------------- \n \
-             72X36 \n \
-             360X200 \n \
-             720X410 \n \
-             1440X1080 \n ",
-            "choices": ['72X36','360X200','720X410','1440X1080'],
-            "when": lambda x: x['output:shared:model'] != 'data',
-        },
-
-        {
-            "type": "select",
-            "name": "input:shared:bc_base",
-            "message": "Select bcs base \n \
-             discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
-             discover_lt: /discover/nobackup/ltakacs/bcs \n \
-             discover_couple: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs \n \
-             discover_ns: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles \n \
+            "type": "text",
+            "name": "input:shared:tag",
+            "message": "Enter GCM or DAS tag for input restarts: \n \
 \n \
-Sample GCM tags for discover_ops, discover_lt, discover_couple bc base :\n \
+Sample GCM tags for legacy BCs:\n \
 --------------- \n \
 G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
 ICA   : Icarus  ..............  Jason \n \
@@ -216,73 +131,79 @@ GITOL : 10.3  ................  10.18 \n \
 INL   : Icarus-NL  ...........  Jason-NL \n \
 GITNL : 10.19  ...............  10.23 \n \
 \n \
-Sample DAS tags for discover_ops, discover_lt, discover_couple bc base :\n \
+Sample DAS tags for legacy BCs:\n \
 --------------- \n \
 5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
 512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
 517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
 525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
 \n \
-Sample BC version for discover_ns ( new structure BC base): \n \
+Sample BC version for new structure BC base): \n \
 -------------- \n \
 NL3   : Newland version 3 \n \
 NL4   : Newland version 4 \n \
 NL5   : Newland version 5 \n \
-NL6   : Not generated yet \n",
-            "choices": ["discover_ops", "discover_lt", "discover_couple","discover_ns", "other"],
-            "when": lambda x: not x['input:shared:MERRA-2'],
-        },
-
-        {
-            "type": "text",
-            "name": "input:shared:tag",
-            "message": "Enter GCM or DAS tag for input:", 
+v06, v07, v08, v09: Not generated yet \n",
+ 
             "default": "INL",
-            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:bc_base"]== "discover_ns",
-        },
-
-        {
-            "type": "text",
-            "name": "input:shared:tag",
-            "message": "Enter BC version for input:",
-            "default": "NL3",
-            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_base"]== "discover_ns",
-        },
-
-        {
-            "type": "select",
-            "name": "output:shared:bc_base",
-            "message": "Select bcs base for new restarts:",
-            "choices": ["discover_ops", "discover_lt", "discover_couple","discover_ns", "other"],
+            "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
         {
             "type": "text",
             "name": "output:shared:tag",
             "message": "Enter GCM or DAS tag for new restarts:",
-            "default": "INL",
-            "when": lambda x:  not x["output:shared:bc_base"] == "discover_ns",
+            "default": "GITNL",
+            "when": lambda x: not x["input:shared:MERRA-2"],
         },
+        # show the message if it is merra2
         {
             "type": "text",
             "name": "output:shared:tag",
-            "message": "Enter BC version for new restarts:",
-            "default": "NL3",
-            "when": lambda x:  x["output:shared:bc_base"] == "discover_ns",
+            "message": "Enter GCM or DAS tag for new restarts: \n \
+\n \
+Sample GCM tags for legacy BCs:\n \
+--------------- \n \
+G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
+ICA   : Icarus  ..............  Jason \n \
+GITOL : 10.3  ................  10.18 \n \
+INL   : Icarus-NL  ...........  Jason-NL \n \
+GITNL : 10.19  ...............  10.23 \n \
+\n \
+Sample DAS tags for legacy BCs:\n \
+--------------- \n \
+5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
+512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
+517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
+525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+\n \
+Sample BC version for new structure BC base): \n \
+-------------- \n \
+NL3   : Newland version 3 \n \
+NL4   : Newland version 4 \n \
+NL5   : Newland version 5 \n \
+v06, v07, v08, v09: Not generated yet \n",
+            "default": "GITNL",
+            "when": lambda x: x["input:shared:MERRA-2"],
         },
 
         {
             "type": "path",
-            "name": "input:shared:alt_bcs",
-            "message": "Specify your own bcs absolute path (do not contain grid info) for restarts: \n ",
-            "when": lambda x: x.get("input:shared:bc_base")=="other",
+            "name": "input:shared:altbcs",
+            "message": "Enter nothing (default) or specify your own absolute bcs path for input restarts: \n\n \
+It expects the sub-structure of the path to be the same as one of the three paths that match the tag. \n \
+/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles  (structure after NL3 ) \n \
+/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs   ( coupled model) \n \
+/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs      ( legacy structure)\n",
+            "default": "",
+            "when": lambda x: not x.get("input:shared:MERRA-2"),
         },
 
         {
             "type": "path",
-            "name": "output:shared:alt_bcs",
-            "message": "Specify your own bcs path (do not contain grid info) for new restarts: \n ",
-            "when": lambda x: x.get("output:shared:bc_base")=="other",
+            "name": "output:shared:altbcs",
+            "message": "Enter nothing (default) or specify your own absolute bcs path for new restarts: \n ",
+            "default": "",
         },
 
         {
@@ -297,6 +218,16 @@ NL6   : Not generated yet \n",
             "message": "Would you like to remap surface?",
             "default": True,
         },
+
+        {
+            "type": "select",
+            "name": "input:surface:catch_model",
+            "message": "What is the catchment model? ",
+            "choices": ['catch','catchcnclm40','catchcnclm45'],
+            "default": 'catch',
+            "when": lambda x: x["output:surface:remap"] and not x["input:shared:MERRA-2"]
+        },
+
         {
             "type": "confirm",
             "name": "output:analysis:bkg",
@@ -317,7 +248,7 @@ NL6   : Not generated yet \n",
         },
         {
             "type": "text",
-            "name": "output:surface:wemout",
+            "name": "output:surface:wemin",
             "message": "What is value of Wemout?",
             "default": lambda x: we_default(x.get('output:shared:tag'))
         },
@@ -357,38 +288,28 @@ NL6   : Not generated yet \n",
    answers = questionary.prompt(questions)
    if not answers.get('input:shared:model') :
       answers['input:shared:model'] = 'data'
+
+   if answers.get('input:shared:ogrid'):
+      answers['input:shared:ogrid'] = answers['input:shared:ogrid'].split()[0]
+   if answers.get('output:shared:ogrid'):
+      answers['output:shared:ogrid'] = answers['output:shared:ogrid'].split()[0]
+
    if answers['input:shared:MERRA-2']:
-     answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
+      answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
+      answers['input:shared:altbcs'] =''
+    
    answers['input:shared:rst_dir'] = os.path.abspath(answers['input:shared:rst_dir'])
    if answers.get('output:shared:ogrid') == 'CS':
       answers['output:shared:ogrid'] = answers['output:shared:agrid']
    answers['output:shared:out_dir']  = os.path.abspath(answers['output:shared:out_dir'])
-
+   
    return answers
 
-def get_config_from_questionary():
-   answers = ask_questions()
-   config  = {}
-   config['input'] = {}
-   config['input']['shared'] = {}
-   config['input']['surface'] = {}
-   config['output'] = {}
-   config['output']['shared'] = {}
-   config['output']['air'] = {}
-   config['output']['surface'] = {}
-   config['output']['analysis'] = {}
-   config['slurm'] = {}
-   for key, value in answers.items():
-     keys = key.split(":")
-     if len(keys) == 2:
-       config[keys[0]][keys[1]] = value
-     if len(keys) == 3:
-       config[keys[0]][keys[1]][keys[2]] = value
-
-   return config
 
 if __name__ == "__main__":
-   config = get_config_from_questionary()
+   answers = ask_questions()
+   cmdl = get_command_line_from_answers(answers)
+   config = get_config_from_answers(answers)
    yaml = ruamel.yaml.YAML()
    with open("raw_answers.yaml", "w") as f:
      yaml.dump(config, f)

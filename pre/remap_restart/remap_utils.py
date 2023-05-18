@@ -6,6 +6,87 @@ import ruamel.yaml
 from collections import OrderedDict
 import shutil
 import questionary
+import glob
+import shlex
+
+NewStructureBCTag = ('NL3', 'NL4', 'NL5', 'v06', 'v07', 'v08', 'v09') 
+BCBase={}
+BCBase['discover_ops']     = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
+BCBase['discover_legacy']  = "/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs"
+BCBase['discover_couple'] = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
+BCBase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
+
+def fvcore_name(x):
+  ymdh = x['input:shared:yyyymmddhh']
+  time = ymdh[0:8] + '_'+ymdh[8:10]
+  rst_dir = x.get('input:shared:rst_dir')
+  if not rst_dir : return False
+
+  files = glob.glob(rst_dir+'/*fvcore_*')
+  if len(files) == 1: 
+    fname = files[0]
+    print('\nFound ' + fname)
+    return fname
+
+  if len(files) > 1 :
+    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
+    fname = files[0]
+    print('\nFound ' + fname)
+    return fname
+
+  return False
+
+def tmp_merra2_dir(x):
+   tmp_merra2 = x['output:shared:out_dir']+ '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
+   return tmp_merra2
+
+def data_ocean_default(resolution):
+   # the default string should match the choice in remapl_question.py
+   default_ = 'CS  (same as atmosphere OSTIA cubed-sphere grid)' 
+   if resolution in ['C12','C24', 'C48'] : default_ = '360x180   (Reynolds)'
+   return default_
+
+def we_default(tag):
+   default_ = '26'
+   if tag in ['INL','GITNL', '525'] : default_ = '13'
+   if tag in NewStructureBCTag      : default_ = '13'
+   return default_
+
+def zoom_default(x):
+   zoom_ = '8'
+   fvcore = fvcore_name(x)
+   if fvcore :
+      fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+      cmd = fvrst + fvcore
+      print(cmd +'\n')
+      p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+      (output, err) = p.communicate()
+      p_status = p.wait()
+      ss = output.decode().split()
+      x['input:shared:agrid'] = "C"+ss[0] # save for air parameter
+      lat = int(ss[0])
+      lon = int(ss[1])
+      if (lon != lat*6) :
+         sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+      ymdh  = x.get('input:shared:yyyymmddhh')
+      ymdh_ = str(ss[3]) + str(ss[4])[0:2]
+      if (ymdh_ != ymdh) :
+         print("Warning: The date in fvcore is different from the date you input\n")
+      zoom = lat /90.0
+      zoom_ = str(int(zoom))
+      if zoom < 1 : zoom_ = '1'
+      if zoom > 8 : zoom_ = '8'
+   if x['input:shared:MERRA-2'] :
+      zoom_ = '2'
+   return zoom_
+
+def get_account():
+   cmd = 'id -gn'
+   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+   (accounts, err) = p.communicate()
+   p_status = p.wait()
+   accounts = accounts.decode().split()
+   return accounts[0]
 
 def config_to_yaml(config, yaml_file):
    if os.path.exists(yaml_file) :
@@ -30,61 +111,15 @@ def yaml_to_config(yaml_file):
    config = yaml.load(stream)
    return config
 
-def write_cmd(config) :
-   def flatten_nested(nested_dict, result=None, prefix=''):
-     if result is None:
-       result = dict()
-     for k, v in nested_dict.items():
-       new_k = ':'.join((prefix, k)) if prefix else k
-       if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
-         result.update({new_k: v})
-       else:
-         flatten_nested(v, result, new_k)
-     return result
+def write_cmd( out_dir, cmdl) :
 
-   out_dir = config['output']['shared']['out_dir']
+   out_dir = os.path.realpath(out_dir)
    if not os.path.exists(out_dir) : os.makedirs(out_dir)
    bin_path = os.path.dirname(os.path.realpath(__file__))
-
-   cmd = '#!/usr/local/bin/csh \n'
-   cmd = cmd + 'set BINPATH=' + bin_path +'\n'
-   cmd = cmd + 'source $BINPATH/g5_modules \n'
-
-   flat_dict = flatten_nested(config)
-
-   k = 1
-   for key, value in flat_dict.items():
-     if isinstance(value, int) or isinstance(value, float) or isinstance(value, bool) or isinstance(value, type(None)): value = str(value)
-     if k == 1:
-       cmd = cmd + 'set FLAT_YAML="' + key+"="+ value+ '"\n'
-     else:
-       cmd = cmd + 'set FLAT_YAML="$FLAT_YAML '+ key+"="+ value+ '"\n'
-     k = k+1
-
-   cmd = cmd + '$BINPATH/remap_restarts.py -o $FLAT_YAML'
-
+   cmdl = bin_path+'/'+ cmdl
    with open(out_dir + '/remap_restarts.CMD', 'w') as f:
-     f.write(cmd)
+     f.write(cmdl)
    subprocess.call(['chmod', '+x',out_dir + '/remap_restarts.CMD'])
-
-def args_to_config(args):
-   # template file should be with this util file
-   remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
-   config = yaml_to_config(remap_tpl)
-   # fill in the config with args
-   for values in args:
-     [keys, value] = values.split("=")
-     key = keys.split(':')
-     if value.lower() in ['false', 'null', 'none'] :
-        value = False
-     elif value.lower() in ['true'] :
-        value = True
-     if len(key) == 2:
-        config[key[0]][key[1]] = value
-     if len(key) == 3:
-        config[key[0]][key[1]][key[2]] = value
-
-   return config
 
 def print_config( config, indent = 0 ):
    for k, v in config.items():
@@ -117,55 +152,95 @@ def merra2_expid(config):
 
    return config
 
-def get_config_from_command_line(cml):
- 
-   ogridID = {}
-   ogridID['c']  = '360X180'
-   ogridID['e']  = '1440x720'
-   ogridID['f']  = '2880x1440'
-   ogridID['CS'] = 'CS'
-   ogridID['aa'] = '72x36'
-   ogridID['bb'] = '360x200'
-   ogridID['dd'] = '720x410'
-   ogridID['ee'] = '1440x1080'
+def get_command_line_from_answers(answers):
 
-   answers = {}
-   answers["input:shared:MERRA-2"]     = cml.merra2
-   answers["input:shared:yyyymmddhh"]  = cml.ymd + cml.hr
-   answers["output:shared:agrid"]      = cml.grout
-   answers["output:air:nlevel"]        = cml.levsout
-   answers["output:shared:out_dir"]    = cml.outdir + '/'
-   answers["input:shared:rst_dir"]     = cml.d + '/'
-   answers["output:shared:expid"]      = cml.newid
+   merra2  = " -merra2 " if answers["input:shared:MERRA-2"] else ""    
+   ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"] 
+   rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]   
 
-   answers["input:shared:tag"]         = cml.tagin
-   answers["output:shared:tag"]        = cml.tagout
+   grout     = ' -grout '   + answers["output:shared:agrid"]   
+   levsout   = ' -levsout ' + answers["output:air:nlevel"]     
+   out_dir   = ' -out_dir ' + answers["output:shared:out_dir"]
+   newid     = answers["output:shared:expid"]   
+   
+   out_newid=''
+   if newid.strip():
+     out_newid = " -newid " + newid
 
-   answers["input:shared:model"]       = cml.ocnmdlin 
-   answers["output:shared:model"]      = cml.ocnmdlout
-   answers["input:shared:ogrid"]       = ogridID[cml.oceanin]
-   answers["output:shared:ogrid"]      = ogridID[cml.oceanout]
- 
-   answers["output:analysis:bkg"]      = cml.bkg     
-   answers["output:analysis:lcv"]      = cml.lcv
+   in_tagin = ''
+   if answers.get("input:shared:tag"):
+     in_tagin = " -tagin " + answers["input:shared:tag"]        
+   tagout = " -tagout " + answers["output:shared:tag"]       
 
-   if cml.rs == 1:
-     answers["output:air:remap"]     = True
-   if cml.rs == 2:     
-     answers["output:surface:remap"] = True
-   if cml.rs == 3:     
-     answers["output:surface:remap"] = True
-     answers["output:air:remap"]     = True
-     
-   if not answers.get('input:shared:model') :
-      answers['input:shared:model'] = 'data'
-   if answers['input:shared:MERRA-2']:
-      answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
-   if answers.get('output:shared:ogrid') == 'CS':
-      answers['output:shared:ogrid'] = answers['output:shared:agrid']
-   answers['input:shared:rst_dir']   = os.path.abspath(answers['input:shared:rst_dir'])
-   answers['output:shared:out_dir']  = os.path.abspath(answers['output:shared:out_dir'])
+   ocnmdlin  = ''
+   if answers.get("input:shared:model"):
+      ocnmdlin  = ' -ocnmdlin ' + answers.get("input:shared:model")
+   ocnmdlout = ' -ocnmdlout ' + answers["output:shared:model"]
 
+   oceanin=''
+   if answers.get("input:shared:ogrid"):
+      oceanin  = ' -oceanin ' + answers["input:shared:ogrid"]
+   oceanout = ' -oceanout ' + answers["output:shared:ogrid"]
+   
+   nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
+   nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
+  
+   in_altbcs = ''
+   out_altbcs = ''
+   if answers.get("input:shared:altbcs", "").strip() :
+      in_altbcs = " -in_altbcs " + answers["input:shared:altbcs"]
+   if answers.get("output:shared:altbcs", "").strip() :
+      out_altbcs = " -out_altbcs " + answers["output:shared:altbcs"]
+
+   zoom = " -zoom " + answers["input:surface:zoom"]
+   wemin  = " -wemin "  + answers["input:surface:wemin"]
+   wemout = " -wemout " + answers["output:surface:wemin"]
+   catch_model =''
+   if answers.get("input:surface:catch_model"):
+      catch_model = " -catch_model " + answers["input:surface:catch_model"]
+   out_rs = " -rs " 
+   rs = 3
+   if answers['output:air:remap'] and not answers['output:surface:remap']:
+       rs = 1
+   if answers['output:surface:remap'] and not answers['output:air:remap']:
+       rs = 2
+   out_rs = out_rs + str(rs)
+
+   account = " -account " + answers["slurm:account"]
+   qos     = " -qos  " + answers["slurm:qos"]
+   constraint  = " -constraint  " + answers["slurm:constraint"]
+
+
+   cmdl = "remap_restarts.py command_line " + merra2 + \
+                                          ymdh  + \
+                                          grout + \
+                                          levsout  + \
+                                          out_newid + \
+                                          ocnmdlin + \
+                                          ocnmdlout + \
+                                          oceanin + \
+                                          oceanout + \
+                                          in_tagin + \
+                                          tagout + \
+                                          rst_dir  + \
+                                          out_dir  + \
+                                          in_altbcs + \
+                                          out_altbcs + \
+                                          catch_model + \
+                                          zoom + \
+                                          wemin + \
+                                          wemout + \
+                                          nobkg + \
+                                          nolcv + \
+                                          out_rs + \
+                                          account + \
+                                          qos + \
+                                          constraint
+
+         
+   return cmdl
+
+def get_config_from_answers(answers):
    config  = {}
    config['input'] = {}
    config['input']['shared'] = {}
@@ -182,8 +257,9 @@ def get_config_from_command_line(cml):
        config[keys[0]][keys[1]] = value
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
-        
+
    return config
+
 
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
