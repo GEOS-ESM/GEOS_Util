@@ -59,7 +59,7 @@ def parse_args(program_description):
 
     p_command.add_argument('-ocnmdlin', default='data',  help='ocean input model: data, MOM5, MOM6')
     p_command.add_argument('-ocnmdlout',default='data',  help='ocean output model: data, MOM5, MOM6')
-    p_command.add_argument('-catch_model',default='catch',  help='ocean output model: catch, catchcnclm40, catchcnclm45')
+    p_command.add_argument('-catch_model',default='catch',  help='catchment model: catch, catchcnclm40, catchcnclm45')
 
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
     #p_command.add_argument('-nolbl', action='store_true', help="label final restarts with 'tagID.gridID' extension")

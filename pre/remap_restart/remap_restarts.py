@@ -33,18 +33,24 @@ program_description = textwrap.dedent(f'''
       2. Use an existing config file to remap:
            ./remap_restarts.py config_file -c my_config.yaml
 
-      3. Use command line to input a flattened yaml file:
-          ./remap_restarts.py command_line -ymd 20040414 -hr 21 ....
-          To get help, please use 
+      3. Use command line's options as inputs:
+          ./remap_restarts.py command_line -ymdh 2004041421  ....
+          To see more command options, please use 
           ./remap_restarts.py command_line -h
+
+      There are three help commands:
+        ./remap_restarts.py -h
+        ./remap_restarts.py config_file -h
+        ./remap_restarts.py command_line -h
 
       NOTE: Each individual script can be executed independently
         1. remap_questions.py generates raw_answer.yaml
-        2. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml
-        3. remap_upper.py uses remap_params.yaml as input for remapping
-        4. remap_lake_landice_saltwater.py uses remap_params.yaml as input for remapping
-        5. remap_catchANDcn.py uses remap_params.yaml as input for remapping
-        6. remap_analysis.py uses remap_params.yaml as input for remapping
+        2. If command_line option is used, the command_line option is converted raw_answers.yaml
+        3. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml
+        4. remap_upper.py uses remap_params.yaml as input for remapping
+        5. remap_lake_landice_saltwater.py uses remap_params.yaml as input for remapping
+        6. remap_catchANDcn.py uses remap_params.yaml as input for remapping
+        7. remap_analysis.py uses remap_params.yaml as input for remapping
     ''')
 def main():
 
