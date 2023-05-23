@@ -227,12 +227,6 @@ class remap_params(object):
      self.tagsRank['Icarus-NLv3_Ostia']    = 20
      for tag in NewStructureBCTag: self.tagsRank[tag] = 21
 
-     self.bcbase={}
-     self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
-     self.bcbase['discover_legacy']  = "/discover/nobackup/ltakacs/bcs"
-     self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
-     self.bcbase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
-
   def init_time(self):
      ymdh = self.common_in.get('yyyymmddhh')
      self.yyyymm = ymdh[0:6]
@@ -285,7 +279,7 @@ class remap_params(object):
        if model == 'MOM6' or model == 'MOM5':
           bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
     elif (tagrank >= self.tagsRank['Icarus_Reynolds']):
-       if bc_base == self.bcbase['discover_ops']:
+       if bc_base == BCBase['discover_ops']:
           bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
        else:
           bcdir = bc_base+'/Icarus/'+bctag+'/'

@@ -11,11 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add command_line options. More items like label, altbcs are added to remap_params.tpl
+- Updates paths to the legacy bcs data by pointing to the new "bcs_shared" directory in the GMAO project space.
+- Support for new boundary conditions package output layout
+
 ### Fixed
+
+- Speedup remap_restarts.py package by adding more processes to catch tiles for fine resolutions.
 
 ### Removed
 
 ### Deprecated
+
+## [1.2.0] - 2023-04-25
+
+### Fixed
+
+- Fixed issue with `remap_upper.py` where nc4 files were being linked instead of binary files which FV routines require
+
+### Changed
+
+- Moved to pass in stretched grid factors to `interp_restarts.x` rather than using a namelist file
 
 ## [1.1.1] - 2023-03-29
 

@@ -58,6 +58,24 @@ class catchANDcn(remap_base):
      out_tilefile = config['output']['surface']['catch_tilefile']
      if not out_tilefile :
         out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
+
+     in_tilenum  = 0 
+     out_tilenum = 0
+     with open( in_bcsdir+'/clsm/catchment.def') as f:
+       in_tilenum = int(next(f))
+     with open( out_bcsdir+'/clsm/catchment.def') as f:
+       out_tilenum = int(next(f))
+     max_tilenum = max(in_tilenum, out_tilenum)
+     NPE = 0
+     if (max_tilenum <= 112573): #M36
+        NPE = 40      
+     elif (max_tilenum <= 1684725) : #M09
+        NPE = 80
+     elif (max_tilenum <= 2496756) : #C720
+        NPE = 120
+     else:
+        NPE = 160
+    
      account    = config['slurm']['account']
      # even the input is binary, the output si nc4
      label = ''
@@ -93,7 +111,7 @@ class catchANDcn(remap_base):
      log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
-#SBATCH --ntasks=56
+#SBATCH --ntasks={NPE}
 #SBATCH --time=1:00:00
 #SBATCH --job-name=mk_catchANDcn
 #SBATCH --qos=debug
@@ -104,7 +122,7 @@ source {Bin}/g5_modules
 
 limit stacksize unlimited
 
-set esma_mpirun_X = ( {Bin}/esma_mpirun -np 56 )
+set esma_mpirun_X = ( {Bin}/esma_mpirun -np {NPE} )
 set mk_catchANDcnRestarts_X   = ( {Bin}/mk_catchANDcnRestarts.x )
 
 set params = ( -model {model}  -time {time} -in_tilefile {in_tilefile} )
@@ -115,7 +133,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
-                  model = model, out_dir = out_dir, surflay = surflay, log_name = log_name,  \
+                  model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
 
@@ -131,10 +149,10 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
        ntasks = os.getenv('SLURM_NTASKS', default = None)
        if ( not ntasks):
          nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
-         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
+         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '40'))
          ntasks = nnodes * ncpus
        ntasks = int(ntasks)
-       NPE = 56
+
        if (ntasks < NPE):
          print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
 
