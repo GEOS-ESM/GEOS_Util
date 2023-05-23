@@ -28,6 +28,7 @@ output:
     expid: C360CS_Jason-3_4_NL_REAMIP_MERRA2_C180
     ogrid: C360
     out_dir: $NOBACKUP/REMAP_TESTS/c360Toc24/
+    label: False
   air:
     # remap upper air or not
     remap: true

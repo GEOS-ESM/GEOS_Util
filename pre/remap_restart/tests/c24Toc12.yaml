@@ -28,6 +28,7 @@ output:
     expid: hello
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
+    label: False
   air:
     # remap upper air or not
     remap: true

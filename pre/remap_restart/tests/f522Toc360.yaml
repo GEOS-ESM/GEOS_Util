@@ -27,6 +27,7 @@ output:
     expid: remap
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/f522Toc360/
+    label: False
   air:
     nlevel: '72'
     remap: true

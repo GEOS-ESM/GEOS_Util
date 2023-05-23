@@ -28,6 +28,7 @@ output:
     expid: C90CS_JM_v10.22.2_L072_C180_AMIP
     ogrid: C90
     out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/
+    label: False
   air:
     # remap upper air or not
     remap: true
