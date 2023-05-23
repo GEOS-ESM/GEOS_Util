@@ -62,11 +62,8 @@ def parse_args(program_description):
     p_command.add_argument('-catch_model',default='catch',  help='catchment model: catch, catchcnclm40, catchcnclm45')
 
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
-    #p_command.add_argument('-nolbl', action='store_true', help="label final restarts with 'tagID.gridID' extension")
     p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
-    #p_command.add_argument('-bkg', action='store_true', help="Don't remap bkg files")
-    #p_command.add_argument('-lbl', action='store_true', help="label final restarts with 'tagID.gridID' extension")
-    #p_command.add_argument('-lcv', action='store_true', help="Don't remap lcv files")
+    p_command.add_argument('-lbl',   action='store_true', help="Label output restart with tag and resolution")
     p_command.add_argument('-in_altbcs',  default="", help= "users' alternative boundary condition files for input")
     p_command.add_argument('-out_altbcs', default="", help= "users' alternative boundary condition files for output")
     p_command.add_argument('-zoom',   help= "zoom for the surface input")
@@ -100,6 +97,7 @@ def get_answers_from_command_line(cml):
    answers["output:shared:tag"]        = cml.tagout
    answers["output:shared:model"]      = cml.ocnmdlout
    answers["output:shared:ogrid"]      = cml.oceanout
+   answers["output:shared:label"]      = cml.lbl
 
    if cml.in_altbcs.strip():
       answers["input:shared:altbcs"]  =  cml.in_altbcs

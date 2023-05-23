@@ -46,6 +46,13 @@ def data_ocean_default(resolution):
    if resolution in ['C12','C24', 'C48'] : default_ = '360x180   (Reynolds)'
    return default_
 
+def get_bcs_basename(bcs):
+  k = bcs.find('/geometry')
+  if k != -1 :
+     bcs = bcs[0:k]
+  while bcs[-1] == '/': bcs = bcs[0:-1] # remove extra '/'
+  return os.path.basename(bcs)
+
 def we_default(tag):
    default_ = '26'
    if tag in ['INL','GITNL', '525'] : default_ = '13'
@@ -185,6 +192,8 @@ def get_command_line_from_answers(answers):
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
   
+   label  = ' -lbl ' if answers["output:shared:label"] else ""
+    
    in_altbcs = ''
    out_altbcs = ''
    if answers.get("input:shared:altbcs", "").strip() :
@@ -230,6 +239,7 @@ def get_command_line_from_answers(answers):
                                           zoom + \
                                           wemin + \
                                           wemout + \
+                                          label + \
                                           nobkg + \
                                           nolcv + \
                                           out_rs + \

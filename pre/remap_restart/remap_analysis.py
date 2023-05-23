@@ -15,6 +15,7 @@ import glob
 import fileinput
 import ruamel.yaml
 from remap_base import remap_base
+from remap_utils import get_bcs_basename
 
 class analysis(remap_base):
   def __init__(self, **configs):
@@ -61,6 +62,13 @@ class analysis(remap_base):
      else:
         expid_out = ''
 
+     in_bcsdir  = config['input']['shared']['bcs_dir']
+     out_bcsdir = config['output']['shared']['bcs_dir']
+     label = ''
+     if config['output']['shared']['label']:
+       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir)
+
      aqua   = config['output']['analysis']['aqua']
      local_fs=[]
      for f in analysis_in:
@@ -90,6 +98,8 @@ class analysis(remap_base):
 
      for f in local_fs:
        fname = os.path.basename(f)
+       k = fname.rfind('.')
+       fname = fname[0:k] + label + fname[k:]
        shutil.move(f, out_dir+'/'+fname)
     # write lcv
      lcv = config['output']['analysis']['lcv']
@@ -97,7 +107,7 @@ class analysis(remap_base):
        ymd_ = yyyymmddhh_[0:8]
        hh_  = yyyymmddhh_[8:10]
        hms_ = hh_+'0000'
-       rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z.bin'
+       rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z'+label +'.bin'
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
        subprocess.call(shlex.split(cmd))

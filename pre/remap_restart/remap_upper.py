@@ -7,6 +7,7 @@ import shlex
 import shutil
 import glob
 from remap_base import remap_base
+from remap_utils import get_bcs_basename
 
 def get_topodir(bcsdir):
   k = bcsdir.find('/geometry/')
@@ -72,13 +73,18 @@ class upperair(remap_base):
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
 
-     types = 'z.bin'
+     types = '.bin'
      type_str = subprocess.check_output(['file','-b', restarts_in[0]])
      type_str = str(type_str)
      if type_str.find('Hierarchical') >=0:
-        types = 'z.nc4'
+        types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
+     label = ''
+     if config['output']['shared']['label']:
+       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir) 
+
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
 
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
@@ -276,6 +282,7 @@ endif
      else:
         expid = ''
      suffix = '_rst.' + suffix
+
      for out_rst in glob.glob("*_rst*"):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)

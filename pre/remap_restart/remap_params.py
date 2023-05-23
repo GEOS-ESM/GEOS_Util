@@ -55,6 +55,7 @@ class remap_params(object):
      config_tpl['output']['shared']['expid']   = self.common_out['expid']
      config_tpl['output']['shared']['tag']     = self.common_out.get('tag')
      config_tpl['output']['shared']['altbcs']  = self.common_out.get('altbcs')
+     config_tpl['output']['shared']['label']  = self.common_out.get('label')
 
      # params for upper air
      config_tpl = self.params_for_air(config_tpl)

@@ -29,6 +29,7 @@ output:
   shared:
     #the tag info here is not critical. It is for command_line options
     tag: none
+    label: false
     altbcs: false
     agrid:
     bcs_dir:

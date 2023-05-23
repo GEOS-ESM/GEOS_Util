@@ -8,6 +8,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base import remap_base
+from remap_utils import get_bcs_basename
 
 def get_landdir(bcsdir):
   k = bcsdir.find('/geometry/')
@@ -59,7 +60,12 @@ class catchANDcn(remap_base):
         out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
      account    = config['slurm']['account']
      # even the input is binary, the output si nc4
-     suffix     = time+'z.nc4'
+     label = ''
+     if config['output']['shared']['label']:
+       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir)
+
+     suffix     = time+'z' + label + '.nc4'
 
      if (expid) :
         expid = expid + '.'

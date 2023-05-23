@@ -7,6 +7,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base import remap_base
+from remap_utils import get_bcs_basename
 
 class lake_landice_saltwater(remap_base):
   def __init__(self, **configs):
@@ -43,13 +44,19 @@ class lake_landice_saltwater(remap_base):
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
-     types = 'z.bin'
+     types = '.bin'
      type_str = subprocess.check_output(['file','-b', restarts_in[0]])
      type_str = str(type_str)
      if 'Hierarchical' in type_str:
-        types = 'z.nc4'
+        types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
+
+     label = ''
+     if config['output']['shared']['label']:
+       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir)
+
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
 
      saltwater = ''
      seaice    = ''

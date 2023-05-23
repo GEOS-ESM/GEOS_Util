@@ -264,6 +264,12 @@ It expects the sub-structure of the path to be the same as one of the three path
             "message": "Enter new restarts expid:",
             "default": "",
         },
+        {
+            "type": "confirm",
+            "name": "output:shared:label",
+            "message": "Would you like to add labels (tags,resoultions) to restarts' names?",
+            "default": False,
+        },
 
         {
             "type": "text",
