@@ -35,7 +35,7 @@ def parse_args(program_description):
     )
     p_command.add_argument('-merra2', action='store_true', default= False, help='use merra2 restarts')
     p_command.add_argument('-ymdh', help='yyyymmddhh year month date hour of input and output restarts')
-    p_command.add_argument('-grout', help='Grid ID of the output restart, format Cxxx')
+    p_command.add_argument('-grout', help='Grid ID of the output restart, format Cxx')
     p_command.add_argument('-levsout', help='levels of output restarts')
 
     p_command.add_argument('-out_dir', help='directory for output restarts')
@@ -50,29 +50,29 @@ def parse_args(program_description):
     p_command.add_argument('-wemin',   help='minimum water snow water equivalent for input catch/cn')
     p_command.add_argument('-wemout',  help='minimum water snow water equivalent for output catch/cn')
 
-    p_command.add_argument('-oceanin',  help='ocean horizontal grid of inputs \n \
-                                          data model: 360x180,1440x720,2880x1440,CS \n \
-                                          coupled model:  72x36, 360x200,720x410,1440x1080')
-    p_command.add_argument('-oceanout', help='ocean horizontal grid of outputs \n \
-                                          data model: 360x180,1440x720,2880x1440,CS \n \
-                                          coupled model:  72x36, 360x200,720x410,1440x1080')
+    ocean_grids=['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
+    p_command.add_argument('-oceanin',  help='ocean horizontal grid of inputs. \n \
+                                          data model choices: 360x180,1440x720,2880x1440,CS. \n \
+                                          coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids)
+    p_command.add_argument('-oceanout', help='ocean horizontal grid of outputs. \n \
+                                             choices are the same as option "oceanin"', choices=ocean_grids)
 
-    p_command.add_argument('-ocnmdlin', default='data',  help='ocean input model: data, MOM5, MOM6')
-    p_command.add_argument('-ocnmdlout',default='data',  help='ocean output model: data, MOM5, MOM6')
-    p_command.add_argument('-catch_model',default='catch',  help='catchment model: catch, catchcnclm40, catchcnclm45')
+    p_command.add_argument('-ocnmdlin', default='data',  help='ocean input model',  choices=['data', 'MOM5', 'MOM6'])
+    p_command.add_argument('-ocnmdlout',default='data',  help='ocean output model', choices=['data', 'MOM5', 'MOM6'])
+    p_command.add_argument('-catch_model',default='catch',  help='catchment model', choices=['catch', 'catchcnclm40', 'catchcnclm45'])
 
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
     p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
-    p_command.add_argument('-lbl',   action='store_true', help="Label output restart with tag and resolution")
+    p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with tags and resolutions")
     p_command.add_argument('-in_altbcs',  default="", help= "users' alternative boundary condition files for input")
     p_command.add_argument('-out_altbcs', default="", help= "users' alternative boundary condition files for output")
     p_command.add_argument('-zoom',   help= "zoom for the surface input")
 
-    p_command.add_argument('-qos',    default="debug", help= "queue of slurm job")
+    p_command.add_argument('-qos',    default = "debug", help= "queue of slurm job", choices=['debug', 'allnccs'])
     account = get_account()
-    p_command.add_argument('-account', default= account,  help= "account of slurm job")
+    p_command.add_argument('-account', default = account,  help= "account of slurm job")
     p_command.add_argument('-constraint', default= 'sky', help= "machine of slurm job")
-    p_command.add_argument('-rs', default=3, help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)')
+    p_command.add_argument('-rs', default=3, help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)', choices=[1,2,3])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
     args, extra_args = parser.parse_known_args()
@@ -121,24 +121,26 @@ def get_answers_from_command_line(cml):
       answers["input:shared:rst_dir"] = os.path.abspath(cml.rst_dir + '/')
 
 
-   # zoom_default fills 'input:shared:agrid'
-   answers["input:surface:zoom"] = zoom_default(answers)
-   if cml.zoom:  answers["input:surface:zoom"] = cml.zoom
+   if cml.zoom: 
+      answers["input:surface:zoom"] = cml.zoom
+   else:
+      # zoom_default fills 'input:shared:agrid'
+      answers["input:surface:zoom"] = zoom_default(answers)
+
    if answers.get('input:shared:ogrid') == 'CS':
       answers['input:shared:ogrid'] = answers['input:shared:agrid']
    if answers.get('output:shared:ogrid') == 'CS':
       answers['output:shared:ogrid'] = answers['output:shared:agrid']
 
-   if not cml.wemin :
-     answers["input:surface:wemin"]  = we_default(answers['input:shared:tag'])
-   else:
+   if cml.wemin :
      answers["input:surface:wemin"]  = cml.wemin
-
-   if not cml.wemout :
-     answers["output:surface:wemin"] = we_default(answers['output:shared:tag'])
    else:
-     answers["output:surface:wemin"] = cml.wemout
+     answers["input:surface:wemin"]  = we_default(answers['input:shared:tag'])
 
+   if cml.wemout :
+     answers["output:surface:wemin"] = cml.wemout
+   else:
+     answers["output:surface:wemin"] = we_default(answers['output:shared:tag'])
 
    answers["slurm:account"]    = cml.account
    answers["slurm:qos"]        = cml.qos
