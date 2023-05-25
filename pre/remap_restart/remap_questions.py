@@ -15,6 +15,26 @@ import questionary
 import glob
 from remap_utils import *
 
+def remove_ogrid_comment(x, opt):
+  ogrid = ''
+  if opt == "IN":
+    ogrid = x.get('input:shared:ogrid')
+  else:
+    ogrid = x.get('output:shared:ogrid')
+  if not ogrid: return False
+
+  ogrid = ogrid.split()[0]
+  if opt == "IN":
+    if ogrid == 'CS':
+       ogrid = x['input:shared:agrid']
+    x['input:shared:ogrid'] = ogrid
+  else:
+    if ogrid == 'CS':
+       ogrid = x['output:shared:agrid']
+    x['output:shared:ogrid'] = ogrid
+  
+  return False
+
 def ask_questions():
 
    questions = [
@@ -42,6 +62,13 @@ def ask_questions():
             "name": "output:shared:out_dir",
             "message": "Enter the directory for new restarts:\n"
         },
+        {
+            "type": "path",
+            "name": "output:shared:out_dir",
+            "message": "init merra2 \n",
+            # always return false, no show but change x
+            "when": lambda x: init_merra2(x),
+        },
 
         {
             "type": "text",
@@ -55,7 +82,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:model",
-            "message": "Select ocean model for input restarts:",
+            "message": "Select ocean model that matches input restarts:",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
             "when": lambda x: not x['input:shared:MERRA-2']
@@ -64,18 +91,34 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select Data Ocean Grid for input restarts:",
+            "message": "Select data ocean grid that matches input restarts:",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
         },
 
         {
+            "type": "text",
+            # remove the comments
+            "name": "input:shared:ogrid",
+            "message": "remove the comment of ogrid",
+            # always return false, so it never shows
+            "when": lambda x: remove_ogrid_comment(x, 'IN')
+        },
+
+        {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select Coupled (MOM5, MOM6) Ocean Grid for input restarts:",
+            "message": "Select coupled (MOM5, MOM6) ocean grid that matches input restarts:",
             "choices": ['72x36','360x200','720x410','1440x1080'],
             "when": lambda x: x.get('input:shared:model') == 'MOM5' or x.get('input:shared:model')== 'MOM6'
+        },
+
+        {
+            "type": "text",
+            "name": "output:shared:agrid",
+            "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
+            "default": 'C360',
         },
 
         {
@@ -88,25 +131,25 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select Data Ocean Grid for new restarts:",
+            "message": "Select data ocean grid for new restarts:",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x: x['output:shared:model'] == 'data',
         },
         {
+            "type": "text",
+            # remove the comments
+            "name": "output:shared:ogrid",
+            "message": "remove the comment of ogrid",
+            # always return false, so it never shows
+            "when": lambda x: remove_ogrid_comment(x, 'OUT')
+        },
+        {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select Couple Ocean Grid for new restarts:",
+            "message": "Select couple ocean grid for new restarts:",
             "choices": ['72x36','360x200','720x410','1440x1080'],
             "when": lambda x: x['output:shared:model'] != 'data',
-        },
-
-
-        {
-            "type": "text",
-            "name": "output:shared:agrid",
-            "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
-            "default": 'C360',
         },
 
         {
@@ -116,33 +159,27 @@ def ask_questions():
             "default": "72",
         },
 
-
-
         {
             "type": "text",
             "name": "input:shared:tag",
-            "message": "Enter GCM or DAS tag for input restarts: \n \
+            "message": "Enter BC version (GCM or DAS tag) that matches input restarts: \n \
 \n \
-Sample GCM tags for legacy BCs:\n \
+BC version: GCM or DAS tag   \n \
 --------------- \n \
-G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
-ICA   : Icarus  ..............  Jason \n \
-GITOL : 10.3  ................  10.18 \n \
-INL   : Icarus-NL  ...........  Jason-NL \n \
-GITNL : 10.19  ...............  10.23 \n \
+G40       : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
+ICA       : Icarus  ..............  Jason \n \
+GITOL     : 10.3  ................  10.18 \n \
+INL       : Icarus-NL  ...........  Jason-NL \n \
+GITNL     : 10.19  ...............  10.23 \n \
 \n \
-Sample DAS tags for legacy BCs:\n \
---------------- \n \
-5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
-512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
-517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
-525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+5B0       : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
+512       : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
+517       : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
+525       : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
 \n \
-Sample BC version for new structure BC base): \n \
--------------- \n \
-NL3   : Newland version 3 \n \
-NL4   : Newland version 4 \n \
-NL5   : Newland version 5 \n \
+NL3       : Newland version 3 \n \
+NL4       : Newland version 4 \n \
+NL5       : Newland version 5 \n \
 v06, v07, v08, v09: Not generated yet \n",
  
             "default": "INL",
@@ -160,50 +197,41 @@ v06, v07, v08, v09: Not generated yet \n",
         {
             "type": "text",
             "name": "output:shared:tag",
-            "message": "Enter GCM or DAS tag for new restarts: \n \
+            "message": " Enter BC version (GCM or DAS tag) for new restarts: \n \
 \n \
-Sample GCM tags for legacy BCs:\n \
+BC version: GCM or DAS tag   \n \
 --------------- \n \
-G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
-ICA   : Icarus  ..............  Jason \n \
-GITOL : 10.3  ................  10.18 \n \
-INL   : Icarus-NL  ...........  Jason-NL \n \
-GITNL : 10.19  ...............  10.23 \n \
+G40       : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
+ICA       : Icarus  ..............  Jason \n \
+GITOL     : 10.3  ................  10.18 \n \
+INL       : Icarus-NL  ...........  Jason-NL \n \
+GITNL     : 10.19  ...............  10.23 \n \
 \n \
-Sample DAS tags for legacy BCs:\n \
---------------- \n \
-5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
-512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
-517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
-525  : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+5B0       : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
+512       : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
+517       : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
+525       : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
 \n \
-Sample BC version for new structure BC base): \n \
--------------- \n \
-NL3   : Newland version 3 \n \
-NL4   : Newland version 4 \n \
-NL5   : Newland version 5 \n \
+NL3       : Newland version 3 \n \
+NL4       : Newland version 4 \n \
+NL5       : Newland version 5 \n \
 v06, v07, v08, v09: Not generated yet \n",
+ 
             "default": "GITNL",
             "when": lambda x: x["input:shared:MERRA-2"],
         },
 
         {
             "type": "path",
-            "name": "input:shared:altbcs",
-            "message": "Enter nothing (default) or specify your own absolute bcs path for input restarts: \n\n \
-It expects the sub-structure of the path to be the same as one of the three paths that match the tag. \n \
-/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles  (structure after NL3 ) \n \
-/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs   ( coupled model) \n \
-/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs      ( legacy structure)\n",
-            "default": "",
-            "when": lambda x: not x.get("input:shared:MERRA-2"),
+            "name": "input:shared:bcs_dir",
+            "message": "Is this BCS matching input restarts? If no, enter your own absolute path: \n",
+            "default": lambda x: get_bcsdir(x, "IN"),
         },
-
         {
             "type": "path",
-            "name": "output:shared:altbcs",
-            "message": "Enter nothing (default) or specify your own absolute bcs path for new restarts: \n ",
-            "default": "",
+            "name": "output:shared:bcs_dir",
+            "message": "Is this BCS for new restarts? If no, enter your own absolute path: \n",
+            "default": lambda x: get_bcsdir(x, "OUT"),
         },
 
         {
@@ -212,6 +240,7 @@ It expects the sub-structure of the path to be the same as one of the three path
             "message": "Would you like to remap upper air?",
             "default": True,
         },
+
         {
             "type": "confirm",
             "name": "output:surface:remap",
@@ -243,19 +272,19 @@ It expects the sub-structure of the path to be the same as one of the three path
         {
             "type": "text",
             "name": "input:surface:wemin",
-            "message": "What is value of Wemin?",
+            "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?",
             "default": lambda x: we_default(x.get('input:shared:tag'))
         },
         {
             "type": "text",
             "name": "output:surface:wemin",
-            "message": "What is value of Wemout?",
+            "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?",
             "default": lambda x: we_default(x.get('output:shared:tag'))
         },
         {
             "type": "text",
             "name": "input:surface:zoom",
-            "message": "What is value of zoom [1-8]?",
+            "message": "What is value of zoom (paremeter of radius search, smaller value means larger radius) for surface inputs [1-8]?",
             "default": lambda x: zoom_default(x)
         },
         {
@@ -292,25 +321,11 @@ It expects the sub-structure of the path to be the same as one of the three path
         },
    ]
    answers = questionary.prompt(questions)
-   if not answers.get('input:shared:model') :
-      answers['input:shared:model'] = 'data'
 
-   if answers.get('input:shared:ogrid'):
-      answers['input:shared:ogrid'] = answers['input:shared:ogrid'].split()[0]
-   if answers.get('output:shared:ogrid'):
-      answers['output:shared:ogrid'] = answers['output:shared:ogrid'].split()[0]
-
-   if answers['input:shared:MERRA-2']:
-      answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
-      answers['input:shared:altbcs'] =''
-    
-   answers['input:shared:rst_dir'] = os.path.abspath(answers['input:shared:rst_dir'])
-   if answers.get('output:shared:ogrid') == 'CS':
-      answers['output:shared:ogrid'] = answers['output:shared:agrid']
-   answers['output:shared:out_dir']  = os.path.abspath(answers['output:shared:out_dir'])
+   answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
+   answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
    
    return answers
-
 
 if __name__ == "__main__":
    answers = ask_questions()

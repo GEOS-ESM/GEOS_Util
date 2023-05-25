@@ -47,8 +47,8 @@ def parse_args(program_description):
     p_command.add_argument('-tagin',  help='GCM or DAS tag associated with inputs')
     p_command.add_argument('-tagout', help='GCM or DAS tag associated with outputs')
 
-    p_command.add_argument('-wemin',   help='minimum water snow water equivalent for input catch/cn')
-    p_command.add_argument('-wemout',  help='minimum water snow water equivalent for output catch/cn')
+    p_command.add_argument('-in_wemin',   help='minimum water snow water equivalent for input catch/cn')
+    p_command.add_argument('-out_wemin',  help='minimum water snow water equivalent for output catch/cn')
 
     ocean_grids=['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
     p_command.add_argument('-oceanin',  help='ocean horizontal grid of inputs. \n \
@@ -64,15 +64,15 @@ def parse_args(program_description):
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
     p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
     p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with tags and resolutions")
-    p_command.add_argument('-in_altbcs',  default="", help= "users' alternative boundary condition files for input")
-    p_command.add_argument('-out_altbcs', default="", help= "users' alternative boundary condition files for output")
+    p_command.add_argument('-in_bcsdir',  default="", help= "users' alternative boundary condition files for input. If not specified (default), it will be deduced from tag and resolution information")
+    p_command.add_argument('-out_bcsdir', default="", help= "users' alternative boundary condition files for output. If not specified (default), it will be deduced from tag and resolution information")
     p_command.add_argument('-zoom',   help= "zoom for the surface input")
 
     p_command.add_argument('-qos',    default = "debug", help= "queue of slurm job", choices=['debug', 'allnccs'])
     account = get_account()
     p_command.add_argument('-account', default = account,  help= "account of slurm job")
     p_command.add_argument('-constraint', default= 'sky', help= "machine of slurm job")
-    p_command.add_argument('-rs', default=3, help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)', choices=[1,2,3])
+    p_command.add_argument('-rs', default= '3', help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)', choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
     args, extra_args = parser.parse_known_args()
@@ -85,25 +85,39 @@ def get_answers_from_command_line(cml):
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
    answers["input:shared:model"]       = cml.ocnmdlin
-   if not cml.merra2:
+   answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
+   if  cml.merra2:
+      init_merra2(answers)
+   else:   
       answers["input:shared:tag"]      = cml.tagin
-      answers["input:shared:ogrid"]    = cml.oceanin
-   answers["input:surface:catch_model"] = cml.catch_model
- 
+      answers["input:surface:catch_model"] = cml.catch_model
+      answers["input:shared:rst_dir"] = os.path.abspath(cml.rst_dir + '/')
+      fvcore_name(answers) 
+      ogrid                            = cml.oceanin
+      if ogrid == "CS":
+         ogrid = answers["input:shared:agrid"]
+      answers["input:shared:ogrid"]    = ogrid
+
    answers["output:shared:agrid"]      = cml.grout
    answers["output:air:nlevel"]        = cml.levsout
-   answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
    answers["output:shared:expid"]      = cml.newid
    answers["output:shared:tag"]        = cml.tagout
    answers["output:shared:model"]      = cml.ocnmdlout
-   answers["output:shared:ogrid"]      = cml.oceanout
    answers["output:shared:label"]      = cml.lbl
+   ogrid                               = cml.oceanout
+   if ogrid == "CS":
+      ogrid = answers["output:shared:agrid"]
+   answers["output:shared:ogrid"]      = ogrid
 
-   if cml.in_altbcs.strip():
-      answers["input:shared:altbcs"]  =  cml.in_altbcs
-   if cml.out_altbcs.strip():
-      answers["output:shared:altbcs"] =  cml.out_altbcs
+   if cml.in_bcsdir.strip():
+      answers["input:shared:bcs_dir"]  =  cml.in_bcsdir
+   else:
+      answers["input:shared:bcs_dir"]  = get_bcsdir(answers, "IN")
 
+   if cml.out_bcsdir.strip():
+      answers["output:shared:bcs_dir"] =  cml.out_bcsdir
+   else:
+      answers["output:shared:bcs_dir"]  = get_bcsdir(answers, "OUT")
 
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
@@ -115,30 +129,19 @@ def get_answers_from_command_line(cml):
      answers["output:surface:remap"] = True
      answers["output:air:remap"]     = True
 
-   if cml.merra2 and not cml.rst_dir:
-      answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
-   else:
-      answers["input:shared:rst_dir"] = os.path.abspath(cml.rst_dir + '/')
-
-
    if cml.zoom: 
       answers["input:surface:zoom"] = cml.zoom
    else:
       # zoom_default fills 'input:shared:agrid'
       answers["input:surface:zoom"] = zoom_default(answers)
 
-   if answers.get('input:shared:ogrid') == 'CS':
-      answers['input:shared:ogrid'] = answers['input:shared:agrid']
-   if answers.get('output:shared:ogrid') == 'CS':
-      answers['output:shared:ogrid'] = answers['output:shared:agrid']
-
-   if cml.wemin :
-     answers["input:surface:wemin"]  = cml.wemin
+   if cml.in_wemin :
+     answers["input:surface:wemin"]  = cml.in_wemin
    else:
      answers["input:surface:wemin"]  = we_default(answers['input:shared:tag'])
 
-   if cml.wemout :
-     answers["output:surface:wemin"] = cml.wemout
+   if cml.out_wemin :
+     answers["output:surface:wemin"] = cml.out_wemin
    else:
      answers["output:surface:wemin"] = we_default(answers['output:shared:tag'])
 

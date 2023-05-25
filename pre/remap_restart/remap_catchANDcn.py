@@ -59,6 +59,8 @@ class catchANDcn(remap_base):
      if not out_tilefile :
         out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
 
+     out_bcsdir = get_landdir(out_bcsdir)
+     in_bcsdir  = get_landdir(in_bcsdir)
      in_tilenum  = 0 
      out_tilenum = 0
      with open( in_bcsdir+'/clsm/catchment.def') as f:
@@ -107,7 +109,6 @@ class catchANDcn(remap_base):
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
 
-     out_bcsdir = get_landdir(out_bcsdir)
      log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
