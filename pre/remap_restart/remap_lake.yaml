@@ -1,0 +1,42 @@
+variables:
+  - short_name: TS
+    long_name: surface_skin_temperature
+    units: 'K'
+    dimension:
+       - subtile
+       - tile
+  - short_name: QS
+    long_name: surface_specific_humidity
+    units: 'kg kg-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name: FR
+    long_name: ice_fraction
+    units: '1'
+    dimension:
+       - subtile
+       - tile
+  - short_name: CH
+    long_name: surface_heat_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name: CM
+    long_name: surface_momentum_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name: CQ
+    long_name: surface_moisture_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+dimensions:
+  tile: 14910
+  subtile: 2
+  time: 1
+  

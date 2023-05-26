@@ -1,0 +1,49 @@
+variables:
+  - short_name: OX
+    long_name: odd_oxygen_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: N20
+    long_name: nitrous_oxide_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: CFC11
+    long_name: CFC11_(CCl3F)_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: CFC12
+    long_name: CFC12_(CCl2F2)_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: HCFC22
+    long_name: HCFC22_(CHClF2)_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: CH4
+    long_name: methane_volume_mixing_ratio
+    units: 'mol mol-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+dimensions:
+  lon: 180
+  lat: 1080
+  lev: 72
+  time: 1
+  

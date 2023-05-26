@@ -37,7 +37,6 @@ class remap_params(object):
      config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
      config_tpl['input']['shared']['tag']        = self.common_in.get('tag')
-     config_tpl['input']['shared']['altbcs']     = self.common_in.get('altbcs')
      config_tpl['input']['surface']['catch_model']       = self.surf_in.get('catch_model')
 
      config_tpl['output']['air']['nlevel']               = self.upper_out.get('nlevel')
@@ -49,7 +48,6 @@ class remap_params(object):
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
      config_tpl['output']['shared']['expid']   = self.common_out['expid']
      config_tpl['output']['shared']['tag']     = self.common_out.get('tag')
-     config_tpl['output']['shared']['altbcs']  = self.common_out.get('altbcs')
      config_tpl['output']['shared']['label']  = self.common_out.get('label')
 
      config_tpl['input']['shared']['bcs_dir']    = self.common_in['bcs_dir']

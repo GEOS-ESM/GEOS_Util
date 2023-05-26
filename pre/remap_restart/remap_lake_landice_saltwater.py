@@ -8,6 +8,7 @@ import ruamel.yaml
 import shlex
 from remap_base import remap_base
 from remap_utils import get_bcs_basename
+from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
   def __init__(self, **configs):
@@ -194,12 +195,18 @@ class lake_landice_saltwater(remap_base):
     surfin = [ merra_2_rst_dir +  expid+'.lake_internal_rst.'     + suffix,
                merra_2_rst_dir +  expid+'.landice_internal_rst.'  + suffix,
                merra_2_rst_dir +  expid+'.saltwater_internal_rst.'+ suffix]
-
-    for f in surfin :
+    bin2nc_yaml = ['remap_lake.yaml', 'remap_landice.yaml','remap_salt.yaml']
+    bin_path = os.path.dirname(os.path.realpath(__file__))
+    for (f,yf) in zip(surfin, bin2nc_yaml):
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
        print("Copy file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
+       ncdest = dest.replace('z.bin', 'z.nc4')
+       yaml_file = bin_path + '/'+yf
+       print('Convert bin to nc4:' + dest + ' to \n' + ncdest + '\n')
+       bin2nc(dest, ncdest, yaml_file)
+       os.remove(dest)
 
 if __name__ == '__main__' :
    lls = lake_landice_saltwater(params_file='remap_params.yaml')

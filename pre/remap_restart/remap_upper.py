@@ -8,6 +8,7 @@ import shutil
 import glob
 from remap_base import remap_base
 from remap_utils import get_bcs_basename
+from remap_bin2nc import bin2nc
 
 def get_topodir(bcsdir):
   k = bcsdir.find('/geometry/')
@@ -72,7 +73,6 @@ class upperair(remap_base):
      os.chdir(tmpdir)
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
-
      types = '.bin'
      type_str = subprocess.check_output(['file','-b', restarts_in[0]])
      type_str = str(type_str)
@@ -85,7 +85,6 @@ class upperair(remap_base):
                '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir) 
 
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
-
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
@@ -339,15 +338,23 @@ endif
 
     upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.moist_internal_rst.'  + suffix,
-              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix,
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
-
-    for f in upperin :
+    bin2nc_yaml = ['remap_fv.yaml', 'remap_moist.yaml', 'remap_gocart.yaml', 'remap_pchem.yaml']
+    bin_path = os.path.dirname(os.path.realpath(__file__))
+    for (f, yf) in zip(upperin,bin2nc_yaml) :
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
        print("Copy file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
+       ncdest = dest.replace('z.bin', 'z.nc4')
+       yaml_file = bin_path + '/'+yf
+       print('Convert bin to nc4:' + dest + ' to \n' + ncdest + '\n')
+       if '_fv' in yf:
+         bin2nc(dest, ncdest, yaml_file, isDouble=True, hasHeader=True)
+       else:
+         bin2nc(dest, ncdest, yaml_file)
+       os.remove(dest)
 
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')
