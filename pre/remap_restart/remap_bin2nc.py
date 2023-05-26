@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from yaml import safe_load, load, dump
 from netCDF4 import Dataset
@@ -101,15 +101,13 @@ def defineDimVars(fid,dims):
    return coordVars
 
 def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=False):
-  file = yamlfile
-  hdr = hasHeader
   
   bintype=np.float32
   if (isDouble):
      bintype=np.float64
   
   
-  f=open(file,'r')
+  f=open(yamlfile,'r')
   
   data=safe_load(f)
   
@@ -144,7 +142,7 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
   writeCVars(cVars,dimensions)
   
   binf =FortranFile(binfile,'r')
-  if hdr:
+  if hasHeader:
      if debug:
         print("reading header")
      rec = binf.read_ints(dtype=np.int32)
@@ -161,12 +159,11 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
 
 if __name__ == "__main__":
 
-   bin2nc('fvcore_internal_rst', 'fvcore_internal_rst.nc4', 'remap_fv.yaml', isDouble=True, hasHeader=True)
-   bin2nc('moist_internal_rst',  'moist_internal_rst.nc4', 'remap_moist.yaml')
-   bin2nc('pchem_internal_rst',  'pchem_internal_rst.nc4', 'remap_pchem.yaml')
-   bin2nc('lake_internal_rst', 'lake_internal_rst.nc4', 'remap_lake.yaml')
-   bin2nc('landice_internal_rst', 'landice_internal_rst.nc4', 'remap_landice.yaml')
-   bin2nc('saltwater_internal_rst', 'saltwater_internal_rst.nc4', 'remap_saltwater.yaml')
-
-
-
+   bin2nc('fvcore_internal_rst',   'fvcore_internal_rst.nc4',    'remap_fv.yaml', isDouble=True, hasHeader=True)
+   bin2nc('moist_internal_rst',    'moist_internal_rst.nc4',     'remap_moist.yaml')
+   bin2nc('pchem_internal_rst',    'pchem_internal_rst.nc4',     'remap_pchem.yaml')
+   bin2nc('gocart_internal_rst',   'gocart_internal_rst.nc4',    'remap_gocart.yaml')
+   bin2nc('lake_internal_rst',     'lake_internal_rst.nc4',      'remap_lake.yaml')
+   bin2nc('landice_internal_rst',  'landice_internal_rst.nc4',   'remap_landice.yaml')
+   bin2nc('saltwater_internal_rst','saltwater_internal_rst.nc4', 'remap_saltwater.yaml')
+   bin2nc('catch_internal_rst',    'catch_internal_rst.nc4',     'remap_catch.yaml')
