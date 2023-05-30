@@ -534,7 +534,7 @@ def get_bcsdir(x, opt):
      base = 'discover_couple'
   if tag in NewStructureBCTag:
      base = 'discover_ns'
-  if x.get('input:shared:MERRA-2'):
+  if x.get('input:shared:MERRA-2') and opt.upper() == "IN":
      base = 'discover_ops'
 
   bc_base = BCBase[base]
