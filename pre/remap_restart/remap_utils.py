@@ -355,9 +355,16 @@ def get_command_line_from_answers(answers):
    ocnmdlout = ' -ocnmdlout ' + answers["output:shared:model"]
 
    oceanin=''
-   if answers.get("input:shared:ogrid"):
-      oceanin  = ' -oceanin ' + answers["input:shared:ogrid"]
-   oceanout = ' -oceanout ' + answers["output:shared:ogrid"]
+   ogrid = answers.get("input:shared:ogrid")
+   if ogrid :
+      if ogrid[0] == 'C'
+         ogrid = "CS"
+      oceanin  = ' -oceanin ' + ogrid
+
+   ogrid = answers.get("output:shared:ogrid")
+   if ogrid[0] == 'C':
+      ogrid = "CS"
+   oceanout = ' -oceanout ' + ogrid
    
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
