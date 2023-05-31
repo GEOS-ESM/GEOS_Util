@@ -357,7 +357,7 @@ def get_command_line_from_answers(answers):
    oceanin=''
    ogrid = answers.get("input:shared:ogrid")
    if ogrid :
-      if ogrid[0] == 'C'
+      if ogrid[0] == 'C':
          ogrid = "CS"
       oceanin  = ' -oceanin ' + ogrid
 
