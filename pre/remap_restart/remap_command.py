@@ -63,6 +63,7 @@ def parse_args(program_description):
 
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
     p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
+    p_command.add_argument('-np',    action='store_true', help="No prompt. Overwrite config files without prompting questions")
     p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with tags and resolutions")
     p_command.add_argument('-in_bcsdir',  default="", help= "users' alternative boundary condition files for input. If not specified (default), it will be deduced from tag and resolution information")
     p_command.add_argument('-out_bcsdir', default="", help= "users' alternative boundary condition files for output. If not specified (default), it will be deduced from tag and resolution information")

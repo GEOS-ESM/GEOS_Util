@@ -288,8 +288,8 @@ def get_account():
    accounts = accounts.decode().split()
    return accounts[0]
 
-def config_to_yaml(config, yaml_file):
-   if os.path.exists(yaml_file) :
+def config_to_yaml(config, yaml_file, noprompt = False):
+   if os.path.exists(yaml_file) and not noprompt :
       overwrite = questionary.confirm("Do you want to overwrite " + yaml_file + "?" , default=False).ask()
       if not overwrite :
          while True:

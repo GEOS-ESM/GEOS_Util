@@ -61,11 +61,13 @@ def main():
   cmdl, extra_args = parse_args(program_description)
   answers = {}
   config_yaml =''
+  noprompt = False
   if (len(sys.argv) > 1) :
      if sys.argv[1] == 'config_file' :
       config_yaml = cmdl.config_file
      if sys.argv[1] == 'command_line':
         answers = get_answers_from_command_line(cmdl)
+        noprompt = cmdl.np
   if (len(sys.argv) == 1 or answers) :
       if not answers:
          answers = ask_questions()
@@ -83,21 +85,22 @@ def main():
   if config:
      print_config(config)
 
-     questions = [
+     if not noprompt :
+       questions = [
            {
                "type": "confirm",
                "name": "Continue",
                "message": "Above is the YAML config file, would you like to continue?",
                "default": True
            },]
-     answer = questionary.prompt(questions)
+       answer = questionary.prompt(questions)
 
-     if not answer['Continue'] :
-        print("\nYou answered not to continue, exiting.\n")
-        sys.exit(0)
+       if not answer['Continue'] :
+         print("\nYou answered not to continue, exiting.\n")
+         sys.exit(0)
 
-     # write config to yaml file
-     config_to_yaml(config, config_yaml)
+       # write config to yaml file
+     config_to_yaml(config, config_yaml,noprompt = noprompt)
 
   # upper air
   upper = upperair(params_file=config_yaml)
