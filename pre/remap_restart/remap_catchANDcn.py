@@ -7,6 +7,8 @@ import shutil
 import glob
 import ruamel.yaml
 import shlex
+import mimetypes
+import netCDF4 as nc
 from remap_base import remap_base
 
 def get_landdir(bcsdir):
@@ -52,16 +54,25 @@ class catchANDcn(remap_base):
      out_wemin  = config['output']['surface']['wemin']
      surflay    = config['output']['surface']['surflay']
      in_tilefile = config['input']['surface']['catch_tilefile']
+
      if not in_tilefile :
+        if not in_bcsdir:
+           exit("You need to provide either input tile file or the input bcs directory")
         in_tilefile  = glob.glob(in_bcsdir+ '/*.til')[0]
+
      out_tilefile = config['output']['surface']['catch_tilefile']
      if not out_tilefile :
         out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
 
-     in_tilenum  = 0 
+     in_tilenum  = 0
+     mime = mimetypes.guess_type(in_rstfile)
+     if mime[0] and 'stream' in mime[0]: # binary
+       in_tilenum  = 1684725 # if it is binary, it is safe to assume the maximum is M09
+     else : # nc4 file
+       ds = nc.Dataset(in_rstfile)
+       in_tilenum = ds.dimensions['tile'].size
+       
      out_tilenum = 0
-     with open( in_bcsdir+'/clsm/catchment.def') as f:
-       in_tilenum = int(next(f))
      with open( out_bcsdir+'/clsm/catchment.def') as f:
        out_tilenum = int(next(f))
      max_tilenum = max(in_tilenum, out_tilenum)
