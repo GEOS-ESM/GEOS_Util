@@ -55,9 +55,11 @@ class catchANDcn(remap_base):
      surflay    = config['output']['surface']['surflay']
      in_tilefile = config['input']['surface']['catch_tilefile']
 
+     # determine NPE based on *approximate* number of input and output tiles
+      
      if not in_tilefile :
         if not in_bcsdir:
-           exit("You need to provide either input tile file or the input bcs directory")
+           exit("Must provide either input tile file or input bcs directory")
         in_tilefile  = glob.glob(in_bcsdir+ '/*.til')[0]
 
      out_tilefile = config['output']['surface']['catch_tilefile']
@@ -77,11 +79,11 @@ class catchANDcn(remap_base):
        out_tilenum = int(next(f))
      max_tilenum = max(in_tilenum, out_tilenum)
      NPE = 0
-     if (max_tilenum <= 112573): #M36
+     if   (max_tilenum <=  112573) : # no more than EASEv2_M36
         NPE = 40      
-     elif (max_tilenum <= 1684725) : #M09
+     elif (max_tilenum <= 1684725) : # no more than EASEv2_M09
         NPE = 80
-     elif (max_tilenum <= 2496756) : #C720
+     elif (max_tilenum <= 2496756) : # no more than C720
         NPE = 120
      else:
         NPE = 160
