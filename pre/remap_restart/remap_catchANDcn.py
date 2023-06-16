@@ -55,8 +55,6 @@ class catchANDcn(remap_base):
      surflay    = config['output']['surface']['surflay']
      in_tilefile = config['input']['surface']['catch_tilefile']
 
-     # determine NPE based on *approximate* number of input and output tiles
-      
      if not in_tilefile :
         if not in_bcsdir:
            exit("Must provide either input tile file or input bcs directory")
@@ -66,24 +64,26 @@ class catchANDcn(remap_base):
      if not out_tilefile :
         out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
 
-     in_tilenum  = 0
+ # determine NPE based on *approximate* number of input and output tile
+      
+     in_Ntile  = 0
      mime = mimetypes.guess_type(in_rstfile)
      if mime[0] and 'stream' in mime[0]: # binary
-       in_tilenum  = 1684725 # if it is binary, it is safe to assume the maximum is M09
+       in_Ntile  = 1684725 # if it is binary, it is safe to assume the maximum is M09
      else : # nc4 file
        ds = nc.Dataset(in_rstfile)
-       in_tilenum = ds.dimensions['tile'].size
+       in_Ntile = ds.dimensions['tile'].size
        
-     out_tilenum = 0
+     out_Ntile = 0
      with open( out_bcsdir+'/clsm/catchment.def') as f:
-       out_tilenum = int(next(f))
-     max_tilenum = max(in_tilenum, out_tilenum)
+       out_Ntile = int(next(f))
+     max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
-     if   (max_tilenum <=  112573) : # no more than EASEv2_M36
+     if   (max_Ntile <=  112573) : # no more than EASEv2_M36
         NPE = 40      
-     elif (max_tilenum <= 1684725) : # no more than EASEv2_M09
+     elif (max_Ntile <= 1684725) : # no more than EASEv2_M09
         NPE = 80
-     elif (max_tilenum <= 2496756) : # no more than C720
+     elif (max_Ntile <= 2496756) : # no more than C720
         NPE = 120
      else:
         NPE = 160
