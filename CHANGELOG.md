@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Get catchment tile number from the input restart file instead of input bcs which may be empty
-- Speedup remap_restarts.py package by adding more processes to catch tiles for fine resolutions.
+- Get number of land tiles from input catch restart file if input bcs path is not available (as in GEOSldas).
+- Speed up remap_restarts.py package by adding more processes to catch tiles for fine resolutions.
 
 ### Removed
 
