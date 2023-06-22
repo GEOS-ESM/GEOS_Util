@@ -11,16 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.0.1] - 2023-06-22
+
+### Changed
+
 - Update CI to use Baselibs 7.13.0
 
 ### Fixed
 
 - Get number of land tiles from input catch restart file if input bcs path is not available (as in GEOSldas).
 - Speed up remap_restarts.py package by adding more processes to catch tiles for fine resolutions.
-
-### Removed
-
-### Deprecated
 
 ## [2.0.0] - 2023-05-17
 
