@@ -28,145 +28,136 @@ def init_tags():
    # BCS Tag: Fortuna-1_4
    global tag_initialized
    if tag_initialized : return
-   F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
-   D214 = ( 'D214',              'GEOSdas-2_1_4',          'GEOSdas-2_1_4-m1',
-            'GEOSdas-2_1_4-m2', 'GEOSdas-2_1_4-m3',       'GEOSdas-2_1_4-m4' )
-   D540 = ( 'D540',              'GEOSadas-5_4_0',         'GEOSadas-5_4_0_p1',
-            'GEOSadas-5_4_0_p2',  'GEOSadas-5_4_0_p3',    'GEOSadas-5_4_0_p4',
-            'GEOSadas-5_4_1',     'GEOSadas-5_4_1_p1',    'GEOSadas-5_4_2',
-            'GEOSadas-5_4_3',     'GEOSadas-5_4_4',       'GEOSadas-5_5_0',
-            'GEOSadas-5_5_1',     'GEOSadas-5_5_2',       'GEOSadas-5_5_3' )
+#   F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
+#   D214 = ( 'D214',              'GEOSdas-2_1_4',          'GEOSdas-2_1_4-m1',
+#            'GEOSdas-2_1_4-m2', 'GEOSdas-2_1_4-m3',       'GEOSdas-2_1_4-m4' )
+#   D540 = ( 'D540',              'GEOSadas-5_4_0',         'GEOSadas-5_4_0_p1',
+#            'GEOSadas-5_4_0_p2',  'GEOSadas-5_4_0_p3',    'GEOSadas-5_4_0_p4',
+#            'GEOSadas-5_4_1',     'GEOSadas-5_4_1_p1',    'GEOSadas-5_4_2',
+#            'GEOSadas-5_4_3',     'GEOSadas-5_4_4',       'GEOSadas-5_5_0',
+#            'GEOSadas-5_5_1',     'GEOSadas-5_5_2',       'GEOSadas-5_5_3' )
 
   # BCS Tag: Fortuna-2_0
   #---------------------
-   F20  = ( 'F20',                    'Fortuna-2_0')
+#   F20  = ( 'F20',                    'Fortuna-2_0')
 
   # BCS Tag: Fortuna-2_1
   #---------------------
-   F21  = ( 'F21',                  'Fortuna-2_1',         'Fortuna-2_1_p1',
-            'Fortuna-2_1_p2',       'Fortuna-2_1_p3',      'Fortuna-2_2',
-            'Fortuna-2_2_p1',       'Fortuna-2_2_p2',      'Fortuna-2_3',
-            'Fortuna-2_3_p1',       'Fortuna-2_4',         'Fortuna-2_4_p1',
-            'Fortuna-2_4_p2',       'Fortuna-2_5',         'Fortuna-2_5_BETA0',
-            'Fortuna-2_5_p1',       'Fortuna-2_5_p2',      'Fortuna-2_5_p3',
-            'Fortuna-2_5_p4',       'Fortuna-2_5_p5',      'Fortuna-2_5_p6',
-            'Fortuna-2_5_pp2' )
-   D561 = ( 'D561',                  'GEOSadas-5_6_1',      'GEOSadas-5_6_1_p1',
-            'GEOSadas-5_6_1_p2',    'GEOSadas-5_6_1_p3',   'GEOSadas-5_6_1_p4',
-            'GEOSadas-5_6_2',       'GEOSadas-5_6_2_p1',   'GEOSadas-5_6_2_p2',
-            'GEOSadas-5_6_2_p3',    'GEOSadas-5_6_2_p4',   'GEOSadas-5_6_2_p5',
-            'GEOSadas-5_6_2_p6',    'GEOSadas-5_7_1',      'GEOSadas-5_7_1_p1',
-            'GEOSadas-5_7_1_p2',    'GEOSadas-5_7_2',      'GEOSadas-5_7_2_p1',
-            'GEOSadas-5_7_2_p2',    'GEOSadas-5_7_2_p2_m1','GEOSadas-5_7_2_p3',
-            'GEOSadas-5_7_2_p3_m1', 'GEOSadas-5_7_2_p3_m2','GEOSadas-5_7_2_p4',
-            'GEOSadas-5_7_2_p5',    'GEOSadas-5_7_2_p5_m1','GEOSadas-5_7_3',
-            'GEOSadas-5_7_3_p1',    'GEOSadas-5_7_3_p2',   'GEOSadas-5_7_3_p2' )
+#   F21  = ( 'F21',                  'Fortuna-2_1',         'Fortuna-2_1_p1',
+#            'Fortuna-2_1_p2',       'Fortuna-2_1_p3',      'Fortuna-2_2',
+#            'Fortuna-2_2_p1',       'Fortuna-2_2_p2',      'Fortuna-2_3',
+#            'Fortuna-2_3_p1',       'Fortuna-2_4',         'Fortuna-2_4_p1',
+#            'Fortuna-2_4_p2',       'Fortuna-2_5',         'Fortuna-2_5_BETA0',
+#            'Fortuna-2_5_p1',       'Fortuna-2_5_p2',      'Fortuna-2_5_p3',
+#            'Fortuna-2_5_p4',       'Fortuna-2_5_p5',      'Fortuna-2_5_p6',
+#            'Fortuna-2_5_pp2' )
+#   D561 = ( 'D561',                  'GEOSadas-5_6_1',      'GEOSadas-5_6_1_p1',
+#            'GEOSadas-5_6_1_p2',    'GEOSadas-5_6_1_p3',   'GEOSadas-5_6_1_p4',
+#            'GEOSadas-5_6_2',       'GEOSadas-5_6_2_p1',   'GEOSadas-5_6_2_p2',
+#            'GEOSadas-5_6_2_p3',    'GEOSadas-5_6_2_p4',   'GEOSadas-5_6_2_p5',
+#            'GEOSadas-5_6_2_p6',    'GEOSadas-5_7_1',      'GEOSadas-5_7_1_p1',
+#            'GEOSadas-5_7_1_p2',    'GEOSadas-5_7_2',      'GEOSadas-5_7_2_p1',
+#            'GEOSadas-5_7_2_p2',    'GEOSadas-5_7_2_p2_m1','GEOSadas-5_7_2_p3',
+#            'GEOSadas-5_7_2_p3_m1', 'GEOSadas-5_7_2_p3_m2','GEOSadas-5_7_2_p4',
+#            'GEOSadas-5_7_2_p5',    'GEOSadas-5_7_2_p5_m1','GEOSadas-5_7_3',
+#            'GEOSadas-5_7_3_p1',    'GEOSadas-5_7_3_p2',   'GEOSadas-5_7_3_p2' )
 
  # BCS Tag: Ganymed-1_0
-  #---------------------
-   G10 =  ( 'G10',                  'Ganymed-1_0',          'Ganymed-1_0_BETA',
-            'Ganymed-1_0_BETA1',    'Ganymed-1_0_BETA2',    'Ganymed-1_0_BETA3',
-            'Ganymed-1_0_BETA4' )
-
-   D580 = ( 'D580',                  'GEOSadas-5_8_0',       'GEOSadas-5_9_0',
-            'GEOSadas-5_9_1' )
-
-  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D
-  #------------------------------------------
-   G10p = ( 'G10p',                 'Ganymed-1_0_p1',       'Ganymed-1_0_p2',
-            'Ganymed-1_0_p3',       'Ganymed-1_0_p4',       'Ganymed-1_0_p5',
-            'Ganymed-1_0_p6' )
-
-   D591p= ( 'D591p',                 'GEOSadas-5_9_1_p1',    'GEOSadas-5_9_1_p2',
-            'GEOSadas-5_9_1_p3',    'GEOSadas-5_9_1_p4',    'GEOSadas-5_9_1_p5',
-            'GEOSadas-5_9_1_p6',    'GEOSadas-5_9_1_p7',    'GEOSadas-5_9_1_p8',
-            'GEOSadas-5_9_1_p9' )
-
-  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D w/ new landice rst
-  #------------------------------------------------------------------------
-   G20  = ( 'G20',                  'Ganymed-2_0',          'Ganymed-2_1',
-            'Ganymed-2_1_p1',       'Ganymed-2_1_p2',       'Ganymed-2_1_p3',
-            'Ganymed-2_1_p4',       'Ganymed-2_1_p5',       'Ganymed-2_1_p6' )
-   D5A0 = ( 'D5A0',                  'GEOSadas-5_10_0',      'GEOSadas-5_10_0_p1' )
-
-
-  # BCS Tags: Ganymed-1_0_Reynolds and Ganymed-1_0_Ostia
-  #-----------------------------------------------------
-   G30  = ( 'G30',                  'Ganymed-3_0',         'Ganymed-3_0_p1' )
-   D5B0 = ( '5B0',                  'GEOSadas-5_10_0_p2',  'GEOSadas-5_11_0' )
-
-  # BCS Tags: Ganymed-4_0_Reynolds, Ganymed-4_0_MERRA-2, and Ganymed-4_0_Ostia
-  #---------------------------------------------------------------------------
+ #---------------------
+#   G10 =  ( 'G10',                  'Ganymed-1_0',          'Ganymed-1_0_BETA',
+#            'Ganymed-1_0_BETA1',    'Ganymed-1_0_BETA2',    'Ganymed-1_0_BETA3',
+#            'Ganymed-1_0_BETA4' )
+#
+#   D580 = ( 'D580',                  'GEOSadas-5_8_0',       'GEOSadas-5_9_0',
+#            'GEOSadas-5_9_1' )
+#
+#  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D
+#  #------------------------------------------
+#   G10p = ( 'G10p',                 'Ganymed-1_0_p1',       'Ganymed-1_0_p2',
+#            'Ganymed-1_0_p3',       'Ganymed-1_0_p4',       'Ganymed-1_0_p5',
+#            'Ganymed-1_0_p6' )
+#
+#   D591p= ( 'D591p',                 'GEOSadas-5_9_1_p1',    'GEOSadas-5_9_1_p2',
+#            'GEOSadas-5_9_1_p3',    'GEOSadas-5_9_1_p4',    'GEOSadas-5_9_1_p5',
+#            'GEOSadas-5_9_1_p6',    'GEOSadas-5_9_1_p7',    'GEOSadas-5_9_1_p8',
+#            'GEOSadas-5_9_1_p9' )
+#
+#  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D w/ new landice rst
+#  #------------------------------------------------------------------------
+#   G20  = ( 'G20',                  'Ganymed-2_0',          'Ganymed-2_1',
+#            'Ganymed-2_1_p1',       'Ganymed-2_1_p2',       'Ganymed-2_1_p3',
+#            'Ganymed-2_1_p4',       'Ganymed-2_1_p5',       'Ganymed-2_1_p6' )
+#   D5A0 = ( 'D5A0',                  'GEOSadas-5_10_0',      'GEOSadas-5_10_0_p1' )
+#
+#
+# BCS Tags: Ganymed-1_0_Reynolds and Ganymed-1_0_Ostia
+#-----------------------------------------------------
+#   G30  = ( 'G30',                  'Ganymed-3_0',         'Ganymed-3_0_p1' )
+#   D5B0 = ( '5B0',                  'GEOSadas-5_10_0_p2',  'GEOSadas-5_11_0' )
+#
+#  # BCS Tags: Ganymed-4_0_Reynolds, Ganymed-4_0_MERRA-2, and Ganymed-4_0_Ostia
+#  #---------------------------------------------------------------------------
    G40  = ( 'G40',                  'Ganymed-4_0',         'Ganymed-4_0_p1',
             'Ganymed-4_1',          'Heracles-1_0',        'Heracles-1_1',
             'Heracles-2_0',         'Heracles-2_1',        'Heracles-3_0',
             'Heracles-4_0',         'Heracles-5_4_p3' )
-   D512 = ( '512',                  'GEOSadas-5_12_2',     'GEOSadas-5_12_4',
-            'GEOSadas-5_12_4_p1',   'GEOSadas-5_12_4_p2',  'GEOSadas-5_12_4_p3',
-            'GEOSadas-5_12_5',      'GEOSadas-5_13_0_p1',  'GEOSadas-5_13_0_p2',
-            'GEOSadas-5_13_1',      'GEOSadas-5_16_5' )
-
-  # BCS Tags: Icarus (New Land Parameters, New Topography)
-  #---------------------------------------------------------------------------
+#   D512 = ( '512',                  'GEOSadas-5_12_2',     'GEOSadas-5_12_4',
+#            'GEOSadas-5_12_4_p1',   'GEOSadas-5_12_4_p2',  'GEOSadas-5_12_4_p3',
+#            'GEOSadas-5_12_5',      'GEOSadas-5_13_0_p1',  'GEOSadas-5_13_0_p2',
+#            'GEOSadas-5_13_1',      'GEOSadas-5_16_5' )
+#
+#  # BCS Tags: Icarus (New Land Parameters, New Topography)
+#  #---------------------------------------------------------------------------
    ICA  = ( 'ICA',                  'Icarus',              'Jason' )
-   D517 = ( '517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
-            'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
-            'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
-            'GEOSadas-5_20_0_p1',   'GEOSadas-5_20_0_p2',  'GEOSadas-5_21_0',
-            'GEOSadas-5_21_2',      'GEOSadas-5_21_3_p1',  'GEOSadas-5_22_0',
-            'GEOSadas-5_22_0_p1',   'GEOSadas-5_22_0_p2',  'GEOSadas-5_23_0',
-            'GEOSadas-5_23_0_p1',   'GEOSadas-5_24_0',     'GEOSadas-5_24_0_p1' )
-   GITOL = ( 'GITOL', '10.3',  '10.4',  '10.5',
-             '10.6',  '10.7',  '10.8',
-             '10.9',  '10.10', '10.11',
-             '10.12', '10.13', '10.14',
-             '10.15', '10.16', '10.17',
-             '10.18'  )
+   NLv3  = ( 'NLv3',                  'NLV3')
+#   D517 = ( '517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
+#            'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
+#            'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
+#            'GEOSadas-5_20_0_p1',   'GEOSadas-5_20_0_p2',  'GEOSadas-5_21_0',
+#            'GEOSadas-5_21_2',      'GEOSadas-5_21_3_p1',  'GEOSadas-5_22_0',
+#            'GEOSadas-5_22_0_p1',   'GEOSadas-5_22_0_p2',  'GEOSadas-5_23_0',
+#            'GEOSadas-5_23_0_p1',   'GEOSadas-5_24_0',     'GEOSadas-5_24_0_p1' )
+#   GITOL = ( 'GITOL', '10.3',  '10.4',  '10.5',
+#             '10.6',  '10.7',  '10.8',
+#             '10.9',  '10.10', '10.11',
+#             '10.12', '10.13', '10.14',
+#             '10.15', '10.16', '10.17',
+#             '10.18'  )
 
   # BCS Tags: Icarus-NLv3 (New Land Parameters)
   #---------------------------------------------------------------------------
-   INL  = ( 'INL', 'Icarus-NL', 'Icarus-NLv3', 'Jason-NL' )
-   GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
-   D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
-                    'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
+#   INL  = ( 'INL', 'Icarus-NL', 'Icarus-NLv3', 'Jason-NL' )
+#   GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
+#   D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
+#                    'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
 
-   for tag in F14:   BCSTag[tag]= "Fortuna-1_4"
-   for tag in F20:   BCSTag[tag]= "Fortuna-2_0"
-   for tag in F21:   BCSTag[tag]= "Fortuna-2_1"
-   for tag in G10:   BCSTag[tag]= "Ganymed-1_0"
-   for tag in G10p:  BCSTag[tag]= "Ganymed-1_0_M"
-   for tag in G20:   BCSTag[tag]= "Ganymed-1_0_M"
-   for tag in G30:   BCSTag[tag]= "Ganymed-1_0_Reynolds"
+#   for tag in F14:   BCSTag[tag]= "Fortuna-1_4"
+#   for tag in F20:   BCSTag[tag]= "Fortuna-2_0"
+#   for tag in F21:   BCSTag[tag]= "Fortuna-2_1"
+#   for tag in G10:   BCSTag[tag]= "Ganymed-1_0"
+#   for tag in G10p:  BCSTag[tag]= "Ganymed-1_0_M"
+#   for tag in G20:   BCSTag[tag]= "Ganymed-1_0_M"
+#   for tag in G30:   BCSTag[tag]= "Ganymed-1_0_Reynolds"
    for tag in G40:   BCSTag[tag]= "Ganymed-4_0_Reynolds"
    for tag in ICA:   BCSTag[tag]= "Icarus_Reynolds"
-   for tag in GITOL: BCSTag[tag]= "Icarus_Reynolds"
-   for tag in INL:   BCSTag[tag]= "Icarus-NLv3_Reynolds"
-   for tag in GITNL: BCSTag[tag]= "Icarus-NLv3_Reynolds"
-   for tag in NewStructureBCTag: BCSTag[tag]= tag
+   for tag in NLv3:  BCSTag[tag]= "Icarus-NLv3_Reynolds"
+#   for tag in GITOL: BCSTag[tag]= "Icarus_Reynolds"
+#   for tag in INL:   BCSTag[tag]= "Icarus-NLv3_Reynolds"
+#   for tag in GITNL: BCSTag[tag]= "Icarus-NLv3_Reynolds"
+#   for tag in NewStructureBCTag: BCSTag[tag]= tag
+#
 
-
-   for tag in D214:  BCSTag[tag]= "Fortuna-1_4"
-   for tag in D540:  BCSTag[tag]= "Fortuna-1_4"
-   for tag in D561:  BCSTag[tag]= "Fortuna-2_1"
-   for tag in D580:  BCSTag[tag]= "Ganymed-1_0"
-   for tag in D591p: BCSTag[tag]= "Ganymed-1_0_M"
-   for tag in D5A0:  BCSTag[tag]= "Ganymed-1_0_M"
-   for tag in D5B0:  BCSTag[tag]= "Ganymed-1_0_Reynolds"
-   for tag in D512:  BCSTag[tag]= "Ganymed-4_0_Reynolds"
-   for tag in D517:  BCSTag[tag]= "Icarus_Reynolds"
-   for tag in D525:  BCSTag[tag]= "Icarus-NLv3_Reynolds"
-
-   TagsRank['Fortuna-1_4'] = 1
-   TagsRank['Fortuna-1_5'] = 2
-   TagsRank['Fortuna-2_0'] = 3
-   TagsRank['Fortuna-2_1'] = 4
-   TagsRank['Ganymed-1_0'] = 5
-   TagsRank['Ganymed-1_0_m1'] = 6
-   TagsRank['Ganymed-1_0_m2'] = 7
-   TagsRank['Ganymed-1_0_M']  = 8
-   TagsRank['Ganymed-1_0_D']  = 9
-   TagsRank['Ganymed-1_0_Reynolds'] = 10
-   TagsRank['Ganymed-1_0_Ostia']    = 11
+#   for tag in D214:  BCSTag[tag]= "Fortuna-1_4"
+#   for tag in D540:  BCSTag[tag]= "Fortuna-1_4"
+#   for tag in D561:  BCSTag[tag]= "Fortuna-2_1"
+#   for tag in D580:  BCSTag[tag]= "Ganymed-1_0"
+#   for tag in D591p: BCSTag[tag]= "Ganymed-1_0_M"
+#   for tag in D5A0:  BCSTag[tag]= "Ganymed-1_0_M"
+#   for tag in D5B0:  BCSTag[tag]= "Ganymed-1_0_Reynolds"
+#   for tag in D512:  BCSTag[tag]= "Ganymed-4_0_Reynolds"
+#   for tag in D517:  BCSTag[tag]= "Icarus_Reynolds"
+#   for tag in D525:  BCSTag[tag]= "Icarus-NLv3_Reynolds"
+#
    TagsRank['Ganymed-4_0_Reynolds'] = 12
    TagsRank['Ganymed-4_0_Ostia']    = 13
    TagsRank['Ganymed-4_0_MERRA-2']  = 14
@@ -263,8 +254,8 @@ def get_bcs_basename(bcs):
 
 def we_default(tag):
    default_ = '26'
-   if tag in ['INL','GITNL', '525'] : default_ = '13'
-   if tag in NewStructureBCTag      : default_ = '13'
+   if tag =='NLv3' : default_ = '13'
+   if tag in NewStructureBCTag  : default_ = '13'
    return default_
 
 def zoom_default(x):

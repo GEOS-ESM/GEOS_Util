@@ -162,62 +162,50 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:tag",
-            "message": "Enter BC version (GCM or DAS tag) that matches input restarts: \n \
+            "message": "Enter BC version that matches input restarts: \n \
 \n \
-BC version: GCM or DAS tag   \n \
+BC version   \n \
 --------------- \n \
-G40       : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
-ICA       : Icarus  ..............  Jason \n \
-GITOL     : 10.3  ................  10.18 \n \
-INL       : Icarus-NL  ...........  Jason-NL \n \
-GITNL     : 10.19  ...............  10.23 \n \
+ICA  : Icarus  \n \
+NLv3 : New land version 3 \n \
 \n \
-5B0       : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
-512       : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
-517       : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
-525       : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+New directory structures: \n \
 \n \
 NL3       : Newland version 3 \n \
 NL4       : Newland version 4 \n \
 NL5       : Newland version 5 \n \
 v06, v07, v08, v09: Not generated yet \n",
  
-            "default": "INL",
+            "default": "ICA",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
         {
             "type": "text",
             "name": "output:shared:tag",
-            "message": "Enter GCM or DAS tag for new restarts:",
-            "default": "GITNL",
+            "message": "Enter BC version for new restarts:",
+            "default": "NLv3",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
         # show the message if it is merra2
         {
             "type": "text",
             "name": "output:shared:tag",
-            "message": " Enter BC version (GCM or DAS tag) for new restarts: \n \
+            "message": " Enter BC version for new restarts: \n \
 \n \
-BC version: GCM or DAS tag   \n \
+BC version   \n \
 --------------- \n \
-G40       : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
-ICA       : Icarus  ..............  Jason \n \
-GITOL     : 10.3  ................  10.18 \n \
-INL       : Icarus-NL  ...........  Jason-NL \n \
-GITNL     : 10.19  ...............  10.23 \n \
+ICA  : Icarus  \n \
+NLv3 : New land version 3 \n \
 \n \
-5B0       : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
-512       : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
-517       : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
-525       : GEOSadas-5_25_1  .....  GEOSadas-5_29_4\n  \
+New directory structures: \n \
 \n \
 NL3       : Newland version 3 \n \
 NL4       : Newland version 4 \n \
 NL5       : Newland version 5 \n \
 v06, v07, v08, v09: Not generated yet \n",
  
-            "default": "GITNL",
+            "default": "NLv3",
             "when": lambda x: x["input:shared:MERRA-2"],
         },
 
