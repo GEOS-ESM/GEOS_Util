@@ -55,8 +55,15 @@ def ask_questions():
             "name": "input:shared:yyyymmddhh",
             "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
+            "when": lambda x: not x['input:shared:MERRA-2'],
         },
-
+        {
+            "type": "text",
+            "name": "input:shared:yyyymmddhh",
+            "message": "From what restart date would you like to remap? (must be 8 digits: yyyymmdd, hour=21z)",
+            "validate": lambda text: len(text)==8 ,
+            "when": lambda x: x['input:shared:MERRA-2'],
+        },
         {
             "type": "path",
             "name": "output:shared:out_dir",
@@ -309,7 +316,8 @@ v06, v07, v08, v09: Not generated yet \n",
         },
    ]
    answers = questionary.prompt(questions)
-
+   if answers['input:shared:MERRA-2'] :
+      answers['input:shared:yyyymmddhh'] = answers['input:shared:yyyymmddhh']+ '21'
    answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
    
