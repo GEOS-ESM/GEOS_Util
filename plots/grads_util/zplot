@@ -360,8 +360,8 @@ eyearm = subwrd(date,2)
 
 'set string 1 l 4'
 'set strsiz .08'
-'draw string 0.50  8.20 Beg: 'bmnthm' 'byearm
-'draw string 0.50  8.05 End: 'emnthm' 'eyearm
+'draw string 0.30  7.90 Beg: 'bmnthm' 'byearm
+'draw string 0.30  7.75 End: 'emnthm' 'eyearm
 'set string 1 c 6'
 * --------------------------------
 

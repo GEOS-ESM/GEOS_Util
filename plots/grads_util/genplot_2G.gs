@@ -39,6 +39,7 @@ RC     = NULL
 LEVEL  = NULL
 MATH   = NULL
 
+    numOGCs = 0
        mold = 0
        mnew = 0
           n = 0
@@ -79,10 +80,10 @@ if( subwrd(args,num) = '-EXPORT' )
 
 *    Construct Model GCs from Model EXPORTS
 *    --------------------------------------
-     numGCs = m
+         numMGCs = m
              m  = 0
              k  = 1
-     while ( k <= numGCs )
+     while ( k <= numMGCs )
              EX = ''
               j = 1
             bit = substr(OLD_EXPORT.k,j,1)
@@ -128,11 +129,11 @@ if( subwrd(args,num) = '-ALT_EXPORT' )
             bit = checkbit(word)
      say '  ALT_EXPORT.'m'  'ALT_EXPORT.m
        endwhile
-       numGCs = m
+       numMGCs = m
 
               k  = 1
               j  = 2
-       while( k <= numGCs )
+       while( k <= numMGCs )
 
       '!remove NEW_EXPORT.txt'
       '! echo 'ALT_EXPORT.k' | cut -d: -f1 > NEW_EXPORT.txt'
@@ -165,6 +166,10 @@ endif
       
 * Read Verification OBS:OBSGC
 * ---------------------------
+* Note: Each Observation Diagnostic may be associated with multiple Observation EXPORTs.
+*       Each Observation EXPORT         is associated with a Specific Observation Gridded Component (GC)
+* ------------------------------------------------------------------------------------------------------
+
 if( subwrd(args,num) = '-OBS' )
               n = n + 1
           OBS.n = subwrd(args,num+n   )
@@ -176,6 +181,17 @@ if( subwrd(args,num) = '-OBS' )
            word = subwrd(args,num+n+1 )
             bit = checkbit(word)
        endwhile
+
+         numOGCs = n
+
+       say ' '
+       say 'Input OBS EXPORT List, numOGCs: 'numOGCs
+       numOGC = 1
+       while( numOGC <= numOGCs )
+       say numOGC': 'OBS.numOGC
+       numOGC = numOGC + 1
+       endwhile
+       say ' '
 endif
 
 * Read SEASONS
@@ -205,23 +221,22 @@ endwhile
 
 * Construct OBS GCs from OBS EXPORTS
 * ----------------------------------
-    numn = n
-if( numn = 0 )
+if( numOGCs = 0 )
 
 *   Set OBS and OBSGC based on Original (OLD) Model EXPORTS and GC
 *   --------------------------------------------------------------
-    numn = numGCs
+    numOGCs = numMGCs
            n  = 1
-   while ( n <= numn )
+   while ( n <= numOGCs )
        OBS.n = OLD_EXPORT.n
      OBSGC.n =     OLD_GC.n
            n = n + 1
    endwhile
 
 else
-        m  = 0
+           n  = 0
         k  = 1
-while ( k <= numn )
+   while ( k <= numOGCs )
         EX = ''
          j = 1
        bit = substr(OBS.k,j,1)
@@ -231,12 +246,12 @@ while ( k <= numn )
        bit = substr(OBS.k,j,1)
        endwhile
        if( EX != OBS.k )
-         m = m + 1
+            n = n + 1
          j = j + 1
-       OBSGC.m = ''
+          OBSGC.n = ''
        bit = substr(OBS.k,j,1)
        while(bit != '')
-       OBSGC.m = OBSGC.m''bit
+          OBSGC.n = OBSGC.n''bit
          j = j + 1
        bit = substr(OBS.k,j,1)
        endwhile
@@ -291,7 +306,7 @@ say ' '
 * Get Model Variables
 * -------------------
         m  = 1
-while ( m <= numGCs )
+while ( m <= numMGCs )
    say 'run 1st call to getvar_2G for SOURCE, orig EXPORT: 'OLD_EXPORT.m'  orig GC: 'OLD_GC.m
    'run getvar_2G 'OLD_EXPORT.m' 'OLD_GC.m
         qname.m = subwrd(result,1)
@@ -335,7 +350,7 @@ endwhile
 
 
 m = 1
-while( m<=numGCs )
+while( m<=numMGCs )
     say 'EXPORT.'m' = 'EXPORT.m
     say '    GC.'m' = 'GC.m
 m = m + 1
@@ -343,7 +358,7 @@ endwhile
 
 say ' '
 n = 1
-while( n<=numn )
+while( n<=numOGCs )
     say '   OBS.'n' = 'OBS.n
     say ' OBSGC.'n' = 'OBSGC.n
 n = n + 1
@@ -364,7 +379,7 @@ endif
 * Ensure NAMES have no underscores
 * --------------------------------
         m=1
-while ( m<numGCs+1 )
+while ( m<numMGCs+1 )
 'fixname 'qname.m
           alias.m = result
 say 'Alias #'m' = 'alias.m
@@ -388,7 +403,7 @@ endwhile
 * Check for Model Name Consistency
 * --------------------------------
  m = 1
-while( m <= numGCs )
+while( m <= numMGCs )
 'set dfile 'qfile.m
 if( LEVEL = "NULL" )
    'set z 1'
@@ -441,7 +456,7 @@ endif
 * ---------------------------------
 'set dfile 'qfile.1
 'sett'
-if( numGCs = 1 )
+if( numMGCs = 1 )
    'define qmod = 'alias.1'.'qfile.1'*'qscal.1
 else
     filename  = geosutil'/plots/'NAME'/modform.gs'
@@ -450,7 +465,7 @@ else
        close  = close(filename)
        mstring = ''
        m  = 1
-       while ( m <= numGCs )
+       while ( m <= numMGCs )
           if( qname.m != alias.m )
               mstring = mstring' 'alias.m'*'qscal.m
           else
@@ -462,7 +477,7 @@ else
     else
        mstring = NAME
        m  = 1
-       while ( m <= numGCs )
+       while ( m <= numMGCs )
           if( qname.m != alias.m )
               mstring = mstring' 'alias.m'*'qscal.m
           else
@@ -487,6 +502,20 @@ else
 endif
 
 'seasonal qmod'
+
+'q dims'
+ say 'Model Environment:'
+ say result
+
+* Compute CLIMATOLOGY Flag for EXP
+* --------------------------------
+            'getdates'
+'run getenv "CLIMATE"'
+             climexp = result
+
+say 'EXP CLIMATE = 'climexp
+say ' '
+
 
 * Create Dummy File with REGRID Dimensions
 * ----------------------------------------
@@ -518,7 +547,9 @@ endif
 
 while( exp != 'NULL' )
 say ' '
-say 'Comparing with: 'exp
+say 'Creating Plots for Comparison Experiment #'numexp': 'exp
+say '--------------------------------------------'
+say ' '
 
 * analysis = false  EXP=M CMP=M  => ALEVS
 * analysis = false  EXP=M CMP=A  => DLEVS
@@ -572,7 +603,7 @@ endif
 * ----------------------------
 FOUND = TRUE
         m  = 1
-while ( m <= numGCs & FOUND = TRUE )
+while ( m <= numMGCs & FOUND = TRUE )
 
    say 'run 1st call to getvar_2G for CMPEXP, orig EXPORT: 'OLD_EXPORT.m'  orig GC: 'OLD_GC.m
    'run getvar_2G 'OLD_EXPORT.m' 'OLD_GC.m' 'exp
@@ -632,13 +663,16 @@ if( LEVEL = "NULL" )
 else
    'set lev 'LEVEL
 endif
+
+* Find Beginning and Ending Dates associated with Comparison Experiment
+* ---------------------------------------------------------------------
     'getdates'
-     begdateo = subwrd(result,1)
-     enddateo = subwrd(result,2)
+     begdate.numexp = subwrd(result,1)
+     enddate.numexp = subwrd(result,2)
 
 * Perform OBS Formula Calculation
 * -------------------------------
-if( numGCs = 1 )
+if( numMGCs = 1 )
    'define cmod'numexp' = 'cname.numexp.1'.'cfile.numexp.1'*'cscal.numexp.1
 else
     filename  = geosutil'/plots/'NAME'/modform.gs'
@@ -647,7 +681,7 @@ else
        close  = close(filename)
        cstring = ''
        n  = 1
-       while ( n <= numGCs )
+       while ( n <= numMGCs )
           cstring = cstring' 'cname.numexp.n'.'cfile.numexp.n'*'cscal.numexp.n
                n  = n + 1
        endwhile
@@ -656,7 +690,7 @@ else
     else
        cstring = NAME
        n  = 1
-       while ( n <= numGCs )
+       while ( n <= numMGCs )
           ostring = ostring' 'cname.numexp.n'.'cfile.numexp.n'*'cscal.numexp.n
                n  = n + 1
        endwhile
@@ -697,8 +731,30 @@ endif
 'seasonal cmod'numexp
 
 
+***********************************************************************************
+
+            say ' '
+           'q dims'
+            say 'CMPEXP  Environment:'
+            say result
+
+*              Compute CLIMATOLOGY Flag for CMPEXP
+*              Note: CMP Parameters are associated with 1st EXPORT component
+*              -------------------------------------------------------------
 'run getenv "CLIMATE"'
-             climate = result
+                                  climate.numexp = result
+                        cmpfile =   cfile.numexp.1
+                        cmpdsc  =   cdesc.numexp.1
+                  cmpnam.numexp =    ctag.numexp.1
+
+            say 'numexp  = 'numexp
+            say 'cmpnam.'numexp' = 'cmpnam.numexp
+            say 'climate.'numexp' = 'climate.numexp
+                         cmpnam   =  cmpnam.numexp
+                 climcmp.cmpnam   =  climate.numexp
+            say 'climcmp.'cmpnam' = 'climcmp.cmpnam
+            say ' '
+
 
 * Loop over Seasons to Process
 * ----------------------------
@@ -722,7 +778,7 @@ while( mathparm != 'DONE' )
         flag = ""
 while ( flag = "" )
 
-'makplot -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'cmod''numexp' -ONAME 'ctag.numexp.1' -OFILE 'cfile.numexp.1' -ODESC 'cdesc.numexp.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
+'makplot -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'cmod''numexp' -ONAME 'ctag.numexp.1' -OFILE 'cfile.numexp.1' -ODESC 'cdesc.numexp.1' -OBEGDATE 'begdate.numexp' -OENDDATE 'enddate.numexp' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
 
  if( DEBUG = "debug" )
      say "Hit ENTER to repeat plot, or NON-BLANK to continue"
@@ -746,7 +802,7 @@ while( mathparm != 'DONE' )
         flag = ""
 while ( flag = "" )
 
-'makplotz -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'cmod''numexp' -ONAME 'ctag.numexp.1' -OFILE 'cfile.numexp.1' -ODESC 'cdesc.numexp.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm' -RGFILE 'rgfile
+'makplotz -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'cmod''numexp' -ONAME 'ctag.numexp.1' -OFILE 'cfile.numexp.1' -ODESC 'cdesc.numexp.1' -OBEGDATE 'begdate.numexp' -OENDDATE 'enddate.numexp' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climcmp.cmpnam' -GC 'GC.1' -MATH 'mathparm' -RGFILE 'rgfile
 
  if( DEBUG = "debug" )
      say "Hit ENTER to repeat plot, or NON-BLANK to continue"
@@ -795,11 +851,15 @@ endwhile
 
        k  = 1
 while( k <= numexp )
+say ' '
 say 'Looping through experiments, k = 'k' CTAG = 'ctag.k.1' TYPE = 'type.k
+say '--------------------------------------------------------------'
+say ' '
 
 if( ( ctag.k.1 = "MERRA-2" | type.k = V ) & cname.k.1 != 'NULL' )
      TAG   = k
      say 'Performing Closeness plots to: 'ctag.TAG.1' k = 'k
+     say '------------------------------------------------'
 
 * Loop over Seasons to Process
 * ----------------------------
@@ -835,6 +895,11 @@ while( n <= numexp )
      say '                        obs: 'ctag.TAG.1
      say '              Total  numexp: 'numexp
      say ''
+                                cmpnam = ctag.n.1
+                                obsnam = ctag.TAG.1
+
+     say '                  climcmp.cmpnam: 'climcmp.cmpnam
+     say '                  climcmp.obsnam: 'climcmp.obsnam
 
              flag = ""
      while ( flag = "" )
@@ -843,7 +908,7 @@ while( n <= numexp )
                   'define zobs'n''season'   = regrid2( cmod'n''season'  ,0.25,0.25,bs_p1,'lonmin','latmin' )'
                   'define zmod'season'      = regrid2( qmod'season'     ,0.25,0.25,bs_p1,'lonmin','latmin' )'
 
-     'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.TAG.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'cfile.TAG.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm'  -QNAME 'qname.1
+     'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.TAG.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'cfile.TAG.1' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climcmp.obsnam' -GC 'GC.1' -MATH 'mathparm'  -QNAME 'qname.1
 
      if( mathparm != NULL )
          MTH = '_'mathparm
@@ -894,20 +959,26 @@ endwhile ;* END While_k Loop
 if( cmpexp_only = TRUE ) ; return ; endif
 
 ***********************************************************************************
-*                      Loop over Observational Verification Datasets
+*         Loop over All Observational Datasets having VERIFICATION.RC files
 ***********************************************************************************
 
 'getnumrc 'geosutil'/plots/'NAME
      rcinfo = result
      numrc  = subwrd( rcinfo,1 )
-say 'Initial RCINFO: 'rcinfo
 
+say ' '
+say 'Initial RCINFO: 'rcinfo
 if( numrc = 0 )
    'getnumrc 'geosutil'/plots/'DIR
     rcinfo = result
     numrc  = subwrd( rcinfo,1 )
 say '  Final RCINFO: 'rcinfo
 endif
+
+say ' '
+say 'Total Number of VERIFICATION.RC Datasets: 'numrc
+say '----------------------------------------- '
+say ' '
 
          k  = 1
 while(   k <= numrc )
@@ -1010,10 +1081,10 @@ say ''
          n  = n + 1
 endwhile
 
-* Save Original numn for other RCs
+* Save Original numOGCs for other RCs
 * --------------------------------
-  numnorig = numn
-  numn     = numobs
+  numnorig = numOGCs
+  numOGCs  = numobs
 
 else
 
@@ -1024,7 +1095,7 @@ else
 * --------------------------
 FOUND = TRUE
         n  = 1
-while ( n <= numn & FOUND = TRUE )
+while ( n <= numOGCs & FOUND = TRUE )
 'run getobs 'OBS.n' 'OBSGC.n' 'rcfile
         oname.n = subwrd(result,1)
         ofile.n = subwrd(result,2)
@@ -1077,7 +1148,7 @@ endif
 
 * Perform OBS Formula Calculation
 * -------------------------------
-if( numn = 1 )
+if( numOGCs = 1 )
    'define qobs = 'oname.1'.'ofile.1'*'oscal.1
 else
     filename  = geosutil'/plots/'NAME'/'OBSFORM
@@ -1086,7 +1157,7 @@ else
        close  = close(filename)
        ostring = ''
        n  = 1
-       while ( n <= numn )
+       while ( n <= numOGCs )
           ostring = ostring' 'oname.n'.'ofile.n'*'oscal.n
                n  = n + 1
        endwhile
@@ -1094,7 +1165,7 @@ else
     else
        ostring = NAME
        n  = 1
-       while ( n <= numn )
+       while ( n <= numOGCs )
           ostring = ostring' 'oname.n'.'ofile.n'*'oscal.n
                n  = n + 1
        endwhile
@@ -1132,6 +1203,17 @@ endif
 
 'run getenv "CLIMATE"'
              climate = result
+
+*              Compute CLIMATOLOGY Flag for OBS/Verifications
+*              ----------------------------------------------
+               'run getenv "CLIMATE"'
+                    climate.cnt = result
+                climobs.ananam  = climate.cnt
+
+            say 'climate.'cnt'    = 'climate.cnt
+            say 'climobs.'ananam' = 'climobs.ananam
+            say ' '
+
 
 
 * Perform Taylor Plots
@@ -1181,7 +1263,9 @@ while( mathparm != 'DONE' )
 * ------------------------------------------
         flag = ""
 while ( flag = "" )
-'makplot -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'qobs' -ONAME 'otag.1' -OFILE 'ofile.1' -ODESC 'odesc.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
+
+'makplot -MVAR 'qmod' -MNAME 'NAME ' -MFILE 'qfile.1' -MDESC 'qdesc.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OVAR 'qobs' -ONAME 'otag.1' -OFILE 'ofile.1' -ODESC 'odesc.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climobs.ananam' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
+
  if( DEBUG = "debug" )
      say "Hit ENTER to repeat plot, or NON-BLANK to continue"
      pull flag
@@ -1199,10 +1283,18 @@ if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n !=
 say 'Closeness plot between  exp: 'qtag.1
 say '                       cexp: 'ctag.n.1
 say '                        obs: 'otag.1
+
+                               cmpnam = ctag.n.1
+                               obsnam = otag.1
+
+say '                  climcmp.cmpnam: 'climcmp.cmpnam
+say '                  climcmp.obsnam: 'climobs.ananam
+
 say ''
         flag = ""
 while ( flag = "" )
-'closeness -CVAR 'cmod''n' -MVAR 'qmod' -OVAR 'qobs' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'otag.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'odesc.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'ofile.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
+
+'closeness -CVAR 'cmod''n' -MVAR 'qmod' -OVAR 'qobs' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'otag.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'odesc.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'ofile.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climobs.ananam' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
 
 if( mathparm != NULL )
     MTH = '_'mathparm
@@ -1278,10 +1370,10 @@ endif
 * ------------------------------
 k = k + 1
 
-* Restore Original numn for other RCs
+* Restore Original numOGCs for other RCs
 * -----------------------------------
 if( LOBSFORM = 'TRUE' )
-        numn = numnorig
+     numOGCs = numnorig
 endif
 
 * End Verification Loop

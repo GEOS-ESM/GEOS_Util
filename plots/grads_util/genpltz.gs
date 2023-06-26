@@ -21,6 +21,8 @@ if( subwrd(args,num) = '-ALIAS'   ) ; alias    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-QFILE'   ) ; qfile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OFILE'   ) ; ofile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ONAME'   ) ; obsnam   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-MBDATE'  ) ; begdate  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-MEDATE'  ) ; enddate  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OBDATE'  ) ; begdateo = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OEDATE'  ) ; enddateo = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NMOD'    ) ; nmod     = subwrd(args,num+1) ; endif
@@ -34,6 +36,8 @@ if( subwrd(args,num) = '-MAX'     ) ; dqmax    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MIN'     ) ; dqmin    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ZLOG'    ) ; zlog     = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-STAT'    ) ; STAT     = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMEXP' ) ; climexp  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMCMP' ) ; climcmp  = subwrd(args,num+1) ; endif
 
 endwhile
 
@@ -52,6 +56,8 @@ say '-ALIAS  'alias
 say '-QFILE 'qfile
 say '-OFILE 'ofile
 say '-ONAME 'obsnam
+say '-MBDATE 'begdate
+say '-MEDATE 'enddate
 say '-OBDATE 'begdateo
 say '-OEDATE 'enddateo
 say '-NMOD 'nmod
@@ -64,33 +70,35 @@ say '-MAX    'dqmax
 say '-MIN    'dqmin
 say '-PTOP   'ptop
 say '-ZLOG   'zlog
+say '-CLIMEXP 'climexp
+say '-CLIMCMP 'climcmp
 
 * Get Dates for Plots
 * -------------------
-'run getenv "BEGDATE"'
-             begdate  = result
-'run getenv "ENDDATE"'
-             enddate  = result
-if( begdate = "NULL" )
-   'set dfile 'qfile
-   'set t    '1
-   'getinfo date'
-         begdate = result
-endif
-if( enddate = "NULL" )
-   'set dfile 'qfile
-   'getinfo tdim'
-            tdim     = result
-   'set t  'tdim
-   'getinfo date'
-         enddate = result
-endif
+*'run getenv "BEGDATE"'
+*             begdate  = result
+*'run getenv "ENDDATE"'
+*             enddate  = result
+*if( begdate = "NULL" )
+*   'set dfile 'qfile
+*   'set t    '1
+*   'getinfo date'
+*         begdate = result
+*endif
+*if( enddate = "NULL" )
+*   'set dfile 'qfile
+*   'getinfo tdim'
+*            tdim     = result
+*   'set t  'tdim
+*   'getinfo date'
+**         enddate = result
+*endif
 
-'run getenv "CLIMATE"'
-             climate = result
-if( begdate = begdateo & enddate = enddateo )
-         climate = 'Actual'
-endif
+*'run getenv "CLIMATE"'
+*             climate = result
+*if( begdate = begdateo & enddate = enddateo )
+*         climate = 'Actual'
+*endif
 
 'set gxout shaded'
 
@@ -158,12 +166,12 @@ endif
          CINTDIFF = result
 
 say ''
-say 'TITLE: 'title
+say ' TITLE: 'title
 say 'LEVTPYE: 'LEVTYPE
 say ' FACT: 'fact
-say 'CLEVS: 'clevs
+say ' CLEVS: 'clevs
 say 'CCOLS: 'ccols
-say 'DLEVS: 'dlevs
+say ' DLEVS: 'dlevs
 say 'DCOLS: 'dcols
 say 'DIFFMAX: 'diffmax
 say 'DIFFMIN: 'diffmin
@@ -201,7 +209,7 @@ fact = DESC
 if( numlevs = 1 )
    'set z 1'
 else
-   'set lev 1000 'ptop
+'set lev 1000 'ptop
 endif
 'set t 1'
 
@@ -230,7 +238,7 @@ say ' ZMIN: 'zmin'   ZMAX: 'zmax
    qmin = subwrd(result,2)
   qzmax = zmin
   qzmin = zmin
-       z = z + 1
+        z = z + 1
  while( z <= zmax )
 'set z 'z
 'minmax.simple modz*'fact
@@ -249,7 +257,6 @@ say 'QZMIN: 'qzmin'  QZMAX: 'qzmax
         qmin = subwrd(result,4)
 'd abs('qmax')'
         qmax = subwrd(result,4)
-
 if( qmin > qmax )
     qmax = qmin
    'd abs('qzmin')'
@@ -290,7 +297,7 @@ endif
 'set grid  off'
 'set frame on'
 'set xlopts 1 3 .11'
-'set ylopts 1 3 .11'
+'set ylopts 1 3 .09'
 'rgbset'
 
 ************************************************************
@@ -368,8 +375,8 @@ if( ccols = NULL )
 else
 * ----------------
 
-   'set clevs 'clevs
-   'set ccols 'ccols
+'set clevs 'clevs
+'set ccols 'ccols
    'd modz*'fact
 
 endif
@@ -406,11 +413,11 @@ if( numlevs = 1 )
    'set ccolor 1'
 else
    'set parea 0 8.5 7.0 11'
-   'cbarn -vert'
+   'cbarn -vert -ymid 5.7'
    'set parea off'
-   'set vpage 0 8.5 0.0 11'
-   'set parea 1.5 7.0 4.30 7.10'
-   'set lev 1000 'ptop
+'set vpage 0 8.5 0.0 11'
+'set parea 1.5 7.0 4.30 7.10'
+'set lev 1000 'ptop
    'set zlog 'zlog
     if( zlog = ON ) ; 'setlevs' ; endif
 endif
@@ -430,8 +437,8 @@ if( ccols = NULL )
        'd      obsz*'fact'*1e'qm
     endif
 else
-   'set clevs 'clevs
-   'set ccols 'ccols
+'set clevs 'clevs
+'set ccols 'ccols
    'd obsz*'fact
 endif
 
@@ -542,7 +549,7 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
    endif
 
    if( fixpltfact != NULL )
-       'd  'fixpltfact
+       'd 'fixpltfact
         dn =subwrd(result,4)
    endif
 
@@ -555,8 +562,8 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
        dm = dn
    endif
 
-   if( fixpltcint != NULL ) 
-       'd  'fixpltcint
+   if( fixpltcint != NULL )
+       'd 'fixpltcint
             fixpltcint =subwrd(result,4)
 
        cint = fixpltcint
@@ -565,7 +572,7 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
          'd qz*'fact'/1e'dm
        else
          'd qz*'fact'*1e'dm
-       endif
+   endif
 
    else
 
@@ -573,13 +580,13 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
        'd 0.1*'dqmax'/1e'dm
         cint = subwrd(result,4)
         say 'dn> 0,  CINT: 'cint
-       'shades 'cint
+      'shades 'cint
        'd qz*'fact'/1e'dm
      else
        'd 0.1*'dqmax'*1e'dm
         cint = subwrd(result,4)
         say 'dn< 0,  CINT: 'cint
-       'shades 'cint
+      'shades 'cint
        'd qz*'fact'*1e'dm
      endif
 
@@ -596,10 +603,9 @@ else
 endif
 * -------------------------------------------
 
-'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
-
-'set gxout contour'
-'set ccolor 1'
+      'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
+      'set gxout contour'
+      'set ccolor 1'
 if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
    'set clevs -'cint' 'cint
     if( dn>0 )
@@ -623,13 +629,13 @@ endif
 
 if( numlevs>1 & CINTDIFF != 'NULL' )
    'set string 1 l 6 90'
-   'set strsiz .17'
-   'draw string 0.75 1.8 Pressure (mb)'
+   'set strsiz .16'
+   'draw string 0.75 1.47 Pressure (mb)'
 endif
 
 'set string 1 l 4 0'
 'set strsiz 0.065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'qdesc' )'
 
 'set string 1 c 6'
 'set strsiz .13'
@@ -637,24 +643,22 @@ endif
 'set strsiz .11'
 
 if( numlevs > 1 )
-'set string 1 c 6'
-if( qn != 0 )
-'draw string 4.25 10.64 'qdesc' 'season' ('nmod') (x 10**'qn')'
+   'set string 1 c 6'
+    if( qn != 0 )
+       'draw string 4.25 10.64 'expid' 'season' ('nmod')  ('climexp') (x 10**'qn')'
+    else
+       'draw string 4.25 10.64 'expid' 'season' ('nmod')  ('climexp')'
+    endif
+       'draw string 4.25  7.24 'obsnam' 'season' ('nobs') ('climcmp')'
 else
-'draw string 4.25 10.64 'qdesc' 'season' ('nmod')'
-endif
-'draw string 4.25  7.24 'odesc' 'season' ('nobs') ('climate')'
-
-else
-
-'set string 4 c 6'
-if( qn != 0 )
-'draw string 4.25 10.64 'qdesc' 'season' ('nmod') (x 10**'qn')'
-else
-'draw string 4.25 10.64 'qdesc' 'season' ('nmod')'
-endif
-'set string 1 c 6'
-'draw string 4.25 7.24 'odesc' 'season' ('nobs') ('climate')'
+   'set string 4 c 6'
+    if( qn != 0 )
+       'draw string 4.25 10.64 'expid' 'season' ('nmod')  ('climexp') (x 10**'qn')'
+    else
+       'draw string 4.25 10.64 'expid' 'season' ('nmod')  ('climexp')'
+    endif
+       'set string 1 c 6'
+       'draw string 4.25 7.24 'obsnam' 'season' ('nobs') ('climcmp')'
 endif
 
 
@@ -663,6 +667,7 @@ if( dn != 0 )
 else
    'draw string 4.25  3.80 Difference (Top-Middle)'
 endif
+
 
                 date = getdate (begdate)
 bmnthm = subwrd(date,1)
@@ -678,29 +683,51 @@ emntho = subwrd(date,1)
 eyearo = subwrd(date,2)
 
 if( numlevs > 1 )
+   'set strsiz 0.08'
+'set string 4 l 5'
+'draw string 0.10 10.50 EXP Dates:'
 'set string 1 l 4'
-'set strsiz .08'
+   'set strsiz .08'
 'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
 'draw string 0.10 10.24 End: 'emnthm' 'eyearm
+
+'set string 4 l 5'
+'draw string 0.10  7.10 CMP Dates:'
+'set string 1 l 4'
 'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
 'draw string 0.10  6.84 End: 'emntho' 'eyearo
 
+if( climexp != 'Actual' | climcmp != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.75  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.60  Actual Dates'
+   'draw string 0.050 3.45  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.75  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.60  Actual Dates'
+endif
+
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'
-   'draw string 0.050 1.67 Plot represents'
-   'draw string 0.050 1.52 values > 'dqrel' %'
-   'draw string 0.050 1.36 Relative Difference'
-   'draw string 0.050 1.22 ( DQ/QMax )'
+   'draw string 0.050 1.35 Plot represents'
+   'draw string 0.050 1.20 values > 'dqrel' %'
+   'draw string 0.050 1.05 Relative Difference'
+   'draw string 0.050 0.90 ( DQ/QMax )'
 endif
 
 else
-'set string 4 l 4'
-'set strsiz .08'
-'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
-'draw string 0.10 10.24 End: 'emnthm' 'eyearm
-'set string 1 r 4'
-'draw string 8.30 10.37 Beg: 'bmntho' 'byearo
-'draw string 8.30 10.24 End: 'emntho' 'eyearo
+
+   'set string 4 l 4'
+   'set strsiz .08'
+   'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
+   'draw string 0.10 10.24 End: 'emnthm' 'eyearm
+   'set string 1 r 4'
+   'draw string 8.30 10.37 Beg: 'bmntho' 'byearo
+   'draw string 8.30 10.24 End: 'emntho' 'eyearo
+
 endif
 
 'set string 1 c 6'
@@ -762,7 +789,7 @@ function xyz (xmin,xmax,ymin,ymax,zmin,zmax)
          'getinfo ypos'
                   ymin = result
                   ymax = result
-     endif
+endif
 
 'getinfo zfreq'
          zfreq = result

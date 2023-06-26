@@ -31,7 +31,7 @@ if( tmin<1 | tmax>tdim )
     'getinfo file'
              file = result
         say 'TIME requested falls outside domain of File: 'file
-        say 'Default times will be used.'
+        say 'Default File times will be used.'
        'set t 1'
        'getinfo date'
         begdate = result

@@ -220,7 +220,8 @@ endif
 'setx'
 'sety'
 'getdates'
-'makez 'alias.5' z1'
+*'makez 'alias.5' z1'
+'makezf 'alias.5' 'alias.5' z1'
 'set x 1'
 'define   sphuz1 = 'alias.5'z1*'scale.5
 'seasonal sphuz1'
