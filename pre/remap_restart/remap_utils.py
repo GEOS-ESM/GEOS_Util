@@ -246,6 +246,7 @@ def data_ocean_default(resolution):
    return default_
 
 def get_bcs_basename(bcs):
+  if not bcs: return ""
   k = bcs.find('/geometry')
   if k != -1 :
      bcs = bcs[0:k]
