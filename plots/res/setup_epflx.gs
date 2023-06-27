@@ -5,6 +5,10 @@ expid  = subwrd(args,2)
 output = subwrd(args,3)
 season = subwrd(args,4)
 
+say 'Running:  setup_epflx 'source' 'expid' 'output' 'season
+say '-------------------------------------------------------'
+say ' '
+
 'getinfo numfiles'
          numfiles = result
 
@@ -27,8 +31,13 @@ while( num <= numrc )
     'run getenv CTLFILE '
                 CTLFILE.num = result
 
-    '!echo `basename 'rcfile' | cut -d. -f2 > CMPID.txt`'
-    'run getenv CMPID '
+    '!echo `basename 'rcfile' | cut -d. -f2- > CMPID.txt`'
+    '!cat CMPID.txt | awk "{print length}"   > LENID.txt'
+    'run getenv LENID'
+                lenid = result
+                lenid = lenid - 3
+    '!cat CMPID.txt | cut -b1-'lenid' > CMPID2.txt'
+    'run getenv CMPID2'
                 CMPID.num = result
 
    say '  CMPID #'num' = 'CMPID.num
@@ -37,6 +46,7 @@ while( num <= numrc )
    if( CMPID.num = expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
+say ' '
  
 'getinfo numfiles'
          numfiles = result
@@ -152,8 +162,9 @@ endwhile
 
 n = 1
 while( n<=numfiles )
+say 'Running: epflx.gs 'CMPID.n' 'season' A'n' 'output
+say '-------------------------------------------------'
 'run 'geosutil'/plots/res/epflx.gs 'CMPID.n' 'season' A'n' 'output
-pause
 'c'
 n = n + 1
 endwhile
@@ -165,6 +176,8 @@ if( CMPID.n != expid )
 
 *           flag = ""
 *   while ( flag = "" )
+    say 'Running:  epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
+    say '----------------------------------------------------'
    'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
 *   say "Hit  ENTER  to repeat plot"
 *   say "Type 'next' for  next plot, 'done' for next field"
@@ -173,6 +186,8 @@ if( CMPID.n != expid )
    'c'
 *           flag = ""
 *   while ( flag = "" )
+    say 'Running: epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
+    say '----------------------------------------------------'
    'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
 *   say "Hit  ENTER  to repeat plot"
 *   say "Type 'next' for  next plot, 'done' for next field"

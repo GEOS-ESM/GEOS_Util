@@ -95,19 +95,16 @@ endif
 say 'BEGDATE = 'begdate
 say 'ENDDATE = 'enddate
 
-'makezdif -q1 epfdiv'season''index' -file1 'num' -q2 epfdiv'season'a'num2' -file2 'num2' -name epdiff  -ptop 1'
-'makezdif -q1   epfy'season''index' -file1 'num' -q2   epfy'season'a'num2' -file2 'num2' -name epydiff -ptop 1'
-'makezdif -q1   epfz'season''index' -file1 'num' -q2   epfz'season'a'num2' -file2 'num2' -name epzdiff -ptop 1'
+'makezdif -q1 epfdiv'season''index' -file1 'num' -q2 epfdiv'season'a'num2' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
+'makezdif -q1   epfy'season''index' -file1 'num' -q2   epfy'season'a'num2' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
+'makezdif -q1   epfz'season''index' -file1 'num' -q2   epfz'season'a'num2' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
  
-say 'finished makezdiff calcualtions'
-say 'DIMS: '
-'q dims'
-say result
-*pause
+'set dfile 'epfile
+'set x 1'
+'set t 1'
+'sety'
 
-' set dfile 'num2
 ' set lev 1000 1'
-*' define epdiff = epdiffz/1e2'
 ' define epdiff = epdiffz'
   nmax = 00
      n = 1
