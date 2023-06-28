@@ -80,7 +80,11 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:agrid",
-            "message": "Enter input atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
+            "message": "Enter input atmospheric grid: \n \
+    C12   C180  C1000  C270\n \
+    C24   C360  C1440  C540\n \
+    C48   C500  C2880  C1080\n \
+    C90   C720  C5760  C2160  C1536\n ",
             "default": 'C360',
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
@@ -124,7 +128,11 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:agrid",
-            "message": "Enter new atmospheric grid: \n C12   C180  C1000  C270\n C24   C360  C1440  C540\n C48   C500  C2880  C1080\n C90   C720  C5760  C2160  C1536\n ",
+            "message": "Enter new atmospheric grid: \n \
+    C12   C180  C1000  C270\n \
+    C24   C360  C1440  C540\n \
+    C48   C500  C2880  C1080\n \
+    C90   C720  C5760  C2160  C1536\n ",
             "default": 'C360',
         },
 
@@ -169,21 +177,20 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:tag",
-            "message": "Enter BC version that matches input restarts: \n \
+            "message": "Enter BC version that matches input restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...) \n \
 \n \
-BC version   \n \
---------------- \n \
-ICA  : Icarus  \n \
-NLv3 : New land version 3 \n \
+    BC version   \n \
+    --------------- \n \
+    ICA  : Icarus  \n \
+    NLv3 : New land version 3 \n \
 \n \
-New directory structures: \n \
+    New directory structures: \n \
 \n \
-NL3       : Newland version 3 \n \
-NL4       : Newland version 4 \n \
-NL5       : Newland version 5 \n \
-v06, v07, v08, v09: Not generated yet \n",
- 
-            "default": "ICA",
+    NL3  : Newland version 3 \n \
+    NL4  : Newland version 4 \n \
+    NL5  : Newland version 5 \n \
+    v06, v07, v08, v09: Not generated yet \n",
+            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
@@ -191,6 +198,7 @@ v06, v07, v08, v09: Not generated yet \n",
             "type": "text",
             "name": "output:shared:tag",
             "message": "Enter BC version for new restarts:",
+            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
             "default": "NLv3",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -198,20 +206,20 @@ v06, v07, v08, v09: Not generated yet \n",
         {
             "type": "text",
             "name": "output:shared:tag",
-            "message": " Enter BC version for new restarts: \n \
+            "message": " Enter BC version for new restarts:  (ICA, NLv3, NL3, NL4, NL5, v06, v07,...) \n \
 \n \
-BC version   \n \
---------------- \n \
-ICA  : Icarus  \n \
-NLv3 : New land version 3 \n \
+    BC version   \n \
+    --------------- \n \
+    ICA  : Icarus  \n \
+    NLv3 : New land version 3 \n \
 \n \
-New directory structures: \n \
+    New directory structures: \n \
 \n \
-NL3       : Newland version 3 \n \
-NL4       : Newland version 4 \n \
-NL5       : Newland version 5 \n \
-v06, v07, v08, v09: Not generated yet \n",
- 
+    NL3  : Newland version 3 \n \
+    NL4  : Newland version 4 \n \
+    NL5  : Newland version 5 \n \
+    v06, v07, v08, v09: Not generated yet \n",
+            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
             "default": "NLv3",
             "when": lambda x: x["input:shared:MERRA-2"],
         },
