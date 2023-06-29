@@ -117,6 +117,7 @@ say 'ZDIFILE: 'result
 'setz'
 
 'set lev 900 1' 
+'set lev 900 0.02' 
 'minmax resdifz'
         dqmax = subwrd(result,1)
         dqmin = subwrd(result,2)
@@ -137,12 +138,17 @@ endif
 
 'set vpage off'
 'set parea off'
+'set clab off'
 
 * Make Plot: Top Panel
 * --------------------
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 7.70 10.50'
 'set grads off'
+
+*'setz'
+'setlevs'
+'set ylopts 1 3 0.09'
 
 'set gxout shaded'
 'set clevs 0'
@@ -157,6 +163,23 @@ endif
 'set cmin -100'
 'd res'season'mod'
 
+'set ccolor 1'
+'set cint 1'
+'set cmax  5'
+'set cmin -5'
+'d res'season'mod'
+
+'set ccolor 1'
+'set cint 0.1'
+'set cmax  1'
+'set cmin -1'
+'d res'season'mod'
+
+'set ccolor 1'
+'set cint 0.01'
+'set cmax  0.1'
+'set cmin -0.1'
+'d res'season'mod'
 
 * Make Plot: Middle Panel
 * -----------------------
@@ -164,6 +187,10 @@ endif
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 4.30 7.10'
 'set grads off'
+
+*'setz'
+'setlevs'
+'set ylopts 1 3 0.09'
 
 'set gxout shaded'
 'set clevs 0'
@@ -176,6 +203,25 @@ endif
 'set cint 5'
 'set cmax  100'
 'set cmin -100'
+'d res'season'obs'
+
+
+'set ccolor 1'
+'set cint 1'
+'set cmax  5'
+'set cmin -5'
+'d res'season'obs'
+
+'set ccolor 1'
+'set cint 0.1'
+'set cmax  1'
+'set cmin -1'
+'d res'season'obs'
+
+'set ccolor 1'
+'set cint 0.01'
+'set cmax  0.1'
+'set cmin -0.1'
 'd res'season'obs'
 
 
@@ -185,6 +231,10 @@ endif
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 0.90 3.70'
 'set grads off'
+
+*'setz'
+'setlevs'
+'set ylopts 1 3 0.09'
 
 'set gxout shaded'
 'set clevs 0'
@@ -196,7 +246,6 @@ endif
 'set x 1'
 'set t 1'
 'sety'
-'setz'
 
 if( CINTDIFF != NULL )
 * --------------------
@@ -278,7 +327,11 @@ endif
 'set z 'z1' 'z2
 'set t 1'
 
-'cbarn -scale 0.9 -snum 0.5'
+*'setz'
+'setlevs'
+'set ylopts 1 3 0.09'
+
+'cbarn -scale 0.9 -snum 0.5 -ymid 0.40'
 'set gxout contour'
 'set clopts 1 3 0.06'
 'set ccolor 1'
@@ -287,16 +340,37 @@ endif
 'set cmin -100'
 'd res'season'obs'
  
+'set ccolor 1'
+'set cint 1'
+'set cmax  5'
+'set cmin -5'
+'d res'season'obs'
+
+'set ccolor 1'
+'set cint 0.1'
+'set cmax  1'
+'set cmin -1'
+'d res'season'obs'
+
+'set ccolor 1'
+'set cint 0.01'
+'set cmax  0.1'
+'set cmin -0.1'
+'d res'season'obs'
+
 
 'set vpage off'
 'set parea off'
 'set vpage 0 8.5 0.0 11'
 
+'set string 1 l 4'
+'set strsiz 0.07'
+'draw string 0.05 0.10 ( EXPID: 'expid' )'
+
 'set string 1 c 6'
 'set strsiz .11'
 
-'draw string 4.25 10.85 EXPID: 'expid
-'draw string 4.25 10.6 'expdsc'  'season' ('nmod')'
+'draw string 4.25 10.75 'expdsc'  'season' ('nmod')'
 'draw string 4.25  7.23 'obsdsc'  'season' ('nobs') ('climate')'
 
 if( dn != 0 )

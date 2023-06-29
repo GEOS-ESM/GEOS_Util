@@ -22,12 +22,18 @@ function closeness (args)
   bdateo = getarg (args,OBEGDATE)
   edateo = getarg (args,OENDDATE)
 
+   cfile = getarg (args,CFILE)
+  bdatec = getarg (args,CBEGDATE)
+  edatec = getarg (args,CENDDATE)
+
    expid = getarg (args,EXPID)
 gridcomp = getarg (args,GC)
   prefix = getarg (args,PREFIX)
   season = getarg (args,SEASON)
   output = getarg (args,OUTPUT)
- climate = getarg (args,CLIMATE)
+ climexp = getarg (args,CLIMEXP)
+ climcmp = getarg (args,CLIMCMP)
+ climobs = getarg (args,CLIMOBS)
     math = getarg (args,MATH)
    level = getarg (args,LEVEL)
 
@@ -35,6 +41,12 @@ gridcomp = getarg (args,GC)
    qname = getarg (args,QNAME)
 if(qname = NULL )
    qname = mname
+endif
+ 
+   alias = NULL
+   alias = getarg (args,ALIAS)
+if(alias = NULL )
+   alias = mname
 endif
  
 * ---------------------------
@@ -64,6 +76,7 @@ ccols = 'NULL'
 dlevs = 'NULL'
 dcols = 'NULL'
 ccint = 'NULL'
+dpct  = 'NULL'
 
 * Check for Existance of NAME Specific plot.rc
 * --------------------------------------------
@@ -159,6 +172,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FIXED_PLOT_CINT
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_CINT' ; endif
                                                                  clspltcint = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CLOSE_PLOT_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_DPCT' ; endif
+                                                                 dpct = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
                                                                 ccols = result
@@ -187,7 +204,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'qname
+   'getdesc 'alias
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
@@ -226,6 +243,10 @@ endif
 'count "'season'" 'bdateo' 'edateo
  nobs = result
 
+'set dfile 'cfile
+'count "'season'" 'bdatec' 'edatec
+ ncmp = result
+
 'set dfile 'mfile
 'count "'season'" 'bdate' 'edate
  nmod = result
@@ -241,6 +262,7 @@ endif
 'define obsg = qobs'
 'define modg = qmod'
 'define codg = cmod'
+
 'define difg = maskout( modg-obsg,abs(obsg) )'
 'define cifg = maskout( codg-obsg,abs(obsg) )'
 
@@ -286,7 +308,13 @@ say 'dqrel = 'dqrel
              dqrel = result/100
 say 'dqrel = 'dqrel
 
-     dpct  = 0.1
+     if( dpct = 'NULL' )
+         dpct = 0.1
+     else
+        'd 'dpct
+         dpct = subwrd(result,4)
+     endif
+
      say 'Absolute DQMAX: 'dqmax'  QMOD_MAX: 'aqmodmax
      say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
      say ' Default Percent Difference for  Plots: 'dpct
@@ -432,7 +460,13 @@ say 'raw dqrel = 'dqrel
              dqrel = result/100
 say 'int dqrel = 'dqrel
 
-     dpct  = 0.1
+     if( dpct = 'NULL' )
+         dpct = 0.1
+     else
+        'd 'dpct
+         dpct = subwrd(result,4)
+     endif
+
      say 'DQMAX: 'dqmax'  QMOD_MAX: 'amdifmax
      say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
      say ' Default Percent Difference for  Plots: 'dpct
@@ -465,7 +499,8 @@ say 'int dqrel = 'dqrel
     'd 'clspltfact
      n = subwrd(result,4)
    endif
-   say 'Diff Scaling Factor: 'n
+     ndif = n
+   say 'Diff Scaling Factor: 'ndif
 
    if( clspltcint != NULL )
     'd 'clspltcint
@@ -506,54 +541,62 @@ say 'int dqrel = 'dqrel
 'set vpage off'
 'set string 1 l 4'
 'set strsiz .065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'mdesc' )'
 
 'set string 1 c 6'
 'set strsiz .125'
 if( level = '' | level = 0 )
-   'draw string 4.25 10.85 'math' 'title
+   'draw string 4.25 10.85 'math' 'title'   'season
 else
-   'draw string 4.25 10.85 'level'-mb 'math' 'title
+   'draw string 4.25 10.85 'level'-mb 'math' 'title'   'season
 endif
 'set strsiz .10'
 
+
 if( ntop != 0 )
    if( ntop>0 )
-      'draw string 4.25 10.62 'mdesc' - 'oname'  'season' ('nmod')  (x 10** -'ntop')'
+      'draw string 4.25 10.62 'expid' ('climexp','nmod') - 'oname' ('climobs','nobs')  (x 10** -'ntop')'
    else
-      'draw string 4.25 10.62 'mdesc' - 'oname'  'season' ('nmod')  (x 10**'ntop')'
+      'draw string 4.25 10.62 'expid' ('climexp','nmod') - 'oname' ('climobs','nobs')  (x 10**'ntop')'
    endif
 else
-   'draw string 4.25 10.62 'mdesc' - 'oname'  'season' ('nmod')'
+   'draw string 4.25 10.62 'expid' ('climexp','nmod') - 'oname' ('climobs','nobs')'
 endif
+
 
 if( nmid != 0 )
    if( nmid>0 )
-      'draw string 4.25 7.22 'cdesc' - 'oname'  'season' ('nobs')  (x 10** -'nmid')  ('climate')'
+      'draw string 4.25 7.22 'cname' ('climcmp','ncmp') - 'oname' ('climobs','nobs')  (x 10** -'nmid')'
    else
-      'draw string 4.25 7.22 'cdesc' - 'oname'  'season' ('nobs')  (x 10**'nmid')  ('climate')'
+      'draw string 4.25 7.22 'cname' ('climcmp','ncmp') - 'oname' ('climobs','nobs')   (x 10**'nmid')'
    endif
 else
-   'draw string 4.25 7.22 'cdesc' - 'oname'  'season' ('nobs')  ('climate')'
+   'draw string 4.25 7.22 'cname' ('climcmp','ncmp') - 'oname' ('climobs','nobs')'
 endif
 
-*if( n != 0 )
-if( ntop != 0 )
-   if( ntop>0 )
-      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**-'ntop')'
+
+if( ndif != 0 )
+   if( ndif>0 )
+      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**-'ndif')'
    else
-      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**'ntop')'
+      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**'ndif')'
    endif
 else
    'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)'
 endif
 
-* Print Beginning and Ending Dates
-* --------------------------------
-                date = getdate (bdate)
+
+* Print Beginning and Ending Target Dates
+* ---------------------------------------
+'run getenv "BEGDATE"'
+             begdate  = result
+'run getenv "ENDDATE"'
+             enddate  = result
+
+                date = getdate (begdate)
 bmnthm = subwrd(date,1)
 byearm = subwrd(date,2)
-                date = getdate (edate)
+                date = getdate (enddate)
 emnthm = subwrd(date,1)
 eyearm = subwrd(date,2)
                 date = getdate (bdateo)
@@ -567,26 +610,66 @@ eyearo = subwrd(date,2)
 
 'set string 1 l 4'
 'set strsiz .08'
-'draw string 0.050 10.30 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.15 End: 'emnthm' 'eyearm
-'draw string 0.050 9.85  Max: 'mdifmax
-'draw string 0.050 9.70  Min: 'mdifmin
-'draw string 0.050 9.40 Mean: 'avgmod
-'draw string 0.050 9.25  Std: 'stdmod
 
-'draw string 0.050 6.90 Beg: 'bmntho' 'byearo
-'draw string 0.050 6.75 End: 'emntho' 'eyearo
-'draw string 0.050 6.45  Max: 'qobsmax
-'draw string 0.050 6.30  Min: 'qobsmin
-'draw string 0.050 6.00 Mean: 'avgobs
-'draw string 0.050 5.85  Std: 'stdobs
+'set string 4 l 5'
+'draw string 0.050 10.50 Target Dates:'
+'set string 1 l 4'
+'draw string 0.050 10.37 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.24 End: 'emnthm' 'eyearm
 
-'draw string 0.050 3.50 Beg: 'bmnthm' 'byearm
-'draw string 0.050 3.35 End: 'emnthm' 'eyearm
-'draw string 0.050 3.05  Max: 'closmax
-'draw string 0.050 2.90  Min: 'closmin
-'draw string 0.050 2.60 Mean: 'avgdif
-'draw string 0.050 2.45  Std: 'stddif
+if( climexp != 'Actual' | climobs != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 9.90  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 9.75  Actual Dates'
+   'draw string 0.050 9.60  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 9.90  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 9.75  Actual Dates'
+endif
+'draw string 0.050 9.40  Max: 'mdifmax
+'draw string 0.050 9.25  Min: 'mdifmin
+'draw string 0.050 8.95 Mean: 'avgmod
+'draw string 0.050 8.80  Std: 'stdmod
+
+
+if( climcmp != 'Actual' | climobs != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 6.50  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 6.35  Actual Dates'
+   'draw string 0.050 6.20  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 6.50  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 6.35  Actual Dates'
+endif
+'draw string 0.050 5.85  Max: 'qobsmax
+'draw string 0.050 5.70  Min: 'qobsmin
+'draw string 0.050 5.40 Mean: 'avgobs
+'draw string 0.050 5.25  Std: 'stdobs
+
+
+if( climexp != 'Actual' | climcmp != 'Actual' | climobs != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.50  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.37  Actual Dates'
+   'draw string 0.050 3.24  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.50  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+endif
+'draw string 0.050 2.90  Max: 'closmax
+'draw string 0.050 2.75  Min: 'closmin
+'draw string 0.050 2.45 Mean: 'avgdif
+'draw string 0.050 2.30  Std: 'stddif
+
 
 *if( CINTDIFF != 'NULL' )
    'set strsiz .07'

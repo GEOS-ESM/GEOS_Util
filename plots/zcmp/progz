@@ -48,6 +48,7 @@ endif
          scale  = subwrd(result,3)
          qdesc  = subwrd(result,4)
          qtag   = subwrd(result,5)
+         expnam = qtag
 
 if( mfile = "NULL" ) ; return ; endif
 
@@ -73,11 +74,10 @@ if( mfile = "NULL" ) ; return ; endif
 'set dfile 'mfile
 'setdates'
 'run getenv "BEGDATE"'
-             begdate  = result
+             begdate.expnam = result
 'run getenv "ENDDATE"'
-             enddate  = result
-*'setlons'
-*'setlats'
+             enddate.expnam = result
+
 'set lon 0 360'
 'set lat -90 90'
 'setz'
@@ -134,6 +134,13 @@ while( month != '' )
        m = m+1
        month = subwrd(months,m)
 endwhile
+
+* Compute CLIMATOLOGY Flag for EXPID
+* ----------------------------------
+  'run getenv "CLIMATE"'
+               climexp = result
+
+say 'CLIMEXP = 'climexp
 
 *******************************************************************
 ****   Loop over Possible Experiment Datasets for Comparison   ****
@@ -210,8 +217,8 @@ if( cname.numexp != 'NULL' )
 
 'set dfile 'cfile.numexp
     'getdates'
-     begdateo = subwrd(result,1)
-     enddateo = subwrd(result,2)
+     begdate.numexp = subwrd(result,1)
+     enddate.numexp = subwrd(result,2)
 
 'set lon 'lonmin' 'lonmax
 'set lat 'latmin' 'latmax
@@ -224,6 +231,19 @@ say 'seasonalf -FUNCTION 'oalias'*'cscal.numexp' -NAME exp'numexp
     'seasonalf -FUNCTION 'oalias'*'cscal.numexp' -NAME exp'numexp
  expfile.numexp  = subwrd(result,1)
  
+* Compute CLIMATOLOGY Flag for CMPEXP
+* -----------------------------------
+  'run getenv "CLIMATE"'
+               climate.numexp = result
+                       cmpnam =    ctag.numexp
+               climcmp.cmpnam = climate.numexp
+               begdate.cmpnam = begdate.numexp
+               enddate.cmpnam = enddate.numexp
+
+say 'CLIMCMP.'cmpnam' = 'climcmp.cmpnam
+say 'BEGDATE.'cmpnam' = 'begdate.cmpnam
+say 'ENDDATE.'cmpnam' = 'enddate.cmpnam
+
 * Release memory for DEFINEd variables not needed
 * -----------------------------------------------
 'undefine qdata'
@@ -271,17 +291,18 @@ endwhile
 say 'Processing Season: 'season
 
 'set dfile 'mfile
-'count "'season'" 'begdate' 'enddate
+'count "'season'" 'begdate.expnam' 'enddate.expnam
  nmod =  result
 
 'set dfile 'cfile.numexp
-'count "'season'" 'begdateo' 'enddateo
- nobs =  result
+'count "'season'" 'begdate.cmpnam' 'enddate.cmpnam
+ ncmp =  result
 
 
 * Set EXPORT Model, Observation Scaling Factors, and PTOPs for plots (for LOG use :L)
 * -----------------------------------------------------------------------------------
 if( EXPORT = "U"     ) ; facm = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
+*if( EXPORT = "U"     ) ; facm = 1     ; nplots = 1 ; ptops = "10:L" ; endif
 if( EXPORT = "V"     ) ; facm = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
 if( EXPORT = "T"     ) ; facm = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
 if( EXPORT = "Q"     ) ; facm = 1000  ; nplots = 1 ; ptops = "30"            ; endif
@@ -326,7 +347,25 @@ faco = facm
                        flag = ""
                while ( flag = "" )
 
-'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'mfile' -OFILE 'cfile.numexp' -ONAME 'ctag.numexp' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'qdesc ' -ODESC 'cdesc.numexp' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop
+'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'mfile' -OFILE 'cfile.numexp' -ONAME 'ctag.numexp' -OBDATE 'begdate.cmpnam' -OEDATE 'enddate.cmpnam' -NMOD 'nmod' -NOBS 'ncmp' -QDESC 'qdesc ' -ODESC 'cdesc.numexp' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam
+
+*'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid
+*                              ' -EXPORT 'EXPORT
+*                              ' -ALIAS 'mname
+*                              ' -QFILE 'mfile
+*                              ' -OFILE 'cfile.numexp
+*                              ' -ONAME 'ctag.numexp
+*                              ' -OBDATE 'begdate.cmpnam
+*                              ' -OEDATE 'enddate.cmpnam
+*                              ' -NMOD 'nmod
+*                              ' -NOBS 'ncmp
+*                              ' -QDESC 'qdesc 
+*                              ' -ODESC 'cdesc.numexp
+*                              ' -OUTPUT 'output
+*                              ' -SEASON 'season
+*                              ' -PTOP 'plttop
+*                              ' -CLIMEXP 'climexp
+*                              ' -CLIMCMP 'climcmp.cmpnam
 
                 if( debug = "debug" )
                     say "Hit  ENTER  to repeat plot"
@@ -371,13 +410,17 @@ endwhile
 * we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
 * ---------------------------------------------------------------------------
 
+say ' '
+say 'Looping through Comparison Experiments for Closeness Plots'
+say '----------------------------------------------------------'
+
        k  = 1
 while( k <= numexp )
-       say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
+say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
 
-       if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
             TAG   = k
-            say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+
+            if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
 
 *           Loop over Seasons to Process
 *           ----------------------------
@@ -399,8 +442,8 @@ while( k <= numexp )
                            n  = 1
                     while( n <= numexp )
                            say 'Testing 'qtag' and 'ctag.n' for closeness with 'ctag.TAG
-
                            if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != ctag.TAG & type.n != V & cname.n != "NULL" )
+
                                say 'Closeness plot between  exp: 'qtag
                                say '                       cexp: 'ctag.n
                                say '                        obs: 'ctag.TAG
@@ -459,16 +502,45 @@ while( k <= numexp )
                               'run getenv "ZDIFILE"'
                                            zdifile3 = result
 
+
 *                              Make ZCLOSEPLT
 *                              --------------
                                       nplot  = 1
                                while( nplot <= nplots )
                                       plttop = subwrd( ptops,nplot )
 
+                                        say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+                                                               nname = ctag.n
+                                                               kname = ctag.k
+                                        say 'climcmp: 'climcmp.nname
+                                        say 'climobs: 'climcmp.kname
+
                                          flag = ""
                                  while ( flag = "" )
 
-                                     'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'zdifile1' -CFILE 'zdifile2' -OFILE 'zdifile3' -ONAME 'ctag.TAG' -CNAME 'ctag.n' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'qdesc ' -ODESC 'cdesc.n' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop
+                                            'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'zdifile1' -CFILE 'zdifile2' -OFILE 'zdifile3' -ONAME 'ctag.TAG' -CNAME 'ctag.n' -MBDATE 'begdate.expnam' -MEDATE 'enddate.expnam' -CBDATE 'begdate.nname' -CEDATE 'enddate.nname' -OBDATE 'begdate.kname' -OEDATE 'enddate.kname' -QDESC 'qdesc ' -ODESC 'cdesc.n' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.nname' -CLIMOBS 'climcmp.kname
+*                                           'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid
+*                                                                              ' -EXPORT 'EXPORT
+*                                                                              ' -ALIAS 'mname
+*                                                                              ' -QFILE 'zdifile1
+*                                                                              ' -CFILE 'zdifile2
+*                                                                              ' -OFILE 'zdifile3
+*                                                                              ' -ONAME 'ctag.TAG
+*                                                                              ' -CNAME 'ctag.n
+*                                                                              ' -MBDATE 'begdate.expnam
+*                                                                              ' -MEDATE 'enddate.expnam
+*                                                                              ' -CBDATE 'begdate.nname
+*                                                                              ' -CEDATE 'enddate.nname
+*                                                                              ' -OBDATE 'begdate.kname
+*                                                                              ' -OEDATE 'enddate.kname
+*                                                                              ' -QDESC 'qdesc 
+*                                                                              ' -ODESC 'cdesc.n
+*                                                                              ' -OUTPUT 'output
+*                                                                              ' -SEASON 'season
+*                                                                              ' -PTOP 'plttop
+*                                                                              ' -CLIMEXP 'climexp
+*                                                                              ' -CLIMCMP 'climcmp.nname
+*                                                                              ' -CLIMOBS 'climcmp.kname
 
                                       if( debug = "debug" )
                                           say "Hit  ENTER  to repeat plot"
@@ -477,33 +549,30 @@ while( k <= numexp )
                                       else
                                           flag = "next"
                                       endif
-
                                      'c'
-                                 endwhile
+                                        endwhile ;* END While_FLAG Loop
 
                               nplot = nplot + 1
-                              endwhile
-
-
-*                          End TAG Check
-*                          -------------
-                           endif
-
+                                     endwhile ;* END While_NPLOT Loop
+                           endif ;* END ctag.n Test
                     n  = n + 1
-                    endwhile ;* END While_N Loop
+                    endwhile ;* END While_N Loop over NUMEXPs
 
-*           End Season Test
-*           ---------------
-            endif
+            endif ;* END SEASON Test
+*           ------------------------
 
             endwhile ;* END While_m>0 (Season) Loop
+*           ---------------------------------------
 
-*      ---------------
-       endif
+            else
+               say ' '
+               say 'Closeness of 'cname.k' of type: 'type.k' to 'ctag.k' NOT Performed'
+               say '------------------------------------------------------------------'
+               say ' '
+            endif ;* END ctag.k Closeness If Test
 
 k = k + 1
 endwhile ;* END While_k Loop
-
 
 
 if( cmpexp_only = TRUE ) ; return ; endif
@@ -515,6 +584,7 @@ if( cmpexp_only = TRUE ) ; return ; endif
 * Set EXPORT Model, Observation Scaling Factors, and PTOPs for plots (for LOG use :L)
 * -----------------------------------------------------------------------------------
 if( EXPORT = "U"     ) ; facm = 1     ; faco = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
+*if( EXPORT = "U"     ) ; facm = 1     ; faco = 1     ; nplots = 1 ; ptops = "10:L" ; endif
 if( EXPORT = "V"     ) ; facm = 1     ; faco = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
 if( EXPORT = "T"     ) ; facm = 1     ; faco = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L" ; endif
 if( EXPORT = "Q"     ) ; facm = 1000  ; faco = 1000  ; nplots = 1 ; ptops = "30"            ; endif
@@ -559,8 +629,8 @@ if( oname != 'NULL' )
 
 'set dfile 'ofile
     'getdates'
-     begdateo = subwrd(result,1)
-     enddateo = subwrd(result,2)
+     begdateo.num = subwrd(result,1)
+     enddateo.num = subwrd(result,2)
 
 'set lon 'lonmin' 'lonmax
 'set lat 'latmin' 'latmax
@@ -599,6 +669,17 @@ else
 endif
 
 
+* Compute CLIMATOLOGY Flag for OBS
+* --------------------------------
+  'run getenv "CLIMATE"'
+            climobs.num    = result
+            climcmp.obsnam = climobs.num
+
+           begdate.obsnam = begdateo.num
+           enddate.obsnam = enddateo.num
+
+say 'CLIMOBS.'obsnam' = 'climcmp.obsnam
+
  
 
 * Loop over Seasons to Process
@@ -614,19 +695,17 @@ endif
 say 'Processing Season: 'season
 
 'set dfile 'mfile
-'count "'season'" 'begdate' 'enddate
+'count "'season'" 'begdate.expnam' 'enddate.expnam
  nmod =  result
 
 'set dfile 'ofile
-'count "'season'"'
+'count "'season'" 'begdate.obsnam' 'enddate.obsnam
  nobs =  result
 
 
 * Create Temporary File at 0.25x0.25 degree resolution with consistent levels
 * ---------------------------------------------------------------------------
 'set dfile 'mfile
-*'setlons'
-*'setlats'
 'set lon 0 360'
 'set lat -90 90'
 
@@ -655,7 +734,25 @@ say 'Processing Season: 'season
                        flag = ""
                while ( flag = "" )
 
-'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'mfile' -OFILE 'ofile' -ONAME 'obsnam' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'qdesc ' -ODESC 'odesc' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop
+'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'mfile' -OFILE 'ofile' -ONAME 'obsnam' -OBDATE 'begdate.obsnam' -OEDATE 'enddate.obsnam' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'qdesc ' -ODESC 'odesc' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.obsnam
+
+*'run 'geosutil'/plots/zcmp/zplt -EXPID 'expid
+*                              ' -EXPORT 'EXPORT
+*                              ' -ALIAS 'mname
+*                              ' -QFILE 'mfile
+*                              ' -OFILE 'ofile
+*                              ' -ONAME 'obsnam
+*                              ' -OBDATE 'begdate.obsnam
+*                              ' -OEDATE 'enddate.obsnam
+*                              ' -NMOD 'nmod
+*                              ' -NOBS 'nobs
+*                              ' -QDESC 'qdesc 
+*                              ' -ODESC 'odesc
+*                              ' -OUTPUT 'output
+*                              ' -SEASON 'season
+*                              ' -PTOP 'plttop
+*                              ' -CLIMEXP 'climexp
+*                              ' -CLIMCMP 'climcmp.obsnam
 
                 if( debug = "debug" )
                     say "Hit  ENTER  to repeat plot"
@@ -688,6 +785,7 @@ say 'Closeness plot between  exp: 'qtag
 say '                       cexp: 'ctag.n
 say '                        obs: 'obsnam
 say ''
+                           cmpnam = ctag.n
 
 'set dfile 'expfile.n
 'set lon  0 360'
@@ -736,7 +834,30 @@ say ''
                        flag = ""
                while ( flag = "" )
 
-'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'zdifile1' -CFILE 'zdifile2' -OFILE 'zdifile3' -ONAME 'obsnam' -CNAME 'ctag.n' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'qdesc ' -ODESC 'odesc' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop
+'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid ' -EXPORT 'EXPORT ' -ALIAS 'mname ' -QFILE 'zdifile1 ' -CFILE 'zdifile2 ' -OFILE 'zdifile3 ' -ONAME 'obsnam ' -CNAME 'ctag.n ' -MBDATE 'begdate.expnam' -MEDATE 'enddate.expnam' -CBDATE 'begdate.cmpnam  ' -CEDATE 'enddate.cmpnam  ' -OBDATE 'begdate.obsnam' -OEDATE 'enddate.obsnam' -QDESC 'qdesc ' -ODESC 'odesc ' -OUTPUT 'output ' -SEASON 'season ' -PTOP 'plttop ' -CLIMEXP 'climexp ' -CLIMCMP 'climcmp.cmpnam ' -CLIMOBS 'climcmp.obsnam
+
+*'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid 
+*                                   ' -EXPORT 'EXPORT 
+*                                   ' -ALIAS 'mname 
+*                                   ' -QFILE 'zdifile1 
+*                                   ' -CFILE 'zdifile2 
+*                                   ' -OFILE 'zdifile3 
+*                                   ' -ONAME 'obsnam 
+*                                   ' -CNAME 'ctag.n 
+*                                   ' -MBDATE 'begdate.expnam
+*                                   ' -MEDATE 'enddate.expnam
+*                                   ' -CBDATE 'begdate.cmpnam
+*                                   ' -CEDATE 'enddate.cmpnam
+*                                   ' -OBDATE 'begdate.obsnam
+*                                   ' -OEDATE 'enddate.obsnam
+*                                   ' -QDESC 'qdesc 
+*                                   ' -ODESC 'odesc 
+*                                   ' -OUTPUT 'output 
+*                                   ' -SEASON 'season 
+*                                   ' -PTOP 'plttop 
+*                                   ' -CLIMEXP 'climexp 
+*                                   ' -CLIMCMP 'climcmp.cmpnam
+*                                   ' -CLIMOBS 'climcmp.obsnam
 
                 if( debug = "debug" )
                     say "Hit  ENTER  to repeat plot"

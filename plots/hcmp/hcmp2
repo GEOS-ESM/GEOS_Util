@@ -167,7 +167,12 @@ if( EXPORT = "SLP" & level != 1000  ) ; return ; endif
              begdate  = result
 'run getenv "ENDDATE"'
              enddate  = result
-'sett'
+
+*'sett'
+'getdates'
+   bdate = subwrd(result,1)
+   edate = subwrd(result,2)
+
 'getinfo tdim'
          tdim = result
 
@@ -225,7 +230,7 @@ if( EXPORT = "CHI" | EXPORT = "PSI" )
         '!echo "s?UNDEF?"'undef'?g    >> sedfile'
         '!echo "s?TDIM?"'tdim'?g      >> sedfile'
         '!echo "s?LEVS?"'level'?g     >> sedfile'
-        '!echo "s?BDATE?"'begdate'?g  >> sedfile'
+        '!echo "s?BDATE?"'bdate'?g    >> sedfile'
 
         '!sed -f sedfile make_psichi.tmpl > xmod.ctl'
 
@@ -272,6 +277,15 @@ endif
 'q dims'
  say 'Model Environment:'
  say result
+
+* Compute CLIMATOLOGY Flag for EXP
+* --------------------------------
+            'getdates'
+'run getenv "CLIMATE"'
+             climexp = result
+
+say 'EXP CLIMATE = 'climexp
+say ' '
 
 ***********************************************************************************
 
@@ -434,16 +448,16 @@ if( cname.numexp != 'NULL' )
            'getinfo  level'
                      obslev = result
            'getdates'
-            begdateo = subwrd(result,1)
-            enddateo = subwrd(result,2)
+            begdate.numexp = subwrd(result,1)
+            enddate.numexp = subwrd(result,2)
            'getinfo tmin'
                     tmin = result
            'getinfo tmax'
                     tmax = result
                     tdim = tmax - tmin + 1
 
-           'run setenv   "BEGDATEO" 'begdateo
-           'run setenv   "ENDDATEO" 'enddateo
+           'run setenv   "BEGDATEO" 'begdate.numexp
+           'run setenv   "ENDDATEO" 'enddate.numexp
 
            'set lon 0 360'
            'set lat -90 90'
@@ -503,7 +517,8 @@ if( EXPORT = "CHI" | EXPORT = "PSI" )
         '!echo "s?UNDEF?"'undef'?g    >> sedfile'
         '!echo "s?TDIM?"'tdim'?g      >> sedfile'
         '!echo "s?LEVS?"'level'?g     >> sedfile'
-        '!echo "s?BDATE?"'begdateo'?g >> sedfile'
+
+        '!echo "s?BDATE?"'begdate.numexp'?g >> sedfile'
 
         '!sed -f sedfile make_psichi.tmpl > xobs.ctl'
 
@@ -588,15 +603,25 @@ endwhile
 
 ***********************************************************************************
 
+            say ' '
            'q dims'
             say 'CMPEXP  Environment:'
             say result
 
+*              Compute CLIMATOLOGY Flag for CMPEXP
+*              -----------------------------------
                'run getenv "CLIMATE"'
-                        climate = result
+                                  climate.numexp = result
                         anafile = cfile.numexp
                         anadsc  = cdesc.numexp
                         ananam  =  ctag.numexp
+                climcmp.ananam  = climate.numexp
+
+            say 'numexp  = 'numexp
+            say 'ananam  = 'ananam
+            say 'climate.'numexp' = 'climate.numexp
+            say 'climcmp.'ananam' = 'climcmp.ananam
+            say ' '
 
                  k = 1
           while( k > 0 )
@@ -607,8 +632,15 @@ endwhile
                    k = k+1
 
                   'set dfile 'qfile
-                  'count "'season'" 'begdate' 'enddate
+                  'count "'season'" 'bdate' 'edate
                    nmod = result
+                  'getinfo dset'
+                           dset = result
+                   say 'set dfile 'qfile
+                   say 'dset = 'dset
+                   say 'count "'season'" 'bdate' 'edate
+                   say 'nmod = 'nmod
+
                    if( EXPORT = "CHI" | EXPORT = "PSI" )
                        if( xdim>576 | ydim>361 )
                            if( EXPORT = "CHI" ) ; 'define mod'season' = fish_chi(u'season'mod,v'season'mod)' ; endif
@@ -620,8 +652,15 @@ endwhile
                    endif
 
                   'set dfile 'anafile
-                  'count "'season'" 'begdateo' 'enddateo
-                   nobs = result
+                  'count "'season'" 'begdate.numexp' 'enddate.numexp
+                   ncmp = result
+                  'getinfo dset'
+                           dset = result
+                   say 'set dfile 'anafile
+                   say 'dset = 'dset
+                   say 'count "'season'" 'begdate.numexp' 'enddate.numexp
+                   say 'ncmp = 'ncmp
+
                    if( EXPORT = "CHI" | EXPORT = "PSI" )
                        if( cxdim>576 | cydim>361 | ctag.numexp = "merra" )
                            if( EXPORT = "CHI" )  ; 'define cmp'season' = fish_chi(u'season'cmp,v'season'cmp)' ; endif
@@ -652,12 +691,30 @@ endwhile
                      'define qcmp'numexp''season' = sqrt(qcmp'numexp''season')'
                   endif
 
-                 'run setenv "CLIMATE" 'climate
+                 'run setenv "CLIMATE" 'climcmp.ananam
 
                        flag = ""
                while ( flag = "" )
 
-              'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid' -MNAME 'EXPORT' -SEASON 'season' -OUTPUT 'output' -LEVEL 'level' -NMOD 'nmod' -NOBS 'nobs' -MFILE 'qfile' -OFILE 'anafile' -ONAME 'ananam' -ODESC 'anadsc' -DEBUG 'debug' -MDESC 'qdesc' -MVAR 'qmod' -OVAR 'qcmp''numexp
+              'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid' -MNAME 'EXPORT' -SEASON 'season' -OUTPUT 'output' -LEVEL 'level' -NMOD 'nmod' -NOBS 'ncmp' -MFILE 'qfile' -OFILE 'anafile' -ONAME 'ananam' -ODESC 'anadsc' -DEBUG 'debug' -MDESC 'qdesc' -MVAR 'qmod' -OVAR 'qcmp''numexp' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.ananam
+
+*             'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid
+*                                           ' -MNAME 'EXPORT
+*                                           ' -SEASON 'season
+*                                           ' -OUTPUT 'output
+*                                           ' -LEVEL 'level
+*                                           ' -NMOD 'nmod
+*                                           ' -NOBS 'ncmp
+*                                           ' -MFILE 'qfile
+*                                           ' -OFILE 'anafile
+*                                           ' -ONAME 'ananam
+*                                           ' -ODESC 'anadsc
+*                                           ' -DEBUG 'debug
+*                                           ' -MDESC 'qdesc
+*                                           ' -MVAR 'qmod
+*                                           ' -OVAR 'qcmp''numexp
+*                                           ' -CLIMEXP 'climexp
+*                                           ' -CLIMCMP 'climcmp.ananam
 
               'myprint -name 'output'/horiz_'ananam'_'pname'_'level'.'season
  
@@ -694,13 +751,16 @@ endwhile
 * we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
 * ---------------------------------------------------------------------------
 
+say ' '
+say 'Looping through Comparison Experiments for Closeness Plots'
+say '----------------------------------------------------------'
        k  = 1
 while( k <= numexp )
-say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
+say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
 
-if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
      TAG   = k
-     say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+
+     if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
 
 * Loop over Seasons to Process
 * ----------------------------
@@ -731,16 +791,51 @@ else
          say 'Closeness plot between  exp: 'qtag
          say '                       cexp: 'ctag.n
          say '                        obs: 'ctag.TAG
+                                                nname = ctag.n
+                                                kname = ctag.k
+                     say '                    climexp: 'climexp
+                     say '                    climcmp: 'climcmp.nname
+                     say '                    climobs: 'climcmp.kname
          say '              Total  numexp: 'numexp
          say ''
+
+                    'define zcmp'TAG''season' = regrid2( qcmp'TAG''season',0.625,0.5,bs_p1,0,-90 )'
+                    'define zcmp'n''season'   = regrid2( qcmp'n''season'  ,0.625,0.5,bs_p1,0,-90 )'
+                    'define zmod'season'      = regrid2( qmod'season'     ,0.625,0.5,bs_p1,0,-90 )'
+
                  flag = ""
          while ( flag = "" )
+                              say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+                             'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zcmp''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'cdesc.TAG' -MFILE 'qfile' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n' -OFILE 'cfile.TAG' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.nname' -CLIMOBS 'climcmp.kname' -GC 'GC' -MATH 'NULL' -LEVEL 'level
 
-             'define zcmp'TAG''season' = regrid2( qcmp'TAG''season',0.25,0.25,bs_p1,0,-90 )'
-             'define zcmp'n''season'   = regrid2( qcmp'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
-             'define zmod'season'      = regrid2( qmod'season'     ,0.25,0.25,bs_p1,0,-90 )'
-
-             'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zcmp''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'cdesc.TAG' -MFILE 'qfile' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'cfile.TAG' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMATE 'climate' -GC 'GC' -MATH 'NULL' -LEVEL 'level
+*                            'closeness -CVAR 'zcmp''n
+*                                     ' -MVAR 'zmod
+*                                     ' -OVAR 'zcmp''TAG
+*                                     ' -CNAME 'ctag.n
+*                                     ' -MNAME 'EXPORT
+*                                     ' -ONAME 'ctag.TAG
+*                                     ' -CDESC 'cdesc.n
+*                                     ' -MDESC 'qdesc
+*                                     ' -ODESC 'cdesc.TAG
+*                                     ' -MFILE 'qfile
+*                                     ' -MBEGDATE 'bdate
+*                                     ' -MENDDATE 'edate
+*                                     ' -CFILE 'cfile.n
+*                                     ' -OFILE 'cfile.TAG
+*                                     ' -CBEGDATE 'begdate.n
+*                                     ' -CENDDATE 'enddate.n
+*                                     ' -OBEGDATE 'begdate.k
+*                                     ' -OENDDATE 'enddate.k
+*                                     ' -EXPID 'expid
+*                                     ' -PREFIX 'NULL
+*                                     ' -SEASON 'season
+*                                     ' -OUTPUT 'output
+*                                     ' -CLIMEXP 'climexp
+*                                     ' -CLIMCMP 'climcmp.nname
+*                                     ' -CLIMOBS 'climcmp.kname
+*                                     ' -GC 'GC
+*                                     ' -MATH 'NULL
+*                                     ' -LEVEL 'level
 
              'myprint -name 'output'/horiz_'ctag.n'_'pname'_'level'_closeness_'ctag.TAG'.'season
 
@@ -752,20 +847,24 @@ else
               endif
              'c'
          endwhile ;* END While_FLAG Loop
-
-     endif :* END CTAG Test
+                     endif ;* END ctag.n Test
 
      n = n + 1
-     endwhile ;* END While_N Loop
+              endwhile ;* END While_N Loop over NUMEXPs
+*             -----------------------------------------
 
-* ---------------
 endif ;* End Season Test
+*        ------------------------
 
-* ---------------
 endwhile ;* END SEASON Loop
+*    ---------------------------
 
-
-endif ;* END Closeness If Test
+     else
+        say ' '
+        say 'Closeness of 'cname.k' of type: 'type.k' to 'ctag.k' NOT Performed'
+        say '------------------------------------------------------------------'
+        say ' '
+     endif ;* END ctag.k Closeness If Test
 
 k = k + 1
 endwhile ;* END While_k Loop
@@ -795,6 +894,13 @@ if( EXPORT = "Q"   & level < 400 ) ; fact = fact*1000  ; endif
 ' getnumrc 'geosutil'/plots/hcmp'
      rcinfo = result
      numrc  = subwrd( rcinfo,1 )
+
+say ' '
+say 'Initial RCINFO: 'rcinfo
+say 'Total Number of VERIFICATION.RC Datasets: 'numrc
+say '----------------------------------------- '
+say ' '
+
        num  = 1
        cnt  = 0
 while( num <= numrc )
@@ -827,6 +933,7 @@ while( num <= numrc )
                    odesc = subwrd(result,4)
                     otag = subwrd(result,5)
      endif
+     obsfile = ofile
 
 if( analysis != "false" )
    'run setenv "DIFFTYPE" 'A
@@ -1085,16 +1192,26 @@ endwhile
 
 ***********************************************************************************
 
+            say ' '
            'q dims'
             say 'OBS'cnt'  Environment:'
             say result
 
+*              Compute CLIMATOLOGY Flag for OBS/Verifications
+*              ----------------------------------------------
                'run getenv "CLIMATE"'
-                        climate = result
+                    climate.cnt = result
                         anaindx = cnt
                         anafile = ofile
                         anadsc  = odesc
                         ananam  = otag
+                climobs.ananam  = climate.cnt
+
+            say 'cnt     = 'cnt
+            say 'ananam  = 'ananam
+            say 'climate.'cnt'    = 'climate.cnt
+            say 'climobs.'ananam' = 'climobs.ananam
+            say ' '
 
                  k = 1
           while( k > 0 )
@@ -1105,8 +1222,15 @@ endwhile
                    k = k+1
 
                   'set dfile 'qfile
-                  'count "'season'" 'begdate' 'enddate
+                  'count "'season'" 'bdate' 'edate
                    nmod = result
+                  'getinfo dset'
+                           dset = result
+                   say 'set dfile 'qfile
+                   say 'dset = 'dset
+                   say 'count "'season'" 'bdate' 'edate
+                   say 'nmod = 'nmod
+
                    if( EXPORT = "CHI" | EXPORT = "PSI" )
                        if( xdim>576 | ydim>361 )
                            if( EXPORT = "CHI" ) ; 'define mod'season' = fish_chi(u'season'mod,v'season'mod)' ; endif
@@ -1117,9 +1241,16 @@ endwhile
                        endif
                    endif
 
-                  'set dfile 'anafile
+                  'set dfile 'obsfile
                   'count "'season'" 'begdateo' 'enddateo
                    nobs = result
+                  'getinfo dset'
+                           dset = result
+                   say 'set dfile 'obsfile
+                   say 'dset = 'dset
+                   say 'count "'season'" 'begdateo' 'enddateo
+                   say 'nobs = 'nobs
+
                    if( EXPORT = "CHI" | EXPORT = "PSI" )
                        if( oxdim>576 | oydim>361 | otag = "merra" )
                            if( EXPORT = "CHI" )  ; 'define obs'season' = fish_chi(u'season'obs,v'season'obs)' ; endif
@@ -1148,14 +1279,32 @@ endwhile
                   if( std_dev = 'true' )
                      'define qobs'season' = sqrt(qobs'season')'
                   endif
-                 'run setenv "CLIMATE" 'climate
+                 'run setenv "CLIMATE" 'climate.cnt
 
 * Standard Horizontal Plot (Experiment_vs_Verification)
 * -----------------------------------------------------
                        flag = ""
                while ( flag = "" )
 
-              'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid' -MNAME 'EXPORT' -SEASON 'season' -OUTPUT 'output' -LEVEL 'level' -NMOD 'nmod' -NOBS 'nobs' -MFILE 'qfile' -OFILE 'anafile' -ONAME 'ananam' -ODESC 'anadsc' -DEBUG 'debug' -MDESC 'qdesc' -MVAR 'qmod' -OVAR 'qobs
+              'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid' -MNAME 'EXPORT' -SEASON 'season' -OUTPUT 'output' -LEVEL 'level' -NMOD 'nmod' -NOBS 'nobs' -MFILE 'qfile' -OFILE 'anafile' -ONAME 'ananam' -ODESC 'anadsc' -DEBUG 'debug' -MDESC 'qdesc' -MVAR 'qmod' -OVAR 'qobs ' -CLIMEXP 'climexp' -CLIMCMP 'climobs.ananam
+
+*             'run 'geosutil'/plots/hcmp/hplt -EXPID 'expid
+*                                           ' -MNAME 'EXPORT
+*                                           ' -SEASON 'season
+*                                           ' -OUTPUT 'output
+*                                           ' -LEVEL 'level
+*                                           ' -NMOD 'nmod
+*                                           ' -NOBS 'nobs
+*                                           ' -MFILE 'qfile
+*                                           ' -OFILE 'anafile
+*                                           ' -ONAME 'ananam
+*                                           ' -ODESC 'anadsc
+*                                           ' -DEBUG 'debug
+*                                           ' -MDESC 'qdesc
+*                                           ' -MVAR 'qmod
+*                                           ' -OVAR 'qobs 
+*                                           ' -CLIMEXP 'climexp
+*                                           ' -CLIMCMP 'climobs.ananam
 
               'myprint -name 'output'/horiz_'ananam'_'pname'_'level'.'season
  
@@ -1177,14 +1326,46 @@ if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != "NULL" & type.n != V )
 say 'Closeness plot between  exp: 'qtag
 say '                       cexp: 'ctag.n
 say '                        obs: 'otag
+                           cname = ctag.n
+say '                    climcmp: 'climcmp.cname
+say '                    climobs: 'climobs.ananam
 say '              Total  numexp: 'numexp
 say ''
         flag = ""
 while ( flag = "" )
 
-'define zobs'season' = regrid2( qobs'season',0.25,0.25,bs_p1,0,-90 )'
+'define zobs'season' = regrid2( qobs'season',0.625,0.5,bs_p1,0,-90 )'
 
-'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zobs' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'otag' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'odesc' -MFILE 'qfile' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'ofile' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMATE 'climate' -GC 'GC' -MATH 'NULL' -LEVEL 'level
+'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zobs' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'otag' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'odesc' -MFILE 'qfile' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'ofile' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cname' -CLIMOBS 'climobs.ananam' -GC 'GC' -MATH 'NULL' -LEVEL 'level
+
+*'closeness -CVAR 'zcmp''n
+*         ' -MVAR 'zmod
+*         ' -OVAR 'zobs
+*         ' -CNAME 'ctag.n
+*         ' -MNAME 'EXPORT
+*         ' -ONAME 'otag
+*         ' -CDESC 'cdesc.n
+*         ' -MDESC 'qdesc
+*         ' -ODESC 'odesc
+*         ' -MFILE 'qfile
+*         ' -MBEGDATE 'bdate
+*         ' -MENDDATE 'edate
+*         ' -CFILE 'cfile.n
+*         ' -CBEGDATE 'begdate.n
+*         ' -CENDDATE 'enddate.n
+*         ' -OFILE 'ofile
+*         ' -OBEGDATE 'begdateo
+*         ' -OENDDATE 'enddateo
+*         ' -EXPID 'expid
+*         ' -PREFIX 'NULL
+*         ' -SEASON 'season
+*         ' -OUTPUT 'output
+*         ' -CLIMEXP 'climexp
+*         ' -CLIMCMP 'climcmp.cname
+*         ' -CLIMOBS 'climobs.ananam
+*         ' -GC 'GC
+*         ' -MATH 'NULL
+*         ' -LEVEL 'level
 
 'myprint -name 'output'/horiz_'ctag.n'_'pname'_'level'_closeness_'otag'.'season
 

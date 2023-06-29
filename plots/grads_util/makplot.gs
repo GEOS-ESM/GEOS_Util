@@ -30,7 +30,8 @@ if( subwrd(args,num) = '-EXPID'    ) ; expid    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-PREFIX'   ) ; prefix   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-SEASON'   ) ; season   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT'   ) ; output   = subwrd(args,num+1) ; endif
-if( subwrd(args,num) = '-CLIMATE'  ) ; climate  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMEXP'  ) ; climexp  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMCMP'  ) ; climcmp  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-GC'       ) ; gridcomp = subwrd(args,num+1) ; say '   gc = 'gridcomp ; endif
 if( subwrd(args,num) = '-MATH'     ) ; math     = subwrd(args,num+1) ; endif
 
@@ -415,7 +416,7 @@ endif
 'set vpage off'
 'set string 1 l 4'
 'set strsiz .065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'mdesc' )'
 
 'set string 1 c 6'
 'set strsiz .14'
@@ -424,14 +425,14 @@ endif
 
 if( m != 0 )
    if( m>0 )
-      'draw string 4.25 10.62 'mdesc'  'season' ('nmod')  (x 10** -'m')'
+      'draw string 4.25 10.62 'expid'  'season' ('nmod')  (x 10** -'m')'
    else
-      'draw string 4.25 10.62 'mdesc'  'season' ('nmod')  (x 10**'m')'
+      'draw string 4.25 10.62 'expid'  'season' ('nmod')  (x 10**'m')'
    endif
 else
-   'draw string 4.25 10.62 'mdesc'  'season' ('nmod')'
+   'draw string 4.25 10.62 'expid'  'season' ('climexp','nmod')'
 endif
-   'draw string 4.25 7.22 'odesc'  'season' ('nobs')  ('climate')'
+   'draw string 4.25 7.22 'oname'  'season' ('climcmp','nobs')'
 
 if( n != 0 )
    'draw string 4.25 3.80 Difference (Top-Middle)  (x 10**'n')'
@@ -459,26 +460,43 @@ eyearo = subwrd(date,2)
 'set string 1 l 4'
 'set strsiz .08'
 
-'draw string 0.050 10.25 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.10 End: 'emnthm' 'eyearm
-'draw string 0.050 9.85  QMax: 'qmodmax
-'draw string 0.050 9.70  QMin: 'qmodmin
-'draw string 0.050 9.40 Mean: 'avgmod
-'draw string 0.050 9.25  Std: 'stdmod
+'set string 4 l 5'
+'draw string 0.050 10.30 EXP Dates:'
+'set string 1 l 4'
+'draw string 0.050 10.17 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.04 End: 'emnthm' 'eyearm
+'draw string 0.050 9.70  Max: 'qmodmax
+'draw string 0.050 9.55  Min: 'qmodmin
+'draw string 0.050 9.25 Mean: 'avgmod
+'draw string 0.050 9.10  Std: 'stdmod
 
+'set string 4 l 5'
+'draw string 0.050 6.98 CMP Dates:'
+'set string 1 l 4'
 'draw string 0.050 6.85 Beg: 'bmntho' 'byearo
 'draw string 0.050 6.70 End: 'emntho' 'eyearo
-'draw string 0.050 6.45 QMax: 'qobsmax
-'draw string 0.050 6.30 QMin: 'qobsmin
+'draw string 0.050 6.45  Max: 'qobsmax
+'draw string 0.050 6.30  Min: 'qobsmin
 'draw string 0.050 6.00 Mean: 'avgobs
 'draw string 0.050 5.85  Std: 'stdobs
 
-'draw string 0.050 3.45 Beg: 'bmntho' 'byearo
-'draw string 0.050 3.30 End: 'emntho' 'eyearo
-'draw string 0.050 3.05 DQMax: 'qdifmax
-'draw string 0.050 2.90 DQMin: 'qdifmin
-'draw string 0.050 2.60 Mean: 'avgdif
-'draw string 0.050 2.45  Std: 'stddif
+if( climexp != 'Actual' | climcmp != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.50  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+   'draw string 0.050 3.20  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.50  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+endif
+
+'draw string 0.050 2.90  Max: 'qdifmax
+'draw string 0.050 2.75  Min: 'qdifmin
+'draw string 0.050 2.45 Mean: 'avgdif
+'draw string 0.050 2.30  Std: 'stddif
 
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'

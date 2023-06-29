@@ -25,6 +25,8 @@ if( subwrd(args,num) = '-ONAME'    ) ; oname    = subwrd(args,num+1) ; say 'onam
 if( subwrd(args,num) = '-ODESC'    ) ; odesc    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'    ) ; debug    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MDESC'    ) ; mdesc    = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMEXP'  ) ; climexp  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMCMP'  ) ; climcmp  = subwrd(args,num+1) ; endif
 
 endwhile
 
@@ -39,10 +41,17 @@ blak   = 0
 'run getenv "ENDDATEO"'
          enddateo = result
 
-'run getenv "BEGDATE"'
-         begdate  = result
-'run getenv "ENDDATE"'
-         enddate  = result
+'set dfile 'mfile
+'getdates'
+ begdate = subwrd(result,1)
+ enddate = subwrd(result,2)
+'set t 1'
+
+*'run getenv "BEGDATE"'
+*         begdate  = result
+*'run getenv "ENDDATE"'
+*         enddate  = result
+
 if( begdate = "NULL" )
    'set dfile 'mfile
    'set t    '1
@@ -56,12 +65,6 @@ if( enddate = "NULL" )
    'set t  'tdim
    'getinfo date'
          enddate = result
-endif
-
-'run getenv "CLIMATE"'
-         climate = result
-if( begdate = begdateo & enddate = enddateo ) 
-         climate = 'Actual'
 endif
 
 * Check for DIFF Contour Level Type
@@ -146,7 +149,7 @@ if( clab    = 'NULL' ) ; clab    =  on  ; endif
 * Set Default Plotting Variables
 ********************************
 
-                         dfact = 1
+                         nfact = 0
 if( fact    = 'NULL' ) ;  fact = 1         ; endif
 if( ccols   = 'NULL' ) ; ccols = "84 0 85" ; endif
 say ''
@@ -185,7 +188,7 @@ endif
 * Temperature
 * -----------
 if( mname = 'T' )
-    'getresource 'PLOTRC' T_DYN_'level'_CVALS' ; cvals = result
+*   'getresource 'PLOTRC' T_DYN_'level'_CVALS' ; cvals = result
      std_cint  = 0.5  
      std_cvals = '1 2'
      std_dlevs = "-2.25 -2 -1.75 -1.5 -1.25 -1 -.75 -.5 -.25 .25 .5 .75 1 1.25 1.5 1.75 2 2.25"
@@ -224,7 +227,7 @@ endif
 * -----------------
 if( mname = 'Q' )
 
-    'getresource 'PLOTRC' Q_MOIST_'level'_CVALS' ; cvals = result
+*   'getresource 'PLOTRC' Q_MOIST_'level'_CVALS' ; cvals = result
 
      std_cint  = 0.2  
      std_cvals = '.4 1'
@@ -318,9 +321,11 @@ endif
 * -------
 if( mname = 'ZLE' )
     if( level >= 300 )
-    title  = 'Height (m)'
+        title  = 'Height (m)'
+        fact   = 1
     else
-    title  = 'Height (km) '
+        title  = 'Height (km) '
+        fact   = 1e-3
     endif
 
     if( level >= 300 )
@@ -517,9 +522,9 @@ say 'Analysis DLON: 'dlon
 'set lat 'latbeg' 'latend
 'define qobs  = 'ovar''season'*'fact
 
-say 'define masko = regrid2( maskm,'dlon','dlat',bs_p1,'lonbeg','latbeg' )'
-    'define masko = regrid2( maskm,'dlon','dlat',bs_p1,'lonbeg','latbeg' )'
-    'define qobso = regrid2( qobs ,'dlon','dlat',bs_p1,'lonbeg','latbeg' )'
+say 'define masko = regrid2( maskm,0.625,0.50,bs_p1,'lonbeg','latbeg' )'
+    'define masko = regrid2( maskm,0.625,0.50,bs_p1,'lonbeg','latbeg' )'
+    'define qobso = regrid2( qobs ,0.625,0.50,bs_p1,'lonbeg','latbeg' )'
     'define qobso = maskout(qobso,masko)'
 
 'set dfile 'mfile
@@ -527,11 +532,13 @@ say 'define masko = regrid2( maskm,'dlon','dlat',bs_p1,'lonbeg','latbeg' )'
 'set lat 'latbeg' 'latend
 
 
-* Make Plot
+* Make Top Plot
 * ---------------------------------
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 7.70 10.50'
 'set grads off'
+    count = 0
+    scale = 1e''count
 
 if( std_dev = 'true' )
     cvals = std_cvals
@@ -553,17 +560,103 @@ endif
    if( aqmodmin > aqmodmax ) ; aqmodmax = aqmodmin ; endif
    say 'Absolute QMOD_MAX: ' aqmodmax
 
+if( mname = "OMEGA" )
+  '  stats  qmod'
+     avg = subwrd(result,1)
+     std = subwrd(result,2)
+     cint = std/3
+     count = 0
+     fact  = 1
+     say 'Initial cint = 'cint
+     while( cint < 1 & count < 10 )
+     count = count + 1
+     fact  = fact  * 10
+     cint  = cint  * 10
+     say 'Updated cint = 'cint
+     endwhile
+     scale = 1e''count
+     say 'Final   cint = 'cint
+     say 'count = 'count
+     say 'scale = 'scale
+     cint = cint + 0.5
+    'getint 'cint
+     cint = result
+    'shades 'cint
+    'd qmod*'scale
+endif
+
+if( mname = "Q" )
+     cint = ( qmodmax - qmodmin ) / 19
+    'getint 'cint*100
+             cint = result/100
+     count = 0
+     fact  = 1
+     say 'Initial cint = 'cint
+     while( cint < 1 & count < 10 )
+     count = count + 1
+     fact  = fact  * 10
+     cint  = cint  * 10
+     say 'Updated cint = 'cint
+     endwhile
+     scale = 1e''count
+     say 'Final   cint = 'cint
+     say 'count = 'count
+     say 'scale = 'scale
+     cint = cint + 0.5
+    'getint 'cint
+     cint = result
+     qmodmin = qmodmin*scale
+    'shades qmod*'scale' 0 -cint 'cint' -minval 'qmodmin
+    'd qmod*'scale
+endif
+
+if( mname = "ZLE" )
+  '  stats  qmod'
+     avg = subwrd(result,1)
+     std = subwrd(result,2)
+     cint = std/3
+     count = 0
+     fact  = 1
+     say 'Initial cint = 'cint
+     while( cint < 1 & count < 10 )
+     count = count + 1
+     fact  = fact  * 10
+     cint  = cint  * 10
+     say 'Updated cint = 'cint
+     endwhile
+     scale = 1e''count
+     say 'Final   cint = 'cint
+     say 'count = 'count
+     say 'scale = 'scale
+     cint = cint + 0.5
+    'getint 'cint
+     cint = result
+     qmodmin = qmodmin*scale
+    'shades qmod*'scale' 0 -cint 'cint' -minval 'qmodmin
+    'd qmod*'scale
+endif
+
+if( mname = "T" )
+    cint = ( qmodmax - qmodmin ) / 19
+    'getint 'cint*100
+             cint = result/100
+   'shades qmod 0 -cint 'cint' -minval 'qmodmin
+   'd qmod'
+endif
+
 if( mname = "QLTOT" | mname = "QITOT" )
    'shades qmod 0 -cint 'cint' -minval 0'
    'd qmod'
 else
+   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" )
    'set clevs 'cvals
    'set ccols 'ccols
    'set clab  'clab
    'd qmod'
+   endif
 endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
@@ -571,6 +664,8 @@ if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname
    'd qmod'
 endif
 
+* Make Middle Plot
+* ---------------------------------
 'set parea off'
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 4.30 7.10'
@@ -591,25 +686,44 @@ endif
    if( aqobsmin > aqobsmax ) ; aqobsmax = aqobsmin ; endif
    say 'Absolute QOBS_MAX: ' aqobsmax
 
+if( mname = "OMEGA" )
+    'shades 'cint
+    'd qobso*'scale
+endif
+
+if( mname = "ZLE" | mname = "Q" )
+    'shades qmod*'scale' 0 -cint 'cint' -minval 'qmodmin
+    'd qobso*'scale
+endif
+
+if( mname = "T" )
+   'shades qmod 0 -cint 'cint' -minval 'qmodmin
+   'd qobso'
+endif
+
 if( mname = "QLTOT" | mname = "QITOT" )
    'shades qmod 0 -cint 'cint' -minval 0'
    'd qobso'
 else
+   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" )
    'set clevs 'cvals
    'set ccols 'ccols
    'd qobso'
+   endif
 endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
    if( blak = 1 ) ; 'black' ;endif
    'd qobso'
 else
-   'cbarn -vert -snum 0.8 -ymid 6.4 -scaley 0.9 '
+   'cbarn -vert -snum 0.8 -ymid 5.7 -scaley 0.9 '
 endif
 
+* Make Bottom Plot
+* ---------------------------------
 'set parea off'
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 0.90 3.70'
@@ -622,19 +736,20 @@ endif
 'q dims'
 say 'DIMS before Final Regridding: 'result
 
-'define obsg = regrid2(  qobs,1,1,bs_p1,'lon',-90)'
-'define modg = regrid2(  qmod,1,1,bs_p1,'lon',-90)'
-'define mask = regrid2( maskm,1,1,bs_p1,'lon',-90)'
+'define obsg = regrid2(  qobs,0.625,0.50,bs_p1,'lon',-90)'
+'define modg = regrid2(  qmod,0.625,0.50,bs_p1,'lon',-90)'
+'define mask = regrid2( maskm,0.625,0.50,bs_p1,'lon',-90)'
 'define obsg = maskout( obsg,mask )'
 
 'set gxout shaded'
 
-   'define delg = modg-obsg'
+   'define delg = (modg-obsg)*'scale
    'set gxout stat'
    'd delg'
    qdifminmax = sublin(result,8)
    qdifmin    = subwrd(qdifminmax,4)
    qdifmax    = subwrd(qdifminmax,5)
+   qdifmaxmin = qdifmax * qdifmin
    say 'QDIF_Max Value: 'qdifmax
    say 'QDIF_Min Value: 'qdifmin
    'set gxout shaded'
@@ -657,16 +772,16 @@ else
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
 
-say 'avgdif = 'avgdif
-say 'stddif = 'stddif
+     say 'avgdif = 'avgdif
+     say 'stddif = 'stddif
      dqmax  =  stddif/3
 
      dqrel = dqmax / aqmodmax  * 100
 
-say 'dqrel = 'dqrel
+     say 'dqrel = 'dqrel
     'getint 'dqrel*100
              dqrel = result/100
-say 'dqrel = 'dqrel
+     say 'dqrel = 'dqrel
 
      say 'Absolute DQMAX: 'dqmax'  QMOD_MAX: 'aqmodmax
      say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
@@ -697,9 +812,13 @@ say 'dqrel = 'dqrel
    endif
       'd 'dqmax'/1e'n
        cint = subwrd(result,4)
-      'shades 'cint
       'define delg = delg/1e'n
-       dfact = "10**"n
+       if( qdifmaxmin < 0 )
+      'shades 'cint
+       else
+      'shades delg 0 -cint 'cint
+       endif
+       nfact = n
        cbscale = 0.55
    say 'DIFF Scaling Factor: 'n
    say 'CINT: 'cint
@@ -730,24 +849,28 @@ endif
 'set vpage off'
 'set string 1 l 4'
 'set strsiz .065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'mdesc' )'
 
 'set string 1 c 6'
 'set strsiz .14'
-'draw string 4.25 10.85 'level'-mb 'title
+  if( count = 0 )
+     'draw string 4.25 10.85 'level'-mb 'title
+  else
+     'draw string 4.25 10.85 'level'-mb 'title'  (x 10**-'count')'
+  endif
 'set strsiz .10'
 
 if( std_dev = 'true' )
-'draw string 4.25 10.62 'mdesc'  'season' ('nmod')  Stand.Dev.'
+'draw string 4.25 10.62 'expid'  'season' ('nmod')  Stand.Dev.'
 else
-'draw string 4.25 10.62 'mdesc'  'season' ('nmod')'
+'draw string 4.25 10.62 'expid'  'season' ( 'climexp' , 'nmod' )'
 endif
-'draw string 4.25 7.22 'odesc'  'season' ('nobs')  ('climate')'
+'draw string 4.25 7.22 'oname'  'season' ( 'climcmp' , 'nobs' )'
 'set strsiz .11'
-if( dfact = 1 )
+if( nfact = 0 )
 'draw string 4.25 3.80 'level'-mb  Difference (Top-Middle)'
 else
-'draw string 4.25 3.80 'level'-mb  Difference (Top-Middle) (x 'dfact')'
+'draw string 4.25 3.80 'level'-mb  Difference (Top-Middle) (x 10**'nfact')'
 endif
 
                 date = getdate (begdate)
@@ -766,13 +889,19 @@ eyearo = subwrd(date,2)
 'set string 1 l 4'
 'set strsiz .08'
 
-'draw string 0.050 10.25 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.10 End: 'emnthm' 'eyearm
-'draw string 0.050 9.85  Max: 'qmodmax
-'draw string 0.050 9.70  Min: 'qmodmin
-'draw string 0.050 9.40 Mean: 'avgmod
-'draw string 0.050 9.25  Std: 'stdmod
+'set string 4 l 5'
+'draw string 0.050 10.30 EXP Dates:'
+'set string 1 l 4'
+'draw string 0.050 10.17 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.04 End: 'emnthm' 'eyearm
+'draw string 0.050 9.70  Max: 'qmodmax
+'draw string 0.050 9.55  Min: 'qmodmin
+'draw string 0.050 9.25 Mean: 'avgmod
+'draw string 0.050 9.10  Std: 'stdmod
 
+'set string 4 l 5'
+'draw string 0.050 6.98 CMP Dates:'
+'set string 1 l 4'
 'draw string 0.050 6.85 Beg: 'bmntho' 'byearo
 'draw string 0.050 6.70 End: 'emntho' 'eyearo
 'draw string 0.050 6.45  Max: 'qobsmax
@@ -780,12 +909,23 @@ eyearo = subwrd(date,2)
 'draw string 0.050 6.00 Mean: 'avgobs
 'draw string 0.050 5.85  Std: 'stdobs
 
-'draw string 0.050 3.45 Beg: 'bmntho' 'byearo
-'draw string 0.050 3.30 End: 'emntho' 'eyearo
-'draw string 0.050 3.05  Max: 'qdifmax
-'draw string 0.050 2.90  Min: 'qdifmin
-'draw string 0.050 2.60 Mean: 'avgdif
-'draw string 0.050 2.45  Std: 'stddif
+if( climexp != 'Actual' | climcmp != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.50  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+   'draw string 0.050 3.20  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.50  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+endif
+
+'draw string 0.050 2.90  Max: 'qdifmax
+'draw string 0.050 2.75  Min: 'qdifmin
+'draw string 0.050 2.45 Mean: 'avgdif
+'draw string 0.050 2.30  Std: 'stddif
 
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'
@@ -858,8 +998,8 @@ if( blak = 1 ) ; 'black' ;endif
 'set grads off'
 'getinfo lon'
          lon = result
-'define obsg = regrid2( qobs,1,1,bs_p1,'lon',-90)'
-'define modg = regrid2( qmod,1,1,bs_p1,'lon',-90)'
+'define obsg = regrid2( qobs,0.625,0.50,bs_p1,'lon',-90)'
+'define modg = regrid2( qmod,0.625,0.50,bs_p1,'lon',-90)'
 
 'set gxout shaded'
 'set clevs 'std_dlevs
@@ -882,7 +1022,7 @@ if( blak = 1 ) ; 'black' ;endif
 'set strsiz .11'
 'draw string 4.25 10.9 'mdesc
 'draw string 4.25 10.6 'level'-mb 'title' 'season' ('nmod') STD.DEV.'
-'draw string 4.25 7.2 'odesc'  'season' ('climate')'
+'draw string 4.25 7.2 'odesc'  'season' ('climcmp')'
 'draw string 4.25 3.80 'level'-mb  Difference (Top-Middle)'
 
 'set string 1 c 4'
