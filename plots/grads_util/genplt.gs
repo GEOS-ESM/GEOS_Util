@@ -1,56 +1,29 @@
 function genplt (args)
 
-                           n = 1
-expid   = subwrd(args,n) ; n = n + 1
-EXPORT  = subwrd(args,n) ; n = n + 1
-GC      = subwrd(args,n) ; n = n + 1
-alias   = subwrd(args,n) ; n = n + 1
-season  = subwrd(args,n) ; n = n + 1
-output  = subwrd(args,n) ; n = n + 1
-level   = subwrd(args,n) ; n = n + 1
-nmod    = subwrd(args,n) ; n = n + 1
-nobs    = subwrd(args,n) ; n = n + 1
-expfile = subwrd(args,n) ; n = n + 1
-anafile = subwrd(args,n) ; n = n + 1
-anal    = subwrd(args,n) ; n = n + 1
-obsname = subwrd(args,n) ; n = n + 1
-debug   = subwrd(args,n) ; n = n + 1
-expdsc  = subwrd(args,n) ; n = n + 1
-stat    = subwrd(args,n) ; n = n + 1
- 
+expid    = getarg( args,EXPID   )
+EXPORT   = getarg( args,EXPORT  )
+GC       = getarg( args,GC      )
+alias    = getarg( args,ALIAS   )
+season   = getarg( args,SEASON  )
+begdate  = getarg( args,MBDATE  )
+enddate  = getarg( args,MEDATE  )
+climexp  = getarg( args,CLIMEXP )
+begdateo = getarg( args,CBDATE  )
+enddateo = getarg( args,CEDATE  )
+climcmp  = getarg( args,CLIMCMP )
+output   = getarg( args,OUTPUT  )
+level    = getarg( args,LEVEL   )
+nmod     = getarg( args,NMOD    )
+nobs     = getarg( args,CMOD    )
+expfile  = getarg( args,MFILE   )
+cmpfile  = getarg( args,CFILE   )
+cmpid    = getarg( args,CNAME   )
+obsname  = getarg( args,CDESC   )
+debug    = getarg( args,DEBUG   )
+expdsc   = getarg( args,MDESC   )
+stat     = getarg( args,STAT    )
+
 blak   = 0
-
-* Get Dates
-* ---------
-'run getenv "BEGDATEO"'
-         begdateo = result
-'run getenv "ENDDATEO"'
-         enddateo = result
-
-'run getenv "BEGDATE"'
-         begdate  = result
-'run getenv "ENDDATE"'
-         enddate  = result
-if( begdate = "NULL" )
-   'set dfile 'expfile
-   'set t    '1
-   'getinfo date'
-         begdate = result
-endif
-if( enddate = "NULL" )
-   'set dfile 'expfile
-   'getinfo tdim'
-            tdim = result
-   'set t  'tdim
-   'getinfo date'
-         enddate = result
-endif
-
-'run getenv "CLIMATE"'
-         climate = result
-if( begdate = begdateo & enddate = enddateo ) 
-         climate = 'Actual'
-endif
 
 * Check for Contour Level Type
 * ----------------------------
@@ -60,7 +33,7 @@ endif
 * Get Plotting Values from Resource File
 * --------------------------------------
 'run getenv "GEOSUTIL"'
-         geosutil = result
+             geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
     PRFX = ''
@@ -90,11 +63,11 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; endi
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_TITLE'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE' ; endif
-                                                                  title = result
+                                                   title  = result
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
-                                                                  ccols = result
+                                                   ccols  = result
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_'CLEVS
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CLEVS' ; endif
@@ -104,7 +77,7 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
 
                         'getresource 'PLOTRC' 'mname'_'GC'_'level'_DPCT'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'GC'_DPCT' ; endif
-                                                           dpct = result
+                                                   dpct  = result
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_REGRID'
                                                                   method = result
@@ -121,7 +94,7 @@ while( i<=length )
   if( bit != ' ' )
       if( DUMMY = '' )
           DUMMY = bit
-      else
+else
           DUMMY = DUMMY''bit
       endif
   endif
@@ -131,7 +104,7 @@ mask = DUMMY
 
 
 if( title   = 'NULL' )
-   'run getdesc 'EXPORT' 'expfile
+   'run getdesc 'alias'  'expfile
     title   =  result
 endif
     title   =  EXPORT':'GC'  'title
@@ -233,9 +206,9 @@ endif
 
 
 
-* Determine DLAT & DLON of Analysis
-* ---------------------------------
-'set dfile 'anafile
+* Determine DLAT & DLON of Comparison Experiment
+* ----------------------------------------------
+'set dfile 'cmpfile
 'set z 1'
 'set t 1'
 'getinfo dlat'
@@ -244,8 +217,8 @@ endif
          dlon = result
 'set gxout shaded'
 
-say 'Analysis DLAT: 'dlat
-say 'Analysis DLON: 'dlon
+say 'CMPID DLAT: 'dlat
+say 'CMPID DLON: 'dlon
 
 'set lon 'lonbeg' 'lonend
 'set lat 'latbeg' 'latend
@@ -296,7 +269,7 @@ if( ccols = NULL )
    else
       'define qmod = qmod / 1e'm
       'define qobs = qobs / 1e'm
-   endif
+endif
 endif
 
 'set dfile 'expfile
@@ -335,7 +308,7 @@ else
     cint = result*2
     if( clevs != NULL ) ; 'set clevs 'clevs ; endif
 endif
-   'd qmod'
+'d qmod'
 
 * Make Plot: Middle Panel
 * -----------------------
@@ -367,9 +340,9 @@ else
    'shades 'qmod' 0'
     if( clevs != NULL ) ; 'set clevs 'clevs ; endif
 endif
-   'd qobs'
+'d qobs'
 
-   'cbarn -vert -snum 0.8 -ymid 6.4 -scaley 0.9 '
+   'cbarn -vert -snum 0.8 -ymid 5.7 -scaley 0.9 '
 
 * Make Plot: Bottom Panel
 * -----------------------
@@ -397,10 +370,9 @@ endif
  stdobs = subwrd(result,2)
 
 'stats maskout(qmod-qobs,abs(qobs))'
- avgdif = subwrd(result,1)
- stddif = subwrd(result,2)
-
-  dqmax = stddif/3
+     avgdif = subwrd(result,1)
+     stddif = subwrd(result,2)
+      dqmax = stddif/3
 
 'set gxout shaded'
 
@@ -418,7 +390,7 @@ endif
       say 'qmax before scaling: 'qmax
       qmax = qmax / scaling
       say 'qmax before scaling: 'qmax
-    endif
+     endif
 
      say 'Absolute DQMAX: 'dqmax'  qmax: 'qmax
      dqrel = dqmax / qmax  * 100 * 100
@@ -467,7 +439,7 @@ endif
    else
       'd 'dqmax'/1e'n
        cint = subwrd(result,4)
-   endif
+endif
 
       'shades 'cint
       'define qdif = (qmod-qobs)/1e'n
@@ -507,7 +479,8 @@ k = m + n
 'set vpage off'
 'set string 1 l 4'
 'set strsiz 0.065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'expdsc' )'
+
 
 'set string 1 c 6'
 'set strsiz .125'
@@ -515,24 +488,24 @@ k = m + n
 
 'set strsiz .11'
 if( level = 0 )
-    if( m != 0 )
-   'draw string 4.25 10.62 'expdsc'  'season' ('nmod') (x 10**'m')'
-    else
-   'draw string 4.25 10.62 'expdsc'  'season' ('nmod')'
-    endif
-   'draw string 4.25 7.22 'obsname'  'season' ('nobs')  ('climate')'
+if( m != 0 )
+   'draw string 4.25 10.62 'expid'  'season' ('nmod')  ('climexp') (x 10**'m')'
+else
+   'draw string 4.25 10.62 'expid'  'season' ('nmod')  ('climexp')'
+endif
+   'draw string 4.25 7.22 'cmpid'  'season' ('nobs')  ('climcmp')'
    if( k != 0 )
    'draw string 4.25 3.80 Difference (Top-Middle) (x 10**'k')'
-   else
+else
    'draw string 4.25 3.80 Difference (Top-Middle)'
-   endif
+endif
 else
     if( m != 0 )
-   'draw string 4.25 10.62 'expdsc'  'level'-mb  'season' ('nmod') (x 10**'m')'
+   'draw string 4.25 10.62 'expid'  'level'-mb  'season' ('nmod')  ('climexp') (x 10**'m')'
     else
-   'draw string 4.25 10.62 'expdsc'  'level'-mb  'season' ('nmod')'
+   'draw string 4.25 10.62 'expid'  'level'-mb  'season' ('nmod')  ('climexp')'
     endif
-   'draw string 4.25 7.22 'obsname'  'season' ('nobs')  ('climate')'
+   'draw string 4.25 7.22 'cmpid'  'season' ('nobs')  ('climcmp')'
    if( k != 0 )
    'draw string 4.25 3.80 'level'-mb  Difference (Top-Middle) (x 10**'k')'
    else
@@ -556,13 +529,19 @@ eyearo = subwrd(date,2)
 'set string 1 l 4'
 'set strsiz .08'
 
-'draw string 0.050 10.25 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.10 End: 'emnthm' 'eyearm
-'draw string 0.050 9.85  Max: 'qmodmax
-'draw string 0.050 9.70  Min: 'qmodmin
-'draw string 0.050 9.40 Mean: 'avgmod
-'draw string 0.050 9.25  Std: 'stdmod
+'set string 4 l 5'
+'draw string 0.050 10.30 EXP Dates:'
+'set string 1 l 4'
+'draw string 0.050 10.17 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.04 End: 'emnthm' 'eyearm
+'draw string 0.050 9.70  Max: 'qmodmax
+'draw string 0.050 9.55  Min: 'qmodmin
+'draw string 0.050 9.25 Mean: 'avgmod
+'draw string 0.050 9.10  Std: 'stdmod
 
+'set string 4 l 5'
+'draw string 0.050 6.98 CMP Dates:'
+'set string 1 l 4'
 'draw string 0.050 6.85 Beg: 'bmntho' 'byearo
 'draw string 0.050 6.70 End: 'emntho' 'eyearo
 'draw string 0.050 6.45  Max: 'qobsmax
@@ -570,12 +549,23 @@ eyearo = subwrd(date,2)
 'draw string 0.050 6.00 Mean: 'avgobs
 'draw string 0.050 5.85  Std: 'stdobs
 
-'draw string 0.050 3.45 Beg: 'bmntho' 'byearo
-'draw string 0.050 3.30 End: 'emntho' 'eyearo
-'draw string 0.050 3.05  Max: 'qdifmax
-'draw string 0.050 2.90  Min: 'qdifmin
-'draw string 0.050 2.60 Mean: 'avgdif
-'draw string 0.050 2.45  Std: 'stddif
+if( climexp != 'Actual' | climcmp != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.50  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+   'draw string 0.050 3.20  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.50  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.35  Actual Dates'
+endif
+
+'draw string 0.050 2.90  Max: 'qdifmax
+'draw string 0.050 2.75  Min: 'qdifmin
+'draw string 0.050 2.45 Mean: 'avgdif
+'draw string 0.050 2.30  Std: 'stddif
 
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'
@@ -585,7 +575,7 @@ if( CINTDIFF != 'NULL' )
    'draw string 0.050 1.32 ( DQ/QMax )'
 endif
 
-'myprint -name 'output'/hdiag_'PRFX''anal'_'EXPORT'.'GC'_'level'.'season
+'myprint -name 'output'/hdiag_'PRFX''cmpid'_'EXPORT'.'GC'_'level'.'season
 'set clab on'
 
 'set mproj latlon'
@@ -616,4 +606,18 @@ i = i + 1
 endif
 endwhile
 return length
+
+function getarg (args,name)
+'numargs  'args
+ numargs = result
+        num = 0
+while ( num < numargs )
+        num = num + 1
+if( subwrd(args,num) = '-'name )
+    arg = subwrd(args,num+1)
+    say name' = 'arg
+    return arg
+endif
+endwhile
+return
 

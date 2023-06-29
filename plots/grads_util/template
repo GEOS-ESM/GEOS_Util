@@ -7,6 +7,7 @@ function template (args)
 'numargs  'args
  numargs = result
 
+PTOP   = NULL
 NAME   = NULL
 DEBUG  = FALSE
 ZLOG   = OFF  
@@ -22,6 +23,7 @@ if( subwrd(args,num) = '-OUTPUT' ) ; OUTPUT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ZLOG'   ) ; ZLOG   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-PTOP'   ) ; PTOP   = subwrd(args,num+1) ; endif
 
 * Read EXPORTS
 * ------------
@@ -150,6 +152,7 @@ if( NAME != NULL ) ; say '    NAME = 'NAME ; endif
 say '  OUTPUT = 'OUTPUT
 say '  DEBUG  = 'DEBUG
 say '  LEVELS = 'levels
+say '  PTOP   = 'PTOP
 say '  SEASONS= 'seasons
 say '  NUMLEVS= 'numlevs
 say '  NUMSEAS= 'numseas
@@ -355,7 +358,14 @@ if( do_z = 'true' )
 if( nlevs != 'NULL' )
    'run setenv "ZDIM" 'nlevs
 endif
-'setz'
+if( PTOP != 'NULL' )
+   'set lev 'PTOP
+   'getinfo zpos'
+            ztop = result
+   'set z 1 'ztop
+else
+   'setz'
+endif
 
 if( nexp = 1 )
       NAME = EXPORT.1
@@ -383,8 +393,13 @@ else
     EXPORT = NAME
         GC = GC.1
 endif
+
 'set dfile 'qfile.1
-'setz'
+if( PTOP != 'NULL' )
+   'set z 1 'ztop
+else
+   'setz'
+endif
 
                  k = 1
           while( k > 0 )

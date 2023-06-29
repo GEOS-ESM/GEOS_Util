@@ -214,9 +214,9 @@ endif
 * -------------------------------------------------
 'setdates'
 'run getenv "BEGDATE"'
-             begdate  = result
+             begdate.EXPID = result
 'run getenv "ENDDATE"'
-             enddate  = result
+             enddate.EXPID = result
 'sett'
 
 * Ensure NAME has no underscores
@@ -274,17 +274,27 @@ else
 endif
 
 if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
-       k = 1
-while( k > 0 )
-  season = subwrd(seasons,k)
-  if( season = '' )
-           k = -1
-  else
-     'define mod'season' = sqrt( mod'season' )'
-           k = k+1
-  endif
-endwhile
+            k = 1
+     while( k > 0 )
+       season = subwrd(seasons,k)
+       if( season = '' )
+                k = -1
+       else
+          'define mod'season' = sqrt( mod'season' )'
+                k = k+1
+       endif
+     endwhile
 endif
+
+'run getenv "CLIMATE"'
+             climate.EXPID = result
+
+say ''
+say '        EXPID = 'EXPID
+say 'begdate.EXPID => begdate.'EXPID' = 'begdate.EXPID
+say 'enddate.EXPID => enddate.'EXPID' = 'enddate.EXPID
+say 'climate.EXPID => climate.'EXPID' = 'climate.EXPID
+say ''
 
 ***********************************************************************************
 *              Loop over Possible Experiment Datasets for Comparison
@@ -368,7 +378,8 @@ while ( m <= numGCs )
        obsdsc.numexp.m = subwrd(result,4)
        obsnam.numexp.m = subwrd(result,5)
 
-    say "Looping CMPEXPs, numexp = "numexp"  obsnam.numexp."m" = "obsnam.numexp.m"  numGCS = "numGCs
+    say "Looping CMPEXPs, numexp = "numexp"  oname."numexp" = "oname.numexp.m"  obsnam."numexp" = "obsnam.numexp.m"  numGCS = "numGCs
+                                                                                         cmpname = obsnam.numexp.m
     say 
     if( STAT = "STD" )
         oname.numexp.m = 'VAR_'oname.numexp.m
@@ -415,12 +426,16 @@ if( found = "TRUE" )
             endif
            'getinfo  level'
                      obslev = result
-           'getdates'
-            begdateo = subwrd(result,1)
-            enddateo = subwrd(result,2)
 
-           'run setenv   "BEGDATEO" 'begdateo
-           'run setenv   "ENDDATEO" 'enddateo
+           'getdates'
+            begdate.cmpname = subwrd(result,1)
+            enddate.cmpname = subwrd(result,2)
+
+            say 'begdate.cmpname: begdate.'cmpname' = 'begdate.cmpname
+            say 'enddate.cmpname: enddate.'cmpname' = 'enddate.cmpname
+
+*          'run setenv   "BEGDATEO" 'begdate.numexp
+*          'run setenv   "ENDDATEO" 'enddate.numexp
 
 * Ensure NAME has no underscores
 * ------------------------------
@@ -476,8 +491,10 @@ else
     endif
 endif
 
+* Compute CLIMATOLOGY Flag for Comparison Experiment
+* --------------------------------------------------
                'run getenv "CLIMATE"'
-                        climate = result
+                        climate.cmpname = result
                         anafile = obsfile.numexp.1
                         anadsc  =  obsdsc.numexp.1
                         ananam  =  obsnam.numexp.1
@@ -491,22 +508,25 @@ endif
                    k = k+1
 
                   'set dfile 'qfile.1
-                  'count "'season'" 'begdate' 'enddate
+             say  'count "'season'" 'begdate.EXPID' 'enddate.EXPID
+                  'count "'season'" 'begdate.EXPID' 'enddate.EXPID
                    nmod = result
+             say  'climate.EXPID = 'climate.EXPID
+
                   'set dfile 'anafile
-                  'count "'season'" 'begdateo' 'enddateo
+             say  'count "'season'" 'begdate.cmpname' 'enddate.cmpname
+                  'count "'season'" 'begdate.cmpname' 'enddate.cmpname
                    nobs.numexp = result
+             say  'climate.cmpname = 'climate.cmpname
 
                   if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
                      'define obs'numexp''season' = sqrt( obs'numexp''season' )'
                   endif
                  'define obs'season' = obs'numexp''season
 
-                 'run setenv "CLIMATE" 'climate
-
                        flag = ""
                while ( flag = "" )
-              'run genplt.gs 'EXPID' 'EXPORT' 'GC' 'alias.1' 'season' 'OUTPUT' 'LEVEL' 'nmod' 'nobs.numexp' 'qfile.1' 'anafile' 'ananam' 'anadsc' 'DEBUG' 'qdesc.1' 'STAT
+              'run genplt.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'alias.1' -SEASON 'season' -MBDATE 'begdate.EXPID' -MEDATE 'enddate.EXPID' -CLIMEXP 'climate.EXPID' -CBDATE 'begdate.cmpname' -CEDATE 'enddate.cmpname' -CLIMCMP 'climate.cmpname' -OUTPUT 'OUTPUT' -LEVEL 'LEVEL' -NMOD 'nmod' -CMOD 'nobs.numexp' -MFILE 'qfile.1' -CFILE 'anafile' -CNAME 'ananam' -CDESC 'anadsc' -DEBUG 'DEBUG' -MDESC 'qdesc.1' -STAT 'STAT
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
                     say "Type 'next' for  next plot, 'done' for next field"
@@ -546,11 +566,15 @@ endwhile
 while( k <= numexp )
   cname.k =  oname.k.1
    ctag.k = obsnam.k.1
+say ' '
 say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
+say '--------------------------------------------------------------'
+say ' '
 
 if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
      TAG   = k
      say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+     say '------------------------------------------------'
 
 * Loop over Seasons to Process
 * ----------------------------
@@ -583,6 +607,14 @@ else
          say '                        obs: 'ctag.TAG
          say '              Total  numexp: 'numexp
          say ''
+                                cmpnam = ctag.n
+                                obsnam = ctag.TAG
+
+     say '                          cmpnam: 'cmpnam
+     say '                          obsnam: 'obsnam
+     say '                  climate.cmpnam: 'climate.cmpnam
+     say '                  climate.obsnam: 'climate.obsnam
+
                  flag = ""
          while ( flag = "" )
 
@@ -590,7 +622,7 @@ else
              'define zobs'n''season'   = regrid2( obs'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
              'define zmod'season'      = regrid2( mod'season'     ,0.25,0.25,bs_p1,0,-90 )'
 
-             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
+             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ALIAS 'alias.1' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate.EXPID' -MENDDATE 'enddate.EXPID' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdate.obsnam' -OENDDATE 'enddate.obsnam' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climate.EXPID' -CLIMCMP 'climate.cmpnam' -CLIMOBS 'climate.obsnam' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
 
              'myprint -name 'OUTPUT'/hdiag_'ctag.n'_'NAME'.'GC.1'_'LEVEL'_closeness_'ctag.TAG'.'season
 

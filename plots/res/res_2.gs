@@ -136,6 +136,7 @@ endif
 
 'set vpage off'
 'set parea off'
+'set zlog  off'
 
 * Make Plot: Top Panel
 * --------------------
@@ -277,7 +278,7 @@ endif
 'set z 'z1' 'z2
 'set t 1'
 
-'cbarn -scale 0.9 -snum 0.5'
+'cbarn -scale 0.9 -snum 0.5 -ymid 0.40'
 'set gxout contour'
 'set clopts 1 3 0.06'
 'set ccolor 1'
@@ -291,11 +292,14 @@ endif
 'set parea off'
 'set vpage 0 8.5 0.0 11'
 
+'set string 1 l 4'
+'set strsiz 0.07'
+'draw string 0.05 0.10 ( EXPID: 'expid' )'
+
 'set string 1 c 6'
 'set strsiz .11'
 
-'draw string 4.25 10.85 EXPID: 'expid
-'draw string 4.25 10.6 'expdsc'  'season' ('nmod')'
+'draw string 4.25 10.75 'expdsc'  'season' ('nmod')'
 'draw string 4.25  7.23 'obsdsc'  'season' ('nobs') ('climate')'
 
 if( dn != 0 )

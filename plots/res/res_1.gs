@@ -98,7 +98,7 @@ function  res_1 (args)
 'set strsiz .11'
 'xlabel 1 5.4 8.1'
 'draw string 5.43666 0.5 EXP:  'expid
-'draw string 5.43666 0.3 CMP:  'obsdes
+'draw string 5.43666 0.3 CMP:  'obsid
 
 'myprint -name 'output'/zonal_'obsid'_str_res.'season
 'set clab on'
