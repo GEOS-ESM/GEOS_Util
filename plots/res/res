@@ -8,6 +8,7 @@ expid  = subwrd(args,k) ; k = k+1
 output = subwrd(args,k) ; k = k+1
 debug  = subwrd(args,k) ; k = k+1
 
+
 * Define Seasons to Process
 * -------------------------
 seasons = ''
@@ -119,15 +120,8 @@ else
 'count "'season'" 'begdate' 'enddate
  nmod = result
 
-* Make Plot
-* ---------
-   if( orientation = PORTRAIT )
-      'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif -ptop 1'
-      'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif -ptop 1'
-   endif
-   'q define'
-   say 'Defined Variables: 'result
-
+* Make LANDSCAPE Plots
+* --------------------
    if( orientation = LANDSCAPE )
               flag = ""
       while ( flag = "" )
@@ -143,7 +137,17 @@ else
       endwhile
    endif
 
+* Make PORTRAIT Plots
+* -------------------
    if( orientation = PORTRAIT )
+              flag = ""
+   'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif '
+   'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif '
+*  'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif -ptop 1'
+*  'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif -ptop 1'
+   'q define'
+   say 'Defined Variables: 'result
+
               flag = ""
       while ( flag = "" )
              'run 'geosutil'/plots/res/res_2 'expid' 'season' 'output' 'obsid' 'obsdsc' 'nmod' 'nobs' 'expdsc' 'begdateo' 'enddateo
@@ -156,6 +160,7 @@ else
               endif
              'c'
       endwhile
+
               flag = ""
       while ( flag = "" )
              'run 'geosutil'/plots/res/res_3 'expid' 'season' 'output' 'obsid' 'obsdsc' 'nmod' 'nobs' 'expdsc' 'begdateo' 'enddateo
@@ -186,11 +191,3 @@ endif
 num = num + 1
 endwhile
 
-
-* Move DATA for Archive
-* ---------------------
-if( orientation = PORTRAIT )
-'!/bin/mv -f residual*ctl    ../'
-'!/bin/mv -f residual*data   ../'
-'!/bin/mv -f VERIFICATION*rc ../'
-endif

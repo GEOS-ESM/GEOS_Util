@@ -9,7 +9,7 @@
 # where $SOURCE is an OPTIONAL valid SOURCE directory containing a HISTORY.rc
 #######################################################################################
 
-set plots = "residual"
+set plots = ""
 set plots = `echo $plots` # To remove blanks
 
 set LIST  = FALSE
@@ -140,11 +140,6 @@ endif
      set plotname = ${ORIENTATION}
      @ n = 1
 
-if( $plot == residual ) then
-                             $GEOSUTIL/plots/res/makeres      $source
-    $grads $batch -l -c "run $GEOSUTIL/plots/res/res   $expid $output $debug $seasons "
-    $grads $batch -l -c "run $GEOSUTIL/plots/zcmp/zcmp $expid $output $seasons "
-endif
 
 # Prognostics: Loop over Variables for Zonal Mean Comparisons
 # -----------------------------------------------------------
@@ -260,17 +255,18 @@ end
 # Turbulence
 # ----------
     set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300'
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT      KM:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT      KH:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT    KMLS:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT    KHLS:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT   KHSFC:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT   KHRAD:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT     EKH:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT     EKM:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT      KM:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT      KH:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT    KMLS:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT    KHLS:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT   KHSFC:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT   KHRAD:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT     EKH:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT     EKM:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT      RI:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT  INTDIS:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT  TOPDIS:TURBULENCE  -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT  INTDIS:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid  -EXPORT  TOPDIS:TURBULENCE  -LEVELS $levels -PTOP 300 -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
 # Moist Processes
 # ---------------
@@ -388,7 +384,7 @@ end
 
 # Tendencies
 # ----------
-    set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300 250 200 150 100'
+    set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300 250 200 150 100 70 50 30 20 10 7 5 3 1 0.4'
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT   DUDTDYN:DYN     -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT   DVDTDYN:DYN     -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT   DTDTDYN:DYN     -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1

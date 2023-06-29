@@ -441,16 +441,20 @@ if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
  'd maskout( maskout(qmod2,lwmask2), abs(qmod2)-'cint' )'
 *'d maskout(         qmod2,          abs(qmod2)-'cint' )'
 
-'cbarn -snum 'cbscale
+'cbarn -snum 'cbscale' -ymid 0.70'
 
 'stats qmod'
  avgmod = subwrd(result,1)
  stdmod = subwrd(result,2)
 
 'set vpage off'
+'set string 1 l 4'
+'set strsiz 0.08'
+'draw string 0.05 0.10 ( EXPID: 'expid' )'
+
 'set string 1 c 6'
 'set strsiz .12'
-'draw string 5.5 8.1 EXPID: 'expid'  'expdsc
+'draw string 5.5 8.1 'expdsc
 if( level != 0 )
     if( n != 0 )
    'draw string 5.5 7.73 'export':'GC

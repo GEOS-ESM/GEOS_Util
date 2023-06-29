@@ -22,6 +22,8 @@ if( subwrd(args,num) = '-ODESC'   ) ; odesc    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT'  ) ; output   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-SEASON'  ) ; season   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-PTOP'    ) ; ptops    = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMEXP' ) ; climexp  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-CLIMCMP' ) ; climcmp  = subwrd(args,num+1) ; endif
 
 endwhile
 
@@ -84,12 +86,6 @@ if( enddate = "NULL" )
    'set t  'tdim
    'getinfo date'
          enddate = result
-endif
-
-'run getenv "CLIMATE"'
-             climate = result
-if( begdate = begdateo & enddate = enddateo )
-         climate = 'Actual'
 endif
 
 'set gxout shaded'
@@ -366,6 +362,7 @@ if( Lbit = L ) ; 'setlevs' ; endif
 'set grads off'
 'set gxout shaded'
 
+     n = 0
  dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
@@ -430,24 +427,24 @@ endif
 
 if( CINTDIFF != 'NULL' )
    'set string 1 l 6 90'
-   'set strsiz .17'
-   'draw string 0.75 1.8 Pressure (mb)'
+   'set strsiz .16'
+   'draw string 0.75 1.47 Pressure (mb)'
 endif
 
 'set string 1 l 4 0'
 'set strsiz .065'
-'draw string 0.05 0.08 ( EXPID:  'expid' )'
+'draw string 0.05 0.08 ( EXPID: 'expid'  DESC: 'qdesc' )'
 
 'set string 1 c 6'
 'set strsiz .13'
 'draw string 4.25 10.85 'title
 
 'set strsiz .10'
-'draw string 4.25 10.635 'qdesc' 'season' ('nmod')'
-'draw string 4.25  7.235 'odesc' 'season' ('nobs') ('climate')'
+'draw string 4.25 10.635 'expid' 'season' ('nmod')  ('climexp')'
+'draw string 4.25  7.235 'obsnam' 'season' ('nobs')  ('climcmp')'
 
 
-if( dfact = 1 )
+if( n = 0 )
   'draw string 4.25 3.850 Difference (Top-Middle)'
 else
   'draw string 4.25 3.850 Difference (Top-Middle) (x 'dfact')'
@@ -467,19 +464,42 @@ byearo = subwrd(date,2)
 emntho = subwrd(date,1)
 eyearo = subwrd(date,2)
 
-'set string 1 l 4'
 'set strsiz .08'
+'set string 4 l 5'
+'draw string 0.10 10.50 EXP Dates:'
+'set strsiz .07'
+'set string 1 l 4'
 'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
 'draw string 0.10 10.24 End: 'emnthm' 'eyearm
+
+'set strsiz .08'
+'set string 4 l 5'
+'draw string 0.10  7.10 CMP Dates:'
+'set strsiz .07'
+'set string 1 l 4'
 'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
 'draw string 0.10  6.84 End: 'emntho' 'eyearo
 
+'set strsiz .08'
+if( climexp != 'Actual' | climcmp != 'Actual' )
+   'set string 2 l 7'
+   'draw string 0.050 3.75  WARNING:'
+   'set string 1 l 4'
+   'draw string 0.050 3.60  Actual Dates'
+   'draw string 0.050 3.45  NOT Used!'
+else
+   'set string 4 l 5'
+   'draw string 0.050 3.75  Comparison using:'
+   'set string 1 l 4'
+   'draw string 0.050 3.60  Actual Dates'
+endif
+
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'
-   'draw string 0.050 1.67 Plot represents'
-   'draw string 0.050 1.52 values > 'dqrel' %'
-   'draw string 0.050 1.36 Relative Difference'
-   'draw string 0.050 1.22 ( DQ/QMax )'
+   'draw string 0.050 1.35 Plot represents'
+   'draw string 0.050 1.20 values > 'dqrel' %'
+   'draw string 0.050 1.05 Relative Difference'
+   'draw string 0.050 0.90 ( DQ/QMax )'
 endif
 
 'set string 1 c 6'

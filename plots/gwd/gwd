@@ -127,6 +127,11 @@ name.14 = sgh
 'set dfile 1'
 'run getinfo undef'
              undef = result
+'setdates'
+'run getenv "BEGDATE"'
+             begdate  = result
+'run getenv "ENDDATE"'
+             enddate  = result
 
        m  = 1
 while( m <= 9 ) 
@@ -135,19 +140,25 @@ while( m <= 9 )
     'setx'
     'sety'
     'setz'
-    'sett'
+    'getinfo zdim'
+             zdim.m = result
+    'getdates'
     'makezf 'qname.m'*'scale.m' 'name.m' z'
  else
-    'set dfile 1'
+    'set dfile 'm
     'setx'
     'sety'
     'setz'
-    'set t 1'
+    'getinfo zdim'
+             zdim.m = result
+    'getdates'
     'define dummy = lat-lat + lon-lon + lev-lev + 'undef
     'makezf dummy 'name.m' z'
  endif
      m = m + 1
 endwhile
+say 'Finished zonal means'
+*pause
 
 'set dfile 'qfile.1
 'getinfo zdim'
@@ -159,29 +170,79 @@ endwhile
 'set x 1'
 'sety'
 'setz'
-'setdates'
-'run getenv "BEGDATE"'
-             begdate  = result
-'run getenv "ENDDATE"'
-             enddate  = result
-'sett'
-'define   dudtbkgz = dudtz-dudtoroz-dudtrayz'
-'define   dvdtbkgz = dvdtz-dvdtoroz-dvdtrayz'
-'define   dtdtbkgz = dtdtz-dtdtoroz-dtdtrayz'
+'getdates'
 
+say 'DIMS:'
+'q dims'
+say result
+
+
+
+'set dfile 'qfile.1
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dudtz'
+
+'set dfile 'qfile.2
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dudtoroz'
-'seasonal dudtbkgz'
+
+'set dfile 'qfile.3
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dudtrayz'
 
+
+
+'set dfile 'qfile.4
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dvdtz'
+
+'set dfile 'qfile.5
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dvdtoroz'
-'seasonal dvdtbkgz'
+
+'set dfile 'qfile.6
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dvdtrayz'
 
+
+
+'set dfile 'qfile.7
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dtdtz'
+
+'set dfile 'qfile.8
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dtdtoroz'
-'seasonal dtdtbkgz'
+
+'set dfile 'qfile.9
+'set x 1'
+'sety'
+'setz'
+'getdates'
 'seasonal dtdtrayz'
 
 
@@ -192,14 +253,14 @@ while( m <= 14 )
     'setlons'
     'sety'
     'set z 1'
-    'sett'
+    'getdates'
     'define 'name.m' = 'qname.m'*'scale.m
  else
     'set dfile 1'
     'setlons'
     'sety'
     'set z 1'
-    'set t 1'
+    'getdates'
     'define 'name.m' = lat-lat + lon-lon + lev-lev + 'undef
  endif
      m = m + 1
@@ -227,6 +288,75 @@ else
 'count "'season'" 'begdate' 'enddate
   num = result
 
+if( zdim.1 != zdim.2 | zdim.2 != zdim.3 )
+   'makezdif -q1 dudtz'season' -file1 'qfile.1' -q2 dudtoroz'season' -file2 'qfile.2' -name dumu'
+   'getinfo numfiles'
+             dufiles = result
+   'makezdif -q1 dumuz -file1 'dufiles' -q2 dudtrayz'season' -file2 'qfile.3' -name dudtbkg'
+   'getinfo numfiles'
+             dufiles = result
+   'set dfile 'dufiles
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dudtbkgz'season' = dudtbkgz'
+else
+   'set dfile 'qfile.1
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dudtbkgz'season' = dudtz'season'-dudtoroz'season'-dudtrayz'season''
+endif
+
+
+if( zdim.1 != zdim.2 | zdim.2 != zdim.3 )
+   'makezdif -q1 dvdtz'season' -file1 'qfile.4' -q2 dvdtoroz'season' -file2 'qfile.5' -name dumv'
+   'getinfo numfiles'
+             dvfiles = result
+   'makezdif -q1 dumvz -file1 'dvfiles' -q2 dvdtrayz'season' -file2 'qfile.6' -name dvdtbkg'
+   'getinfo numfiles'
+             dvfiles = result
+   'set dfile 'dvfiles
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dvdtbkgz'season' = dvdtbkgz'
+else
+   'set dfile 'qfile.1
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dvdtbkgz'season' = dvdtz'season'-dvdtoroz'season'-dvdtrayz'season''
+endif
+
+
+if( zdim.1 != zdim.2 | zdim.2 != zdim.3 )
+   'makezdif -q1 dtdtz'season' -file1 'qfile.7' -q2 dtdtoroz'season' -file2 'qfile.8' -name dumt'
+   'getinfo numfiles'
+             dtfiles = result
+   'makezdif -q1 dumtz -file1 'dtfiles' -q2 dtdtrayz'season' -file2 'qfile.9' -name dtdtbkg'
+   'getinfo numfiles'
+             dtfiles = result
+   'set dfile 'dtfiles
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dtdtbkgz'season' = dtdtbkgz'
+else
+   'set dfile 'qfile.1
+   'set x 1'
+   'set t 1'
+   'sety'
+   'setz'
+   'define   dtdtbkgz'season' = dtdtz'season'-dtdtoroz'season'-dtdtrayz'season''
+endif
+
+
         flag = ""
 while ( flag = "" )
 'run  'geosutil'/plots/gwd/gwd_1.gs 'expid'    'season' 'output' 'num' 'ptop' 'debug
@@ -253,6 +383,7 @@ endif
 'c'
 endwhile
 
+'set dfile 'qfile.12
         flag = ""
 while ( flag = "" )
 'run  'geosutil'/plots/gwd/gwd_2.gs 'expid' 'season' 'output' 'num' 'debug

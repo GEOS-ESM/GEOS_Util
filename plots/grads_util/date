@@ -6,9 +6,18 @@ date = result
 length = strlen(date)
 if( length = 12 )
     hour = substr( date,1,2 )
-    nymd = substr( date,4,9 )
-    date = hour':00Z'nymd
+  minute = 00
+    day  = substr( date,4,2 )
+   month = substr( date,6,3 )
+    year = substr( date,9,4 )
+else
+    hour = substr( date,1,2 )
+  minute = substr( date,4,2 )
+    day  = substr( date,7,2 )
+   month = substr( date,9,3 )
+    year = substr( date,12,4 )
 endif
+    date = day' 'month' 'year'  'hour':'minute'Z'
 
 if( args != 1 )
 '!/bin/rm 'file

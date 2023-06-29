@@ -14,7 +14,7 @@ ptop   = subwrd(args,5)
 'set ylopts 1 3 .2'
 'set x 1'
 
-'vpage 1 1 2 2'
+'vpage 1 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'sety'
@@ -39,7 +39,7 @@ ptop   = subwrd(args,5)
 'draw ylab Pressure (mb)'
 
 
-'vpage 2 1 2 2'
+'vpage 2 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'sety'
@@ -63,7 +63,7 @@ ptop   = subwrd(args,5)
 'draw title Temperature Tendency from Orographic GWD (K/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 1 2 2 2'
+'vpage 1 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'sety'
@@ -87,7 +87,7 @@ ptop   = subwrd(args,5)
 'draw title Temperature Tendency from Background GWD (K/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 2 2 2'
+'vpage 2 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'sety'

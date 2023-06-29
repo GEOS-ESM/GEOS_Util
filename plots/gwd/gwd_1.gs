@@ -21,7 +21,7 @@ debug  = subwrd(args,6)
 
 * DUDT 1000-ptop mb
 * -----------------
-'vpage 1 1 2 2'
+'vpage 1 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -49,7 +49,7 @@ debug  = subwrd(args,6)
 'draw title Total U-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 1 2 2'
+'vpage 2 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -77,7 +77,7 @@ debug  = subwrd(args,6)
 'draw title U-Wind Tendency from Orographic GWD (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 2 2 2'
+'vpage 2 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -105,7 +105,7 @@ debug  = subwrd(args,6)
 'draw title U-Wind Tendency from Rayleigh Friction (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 1 2 2 2'
+'vpage 1 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -150,7 +150,7 @@ endif
 
 * DUDT 1000-10 mb
 * ---------------
-'vpage 1 1 2 2'
+'vpage 1 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 10'
 'set ylevs 1000 820 650 500 400 300 200 140 100 70 50 40 30 20 14 10'
 'set t 1'
@@ -178,7 +178,7 @@ endif
 'draw title Total U-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 1 2 2'
+'vpage 2 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 10'
 'set ylevs 1000 820 650 500 400 300 200 140 100 70 50 40 30 20 14 10'
 'set t 1'
@@ -206,7 +206,7 @@ endif
 'draw title U-Wind Tendency from Orographic GWD (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 2 2 2'
+'vpage 2 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 10'
 'set ylevs 1000 820 650 500 400 300 200 140 100 70 50 40 30 20 14 10'
 'set t 1'
@@ -234,7 +234,7 @@ endif
 'draw title U-Wind Tendency from Rayleigh Friciton (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 1 2 2 2'
+'vpage 1 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 10'
 'set ylevs 1000 820 650 500 400 300 200 140 100 70 50 40 30 20 14 10'
 'set t 1'
@@ -279,7 +279,7 @@ endif
 
 * DVDT 1000-ptop mb
 * -----------------
-'vpage 1 1 2 2'
+'vpage 1 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -307,7 +307,7 @@ endif
 'draw title Total V-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 1 2 2'
+'vpage 2 1 2 2 -top 0.6 -bot -0.10'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -335,7 +335,7 @@ endif
 'draw title V-Wind Tendency from Orographic GWD (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 2 2 2 2'
+'vpage 2 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'
@@ -363,7 +363,7 @@ endif
 'draw title V-Wind Tendency from Rayleigh Friction (m/sec/day)'
 'draw ylab Pressure (mb)'
 
-'vpage 1 2 2 2'
+'vpage 1 2 2 2 -top 0.25 -bot 0.25'
 'set lev 1000 'ptop
 'setlevs'
 'set t 1'

@@ -55,7 +55,7 @@ debug  = subwrd(args,5)
 'shades ss 0 -cint 0.01'
 'define ss2 = regrid2( ss,0.25,0.25,bs_p1,0,-90 )'
 'd maskout( ss2, abs(ss2)-0.01 )'
-'cbarn -scalex 0.55 -scaley 0.55 -xmid 2.90 -ymid 4.35 -snum 0.45'
+'cbarn -scalex 0.30 -scaley 0.55 -xmid 2.90 -ymid 4.35 -snum 0.45'
 'set gxout contour'
 'set clevs 0.01'
 'set ccolor 1'
@@ -89,7 +89,7 @@ debug  = subwrd(args,5)
 'shades ss 0 -cint 0.01'
 'define ss2 = regrid2( ss,0.25,0.25,bs_p1,0,-90 )'
 'd maskout( ss2, abs(ss2)-0.01 )'
-'cbarn -scalex 0.55 -scaley 0.55 -xmid 8.40 -ymid 4.35 -snum 0.45'
+'cbarn -scalex 0.30 -scaley 0.55 -xmid 8.40 -ymid 4.35 -snum 0.45'
 'set gxout contour'
 'set clevs 0.01'
 'set ccolor 1'
@@ -110,6 +110,7 @@ debug  = subwrd(args,5)
 'set grads off'
 'set grid  off'
 
+'set dfile '12
 'set gxout shaded'
 'define ss = mag( taubkgx'season' , taubkgy'season' )'
 'makez ss z'
@@ -146,7 +147,7 @@ debug  = subwrd(args,5)
 'shades ss 0 -cint 0.01'
 'define ss2 = regrid2( ss,0.25,0.25,bs_p1,0,-90 )'
 'd maskout( ss2, abs(ss2)-0.01 )'
-'cbarn -scalex 0.55 -scaley 0.55 -xmid 8.40 -ymid 0.55 -snum 0.45'
+'cbarn -scalex 0.30 -scaley 0.55 -xmid 8.40 -ymid 0.55 -snum 0.45'
 'set gxout contour'
 'set clevs 0.01'
 'set ccolor 1'
@@ -311,7 +312,7 @@ endif
 'shades ss 0 -cint 50'
 'define ss2 = regrid2( ss,0.25,0.25,bs_p1,0,-90 )'
 'd maskout( ss2, abs(ss2)-50 )'
-'cbarn -scalex 0.55 -scaley 0.55 -xmid 2.90 -ymid 4.35 -snum 0.45'
+'cbarn -scalex 0.30 -scaley 0.55 -xmid 2.90 -ymid 4.35 -snum 0.45'
 
 'set gxout contour'
 'set clevs 50'

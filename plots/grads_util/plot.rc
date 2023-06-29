@@ -22,6 +22,10 @@ For Single 2-D Variable Plots:
   Add, for example: EXPORT_GC_CLOSE_PLOT_FACTOR: -3
   Add, for example: EXPORT_GC_CLOSE_PLOT_CINT: 10
 
+* To affect Default Percentage for Closeness Plots
+* ------------------------------------------------
+  Add, for example: EXPORT_GC_CLOSE_PLOT_DPCT: 0.01
+
 ************************************************************************************
 
 ************************************************************************************
@@ -110,6 +114,7 @@ SLP_DYN_CINT: 4
 *U_DYN_FIXED_PLOT_CINT: 15
 *U_DYN_CLOSE_PLOT_FACTOR: -3
 *U_DYN_CLOSE_PLOT_CINT: 15
+*U_DYN_CLOSE_PLOT_DPCT: 0.01
 
 U_DYN_TITLE: Zonal U-Wind (m/s)
 U_DYN_30_CINT:    5
@@ -633,10 +638,10 @@ DUDTDYN_DYN_250_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DUDTDYN_DYN_200_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DUDTDYN_DYN_150_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DUDTDYN_DYN_100_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
-DUDTDYN_DYN_CLEVS:  -18 -16 -14 -12 -10 -8 -6 -4 -2 2 4 6 8 10 12 14 16 18
+DUDTDYN_DYN_CLEVS: -4.0 -3 -2.5 -2 -1.5 -1 -0.75 -0.5 -0.25 .25 0.5 0.75 1 1.5 2 2.5 3 4.0
 
-*DUDTDYN_DYN_FIXED_PLOT_FACTOR: -2
-*DUDTDYN_DYN_FIXED_PLOT_CINT: 1.2
+*DUDTDYN_DYN_FIXED_PLOT_FACTOR: -1
+*DUDTDYN_DYN_FIXED_PLOT_CINT: 0.2
 *DVDTDYN_DYN_FIXED_PLOT_FACTOR: -2
 *DVDTDYN_DYN_FIXED_PLOT_CINT: 3.0
 
@@ -665,6 +670,7 @@ DVDTDYN_DYN_250_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DVDTDYN_DYN_200_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DVDTDYN_DYN_150_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DVDTDYN_DYN_100_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
+DVDTDYN_DYN_CLEVS: -4.0 -3 -2.5 -2 -1.5 -1 -0.75 -0.5 -0.25 .25 0.5 0.75 1 1.5 2 2.5 3 4.0
 
 
 DTDTDYN_DYN_TITLE: DTDT from Dynamics (K/day)
@@ -677,21 +683,22 @@ DTDTDYN_DYN_950_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DTDTDYN_DYN_925_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DTDTDYN_DYN_900_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
 DTDTDYN_DYN_850_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
-DTDTDYN_DYN_800_CLEVS:  -14 -12 -10 -8 -6 -4 -2 -1 -0.5 0.5 1 2 4 6 8 10 12 14
-DTDTDYN_DYN_750_CLEVS:  -14 -12 -10 -8 -6 -4 -2 -1 -0.5 0.5 1 2 4 6 8 10 12 14
-DTDTDYN_DYN_700_CLEVS:  -14 -12 -10 -8 -6 -4 -2 -1 -0.5 0.5 1 2 4 6 8 10 12 14
-DTDTDYN_DYN_650_CLEVS:  -14 -12 -10 -8 -6 -4 -2 -1 -0.5 0.5 1 2 4 6 8 10 12 14
-DTDTDYN_DYN_600_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_550_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_500_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_450_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_400_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_350_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_300_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_250_CLEVS:  -9 -8 -7 -6 -5 -4 -3 -2 -1 1 2 3 4 5 6 7 8 9
-DTDTDYN_DYN_200_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
-DTDTDYN_DYN_150_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
-DTDTDYN_DYN_100_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
+DTDTDYN_DYN_800_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7
+DTDTDYN_DYN_750_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7  
+DTDTDYN_DYN_700_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7  
+DTDTDYN_DYN_650_CLEVS:  -7 -6 -5 -4 -3 -2 -1.5 -1 -0.5 0.5 1 1.5 2 3 4 5 6 7  
+DTDTDYN_DYN_600_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
+DTDTDYN_DYN_550_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
+DTDTDYN_DYN_500_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
+DTDTDYN_DYN_450_CLEVS:  -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
+DTDTDYN_DYN_400_CLEVS:  -2.5 -2 -1.75 -1.5 -1.25 -1 -0.75 -0.5 -.25 .25 .5 .75 1 1.25 1.5 1.75 2 2.5
+DTDTDYN_DYN_350_CLEVS:  -2.5 -2 -1.75 -1.5 -1.25 -1 -0.75 -0.5 -.25 .25 .5 .75 1 1.25 1.5 1.75 2 2.5
+DTDTDYN_DYN_300_CLEVS:  -2.5 -2 -1.75 -1.5 -1.25 -1 -0.75 -0.5 -.25 .25 .5 .75 1 1.25 1.5 1.75 2 2.5
+DTDTDYN_DYN_250_CLEVS:  -2.5 -2 -1.75 -1.5 -1.25 -1 -0.75 -0.5 -.25 .25 .5 .75 1 1.25 1.5 1.75 2 2.5
+DTDTDYN_DYN_200_CLEVS:  -1.5 -1 -.8 -.6 -.5 -.4 -.3 -.2 -0.1 0.1 .2 .3 .4 .5 .6 .8 1 1.5
+DTDTDYN_DYN_150_CLEVS:  -1.5 -1 -.8 -.6 -.5 -.4 -.3 -.2 -0.1 0.1 .2 .3 .4 .5 .6 .8 1 1.5
+DTDTDYN_DYN_100_CLEVS:  -1.5 -1 -.8 -.6 -.5 -.4 -.3 -.2 -0.1 0.1 .2 .3 .4 .5 .6 .8 1 1.5
+DTDTDYN_DYN_CLEVS:      -4.5 -4 -3.5 -3 -2.5 -2 -1.5 -1 -.5 .5 1 1.5 2 2.5 3 3.5 4 4.5
 
 
 DQVDTDYN_DYN_TITLE: DQVDT from Dynamics (g/kg/day)
@@ -821,7 +828,7 @@ DTDTTOT_PHYSICS_CLEVS: -2 -1 -0.5 -0.4 -0.3 -.2 -.1 -0.05 -0.01 0.01 0.05 .1 .2 
 DQDTTOT_MOIST_TITLE: DQDT_TOT (Dynamics + Physics [+ Analysis]) (g/kg/day)
 DQDTTOT_MOIST_FACTOR: 86400*1000
 DQDTTOT_MOIST_CCOLS: 55  49  47  45  44  36  34  33  32  0  21  22  23  24  25  26  27  28 69
-DQDTTOT_MOIST_CLEVS: -8 -6 -4 -2 -1 -0.8 -0.6 -0.4 -0.2 0.2 0.4 0.6 0.8 1 2 4 6 8
+DQDTTOT_MOIST_CLEVS: -0.5 -0.4 -0.3 -.2 -.1 -0.07 -0.05 -0.03 -0.01 0.01 0.03 0.05 0.07 .1 .2 .3 .4 .5
 
 
 ************************************************************************************
@@ -1342,7 +1349,7 @@ STD_DQVDT_ANA_AGCM_Z_CLEVS:  0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.1 1.2 1.3 1
 *BIAS_DQVDT_ANA_AGCM_FIXED_PLOT_FACTOR: -2
 *BIAS_DQVDT_ANA_AGCM_FIXED_PLOT_CINT: 4
 *BIAS_DQVDT_ANA_AGCM_Z_CCOLS: 50 42 44 46 48 39 37 36 34 32 31 21 22 24 25 26 27 28 29
- BIAS_DQVDT_ANA_AGCM_Z_CLEVS:  2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25 27.5 30 32.5 35 37.5 40 42.5 45
+*BIAS_DQVDT_ANA_AGCM_Z_CLEVS:  2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25 27.5 30 32.5 35 37.5 40 42.5 45
 
 *BIAS_DQVDT_ANA_AGCM_CLEVS:  0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9
  BIAS_DQVDT_ANA_AGCM_CLEVS:  0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95
