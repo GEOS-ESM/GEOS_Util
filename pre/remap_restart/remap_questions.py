@@ -206,7 +206,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:bc_version",
-            "message": f'''Enter BC version that matches input restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...)
+            "message": f'''Enter BC version for new restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...)
 
     BC version
     ---------------
