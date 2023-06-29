@@ -81,8 +81,8 @@ class upperair(remap_base):
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
      label = ''
      if config['output']['shared']['label']:
-       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
-               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir) 
+       label = '.' + config['input']['shared']['bc_version'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['bc_version']+ '.' + get_bcs_basename(out_bcsdir) 
 
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
      for rst in restarts_in :

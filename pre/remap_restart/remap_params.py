@@ -36,7 +36,7 @@ class remap_params(object):
      config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
      config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
-     config_tpl['input']['shared']['tag']        = self.common_in.get('tag')
+     config_tpl['input']['shared']['bc_version']        = self.common_in.get('bc_version')
      config_tpl['input']['surface']['catch_model']       = self.surf_in.get('catch_model')
 
      config_tpl['output']['air']['nlevel']               = self.upper_out.get('nlevel')
@@ -47,7 +47,7 @@ class remap_params(object):
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
      config_tpl['output']['shared']['expid']   = self.common_out['expid']
-     config_tpl['output']['shared']['tag']     = self.common_out.get('tag')
+     config_tpl['output']['shared']['bc_version']     = self.common_out.get('bc_version')
      config_tpl['output']['shared']['label']  = self.common_out.get('label')
 
      config_tpl['input']['shared']['bcs_dir']    = self.common_in['bcs_dir']
@@ -65,12 +65,12 @@ class remap_params(object):
        return config_tpl 
         
      ogrid = config_tpl['input']['shared']['ogrid']
-     tagout = self.common_out['tag']
-     bctag  = get_bcTag(tagout, ogrid)
-     tagrank = TagsRank[bctag]
+     bcvout = self.common_out['bc_version']
+     bcVersion  = get_bcVersion(bcvout, ogrid)
+     bc_versionrank = BcsRank[bcVersion]
      if ( not config_tpl['input']['air']['drymass']) :
         config_tpl['input']['air']['drymass'] = 0
-        if tagrank >=12 :
+        if bc_versionrank >=12 :
           config_tpl['input']['air']['drymass'] = 1
 
      return config_tpl
@@ -83,13 +83,13 @@ class remap_params(object):
 
   def params_for_surface(self, config_tpl):
     config_tpl['output']['surface']['surflay'] = 20.
-    tagout = self.common_out['tag']
+    bcvout = self.common_out['bc_version']
     ogrid = self.common_out['ogrid']
-    bctag = get_bcTag(tagout, ogrid)
-    tagrank = TagsRank[bctag]
-    if tagrank >=12 :
+    bcVersion = get_bcVersion(bcvout, ogrid)
+    bc_versionrank = BcsRank[bcVersion]
+    if bc_versionrank >=12 :
        config_tpl['output']['surface']['surflay'] = 50.
-    if tagrank >= TagsRank["Icarus_Reynolds"]:
+    if bc_versionrank >= BcsRank["Icarus_Reynolds"]:
        config_tpl['output']['surface']['split_saltwater'] = True
     config_tpl['input']['surface']['zoom']= self.surf_in['zoom']
     config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
@@ -102,10 +102,10 @@ class remap_params(object):
     config_tpl['output']['analysis']['bkg'] = self.ana_out.get('bkg')
     
     ogrid = self.common_out['ogrid']
-    tagout = self.common_out['tag']
-    bctag  = get_bcTag(tagout, ogrid)
-    tagrank = TagsRank[bctag]
-    if tagrank >= TagsRank["Ganymed-4_0_Reynolds"] :
+    bcvout = self.common_out['bc_version']
+    bcVersion  = get_bcVersion(bcvout, ogrid)
+    bc_versionrank = BcsRank[bcVersion]
+    if bc_versionrank >= BcsRank["Ganymed-4_0_Reynolds"] :
       config_tpl['output']['analysis']['aqua'] = True
     return config_tpl
 

@@ -176,7 +176,7 @@ def ask_questions():
 
         {
             "type": "text",
-            "name": "input:shared:tag",
+            "name": "input:shared:bc_version",
             "message": "Enter BC version that matches input restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...) \n \
 \n \
     BC version   \n \
@@ -196,7 +196,7 @@ def ask_questions():
 
         {
             "type": "text",
-            "name": "output:shared:tag",
+            "name": "output:shared:bc_version",
             "message": "Enter BC version for new restarts:",
             "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
             "default": "NLv3",
@@ -205,7 +205,7 @@ def ask_questions():
         # show the message if it is merra2
         {
             "type": "text",
-            "name": "output:shared:tag",
+            "name": "output:shared:bc_version",
             "message": " Enter BC version for new restarts:  (ICA, NLv3, NL3, NL4, NL5, v06, v07,...) \n \
 \n \
     BC version   \n \
@@ -276,13 +276,13 @@ def ask_questions():
             "type": "text",
             "name": "input:surface:wemin",
             "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?",
-            "default": lambda x: we_default(x.get('input:shared:tag'))
+            "default": lambda x: we_default(x.get('input:shared:bc_version'))
         },
         {
             "type": "text",
             "name": "output:surface:wemin",
             "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?",
-            "default": lambda x: we_default(x.get('output:shared:tag'))
+            "default": lambda x: we_default(x.get('output:shared:bc_version'))
         },
         {
             "type": "text",
@@ -299,7 +299,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:shared:label",
-            "message": "Would you like to add labels (tags,resoultions) to restarts' names?",
+            "message": "Would you like to add labels (bc_versions,resoultions) to restarts' names?",
             "default": False,
         },
 

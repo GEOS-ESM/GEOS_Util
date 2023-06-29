@@ -11,23 +11,23 @@ import shlex
 
 # define some constants for bcs
 
-NewStructureBCTag = ('NL3', 'NL4', 'NL5', 'v06', 'v07', 'v08', 'v09') 
+NewStructureBCList = ['NL3', 'NL4', 'NL5', 'v06', 'v07', 'v08', 'v09']
 BCBase={}
 BCBase['discover_ops']     = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
 BCBase['discover_legacy']  = "/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs"
 BCBase['discover_couple'] = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 BCBase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
 
-BCSTag = {}
-TagsRank = {}
-tag_initialized = False
+BcsVersionMap = {}
+BcsRank = {}
+bc_version_initialized = False
 
-def init_tags():
+def init_bc_versions():
    # copy and paste from rigrid.pl
    # minor change. Add "D" to the number for each group
    # BCS Tag: Fortuna-1_4
-   global tag_initialized
-   if tag_initialized : return
+   global bc_version_initialized
+   if bc_version_initialized : return
 #   F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
 #   D214 = ( 'D214',              'GEOSdas-2_1_4',          'GEOSdas-2_1_4-m1',
 #            'GEOSdas-2_1_4-m2', 'GEOSdas-2_1_4-m3',       'GEOSdas-2_1_4-m4' )
@@ -109,7 +109,7 @@ def init_tags():
 #  # BCS Tags: Icarus (New Land Parameters, New Topography)
 #  #---------------------------------------------------------------------------
    ICA  = ( 'ICA',                  'Icarus',              'Jason' )
-   NLv3  = ( 'NLv3',                  'NLV3')
+   NLv3  = ( 'NLv3',)
 #   D517 = ( '517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
 #            'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
 #            'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
@@ -131,44 +131,44 @@ def init_tags():
 #   D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
 #                    'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
 
-#   for tag in F14:   BCSTag[tag]= "Fortuna-1_4"
-#   for tag in F20:   BCSTag[tag]= "Fortuna-2_0"
-#   for tag in F21:   BCSTag[tag]= "Fortuna-2_1"
-#   for tag in G10:   BCSTag[tag]= "Ganymed-1_0"
-#   for tag in G10p:  BCSTag[tag]= "Ganymed-1_0_M"
-#   for tag in G20:   BCSTag[tag]= "Ganymed-1_0_M"
-#   for tag in G30:   BCSTag[tag]= "Ganymed-1_0_Reynolds"
-   for tag in G40:   BCSTag[tag]= "Ganymed-4_0_Reynolds"
-   for tag in ICA:   BCSTag[tag]= "Icarus_Reynolds"
-   for tag in NLv3:  BCSTag[tag]= "Icarus-NLv3_Reynolds"
-#   for tag in GITOL: BCSTag[tag]= "Icarus_Reynolds"
-#   for tag in INL:   BCSTag[tag]= "Icarus-NLv3_Reynolds"
-#   for tag in GITNL: BCSTag[tag]= "Icarus-NLv3_Reynolds"
-#   for tag in NewStructureBCTag: BCSTag[tag]= tag
+#   for bc_version in F14:   BcsVersionMap[bc_version]= "Fortuna-1_4"
+#   for bc_version in F20:   BcsVersionMap[bc_version]= "Fortuna-2_0"
+#   for bc_version in F21:   BcsVersionMap[bc_version]= "Fortuna-2_1"
+#   for bc_version in G10:   BcsVersionMap[bc_version]= "Ganymed-1_0"
+#   for bc_version in G10p:  BcsVersionMap[bc_version]= "Ganymed-1_0_M"
+#   for bc_version in G20:   BcsVersionMap[bc_version]= "Ganymed-1_0_M"
+#   for bc_version in G30:   BcsVersionMap[bc_version]= "Ganymed-1_0_Reynolds"
+   for bc_version in G40:  BcsVersionMap[bc_version]= "Ganymed-4_0_Reynolds"
+   for bc_version in ICA:  BcsVersionMap[bc_version]= "Icarus_Reynolds"
+   for bc_version in NLv3: BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
+#   for bc_version in GITOL: BcsVersionMap[bc_version]= "Icarus_Reynolds"
+#   for bc_version in INL:   BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
+#   for bc_version in GITNL: BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
+#   for bc_version in NewStructureBCList: BcsVersionMap[bc_version]= bc_version
 #
 
-#   for tag in D214:  BCSTag[tag]= "Fortuna-1_4"
-#   for tag in D540:  BCSTag[tag]= "Fortuna-1_4"
-#   for tag in D561:  BCSTag[tag]= "Fortuna-2_1"
-#   for tag in D580:  BCSTag[tag]= "Ganymed-1_0"
-#   for tag in D591p: BCSTag[tag]= "Ganymed-1_0_M"
-#   for tag in D5A0:  BCSTag[tag]= "Ganymed-1_0_M"
-#   for tag in D5B0:  BCSTag[tag]= "Ganymed-1_0_Reynolds"
-#   for tag in D512:  BCSTag[tag]= "Ganymed-4_0_Reynolds"
-#   for tag in D517:  BCSTag[tag]= "Icarus_Reynolds"
-#   for tag in D525:  BCSTag[tag]= "Icarus-NLv3_Reynolds"
+#   for bc_version in D214:  BcsVersionMap[bc_version]= "Fortuna-1_4"
+#   for bc_version in D540:  BcsVersionMap[bc_version]= "Fortuna-1_4"
+#   for bc_version in D561:  BcsVersionMap[bc_version]= "Fortuna-2_1"
+#   for bc_version in D580:  BcsVersionMap[bc_version]= "Ganymed-1_0"
+#   for bc_version in D591p: BcsVersionMap[bc_version]= "Ganymed-1_0_M"
+#   for bc_version in D5A0:  BcsVersionMap[bc_version]= "Ganymed-1_0_M"
+#   for bc_version in D5B0:  BcsVersionMap[bc_version]= "Ganymed-1_0_Reynolds"
+#   for bc_version in D512:  BcsVersionMap[bc_version]= "Ganymed-4_0_Reynolds"
+#   for bc_version in D517:  BcsVersionMap[bc_version]= "Icarus_Reynolds"
+#   for bc_version in D525:  BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
 #
-   TagsRank['Ganymed-4_0_Reynolds'] = 12
-   TagsRank['Ganymed-4_0_Ostia']    = 13
-   TagsRank['Ganymed-4_0_MERRA-2']  = 14
-   TagsRank['Icarus_Reynolds']      = 15
-   TagsRank['Icarus_MERRA-2']       = 16
-   TagsRank['Icarus_Ostia']         = 17
-   TagsRank['Icarus-NLv3_Reynolds'] = 18
-   TagsRank['Icarus-NLv3_MERRA-2']  = 19
-   TagsRank['Icarus-NLv3_Ostia']    = 20
-   for tag in NewStructureBCTag: TagsRank[tag] = 21
-   tag_initialized = True
+   BcsRank['Ganymed-4_0_Reynolds'] = 12
+   BcsRank['Ganymed-4_0_Ostia']    = 13
+   BcsRank['Ganymed-4_0_MERRA-2']  = 14
+   BcsRank['Icarus_Reynolds']      = 15
+   BcsRank['Icarus_MERRA-2']       = 16
+   BcsRank['Icarus_Ostia']         = 17
+   BcsRank['Icarus-NLv3_Reynolds'] = 18
+   BcsRank['Icarus-NLv3_MERRA-2']  = 19
+   BcsRank['Icarus-NLv3_Ostia']    = 20
+   for bc_version in NewStructureBCList: BcsRank[bc_version] = 21
+   bc_version_initialized = True
 
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
@@ -193,7 +193,7 @@ def init_merra2(x):
   x['input:shared:model'] = 'data'
   x['input:shared:agrid'] = 'C180'
   x['input:shared:ogrid'] = '1440x720'
-  x['input:shared:tag']   = 'Ganymed-4_0'
+  x['input:shared:bc_version']   = 'Ganymed-4_0'
   x['input:surface:catch_model']   = 'catch'
   x['input:shared:rst_dir'] = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
 
@@ -253,10 +253,10 @@ def get_bcs_basename(bcs):
   while bcs[-1] == '/': bcs = bcs[0:-1] # remove extra '/'
   return os.path.basename(bcs)
 
-def we_default(tag):
+def we_default(bc_version):
    default_ = '26'
-   if tag =='NLv3' : default_ = '13'
-   if tag in NewStructureBCTag  : default_ = '13'
+   if bc_version =='NLv3' : default_ = '13'
+   if bc_version in NewStructureBCList  : default_ = '13'
    return default_
 
 def zoom_default(x):
@@ -336,10 +336,10 @@ def get_command_line_from_answers(answers):
    if newid.strip():
      out_newid = " -newid " + newid
 
-   in_tagin = ''
-   if answers.get("input:shared:tag"):
-     in_tagin = " -tagin " + answers["input:shared:tag"]        
-   tagout = " -tagout " + answers["output:shared:tag"]       
+   bcvin = ''
+   if answers.get("input:shared:bc_version"):
+     bcvin = " -bcvin " + answers["input:shared:bc_version"]        
+   bcvout = " -bcvout " + answers["output:shared:bc_version"]       
 
    ocnmdlin  = ''
    if answers.get("input:shared:model"):
@@ -402,8 +402,8 @@ def get_command_line_from_answers(answers):
                                           ocnmdlout + \
                                           oceanin + \
                                           oceanout + \
-                                          in_tagin + \
-                                          tagout + \
+                                          bcvin + \
+                                          bcvout + \
                                           rst_dir  + \
                                           out_dir  + \
                                           in_bcsdir + \
@@ -443,19 +443,19 @@ def get_config_from_answers(answers):
 
    return config
 
-def get_bcTag(tag, ogrid):
-  bctag = BCSTag[tag]
-  if bctag in NewStructureBCTag : return bctag
+def get_bcVersion(bc_version, ogrid):
+  bcVersion = BcsVersionMap[bc_version]
+  if bcVersion in NewStructureBCList : return bcVersion
   if ogrid[0].upper() == "C":
-     bctag=bctag.replace('_Reynolds','_Ostia')
+     bcVersion=bcVersion.replace('_Reynolds','_Ostia')
   else:
      xy = ogrid.upper().split('X')
      x = int(xy[0])
-     if x == 1440:   bctag=bctag.replace('_Reynolds','_MERRA-2')
+     if x == 1440:   bcVersion=bcVersion.replace('_Reynolds','_MERRA-2')
      if x == 2880:
-        bctag=bctag.replace('_Reynolds','_Ostia')
-        bctag=bctag.replace('_M','_D')
-  return bctag
+        bcVersion=bcVersion.replace('_Reynolds','_Ostia')
+        bcVersion=bcVersion.replace('_M','_D')
+  return bcVersion
 
 def get_grid_subdir(bcdir, agrid, ogrid, model):
    def get_name_with_grid( grid, names, a_o):
@@ -516,13 +516,13 @@ def get_grid_subdir(bcdir, agrid, ogrid, model):
    return g
 
 def get_bcsdir(x, opt):
-  init_tags()
-  tag   = x.get('input:shared:tag')
+  init_bc_versions()
+  bc_version   = x.get('input:shared:bc_version')
   agrid = x.get('input:shared:agrid')
   ogrid = x.get('input:shared:ogrid')
   model = x.get('input:shared:model')
   if opt.upper() == "OUT":
-    tag   = x.get('output:shared:tag')
+    bc_version   = x.get('output:shared:bc_version')
     agrid = x.get('output:shared:agrid')
     ogrid = x.get('output:shared:ogrid')
     model = x.get('output:shared:model')
@@ -531,35 +531,35 @@ def get_bcsdir(x, opt):
   base = 'discover_legacy'
   if model != "data":
      base = 'discover_couple'
-  if tag in NewStructureBCTag:
+  if bc_version in NewStructureBCList:
      base = 'discover_ns'
   if x.get('input:shared:MERRA-2') and opt.upper() == "IN":
      base = 'discover_ops'
 
   bc_base = BCBase[base]
 
-  bctag   = get_bcTag(tag,ogrid)
-  tagrank = TagsRank[bctag]
+  bcVersion   = get_bcVersion(bc_version,ogrid)
+  bc_versionrank = BcsRank[bcVersion]
 
-  if (tagrank >= TagsRank['NL3']) :
-     bcdir = bc_base+'/'+ bctag+'/geometry/'
-  elif (tagrank >= TagsRank['Icarus-NLv3_Reynolds']) :
-     bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
+  if (bc_versionrank >= BcsRank['NL3']) :
+     bcdir = bc_base+'/'+ bcVersion+'/geometry/'
+  elif (bc_versionrank >= BcsRank['Icarus-NLv3_Reynolds']) :
+     bcdir = bc_base+'/Icarus-NLv3/'+bcVersion+'/'
      if model == 'MOM6' or model == 'MOM5':
         bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
-  elif (tagrank >= TagsRank['Icarus_Reynolds']):
+  elif (bc_versionrank >= BcsRank['Icarus_Reynolds']):
      if bc_base == BCBase['discover_ops']:
-        bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
+        bcdir = bc_base+'/Icarus_Updated/'+bcVersion+'/'
      else:
-        bcdir = bc_base+'/Icarus/'+bctag+'/'
+        bcdir = bc_base+'/Icarus/'+bcVersion+'/'
      if model == 'MOM6' or model == 'MOM5':
         bcdir = bc_base+'/Icarus/'+model+'/'
-  elif(tagrank >= TagsRank["Ganymed-4_0_Reynolds"]):
-     bcdir = bc_base + '/Ganymed-4_0/'+bctag+'/'
+  elif(bc_versionrank >= BcsRank["Ganymed-4_0_Reynolds"]):
+     bcdir = bc_base + '/Ganymed-4_0/'+bcVersion+'/'
      if model == 'MOM6' or model == 'MOM5':
         bcdir = bc_base+'/Ganymed/'+model+'/'
   else:
-     bcdir = bc_base + '/' + bctag + '/'
+     bcdir = bc_base + '/' + bcVersion + '/'
      if model == 'MOM6' or model == 'MOM5':
         bcdir = bc_base+'/Ganymed/'+model+'/'
 

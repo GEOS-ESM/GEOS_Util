@@ -54,8 +54,8 @@ class lake_landice_saltwater(remap_base):
 
      label = ''
      if config['output']['shared']['label']:
-       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
-               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir)
+       label = '.' + config['input']['shared']['bc_version'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['bc_version']+ '.' + get_bcs_basename(out_bcsdir)
 
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
 

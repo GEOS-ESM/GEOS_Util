@@ -8,8 +8,8 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
-    #the tag info here is not critical. It is for command_line options
-    tag: none
+    #the bc_version info here is not critical. It is used in command_line options
+    bc_version: none
     MERRA-2: false
     agrid:
     bcs_dir:
@@ -26,8 +26,8 @@ input:
     catch_tilefile: null
 output:
   shared:
-    #the tag info here is not critical. It is for command_line options
-    tag: none
+    #the bc_version info here is not critical. It is used in command_line options
+    bc_version: none
     label: false
     agrid:
     bcs_dir:

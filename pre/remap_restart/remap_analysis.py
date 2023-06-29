@@ -66,8 +66,8 @@ class analysis(remap_base):
      out_bcsdir = config['output']['shared']['bcs_dir']
      label = ''
      if config['output']['shared']['label']:
-       label = '.' + config['input']['shared']['tag'] + '.' + get_bcs_basename(in_bcsdir) + \
-               '.' + config['output']['shared']['tag']+ '.' + get_bcs_basename(out_bcsdir)
+       label = '.' + config['input']['shared']['bc_version'] + '.' + get_bcs_basename(in_bcsdir) + \
+               '.' + config['output']['shared']['bc_version']+ '.' + get_bcs_basename(out_bcsdir)
 
      aqua   = config['output']['analysis']['aqua']
      local_fs=[]

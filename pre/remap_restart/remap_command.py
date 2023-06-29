@@ -44,8 +44,8 @@ def parse_args(program_description):
     p_command.add_argument('-expid', help='restart id for input restarts')
     p_command.add_argument('-newid', default="",help='restart id for output restarts')
 
-    p_command.add_argument('-tagin',  help='GCM or DAS tag associated with inputs')
-    p_command.add_argument('-tagout', help='GCM or DAS tag associated with outputs')
+    p_command.add_argument('-bcvin',  help='bc_version associated with inputs')
+    p_command.add_argument('-bcvout', help='bc_version associated with outputs')
 
     p_command.add_argument('-in_wemin',   help='minimum water snow water equivalent for input catch/cn')
     p_command.add_argument('-out_wemin',  help='minimum water snow water equivalent for output catch/cn')
@@ -64,9 +64,9 @@ def parse_args(program_description):
     p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
     p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
     p_command.add_argument('-np',    action='store_true', help="No prompt. Overwrite config files without prompting questions")
-    p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with tags and resolutions")
-    p_command.add_argument('-in_bcsdir',  default="", help= "users' alternative boundary condition files for input. If not specified (default), it will be deduced from tag and resolution information")
-    p_command.add_argument('-out_bcsdir', default="", help= "users' alternative boundary condition files for output. If not specified (default), it will be deduced from tag and resolution information")
+    p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with bc_versions and resolutions")
+    p_command.add_argument('-in_bcsdir',  default="", help= "users' alternative boundary condition files for input. If not specified (default), it will be deduced from bc_version and resolution information")
+    p_command.add_argument('-out_bcsdir', default="", help= "users' alternative boundary condition files for output. If not specified (default), it will be deduced from bc_version and resolution information")
     p_command.add_argument('-zoom',   help= "zoom for the surface input")
 
     p_command.add_argument('-qos',    default = "debug", help= "queue of slurm job", choices=['debug', 'allnccs'])
@@ -90,7 +90,7 @@ def get_answers_from_command_line(cml):
    if  cml.merra2:
       init_merra2(answers)
    else:   
-      answers["input:shared:tag"]      = cml.tagin
+      answers["input:shared:bc_version"]      = cml.bcvin
       answers["input:surface:catch_model"] = cml.catch_model
       answers["input:shared:rst_dir"] = os.path.abspath(cml.rst_dir + '/')
       fvcore_name(answers) 
@@ -102,7 +102,7 @@ def get_answers_from_command_line(cml):
    answers["output:shared:agrid"]      = cml.grout
    answers["output:air:nlevel"]        = cml.levsout
    answers["output:shared:expid"]      = cml.newid
-   answers["output:shared:tag"]        = cml.tagout
+   answers["output:shared:bc_version"]        = cml.bcvout
    answers["output:shared:model"]      = cml.ocnmdlout
    answers["output:shared:label"]      = cml.lbl
    ogrid                               = cml.oceanout
@@ -139,12 +139,12 @@ def get_answers_from_command_line(cml):
    if cml.in_wemin :
      answers["input:surface:wemin"]  = cml.in_wemin
    else:
-     answers["input:surface:wemin"]  = we_default(answers['input:shared:tag'])
+     answers["input:surface:wemin"]  = we_default(answers['input:shared:bc_version'])
 
    if cml.out_wemin :
      answers["output:surface:wemin"] = cml.out_wemin
    else:
-     answers["output:surface:wemin"] = we_default(answers['output:shared:tag'])
+     answers["output:surface:wemin"] = we_default(answers['output:shared:bc_version'])
 
    answers["slurm:account"]    = cml.account
    answers["slurm:qos"]        = cml.qos
