@@ -85,7 +85,7 @@ def ask_questions():
     C24   C360  C1440  C540
     C48   C500  C2880  C1080
     C90   C720  C5760  C2160  C1536\n''',
-            "default": 'C360',
+            "validate": lambda text : text in ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536'],
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
         },
@@ -134,6 +134,7 @@ def ask_questions():
     C48   C500  C2880  C1080
     C90   C720  C5760  C2160  C1536\n''',
             "default": 'C360',
+            "validate": lambda text : text in ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536'],
         },
 
         {
@@ -175,52 +176,51 @@ def ask_questions():
         },
 
         {
-            "type": "text",
+            "type": "select",
             "name": "input:shared:bc_version",
-            "message": f'''Enter BC version that matches input restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...)
+            "message": f'''Enter BC version that matches input restarts: 
 
-    BC version
-    ---------------
-    ICA  : Icarus
-    NLv3 : New land version 3
-
-    New directory structures:
-
-    NL3  : Newland version 3
-    NL4  : Newland version 4
-    NL5  : Newland version 5
-    v06, v07, v08, v09: Not generated yet \n''',
-            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
+    BC version      Sample GCM and DAS tags
+    ----------      -----------------------
+    Ganymed-4_0:    Ganymed-4_0 ...... Heracles-5_4_p3
+    Ganymed-4_0:    GEOSadas-5_12_2 .. GEOSadas-5_16_5
+    ICA:            Icarus ........... Jason
+    ICA:            10.3 ............. 10.18
+    ICA:            GEOSadas-5_17_0 .. GEOSadas-5_24_0_p1
+    NL3:            Icarus-NL ........ Jason-NL
+    NL3:            10.19 ............ 10.23
+    NL3:            11.00 ............ 11.1
+    NL3:            GEOSadas-5_25_1 .. GEOSadas-5_29_4\n''',
+            "choices": ['NL3', 'ICA','Ganymed-4_0'],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
         {
-            "type": "text",
+            "type": "select",
             "name": "output:shared:bc_version",
             "message": "Enter BC version for new restarts:",
-            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
-            "default": "NLv3",
+            "choices": ['NL3', 'ICA','Ganymed-4_0'],
+            "default": "NL3",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
         # show the message if it is merra2
         {
-            "type": "text",
+            "type": "select",
             "name": "output:shared:bc_version",
-            "message": f'''Enter BC version for new restarts: (ICA, NLv3, NL3, NL4, NL5, v06, v07,...)
-
-    BC version
-    ---------------
-    ICA  : Icarus
-    NLv3 : New land version 3
-
-    New directory structures:
-
-    NL3  : Newland version 3
-    NL4  : Newland version 4
-    NL5  : Newland version 5
-    v06, v07, v08, v09: Not generated yet \n''',
-            "validate": lambda text : text in ["ICA", "NLv3", "NL3", "NL4", "NL5", "v06", "v07"],
-            "default": "NLv3",
+            "message": f'''Enter BC version for new restarts:
+    BC version      Sample GCM and DAS tags
+    ----------      -----------------------
+    Ganymed-4_0:    Ganymed-4_0 ...... Heracles-5_4_p3
+    Ganymed-4_0:    GEOSadas-5_12_2 .. GEOSadas-5_16_5
+    ICA:            Icarus ........... Jason
+    ICA:            10.3 ............. 10.18
+    ICA:            GEOSadas-5_17_0 .. GEOSadas-5_24_0_p1
+    NL3:            Icarus-NL ........ Jason-NL
+    NL3:            10.19 ............ 10.23
+    NL3:            11.00 ............ 11.1
+    NL3:            GEOSadas-5_25_1 .. GEOSadas-5_29_4\n''',
+            "choices": ['NL3', 'ICA','Ganymed-4_0'],
+            "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
         },
 
@@ -252,15 +252,6 @@ def ask_questions():
         },
 
         {
-            "type": "select",
-            "name": "input:surface:catch_model",
-            "message": "What is the catchment model? ",
-            "choices": ['catch','catchcnclm40','catchcnclm45'],
-            "default": 'catch',
-            "when": lambda x: x["output:surface:remap"] and not x["input:shared:MERRA-2"]
-        },
-
-        {
             "type": "confirm",
             "name": "output:analysis:bkg",
             "message": "Regrid bkg files?",
@@ -276,18 +267,18 @@ def ask_questions():
             "type": "text",
             "name": "input:surface:wemin",
             "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?",
-            "default": lambda x: we_default(x.get('input:shared:bc_version'))
+            "default": lambda x: wemin_default(x.get('input:shared:bc_version'))
         },
         {
             "type": "text",
             "name": "output:surface:wemin",
             "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?",
-            "default": lambda x: we_default(x.get('output:shared:bc_version'))
+            "default": lambda x: wemin_default(x.get('output:shared:bc_version'))
         },
         {
             "type": "text",
             "name": "input:surface:zoom",
-            "message": "What is value of zoom (paremeter of radius search, smaller value means larger radius) for surface inputs [1-8]?",
+            "message": "What is value of zoom (parameter of radius search, smaller value means larger radius) for surface inputs [1-8]?",
             "default": lambda x: zoom_default(x)
         },
         {
@@ -299,7 +290,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:shared:label",
-            "message": "Would you like to add labels (bc_versions,resoultions) to restarts' names?",
+            "message": "Would you like to add labels (bc_versions,resolutions) to restarts' names?",
             "default": False,
         },
 
@@ -328,7 +319,10 @@ def ask_questions():
       answers['input:shared:yyyymmddhh'] = answers['input:shared:yyyymmddhh']+ '21'
    answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
-   
+
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:  
+      answers["input:surface:catch_model"] = catch_model(answers)
+ 
    return answers
 
 if __name__ == "__main__":

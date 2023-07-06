@@ -139,12 +139,12 @@ def get_answers_from_command_line(cml):
    if cml.in_wemin :
      answers["input:surface:wemin"]  = cml.in_wemin
    else:
-     answers["input:surface:wemin"]  = we_default(answers['input:shared:bc_version'])
+     answers["input:surface:wemin"]  = wemin_default(answers['input:shared:bc_version'])
 
    if cml.out_wemin :
      answers["output:surface:wemin"] = cml.out_wemin
    else:
-     answers["output:surface:wemin"] = we_default(answers['output:shared:bc_version'])
+     answers["output:surface:wemin"] = wemin_default(answers['output:shared:bc_version'])
 
    answers["slurm:account"]    = cml.account
    answers["slurm:qos"]        = cml.qos

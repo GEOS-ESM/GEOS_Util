@@ -144,7 +144,7 @@ def init_bc_versions():
 #   for bc_version in GITOL: BcsVersionMap[bc_version]= "Icarus_Reynolds"
 #   for bc_version in INL:   BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
 #   for bc_version in GITNL: BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
-#   for bc_version in NewStructureBCList: BcsVersionMap[bc_version]= bc_version
+   for bc_version in NewStructureBCList: BcsVersionMap[bc_version]= bc_version
 #
 
 #   for bc_version in D214:  BcsVersionMap[bc_version]= "Fortuna-1_4"
@@ -239,6 +239,31 @@ def fvcore_name(x):
   x['input:shared:expid'] = expid 
   return fname
 
+def catch_model(x):
+  ymdh = x['input:shared:yyyymmddhh']
+  time = ymdh[0:8] + '_'+ymdh[8:10]
+  rst_dir = x.get('input:shared:rst_dir')
+  if not rst_dir : return False
+
+  x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
+
+  files = glob.glob(rst_dir+'/*catch*')
+
+  if len (files) == 0 : return False
+  fname= ''
+  if len(files) == 1:
+    fname = os.path.basename(files[0])
+
+  if len(files) > 1 :
+    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
+    fname = os.path.basename(files[0])
+  model = 'catch'
+  if 'cnclm40' in fname.lower():
+    model = 'catchcnclm40'
+  if 'cnclm45' in fname.lower():
+    model = 'catchcnclm45'
+  return model
+
 def data_ocean_default(resolution):
    # the default string should match the choice in remapl_question.py
    default_ = 'CS  (same as atmosphere OSTIA cubed-sphere grid)' 
@@ -253,7 +278,7 @@ def get_bcs_basename(bcs):
   while bcs[-1] == '/': bcs = bcs[0:-1] # remove extra '/'
   return os.path.basename(bcs)
 
-def we_default(bc_version):
+def wemin_default(bc_version):
    default_ = '26'
    if bc_version =='NLv3' : default_ = '13'
    if bc_version in NewStructureBCList  : default_ = '13'
