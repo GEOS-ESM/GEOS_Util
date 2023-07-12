@@ -57,7 +57,6 @@ class catchANDcn(remap_base):
      surflay    = config['output']['surface']['surflay']
      in_tilefile = config['input']['surface']['catch_tilefile']
 
-     in_bcsdir  = get_landdir(in_bcsdir)
      if not in_tilefile :
         if not in_bcsdir:
            exit("Must provide either input tile file or input bcs directory")
