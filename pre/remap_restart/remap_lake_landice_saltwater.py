@@ -7,7 +7,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base import remap_base
-from remap_utils import get_bcs_basename
+from remap_utils import get_label
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -52,12 +52,8 @@ class lake_landice_saltwater(remap_base):
         types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
 
-     label = ''
-     if config['output']['shared']['label']:
-       label = '.' + config['input']['shared']['bc_version'] + '.' + get_bcs_basename(in_bcsdir) + \
-               '.' + config['output']['shared']['bc_version']+ '.' + get_bcs_basename(out_bcsdir)
-
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + label + types
+     label = get_label(config) 
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
      saltwater = ''
      seaice    = ''

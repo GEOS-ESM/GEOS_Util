@@ -101,7 +101,7 @@ def main():
 
        # write config to yaml file
      config_to_yaml(config, config_yaml,noprompt = noprompt)
-
+  print(config_yaml)
   # upper air
   upper = upperair(params_file=config_yaml)
   upper.remap()

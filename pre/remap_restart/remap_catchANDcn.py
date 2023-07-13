@@ -10,15 +10,11 @@ import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
-from remap_utils import get_bcs_basename
+from remap_utils import get_label
 
 def get_landdir(bcsdir):
   if bcsdir :
-    k = bcsdir.find('/geometry/')
-    if k != -1 :
-       while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
-       sub_grids = os.path.basename(bcsdir)
-       bcsdir = bcsdir[0:k]+'/land/'+ sub_grids
+    bcsdir = bcsdir.replace('/geometry/','/land/')
   return bcsdir
 
 class catchANDcn(remap_base):
@@ -94,12 +90,9 @@ class catchANDcn(remap_base):
     
      account    = config['slurm']['account']
      # even the input is binary, the output would be nc4
-     label = ''
-     if config['output']['shared']['label']:
-       label = '.' + config['input']['shared']['bc_version'] + '.' + get_bcs_basename(in_bcsdir) + \
-               '.' + config['output']['shared']['bc_version']+ '.' + get_bcs_basename(out_bcsdir)
+     label = get_label(config) 
 
-     suffix     = time+'z' + label + '.nc4'
+     suffix     = time+'z.nc4' + label
 
      if (expid) :
         expid = expid + '.'

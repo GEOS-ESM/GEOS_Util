@@ -272,11 +272,19 @@ def data_ocean_default(resolution):
 
 def get_bcs_basename(bcs):
   if not bcs: return ""
-  k = bcs.find('/geometry')
-  if k != -1 :
-     bcs = bcs[0:k]
   while bcs[-1] == '/': bcs = bcs[0:-1] # remove extra '/'
   return os.path.basename(bcs)
+
+def get_label(config):
+  label = ''
+  if config['output']['shared']['label']:
+     in_resolution  = get_bcs_basename(config['input']['shared']['bcs_dir'])
+     out_resolution = get_bcs_basename(config['output']['shared']['bcs_dir'])
+     in_bcv         =  config['input']['shared']['bc_version']
+     out_bcv        =  config['output']['shared']['bc_version']
+     label = '.' + in_bcv  + '.' + in_resolution + \
+             '.' + out_bcv + '.' + out_resolution
+  return label
 
 def wemin_default(bc_version):
    default_ = '26'
