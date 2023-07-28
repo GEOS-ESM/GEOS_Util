@@ -12,6 +12,8 @@ DESC   = ''
 rcfile = 'stats.rc'
 fields = 'p u v t q h'
 rms    = 0
+regions = 'GLO NHE TRO SHE'
+xregions = 'GLO NHE TRO SHE NWQ NEQ SWQ SEQ NAM EUR NPO SPO XPO'
 
         num = 0
 while ( num < numargs )
@@ -42,9 +44,33 @@ if( subwrd(args,num) = '-fields' )
     endwhile
 endif
 
+if( subwrd(args,num) = '-regions' )
+     regions = ''
+           k = 1
+    while( k > 0 )
+           L = num + k
+        region  = subwrd(args,L)
+    if( region  = '' )
+        k = -1
+    else
+        bit = substr(region,1,1)
+        if( bit = '-' )
+              k = -1
+        else
+              regions = regions % ' ' % region
+              k = k+1
+        endif
+    endif
+    endwhile
+endif
+
 endwhile
+
 'numargs 'fields
  numfields = result
+
+'numargs 'regions
+ numregions = result
 
 if( SOURCE != NULL ) 
    'run setenv "SOURCE" 'SOURCE
@@ -155,8 +181,14 @@ if( field = subwrd(fields,j) & field != p )
 * ---------------------------
     x = 1
     while ( x<=xdim )
-      'run 'geosutil'/plots/grads_util/rmscmpz -x 'x' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
-      'c'
+       r = 1
+       while ( r<=numregions )
+         if( subwrd(regions,r) = subwrd(xregions,x) )
+           'run 'geosutil'/plots/grads_util/rmscmpz -x 'x' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
+           'c'
+         endif
+         r = r + 1
+       endwhile
        x = x + 1
     endwhile
 

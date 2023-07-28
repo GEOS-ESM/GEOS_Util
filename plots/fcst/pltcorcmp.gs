@@ -12,6 +12,8 @@ DESC   = ''
 rms    = 0
 rcfile = 'stats.rc'
 fields = 'p u v t q h'
+regions = 'GLO NHE TRO SHE'
+xregions = 'GLO NHE TRO SHE NWQ NEQ SWQ SEQ NAM EUR NPO SPO XPO'
 
         num = 0
 while ( num < numargs )
@@ -42,9 +44,33 @@ if( subwrd(args,num) = '-fields' )
     endwhile
 endif
 
+if( subwrd(args,num) = '-regions' )
+     regions = ''
+           k = 1
+    while( k > 0 )
+           L = num + k
+        region  = subwrd(args,L)
+    if( region  = '' )
+        k = -1
+    else
+        bit = substr(region,1,1)
+        if( bit = '-' )
+              k = -1
+        else
+              regions = regions % ' ' % region
+              k = k+1
+        endif
+    endif
+    endwhile
+endif
+
 endwhile
+
 'numargs 'fields
  numfields = result
+
+'numargs 'regions
+ numregions = result
 
 if( SOURCE != NULL ) 
    'run setenv "SOURCE" 'SOURCE
@@ -166,8 +192,14 @@ if( field = subwrd(fields,j) )
     if( level.z = 1 | level.z = 2 | level.z = 3 | level.z = 4 | level.z = 5 | level.z = 7 | level.z = 10 | level.z = 20 | level.z = 30 | level.z = 40 | level.z = 50 | level.z = 70 | level.z = 100 | level.z = 150 | level.z = 200 | level.z = 250 | level.z = 300 | level.z = 350 | level.z = 400 | level.z = 450 | level.z = 500 | level.z = 550 | level.z = 600 | level.z = 650 | level.z = 700 | level.z = 750 | level.z = 800 | level.z = 850 | level.z = 900 | level.z = 925 | level.z = 950 | level.z = 975 | level.z = 1000 )
       x = 1
       while ( x<=xdim )
-      'run 'geosutil'/plots/grads_util/corcmp -x 'x' -lev 'level.z' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
-      'c'
+        r = 1
+        while ( r<=numregions )
+          if( subwrd(regions,r) = subwrd(xregions,x) )  
+            'run 'geosutil'/plots/grads_util/corcmp -x 'x' -lev 'level.z' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
+            'c'
+          endif
+          r = r + 1
+        endwhile
       x = x + 1
       endwhile
     endif
