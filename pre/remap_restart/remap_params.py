@@ -63,15 +63,8 @@ class remap_params(object):
   def params_for_air(self, config_tpl):
      if self.common_in['MERRA-2']:
        return config_tpl 
-        
-     ogrid = config_tpl['input']['shared']['ogrid']
-     bcvout = self.common_out['bc_version']
-     bcVersion  = get_bcVersion(bcvout, ogrid)
-     bc_versionrank = BcsRank[bcVersion]
      if ( not config_tpl['input']['air']['drymass']) :
-        config_tpl['input']['air']['drymass'] = 0
-        if bc_versionrank >=12 :
-          config_tpl['input']['air']['drymass'] = 1
+        config_tpl['input']['air']['drymass'] = 1
 
      return config_tpl
 
@@ -82,15 +75,12 @@ class remap_params(object):
     return config_tpl
 
   def params_for_surface(self, config_tpl):
-    config_tpl['output']['surface']['surflay'] = 20.
-    bcvout = self.common_out['bc_version']
+    config_tpl['output']['surface']['surflay'] = 50.
+    bc_version = self.common_out['bc_version']
     ogrid = self.common_out['ogrid']
-    bcVersion = get_bcVersion(bcvout, ogrid)
-    bc_versionrank = BcsRank[bcVersion]
-    if bc_versionrank >=12 :
-       config_tpl['output']['surface']['surflay'] = 50.
-    if bc_versionrank >= BcsRank["Icarus_Reynolds"]:
-       config_tpl['output']['surface']['split_saltwater'] = True
+    config_tpl['output']['surface']['split_saltwater'] = True
+    if 'Ganymed' in bc_version :
+       config_tpl['output']['surface']['split_saltwater'] = False
     config_tpl['input']['surface']['zoom']= self.surf_in['zoom']
     config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
     config_tpl['output']['surface']['wemin']= self.surf_out['wemin']
@@ -100,13 +90,8 @@ class remap_params(object):
   def params_for_analysis(self, config_tpl):
     config_tpl['output']['analysis']['lcv'] = self.ana_out.get('lcv')
     config_tpl['output']['analysis']['bkg'] = self.ana_out.get('bkg')
+    config_tpl['output']['analysis']['aqua'] = True
     
-    ogrid = self.common_out['ogrid']
-    bcvout = self.common_out['bc_version']
-    bcVersion  = get_bcVersion(bcvout, ogrid)
-    bc_versionrank = BcsRank[bcVersion]
-    if bc_versionrank >= BcsRank["Ganymed-4_0_Reynolds"] :
-      config_tpl['output']['analysis']['aqua'] = True
     return config_tpl
 
 if __name__ == "__main__":

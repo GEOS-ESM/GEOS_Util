@@ -180,18 +180,12 @@ def ask_questions():
             "name": "input:shared:bc_version",
             "message": f'''Enter BC version that matches input restarts: 
 
-    BC version      Sample GCM and DAS tags
-    ----------      -----------------------
-    Ganymed-4_0:    Ganymed-4_0 ...... Heracles-5_4_p3
-    Ganymed-4_0:    GEOSadas-5_12_2 .. GEOSadas-5_16_5
-    ICA:            Icarus ........... Jason
-    ICA:            10.3 ............. 10.18
-    ICA:            GEOSadas-5_17_0 .. GEOSadas-5_24_0_p1
-    NL3:            Icarus-NL ........ Jason-NL
-    NL3:            10.19 ............ 10.23
-    NL3:            11.00 ............ 11.1
-    NL3:            GEOSadas-5_25_1 .. GEOSadas-5_29_4\n''',
-            "choices": ['NL3', 'ICA','Ganymed-4_0'],
+    BC version         ADAS tags             GCM tags
+    ----------      ---------------     ------------------
+    GM4:            5_12_4              Ganymed-4_0 -
+    ICA:            5_13 ... 5_22       Icarus.....v10.18  
+    NL3:            5_25 -              Icarus_NL, v10.19- \n ''',
+            "choices": ['NL3', 'ICA','GM4'],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
@@ -199,7 +193,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": "Enter BC version for new restarts:",
-            "choices": ['NL3', 'ICA','Ganymed-4_0'],
+            "choices": ['NL3', 'ICA','GM4'],
             "default": "NL3",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -208,18 +202,12 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": f'''Enter BC version for new restarts:
-    BC version      Sample GCM and DAS tags
-    ----------      -----------------------
-    Ganymed-4_0:    Ganymed-4_0 ...... Heracles-5_4_p3
-    Ganymed-4_0:    GEOSadas-5_12_2 .. GEOSadas-5_16_5
-    ICA:            Icarus ........... Jason
-    ICA:            10.3 ............. 10.18
-    ICA:            GEOSadas-5_17_0 .. GEOSadas-5_24_0_p1
-    NL3:            Icarus-NL ........ Jason-NL
-    NL3:            10.19 ............ 10.23
-    NL3:            11.00 ............ 11.1
-    NL3:            GEOSadas-5_25_1 .. GEOSadas-5_29_4\n''',
-            "choices": ['NL3', 'ICA','Ganymed-4_0'],
+    BC version         ADAS tags             GCM tags
+    ----------      ---------------     ------------------
+    GM4:            5_12_4              Ganymed-4_0 -
+    ICA:            5_13 ... 5_22       Icarus.....v10.18  
+    NL3:            5_25 -              Icarus_NL, v10.19- \n ''',
+            "choices": ['NL3', 'ICA','GM4'],
             "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
         },

@@ -9,167 +9,6 @@ import questionary
 import glob
 import shlex
 
-# define some constants for bcs
-
-NewStructureBCList = ['NL3', 'NL4', 'NL5', 'v06', 'v07', 'v08', 'v09']
-BCBase={}
-BCBase['discover_ops']     = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
-BCBase['discover_legacy']  = "/discover/nobackup/projects/gmao/bcs_shared/legacy_bcs"
-BCBase['discover_couple'] = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
-BCBase['discover_ns']  = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
-
-BcsVersionMap = {}
-BcsRank = {}
-bc_version_initialized = False
-
-def init_bc_versions():
-   # copy and paste from rigrid.pl
-   # minor change. Add "D" to the number for each group
-   # BCS Tag: Fortuna-1_4
-   global bc_version_initialized
-   if bc_version_initialized : return
-#   F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
-#   D214 = ( 'D214',              'GEOSdas-2_1_4',          'GEOSdas-2_1_4-m1',
-#            'GEOSdas-2_1_4-m2', 'GEOSdas-2_1_4-m3',       'GEOSdas-2_1_4-m4' )
-#   D540 = ( 'D540',              'GEOSadas-5_4_0',         'GEOSadas-5_4_0_p1',
-#            'GEOSadas-5_4_0_p2',  'GEOSadas-5_4_0_p3',    'GEOSadas-5_4_0_p4',
-#            'GEOSadas-5_4_1',     'GEOSadas-5_4_1_p1',    'GEOSadas-5_4_2',
-#            'GEOSadas-5_4_3',     'GEOSadas-5_4_4',       'GEOSadas-5_5_0',
-#            'GEOSadas-5_5_1',     'GEOSadas-5_5_2',       'GEOSadas-5_5_3' )
-
-  # BCS Tag: Fortuna-2_0
-  #---------------------
-#   F20  = ( 'F20',                    'Fortuna-2_0')
-
-  # BCS Tag: Fortuna-2_1
-  #---------------------
-#   F21  = ( 'F21',                  'Fortuna-2_1',         'Fortuna-2_1_p1',
-#            'Fortuna-2_1_p2',       'Fortuna-2_1_p3',      'Fortuna-2_2',
-#            'Fortuna-2_2_p1',       'Fortuna-2_2_p2',      'Fortuna-2_3',
-#            'Fortuna-2_3_p1',       'Fortuna-2_4',         'Fortuna-2_4_p1',
-#            'Fortuna-2_4_p2',       'Fortuna-2_5',         'Fortuna-2_5_BETA0',
-#            'Fortuna-2_5_p1',       'Fortuna-2_5_p2',      'Fortuna-2_5_p3',
-#            'Fortuna-2_5_p4',       'Fortuna-2_5_p5',      'Fortuna-2_5_p6',
-#            'Fortuna-2_5_pp2' )
-#   D561 = ( 'D561',                  'GEOSadas-5_6_1',      'GEOSadas-5_6_1_p1',
-#            'GEOSadas-5_6_1_p2',    'GEOSadas-5_6_1_p3',   'GEOSadas-5_6_1_p4',
-#            'GEOSadas-5_6_2',       'GEOSadas-5_6_2_p1',   'GEOSadas-5_6_2_p2',
-#            'GEOSadas-5_6_2_p3',    'GEOSadas-5_6_2_p4',   'GEOSadas-5_6_2_p5',
-#            'GEOSadas-5_6_2_p6',    'GEOSadas-5_7_1',      'GEOSadas-5_7_1_p1',
-#            'GEOSadas-5_7_1_p2',    'GEOSadas-5_7_2',      'GEOSadas-5_7_2_p1',
-#            'GEOSadas-5_7_2_p2',    'GEOSadas-5_7_2_p2_m1','GEOSadas-5_7_2_p3',
-#            'GEOSadas-5_7_2_p3_m1', 'GEOSadas-5_7_2_p3_m2','GEOSadas-5_7_2_p4',
-#            'GEOSadas-5_7_2_p5',    'GEOSadas-5_7_2_p5_m1','GEOSadas-5_7_3',
-#            'GEOSadas-5_7_3_p1',    'GEOSadas-5_7_3_p2',   'GEOSadas-5_7_3_p2' )
-
- # BCS Tag: Ganymed-1_0
- #---------------------
-#   G10 =  ( 'G10',                  'Ganymed-1_0',          'Ganymed-1_0_BETA',
-#            'Ganymed-1_0_BETA1',    'Ganymed-1_0_BETA2',    'Ganymed-1_0_BETA3',
-#            'Ganymed-1_0_BETA4' )
-#
-#   D580 = ( 'D580',                  'GEOSadas-5_8_0',       'GEOSadas-5_9_0',
-#            'GEOSadas-5_9_1' )
-#
-#  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D
-#  #------------------------------------------
-#   G10p = ( 'G10p',                 'Ganymed-1_0_p1',       'Ganymed-1_0_p2',
-#            'Ganymed-1_0_p3',       'Ganymed-1_0_p4',       'Ganymed-1_0_p5',
-#            'Ganymed-1_0_p6' )
-#
-#   D591p= ( 'D591p',                 'GEOSadas-5_9_1_p1',    'GEOSadas-5_9_1_p2',
-#            'GEOSadas-5_9_1_p3',    'GEOSadas-5_9_1_p4',    'GEOSadas-5_9_1_p5',
-#            'GEOSadas-5_9_1_p6',    'GEOSadas-5_9_1_p7',    'GEOSadas-5_9_1_p8',
-#            'GEOSadas-5_9_1_p9' )
-#
-#  # BCS Tags: Ganymed-1_0_M and Ganymed-1_0_D w/ new landice rst
-#  #------------------------------------------------------------------------
-#   G20  = ( 'G20',                  'Ganymed-2_0',          'Ganymed-2_1',
-#            'Ganymed-2_1_p1',       'Ganymed-2_1_p2',       'Ganymed-2_1_p3',
-#            'Ganymed-2_1_p4',       'Ganymed-2_1_p5',       'Ganymed-2_1_p6' )
-#   D5A0 = ( 'D5A0',                  'GEOSadas-5_10_0',      'GEOSadas-5_10_0_p1' )
-#
-#
-# BCS Tags: Ganymed-1_0_Reynolds and Ganymed-1_0_Ostia
-#-----------------------------------------------------
-#   G30  = ( 'G30',                  'Ganymed-3_0',         'Ganymed-3_0_p1' )
-#   D5B0 = ( '5B0',                  'GEOSadas-5_10_0_p2',  'GEOSadas-5_11_0' )
-#
-#  # BCS Tags: Ganymed-4_0_Reynolds, Ganymed-4_0_MERRA-2, and Ganymed-4_0_Ostia
-#  #---------------------------------------------------------------------------
-   G40  = ( 'G40',                  'Ganymed-4_0',         'Ganymed-4_0_p1',
-            'Ganymed-4_1',          'Heracles-1_0',        'Heracles-1_1',
-            'Heracles-2_0',         'Heracles-2_1',        'Heracles-3_0',
-            'Heracles-4_0',         'Heracles-5_4_p3' )
-#   D512 = ( '512',                  'GEOSadas-5_12_2',     'GEOSadas-5_12_4',
-#            'GEOSadas-5_12_4_p1',   'GEOSadas-5_12_4_p2',  'GEOSadas-5_12_4_p3',
-#            'GEOSadas-5_12_5',      'GEOSadas-5_13_0_p1',  'GEOSadas-5_13_0_p2',
-#            'GEOSadas-5_13_1',      'GEOSadas-5_16_5' )
-#
-#  # BCS Tags: Icarus (New Land Parameters, New Topography)
-#  #---------------------------------------------------------------------------
-   ICA  = ( 'ICA',                  'Icarus',              'Jason' )
-   NLv3  = ( 'NLv3',)
-#   D517 = ( '517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
-#            'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
-#            'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
-#            'GEOSadas-5_20_0_p1',   'GEOSadas-5_20_0_p2',  'GEOSadas-5_21_0',
-#            'GEOSadas-5_21_2',      'GEOSadas-5_21_3_p1',  'GEOSadas-5_22_0',
-#            'GEOSadas-5_22_0_p1',   'GEOSadas-5_22_0_p2',  'GEOSadas-5_23_0',
-#            'GEOSadas-5_23_0_p1',   'GEOSadas-5_24_0',     'GEOSadas-5_24_0_p1' )
-#   GITOL = ( 'GITOL', '10.3',  '10.4',  '10.5',
-#             '10.6',  '10.7',  '10.8',
-#             '10.9',  '10.10', '10.11',
-#             '10.12', '10.13', '10.14',
-#             '10.15', '10.16', '10.17',
-#             '10.18'  )
-
-  # BCS Tags: Icarus-NLv3 (New Land Parameters)
-  #---------------------------------------------------------------------------
-#   INL  = ( 'INL', 'Icarus-NL', 'Icarus-NLv3', 'Jason-NL' )
-#   GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
-#   D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
-#                    'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
-
-#   for bc_version in F14:   BcsVersionMap[bc_version]= "Fortuna-1_4"
-#   for bc_version in F20:   BcsVersionMap[bc_version]= "Fortuna-2_0"
-#   for bc_version in F21:   BcsVersionMap[bc_version]= "Fortuna-2_1"
-#   for bc_version in G10:   BcsVersionMap[bc_version]= "Ganymed-1_0"
-#   for bc_version in G10p:  BcsVersionMap[bc_version]= "Ganymed-1_0_M"
-#   for bc_version in G20:   BcsVersionMap[bc_version]= "Ganymed-1_0_M"
-#   for bc_version in G30:   BcsVersionMap[bc_version]= "Ganymed-1_0_Reynolds"
-   for bc_version in G40:  BcsVersionMap[bc_version]= "Ganymed-4_0_Reynolds"
-   for bc_version in ICA:  BcsVersionMap[bc_version]= "Icarus_Reynolds"
-   for bc_version in NLv3: BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
-#   for bc_version in GITOL: BcsVersionMap[bc_version]= "Icarus_Reynolds"
-#   for bc_version in INL:   BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
-#   for bc_version in GITNL: BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
-   for bc_version in NewStructureBCList: BcsVersionMap[bc_version]= bc_version
-#
-
-#   for bc_version in D214:  BcsVersionMap[bc_version]= "Fortuna-1_4"
-#   for bc_version in D540:  BcsVersionMap[bc_version]= "Fortuna-1_4"
-#   for bc_version in D561:  BcsVersionMap[bc_version]= "Fortuna-2_1"
-#   for bc_version in D580:  BcsVersionMap[bc_version]= "Ganymed-1_0"
-#   for bc_version in D591p: BcsVersionMap[bc_version]= "Ganymed-1_0_M"
-#   for bc_version in D5A0:  BcsVersionMap[bc_version]= "Ganymed-1_0_M"
-#   for bc_version in D5B0:  BcsVersionMap[bc_version]= "Ganymed-1_0_Reynolds"
-#   for bc_version in D512:  BcsVersionMap[bc_version]= "Ganymed-4_0_Reynolds"
-#   for bc_version in D517:  BcsVersionMap[bc_version]= "Icarus_Reynolds"
-#   for bc_version in D525:  BcsVersionMap[bc_version]= "Icarus-NLv3_Reynolds"
-#
-   BcsRank['Ganymed-4_0_Reynolds'] = 12
-   BcsRank['Ganymed-4_0_Ostia']    = 13
-   BcsRank['Ganymed-4_0_MERRA-2']  = 14
-   BcsRank['Icarus_Reynolds']      = 15
-   BcsRank['Icarus_MERRA-2']       = 16
-   BcsRank['Icarus_Ostia']         = 17
-   BcsRank['Icarus-NLv3_Reynolds'] = 18
-   BcsRank['Icarus-NLv3_MERRA-2']  = 19
-   BcsRank['Icarus-NLv3_Ostia']    = 20
-   for bc_version in NewStructureBCList: BcsRank[bc_version] = 21
-   bc_version_initialized = True
-
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
@@ -193,7 +32,7 @@ def init_merra2(x):
   x['input:shared:model'] = 'data'
   x['input:shared:agrid'] = 'C180'
   x['input:shared:ogrid'] = '1440x720'
-  x['input:shared:bc_version']   = 'Ganymed-4_0'
+  x['input:shared:bc_version']   = 'GM4'
   x['input:surface:catch_model']   = 'catch'
   x['input:shared:rst_dir'] = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
 
@@ -288,8 +127,7 @@ def get_label(config):
 
 def wemin_default(bc_version):
    default_ = '26'
-   if bc_version =='NLv3' : default_ = '13'
-   if bc_version in NewStructureBCList  : default_ = '13'
+   if bc_version =='NL3' : default_ = '13'
    return default_
 
 def zoom_default(x):
@@ -476,20 +314,6 @@ def get_config_from_answers(answers):
 
    return config
 
-def get_bcVersion(bc_version, ogrid):
-  bcVersion = BcsVersionMap[bc_version]
-  if bcVersion in NewStructureBCList : return bcVersion
-  if ogrid[0].upper() == "C":
-     bcVersion=bcVersion.replace('_Reynolds','_Ostia')
-  else:
-     xy = ogrid.upper().split('X')
-     x = int(xy[0])
-     if x == 1440:   bcVersion=bcVersion.replace('_Reynolds','_MERRA-2')
-     if x == 2880:
-        bcVersion=bcVersion.replace('_Reynolds','_Ostia')
-        bcVersion=bcVersion.replace('_M','_D')
-  return bcVersion
-
 def get_grid_subdir(bcdir, agrid, ogrid, model):
    def get_name_with_grid( grid, names, a_o):
      if not grid :
@@ -549,7 +373,6 @@ def get_grid_subdir(bcdir, agrid, ogrid, model):
    return g
 
 def get_bcsdir(x, opt):
-  init_bc_versions()
   bc_version   = x.get('input:shared:bc_version')
   agrid = x.get('input:shared:agrid')
   ogrid = x.get('input:shared:ogrid')
@@ -560,45 +383,10 @@ def get_bcsdir(x, opt):
     ogrid = x.get('output:shared:ogrid')
     model = x.get('output:shared:model')
 
-  bcdir   = ''
-  base = 'discover_legacy'
-  if model != "data":
-     base = 'discover_couple'
-  if bc_version in NewStructureBCList:
-     base = 'discover_ns'
-  if x.get('input:shared:MERRA-2') and opt.upper() == "IN":
-     base = 'discover_ops'
-
-  bc_base = BCBase[base]
-
-  bcVersion   = get_bcVersion(bc_version,ogrid)
-  bc_versionrank = BcsRank[bcVersion]
-
-  if (bc_versionrank >= BcsRank['NL3']) :
-     bcdir = bc_base+'/'+ bcVersion+'/geometry/'
-  elif (bc_versionrank >= BcsRank['Icarus-NLv3_Reynolds']) :
-     bcdir = bc_base+'/Icarus-NLv3/'+bcVersion+'/'
-     if model == 'MOM6' or model == 'MOM5':
-        bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
-  elif (bc_versionrank >= BcsRank['Icarus_Reynolds']):
-     if bc_base == BCBase['discover_ops']:
-        bcdir = bc_base+'/Icarus_Updated/'+bcVersion+'/'
-     else:
-        bcdir = bc_base+'/Icarus/'+bcVersion+'/'
-     if model == 'MOM6' or model == 'MOM5':
-        bcdir = bc_base+'/Icarus/'+model+'/'
-  elif(bc_versionrank >= BcsRank["Ganymed-4_0_Reynolds"]):
-     bcdir = bc_base + '/Ganymed-4_0/'+bcVersion+'/'
-     if model == 'MOM6' or model == 'MOM5':
-        bcdir = bc_base+'/Ganymed/'+model+'/'
-  else:
-     bcdir = bc_base + '/' + bcVersion + '/'
-     if model == 'MOM6' or model == 'MOM5':
-        bcdir = bc_base+'/Ganymed/'+model+'/'
-
+  bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
+  bcdir = bc_base+'/'+ bc_version+'/geometry/'
   if not os.path.exists(bcdir):
      exit("Cannot find bc dir " +  bcdir)
-
 
   gridStr = get_grid_subdir(bcdir,agrid, ogrid, model)
   bcdir =  bcdir + gridStr
