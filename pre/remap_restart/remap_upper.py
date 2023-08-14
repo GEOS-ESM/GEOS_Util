@@ -15,7 +15,10 @@ def get_topodir(bcsdir):
   if k != -1 :
      while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
      agrid_name = os.path.basename(bcsdir).split('_')[0]
-     bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name + '/smoothed'
+     if '/GM4/' in bcsdir :
+        bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name
+     else:
+        bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name + '/smoothed'
   return bcsdir
 
 class upperair(remap_base):
