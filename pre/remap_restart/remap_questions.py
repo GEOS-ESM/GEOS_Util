@@ -180,11 +180,11 @@ def ask_questions():
             "name": "input:shared:bc_version",
             "message": f'''Enter BC version that matches input restarts: 
 
-    BC version         ADAS tags             GCM tags
-    ----------      ---------------     ------------------
-    GM4:            5_12_4              Ganymed-4_0 -
-    ICA:            5_13 ... 5_22       Icarus.....v10.18  
-    NL3:            5_25 -              Icarus_NL, v10.19- \n ''',
+    BC version                 ADAS tags                   GCM tags
+    ----------              ---------------          ------------------
+    GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
+    ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
+    NL3: Icarus-NLv3    5_25_1 ... 5_29_4 (now)   Icarus_NL, 10.19 ... 11.1 (now) \n ''',
             "choices": ['NL3', 'ICA','GM4'],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -202,11 +202,11 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": f'''Enter BC version for new restarts:
-    BC version         ADAS tags             GCM tags
-    ----------      ---------------     ------------------
-    GM4:            5_12_4              Ganymed-4_0 -
-    ICA:            5_13 ... 5_22       Icarus.....v10.18  
-    NL3:            5_25 -              Icarus_NL, v10.19- \n ''',
+    BC version                 ADAS tags                   GCM tags
+    ----------              ---------------          ------------------
+    GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
+    ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
+    NL3: Icarus-NLv3    5_25_1 ... 5_29_4 (now)   Icarus_NL, 10.19 ... 11.1 (now) \n ''',
             "choices": ['NL3', 'ICA','GM4'],
             "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
