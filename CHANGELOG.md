@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fixed the cmpz plots for rms and anomaly correlation
+
 ### Removed
 
 ### Deprecated
