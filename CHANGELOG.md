@@ -11,15 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update CI to use Baselibs default from CircleCI orb
-
 ### Fixed
-
-- fixed the cmpz plots for rms and anomaly correlation
 
 ### Removed
 
 ### Deprecated
+
+## [2.0.3] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs default from CircleCI orb
+
+### Fixed
+
+- Eliminate accidental post-processing of *.nc4-partial files
+- fixed the cmpz plots for rms and anomaly correlation
 
 ## [2.0.2] - 2023-06-28
 
