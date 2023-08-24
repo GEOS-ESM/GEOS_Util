@@ -35,6 +35,16 @@ def remove_ogrid_comment(x, opt):
   
   return False
 
+def echo_bcs(x,opt):
+  if opt == "IN":
+    x['input:shared:bcs_dir']  = get_bcsdir(x, 'IN')
+    print("\nBc path for the input restart: " + x['input:shared:bcs_dir'])
+  if opt == "OUT":
+    x['output:shared:bcs_dir'] = get_bcsdir(x, 'OUT')
+    print("\nBc path for the output restart: " + x['output:shared:bcs_dir'])
+    print("\nUsers can change the paths in the generated remap_params.yaml file later on")
+  return False
+
 def ask_questions():
 
    questions = [
@@ -47,7 +57,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "input:shared:rst_dir",
-            "message": "Enter the directory containing restart files to be remapped:",
+            "message": "Enter the input directory containing restart files to be remapped:",
             "when": lambda x: not x['input:shared:MERRA-2'],
         },
         {
@@ -67,7 +77,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "output:shared:out_dir",
-            "message": "Enter the directory for new restarts:\n"
+            "message": "Enter the output directory for new restarts:\n"
         },
         {
             "type": "path",
@@ -175,29 +185,7 @@ def ask_questions():
             "default": "72",
         },
 
-        {
-            "type": "select",
-            "name": "input:shared:bc_version",
-            "message": f'''Enter BC version that matches input restarts: 
-
-    BC version                 ADAS tags                   GCM tags
-    ----------              ---------------          ------------------
-    GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
-    ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
-    NL3: Icarus-NLv3    5_25_1 ... 5_29_4 (now)   Icarus_NL, 10.19 ... 11.1 (now) \n ''',
-            "choices": ['NL3', 'ICA','GM4'],
-            "when": lambda x: not x["input:shared:MERRA-2"],
-        },
-
-        {
-            "type": "select",
-            "name": "output:shared:bc_version",
-            "message": "Enter BC version for new restarts:",
-            "choices": ['NL3', 'ICA','GM4'],
-            "default": "NL3",
-            "when": lambda x: not x["input:shared:MERRA-2"],
-        },
-        # show the message if it is merra2
+        # to show the message, we ask output first
         {
             "type": "select",
             "name": "output:shared:bc_version",
@@ -206,23 +194,53 @@ def ask_questions():
     ----------              ---------------          ------------------
     GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
     ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
-    NL3: Icarus-NLv3    5_25_1 ... 5_29_4 (now)   Icarus_NL, 10.19 ... 11.1 (now) \n ''',
-            "choices": ['NL3', 'ICA','GM4'],
+    NL3: Icarus-NLv3    5_25_1 ... present        Icarus_NL, 10.19 ... present
+
+    develop:                   notes
+                        -------------------
+             v06:
+             v07:
+             v08:
+              \n ''',
+            "choices": ['NL3', 'ICA','GM4','develop'],
             "default": "NL3",
-            "when": lambda x: x["input:shared:MERRA-2"],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": "Enter develop BC version for new restarts:",
+            "choices": ['v06', 'v07','v08'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'develop',
+        },
+
+        {
+            "type": "select",
+            "name": "input:shared:bc_version",
+            "message": "Enter BC version that matches input restarts:", 
+            "choices": ['NL3', 'ICA','GM4','develop'],
+            "when": lambda x: not x["input:shared:MERRA-2"],
+        },
+
+        {
+            "type": "select",
+            "name": "input:shared:bc_version",
+            "message": "Enter develop BC version that matches input restarts:",
+            "choices": ['v06', 'v07','v08'],
+            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_version"] == 'develop',
         },
 
         {
             "type": "path",
             "name": "input:shared:bcs_dir",
             "message": "Is this BCS matching input restarts? If no, enter your own absolute path: \n",
-            "default": lambda x: get_bcsdir(x, "IN"),
+            "when": lambda x: echo_bcs(x, "IN"),
         },
         {
             "type": "path",
             "name": "output:shared:bcs_dir",
             "message": "Is this BCS for new restarts? If no, enter your own absolute path: \n",
-            "default": lambda x: get_bcsdir(x, "OUT"),
+            "when": lambda x:  echo_bcs(x, "OUT"),
         },
 
         {
@@ -242,7 +260,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:analysis:bkg",
-            "message": "Regrid bkg files?",
+            "message": "Remap bkg files?",
             "default": False,
         },
         {
@@ -285,7 +303,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "slurm:qos",
-            "message": "qos?",
+            "message": "qos? If the resolution is c1440 or higher, enter allnccs ",
             "default": "debug",
         },
 

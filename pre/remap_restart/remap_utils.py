@@ -126,8 +126,8 @@ def get_label(config):
   return label
 
 def wemin_default(bc_version):
-   default_ = '26'
-   if bc_version =='NL3' : default_ = '13'
+   default_ = '13'
+   if bc_version =='GM4' or bc_version == 'ICA' : default_ = '26'
    return default_
 
 def zoom_default(x):

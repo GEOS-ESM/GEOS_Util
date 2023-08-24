@@ -40,7 +40,7 @@ output:
     nlevel:
   surface:
     split_saltwater: false
-    surflay: 20.
+    surflay: 50.
     wemin:
     # remap lake, saltwater, landicet
     remap_water: true

@@ -136,7 +136,11 @@ class upperair(remap_base):
        NPE = 5400; nwrit= 6
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
-     if NPE > 532: QOS = "###" + QOS
+     TIME ="#SBATCH --time=1:00:00"
+     if NPE > 532: 
+       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
+       TIME = "#SBATCH --time=12:00:00"
+
      CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']
 
      log_name = out_dir+'/remap_upper_log'
@@ -181,10 +185,10 @@ class upperair(remap_base):
 
      remap_template="""#!/bin/csh -xf
 #SBATCH --account={account}
-#SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name=remap_upper
 #SBATCH --output={log_name}
+{TIME}
 {QOS}
 {CONSTR}
 
@@ -250,7 +254,7 @@ endif
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic,
+             QOS = QOS, TIME = TIME, CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
@@ -296,6 +300,11 @@ endif
 
      print('\n Move remap_upper.j to ' + out_dir)
      shutil.move('remap_upper.j', out_dir+"/remap_upper.j")
+     with open(out_dir+'/cap_restart', 'w') as f:
+        yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+        time = yyyymmddhh_[0:8]+' '+yyyymmddhh_[8:10]+'0000'
+        print('Create cap_restart')
+        f.write(time)
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
