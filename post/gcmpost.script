@@ -372,7 +372,7 @@ if( $PLOTS[1] != "NULL"  ) then
          # Default Model Development Case (No grads_ddf attribute)
          # -------------------------------------------------------
          cd $SOURCE/$collections[1]
-         set  monthlies = `/bin/ls -1 $expid.$collections[1].monthly* | grep -v $expid.$collections[1].monthly.clim`
+         set  monthlies = `/bin/ls -1 $expid.$collections[1].monthly* | grep -v $expid.$collections[1].monthly.clim | grep -v partial`
          set        num = `/bin/ls -1 $monthlies | wc -l`
          if( $check_plot == 'NULL' ) set check_plot = TRUE
          @ date_node = $expdots + $ndots[1] + 4
@@ -488,16 +488,16 @@ end
           if( $RECDATE != "NULL"  ) then
             if( ${#monthly_attribute} == 0 ) then
                 /bin/rm -f  ${expid}.${collection}.monthly.$RECDATE.*
-            set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep $RECDATE`
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep $RECDATE | grep -v partial`
           else
-                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal | grep $RECDATE`
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal | grep $RECDATE | grep -v partial`
             endif
           else
             if( ${#monthly_attribute} == 0 ) then
                 /bin/rm -f  ${expid}.${collection}.monthly.*
-            set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep -v partial`
             else
-                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal`
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal | grep -v partial`
           endif
           endif
           echo "Collection: $collection"
@@ -584,9 +584,9 @@ foreach collection ( $collections )
             cd $SOURCE/holding/$collection/$date
 
             if( ${#monthly_attribute} == 0 ) then
-            set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep -v partial`
             else
-                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
+                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal | grep -v partial`
             endif
 
             set  num = $#locals
@@ -767,7 +767,7 @@ foreach collection ( $collections )
                # Tar and Archive Dailies
                # -----------------------
                if( ${#monthly_attribute} == 0 ) then
-               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+                 set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep -v partial`
                  if( $#locals != 0 ) then
                      echo "Archiving Dailies for Collection: $collection for Date: $date"
                @ daily_date_node  = $date_node
@@ -835,9 +835,9 @@ foreach collection ( $collections )
                if( ${#monthly_attribute} != 0 ) @ monthly_date_node  = $date_node
 
                if( ${#monthly_attribute} == 0 ) then
-                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.*${ext}"   | grep  monthly | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.*${ext}"   | grep  monthly | grep -v diurnal | grep -v partial`
                else
-                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.[0-9]\{6\}01_0000z.${ext}" | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.[0-9]\{6\}01_0000z.${ext}" | grep -v diurnal | grep -v partial`
                endif
 
                echo "Archiving Monthlies for Collection: $collection for Date: $date"
@@ -896,7 +896,7 @@ foreach collection ( $collections )
                # Archive Monthlies (diurnal files)
                # ---------------------------------
                @ monthly_date_node  = $date_node + 1                 # Since diurnal is simply appended to collection name
-               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  diurnal | grep -v monthly`
+               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  diurnal | grep -v monthly | grep -v partial`
                set  num   = `/bin/ls -1 | grep ${expid}.${collection} | grep  diurnal | grep -v monthly | wc -l`
                if( $num  != 0 ) then
 
@@ -1049,7 +1049,7 @@ foreach collection ( $collections )
 
       cd $SOURCE/${collection}
 
-      set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v clim`
+      set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v clim | grep -v partial`
       set num = `/bin/ls -1 $monthlies | wc -l`
 
       # Create DDF File
@@ -1253,9 +1253,9 @@ foreach stream ($streams)
     set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
     echo Checking stream: $stream for date: $date
     if( ${#monthly_attribute} == 0 ) then
-        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v clim`
+        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v clim | grep -v partial`
     else
-        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.${date}* | grep -v clim`
+        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.${date}* | grep -v clim | grep -v partial`
     endif
 
     echo checkstream: $checkstream
