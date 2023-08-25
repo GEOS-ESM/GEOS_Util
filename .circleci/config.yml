@@ -22,4 +22,5 @@ workflows:
           repo: GEOSgcm
           checkout_fixture: true
           mepodevelop: true
+          checkout_mapl3_release_branch: true
           persist_workspace: false # Needs to be true to run fv3/gcm experiment, costs extra
