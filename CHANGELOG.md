@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add CI step to make PR to MAPL3 on push to `main`
+
 ### Changed
 
 - Modified interfaces for variables gFTL container to be V2.  Changes include
