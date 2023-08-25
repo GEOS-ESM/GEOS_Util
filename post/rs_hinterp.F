@@ -482,11 +482,13 @@ c ---------------------------------
            allocate ( qnew(im_out,jm_out,nmax) )
 
          vars => cfg_in(1)%get_variables()
-         iter = vars%begin()
+         iter = vars%ftn_begin()
 
          counter = 0
-         do while(iter /= vars%end())
-            var_name => iter%key()
+         do while(iter /= vars%ftn_end())
+            call iter%next()
+
+            var_name => iter%first()
             if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
                do l=1,dimSizes(3)
                   call MAPL_VarRead(fmt_in,var_name,dumold,lev=l)
@@ -494,14 +496,14 @@ c ---------------------------------
                   q(:,:,counter) = dumold
                enddo
             end if
-            call iter%next()
          enddo
 
          call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
 
          counter = 0
-         do while(iter /= vars%end())
-            var_name => iter%key()
+         do while(iter /= vars%ftn_end())
+            call iter%next()
+            var_name => iter%first()
             if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
                do l=1,dimSizes(3)
                   counter = counter + 1
@@ -509,7 +511,6 @@ c ---------------------------------
                   call MAPL_VarWrite(fmt_out,var_name,dumnew,lev=l)
                enddo
             end if
-            call iter%next()
          enddo
 
          call fmt_out%close()
@@ -595,11 +596,12 @@ c ---------------------------------
            allocate ( qnew(im_out,jm_out,nmax) )
 
          vars => cfg_in(1)%get_variables()
-         iter = vars%begin()
+         iter = vars%ftn_begin()
 
          counter = 0
-         do while(iter /= vars%end())
-            var_name => iter%key()
+         do while(iter /= vars%ftn_end())
+            call iter%next()
+            var_name => iter%first()
             if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
                do l=1,dimSizes(3)
                   call MAPL_VarRead(fmt_in,var_name,dumold,lev=l)
@@ -607,14 +609,15 @@ c ---------------------------------
                   q(:,:,counter) = dumold
                enddo
             end if
-            call iter%next()
          enddo
 
          call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
 
          counter = 0
-         do while(iter /= vars%end())
-            var_name => iter%key()
+         do while(iter /= vars%ftn_end())
+            call iter%next()
+
+            var_name => iter%first()
             if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
                do l=1,dimSizes(3)
                   counter = counter + 1
@@ -622,7 +625,6 @@ c ---------------------------------
                   call MAPL_VarWrite(fmt_out,var_name,dumnew,lev=l)
                enddo
             end if
-            call iter%next()
          enddo
 
          call fmt_out%close()

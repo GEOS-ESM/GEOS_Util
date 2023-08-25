@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Modified interfaces for variables gFTL container to be V2.  Changes include
+  - `%key()` becomes `%first()`
+  - `%value()` becomes `%second()`
+  - `begin()` and `end()` become `ftn_begin()` and `ftn_end()` respectively.
+  - `iter%next()` goes to top of loop instead of bottom.
+  - any other `iter%next()` for a `cycle` statement should be deleted.
+
 ### Fixed
 
 ### Removed
