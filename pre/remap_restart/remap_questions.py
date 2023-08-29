@@ -196,38 +196,36 @@ def ask_questions():
     ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
     NL3: Icarus-NLv3    5_25_1 ... present        Icarus_NL, 10.19 ... present
 
-    develop:                   notes
+    Development:            Notes
                         -------------------
-             v06:
-             v07:
-             v08:
+        v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb
               \n ''',
-            "choices": ['NL3', 'ICA','GM4','develop'],
+            "choices": ['NL3', 'ICA','GM4','Development'],
             "default": "NL3",
         },
 
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": "Enter develop BC version for new restarts:",
-            "choices": ['v06', 'v07','v08'],
-            "when": lambda x:  x["output:shared:bc_version"] == 'develop',
+            "message": "Enter BC version for new restarts; this option is in testing stage:",
+            "choices": ['v06'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Development',
         },
 
         {
             "type": "select",
             "name": "input:shared:bc_version",
             "message": "Enter BC version that matches input restarts:", 
-            "choices": ['NL3', 'ICA','GM4','develop'],
+            "choices": ['NL3', 'ICA','GM4','Development'],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
 
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": "Enter develop BC version that matches input restarts:",
-            "choices": ['v06', 'v07','v08'],
-            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_version"] == 'develop',
+            "message": "Enter BC version for new restarts; this option is in testing stage:",
+            "choices": ['v06'],
+            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_version"] == 'Development',
         },
 
         {
