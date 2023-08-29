@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add CI step to make PR to MAPL3 on push to `main`
+
 ### Changed
 
 - Add command_line options. More items like label, altbcs are added to remap_params.tpl
@@ -20,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Deprecated
+
+## [2.0.3] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs default from CircleCI orb
+
+### Fixed
+
+- Eliminate accidental post-processing of *.nc4-partial files
+- fixed the cmpz plots for rms and anomaly correlation
 
 ## [2.0.2] - 2023-06-28
 

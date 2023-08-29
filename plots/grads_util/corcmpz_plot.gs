@@ -363,7 +363,7 @@ endwhile
 * Plot each individual forecast while computing mean and Fisher Transform (to force Gaussian Distribution)
 * --------------------------------------------------------------------------------------------------------
 
-*say 'Redfine field'
+*say 'Redefine field'
 m = 0
 while( m<=mexps )
         n   = filebeg
@@ -650,7 +650,7 @@ endwhile
 
 
 ************************************************************************
-if (1 = 0)
+* if (1 = 0)
 * Plot Fisher Mean for Experiments
 * --------------------------------
 say '  Plot Fisher Mean for Experiments'
@@ -717,7 +717,7 @@ endif
 
 m = m + 1
 endwhile
-endif
+*endif
 
 ************************************************************************
 
@@ -736,6 +736,13 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 * Compute RMS difference between ravem and rave0: ravediff
 * --------------------------------------------------------
 'makezdif3 -q1  rave'm' -file1 'mfile' -q2 rave0  -file2 1  -ptop 'toplev' -name rave'
+'getinfo numfiles'
+         newfile = result
+'close ' newfile
+
+* Compute difference between 99.99% Confidence and zero: rUp99p99diff
+* -------------------------------------------------------------
+'makezdif3 -q1   rUp99p99'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp99p99'
 'getinfo numfiles'
          newfile = result
 'close ' newfile
