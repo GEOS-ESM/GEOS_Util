@@ -39,9 +39,12 @@ def init_merra2(x):
   return False
 
 def fvcore_name(x):
+  if 'input:shared:agrid' in x.keys():
+     return True
   ymdh = x['input:shared:yyyymmddhh']
   time = ymdh[0:8] + '_'+ymdh[8:10]
   rst_dir = x.get('input:shared:rst_dir')
+
   if not rst_dir : return False
 
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
@@ -77,6 +80,43 @@ def fvcore_name(x):
   expid = expid[0:-1]
   x['input:shared:expid'] = expid 
   return fname
+
+def fvcore_time(x):
+  rst_dir = x.get('input:shared:rst_dir')
+  if not rst_dir :
+    sys.exit('Input restart directory does not exist.\n')
+
+  x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
+   
+  files = glob.glob(rst_dir+'/*fvcore_*')
+      
+  if len (files) == 0 : return True
+  if len (files)  > 1 : return True
+  fname =''    
+  if len(files) == 1: 
+    fname = files[0]
+   
+  fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+  cmd = fvrst + fname
+  #print(cmd +'\n')
+  p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+  (output, err) = p.communicate()
+  p_status = p.wait()
+  ss = output.decode().split()
+  lat = int(ss[0])
+  lon = int(ss[1])
+  if (lon != lat*6) :
+      sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+  ymdh_ = str(ss[3]) + str(ss[4])[0:2]
+  x['input:shared:yyyymmddhh'] = ymdh_
+  print("\nThe fvore has restart time " + ymdh_)
+  x['input:shared:agrid'] = "C"+ss[0] # save for air parameter
+  print("The input fvcore restart has air grid: " + "C" + ss[0] + '\n')
+  expid = os.path.basename(fname).split('fvcore')[0]
+  expid = expid[0:-1]
+  x['input:shared:expid'] = expid 
+  if (expid) : print("The input fvcore's experiment ID " + expid + '\n')
+  return False
 
 def catch_model(x):
   ymdh = x['input:shared:yyyymmddhh']
@@ -130,6 +170,13 @@ def wemin_default(bc_version):
    if bc_version =='GM4' or bc_version == 'ICA' : default_ = '26'
    return default_
 
+def show_wemin_default(x):
+   if not x['input:shared:MERRA-2']:
+      return True
+   else:
+      x['input:surface:wemin'] = '26'
+      return False
+
 def zoom_default(x):
    zoom_ = '8'
    cxx = x.get('input:shared:agrid')
@@ -182,7 +229,8 @@ def write_cmd( out_dir, cmdl) :
    cmdl = bin_path+'/'+ cmdl
    with open(out_dir + '/remap_restarts.CMD', 'w') as f:
      f.write(cmdl)
-   subprocess.call(['chmod', '+x',out_dir + '/remap_restarts.CMD'])
+   # Don't run remap_ressatrs.CMD directly. It may overwrite itself
+   #subprocess.call(['chmod', '+x',out_dir + '/remap_restarts.CMD'])
 
 def print_config( config, indent = 0 ):
    for k, v in config.items():
@@ -261,7 +309,7 @@ def get_command_line_from_answers(answers):
 
    account = " -account " + answers["slurm:account"]
    qos     = " -qos  " + answers["slurm:qos"]
-   constraint  = " -constraint  " + answers["slurm:constraint"]
+   partition  = " -partition  " + answers["slurm:partition"]
 
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
@@ -289,7 +337,7 @@ def get_command_line_from_answers(answers):
                                           out_rs + \
                                           account + \
                                           qos + \
-                                          constraint
+                                          partition
 
          
    return cmdl

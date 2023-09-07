@@ -72,7 +72,7 @@ def parse_args(program_description):
     p_command.add_argument('-qos',    default = "debug", help= "queue of slurm job", choices=['debug', 'allnccs'])
     account = get_account()
     p_command.add_argument('-account', default = account,  help= "account of slurm job")
-    p_command.add_argument('-constraint', default= 'sky', help= "machine of slurm job")
+    p_command.add_argument('-partition', default= 'compute', help= "partition of slurm job")
     p_command.add_argument('-rs', default= '3', help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)', choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
@@ -148,7 +148,7 @@ def get_answers_from_command_line(cml):
 
    answers["slurm:account"]    = cml.account
    answers["slurm:qos"]        = cml.qos
-   answers["slurm:constraint"] = cml.constraint
+   answers["slurm:partition"]  = cml.partition
   
    return answers
 

@@ -45,32 +45,38 @@ def echo_bcs(x,opt):
     print("\nUsers can change the paths in the generated remap_params.yaml file later on")
   return False
 
+def default_partition(x):
+   if x['slurm:qos'] == 'debug':
+      x['slurm:partition'] = 'compute'
+      return False
+   return True
+
 def ask_questions():
 
    questions = [
         {
             "type": "confirm",
             "name": "input:shared:MERRA-2",
-            "message": "Would you like to remap archived MERRA-2 restarts?",
+            "message": "Would you like to remap archived MERRA-2 restarts?\n",
             "default": False,
         },
         {
             "type": "path",
             "name": "input:shared:rst_dir",
-            "message": "Enter the input directory containing restart files to be remapped:",
+            "message": "Enter the input directory containing restart files to be remapped:\n",
             "when": lambda x: not x['input:shared:MERRA-2'],
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
+            "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)\n",
             "validate": lambda text: len(text)==10 ,
-            "when": lambda x: not x['input:shared:MERRA-2'],
+            "when": lambda x: not x['input:shared:MERRA-2'] and fvcore_time(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "From what restart date would you like to remap? (must be 8 digits: yyyymmdd, hour=21z)",
+            "message": "From what restart date would you like to remap? (must be 8 digits: yyyymmdd, hour=21z)\n",
             "validate": lambda text: len(text)==8 ,
             "when": lambda x: x['input:shared:MERRA-2'],
         },
@@ -103,7 +109,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:model",
-            "message": "Select ocean model that matches input restarts:",
+            "message": "Select ocean model that matches input restarts:\n",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
             "when": lambda x: not x['input:shared:MERRA-2']
@@ -112,7 +118,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select data ocean grid that matches input restarts:",
+            "message": "Select data ocean grid that matches input restarts:\n",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
@@ -130,7 +136,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select coupled (MOM5, MOM6) ocean grid that matches input restarts:",
+            "message": "Select coupled (MOM5, MOM6) ocean grid that matches input restarts:\n",
             "choices": ['72x36','360x200','720x410','1440x1080'],
             "when": lambda x: x.get('input:shared:model') == 'MOM5' or x.get('input:shared:model')== 'MOM6'
         },
@@ -150,14 +156,14 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:model",
-            "message": "Select ocean model for new restarts:",
+            "message": "Select ocean model for new restarts:\n",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
         },
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select data ocean grid for new restarts:",
+            "message": "Select data ocean grid for new restarts:\n",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x: x['output:shared:model'] == 'data',
@@ -173,7 +179,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select couple ocean grid for new restarts:",
+            "message": "Select couple ocean grid for new restarts:\n",
             "choices": ['72x36','360x200','720x410','1440x1080'],
             "when": lambda x: x['output:shared:model'] != 'data',
         },
@@ -181,41 +187,22 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:air:nlevel",
-            "message": "Enter new atmospheric levels: (71 72 91 127 132 137 144 181)",
+            "message": "Enter new atmospheric levels: (71 72 91 127 132 137 144 181)\n",
             "default": "72",
         },
 
         # to show the message, we ask output first
         {
             "type": "select",
-            "name": "output:shared:bc_version",
-            "message": f'''Enter BC version for new restarts:
+            "name": "input:shared:bc_version",
+            "message": f'''\nEnter BC version that matches input restarts:
     BC version                 ADAS tags                   GCM tags
     ----------              ---------------          ------------------
     GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
     ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
     NL3: Icarus-NLv3    5_25_1 ... present        Icarus_NL, 10.19 ... present
-
-    Development:            Notes
-                        -------------------
-        v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb
-              \n ''',
-            "choices": ['NL3', 'ICA','GM4','Development'],
-            "default": "NL3",
-        },
-
-        {
-            "type": "select",
-            "name": "output:shared:bc_version",
-            "message": "Enter BC version for new restarts; this option is in testing stage:",
-            "choices": ['v06'],
-            "when": lambda x:  x["output:shared:bc_version"] == 'Development',
-        },
-
-        {
-            "type": "select",
-            "name": "input:shared:bc_version",
-            "message": "Enter BC version that matches input restarts:", 
+    Development: more choices
+              \n\n ''',
             "choices": ['NL3', 'ICA','GM4','Development'],
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -223,9 +210,54 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": "Enter BC version for new restarts; this option is in testing stage:",
+            "message": f'''\nMore choices of BC versions that macthes input restarts (this option is in testing stage):
+
+             v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n''',
             "choices": ['v06'],
-            "when": lambda x: not x["input:shared:MERRA-2"] and x["input:shared:bc_version"] == 'Development',
+            "when": lambda x: x["input:shared:bc_version"] == 'Development',
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": f'''\nEnter BC version for new restarts:
+    BC version                 ADAS tags                   GCM tags
+    ----------              ---------------          ------------------
+    GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
+    ICA: Icarus         5_17_0 ... 5_24_0_p1      Icarus, Jason    ...  10.18   
+    NL3: Icarus-NLv3    5_25_1 ... present        Icarus_NL, 10.19 ... present
+    Development: more choices
+              \n\n''',
+            "choices": ['NL3', 'ICA','GM4','Development'],
+            "default": "NL3",
+            "when": lambda x: x["input:shared:MERRA-2"],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": "Enter BC version for new restarts:\n",
+            "choices": ['NL3', 'ICA','GM4','Development'],
+            "default": "NL3",
+            "when": lambda x: not x["input:shared:MERRA-2"],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": f'''\nMore choices of BC versions for new restarts (this option is in testing stage):
+
+             v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n''',
+            "choices": ['v06'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Development' and x["input:shared:bc_version"] not in ['v06'],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": "\nMore choices of BC version for new restarts (this option is in testing stage):\n",
+            "choices": ['v06'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Development' and x["input:shared:bc_version"] in ['v06'],
         },
 
         {
@@ -270,25 +302,26 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:surface:wemin",
-            "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?",
-            "default": lambda x: wemin_default(x.get('input:shared:bc_version'))
+            "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?\n",
+            "default": lambda x: wemin_default(x.get('input:shared:bc_version')),
+            "when": lambda x: show_wemin_default(x),
         },
         {
             "type": "text",
             "name": "output:surface:wemin",
-            "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?",
+            "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?\n",
             "default": lambda x: wemin_default(x.get('output:shared:bc_version'))
         },
         {
             "type": "text",
             "name": "input:surface:zoom",
-            "message": "What is value of zoom (parameter of radius search, smaller value means larger radius) for surface inputs [1-8]?",
+            "message": "What is value of zoom (parameter of radius search, smaller value means larger radius) for surface inputs [1-8]?\n",
             "default": lambda x: zoom_default(x)
         },
         {
             "type": "text",
             "name": "output:shared:expid",
-            "message": "Enter new restarts expid:",
+            "message": "Enter new restarts expid (prefix of the output restart names): \n",
             "default": "",
         },
         {
@@ -312,10 +345,11 @@ def ask_questions():
             "default": get_account(),
         },
         {
-            "type": "select",
-            "name": "slurm:constraint",
-            "message": "constraint?",
-            "choices": ['sky', 'cas'],
+            "type": "text",
+            "name": "slurm:partition",
+            "message": "partition?",
+            "default": "compute",
+            "when": lambda x : default_partition(x),
         },
    ]
    answers = questionary.prompt(questions)

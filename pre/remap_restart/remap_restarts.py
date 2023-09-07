@@ -75,11 +75,12 @@ def main():
       raw_config = get_config_from_answers(answers)
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
-      with open("raw_answers.yaml", "w") as f:
-        yaml.dump(raw_config, f)
+      # just for debugging
+      # with open("raw_answers.yaml", "w") as f:
+      #   yaml.dump(raw_config, f)
       params = remap_params(raw_config)
       config = params.config
-      config_yaml = 'remap_params.yaml'
+      config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml'
 
   print('\n')
   if config:
@@ -101,6 +102,14 @@ def main():
 
        # write config to yaml file
      config_to_yaml(config, config_yaml,noprompt = noprompt)
+
+     if not noprompt :
+       submit = questionary.confirm("Submit the jobs now ?" , default=True).ask()
+       if not submit :
+         print("\nYou can submit the jobs by the command later on: \n")
+         print("./remap_restarts.py config_file -c " + config_yaml + "\n")
+         sys.exit(0)
+
   print(config_yaml)
   # upper air
   upper = upperair(params_file=config_yaml)

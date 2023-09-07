@@ -55,4 +55,4 @@ output:
 slurm:
   account:
   qos:
-  constraint:
+  partition:

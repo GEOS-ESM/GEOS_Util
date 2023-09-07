@@ -141,7 +141,7 @@ class upperair(remap_base):
        assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
        TIME = "#SBATCH --time=12:00:00"
 
-     CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']
+     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
 
      log_name = out_dir+'/remap_upper_log'
 
@@ -190,7 +190,7 @@ class upperair(remap_base):
 #SBATCH --output={log_name}
 {TIME}
 {QOS}
-{CONSTR}
+{PARTITION}
 
 unlimit
 
@@ -254,7 +254,7 @@ endif
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS, TIME = TIME, CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic,
+             QOS = QOS, TIME = TIME, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
      script_name = './remap_upper.j'

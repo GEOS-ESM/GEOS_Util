@@ -87,6 +87,13 @@ class catchANDcn(remap_base):
         NPE = 120
      else:
         NPE = 160
+
+     QOS = "#SBATCH --qos="+config['slurm']['qos']
+     TIME ="#SBATCH --time=1:00:00"
+     if NPE >= 160:
+       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
+       TIME = "#SBATCH --time=12:00:00"
+     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
     
      account    = config['slurm']['account']
      # even the input is binary, the output would be nc4
@@ -120,10 +127,11 @@ class catchANDcn(remap_base):
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks={NPE}
-#SBATCH --time=1:00:00
 #SBATCH --job-name=mk_catchANDcn
-#SBATCH --qos=debug
 #SBATCH --output={log_name}
+{TIME}
+{QOS}
+{PARTITION}
 #
 
 source {Bin}/g5_modules
@@ -143,7 +151,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
-                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
+                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )
 
      script_name = './mk_catchANDcn.j'
 
