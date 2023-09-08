@@ -195,7 +195,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": f'''\nEnter BC version that matches input restarts:
+            "message": f'''\nSelect BC version that matches input restarts:
     BC version                 ADAS tags                   GCM tags
     ----------              ---------------          ------------------
     GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
@@ -220,7 +220,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": f'''\nEnter BC version for new restarts:
+            "message": f'''\nSelect BC version for new restarts:
     BC version                 ADAS tags                   GCM tags
     ----------              ---------------          ------------------
     GM4: Ganymed-4_0    5_12_2 ... 5_16_5         Ganymed-4_0      ... Heracles-5_4_p3
@@ -236,7 +236,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": "Enter BC version for new restarts:\n",
+            "message": "Select BC version for new restarts:\n",
             "choices": ['NL3', 'ICA','GM4','Development'],
             "default": "NL3",
             "when": lambda x: not x["input:shared:MERRA-2"],
