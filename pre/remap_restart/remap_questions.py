@@ -111,7 +111,7 @@ def ask_questions():
 
         {
             "type": "select",
-            "name": "input:shared:model",
+            "name": "input:shared:omodel",
             "message": "Select ocean model that matches input restarts:\n",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
@@ -124,12 +124,14 @@ def ask_questions():
             "message": "Select data ocean grid that matches input restarts:\n",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
-            "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
+            "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'],
         },
 
+        # The following is not a real question; "when" always return false.  Removes the parenthetical comment 
+        # from the ogrid "choice" that was selected in answer to the previous question.
+        # (hack that uses the questionary framework to manipulate data inbetween questions)
         {
             "type": "text",
-            # remove the comments
             "name": "input:shared:ogrid",
             "message": "remove the comment of ogrid",
             # always return false, so it never shows
@@ -141,7 +143,7 @@ def ask_questions():
             "name": "input:shared:ogrid",
             "message": "Select coupled (MOM5, MOM6) ocean grid that matches input restarts:\n",
             "choices": ['72x36','360x200','720x410','1440x1080'],
-            "when": lambda x: x.get('input:shared:model') == 'MOM5' or x.get('input:shared:model')== 'MOM6'
+            "when": lambda x: x.get('input:shared:omodel') == 'MOM5' or x.get('input:shared:omodel')== 'MOM6'
         },
 
         {
@@ -158,7 +160,7 @@ def ask_questions():
 
         {
             "type": "select",
-            "name": "output:shared:model",
+            "name": "output:shared:omodel",
             "message": "Select ocean model for new restarts:\n",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
@@ -169,10 +171,12 @@ def ask_questions():
             "message": "Select data ocean grid for new restarts:\n",
             "choices": ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)'],
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
-            "when": lambda x: x['output:shared:model'] == 'data',
+            "when": lambda x: x['output:shared:omodel'] == 'data',
         },
 
-        # This is not a real question. "when" always return false. It is used to remove the comment in the ogrid choices.
+        # The following is not a real question; "when" always return false.  Removes the parenthetical comment 
+        # from the ogrid "choice" that was selected in answer to the previous question.
+        # (hack that uses the questionary framework to manipulate data inbetween questions)
         {
             "type": "text",
             "name": "output:shared:ogrid",
@@ -185,7 +189,7 @@ def ask_questions():
             "name": "output:shared:ogrid",
             "message": "Select couple ocean grid for new restarts:\n",
             "choices": ['72x36','360x200','720x410','1440x1080'],
-            "when": lambda x: x['output:shared:model'] != 'data',
+            "when": lambda x: x['output:shared:omodel'] != 'data',
         },
 
         {
@@ -306,14 +310,14 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:surface:wemin",
-            "message": "What is value of wemin (minimum snow water equivalent parameter) for surface inputs?\n",
+            "message": "Enter value of wemin (min. snow water equivalent parameter) used in simulation that produced input restarts.\n",
             "default": lambda x: wemin_default(x.get('input:shared:bc_version')),
             "when": lambda x: show_wemin_default(x),
         },
         {
             "type": "text",
             "name": "output:surface:wemin",
-            "message": "What is value of wemin (minimum snow water equivalent parameter) for new surface restarts?\n",
+            "message": "Enter value of wemin (min. snow water equivalent parameter) to be used in simulation with new restarts.\n",
             "default": lambda x: wemin_default(x.get('output:shared:bc_version'))
         },
         {
