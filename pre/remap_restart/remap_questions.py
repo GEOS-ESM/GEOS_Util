@@ -53,6 +53,9 @@ def default_partition(x):
 
 def ask_questions():
 
+   bc_versions =  ['NL3', 'ICA','GM4','Development']
+   develop_bcs =  ['v06']
+
    questions = [
         {
             "type": "confirm",
@@ -168,9 +171,10 @@ def ask_questions():
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x: x['output:shared:model'] == 'data',
         },
+
+        # This is not a real question. "when" always return false. It is used to remove the comment in the ogrid choices.
         {
             "type": "text",
-            # remove the comments
             "name": "output:shared:ogrid",
             "message": "remove the comment of ogrid",
             # always return false, so it never shows
@@ -228,7 +232,7 @@ def ask_questions():
     NL3: Icarus-NLv3    5_25_1 ... present        Icarus_NL, 10.19 ... present
     Development: more choices
               \n\n''',
-            "choices": ['NL3', 'ICA','GM4','Development'],
+            "choices": bc_versions ,
             "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
         },
@@ -237,7 +241,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": "Select BC version for new restarts:\n",
-            "choices": ['NL3', 'ICA','GM4','Development'],
+            "choices": bc_versions ,
             "default": "NL3",
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -248,7 +252,7 @@ def ask_questions():
             "message": f'''\nMore choices of BC versions for new restarts (this option is in testing stage):
 
              v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n''',
-            "choices": ['v06'],
+            "choices": develop_bcs ,
             "when": lambda x:  x["output:shared:bc_version"] == 'Development' and x["input:shared:bc_version"] not in ['v06'],
         },
 
@@ -256,7 +260,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": "\nMore choices of BC version for new restarts (this option is in testing stage):\n",
-            "choices": ['v06'],
+            "choices": develop_bcs ,
             "when": lambda x:  x["output:shared:bc_version"] == 'Development' and x["input:shared:bc_version"] in ['v06'],
         },
 

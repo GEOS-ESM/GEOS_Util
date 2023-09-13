@@ -5,6 +5,8 @@
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
+#  This script parses and converts the command-line arguments to answers equivalent to that from remap_questions.py
+
 
 import os
 import subprocess
