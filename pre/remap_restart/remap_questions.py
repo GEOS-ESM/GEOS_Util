@@ -294,13 +294,13 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:analysis:bkg",
-            "message": "Remap bkg files?",
+            "message": "Remap bkg files?  (required by ADAS but not mapped onto ADAS grid; run one ADAS cycle to spin up) ",
             "default": False,
         },
         {
             "type": "confirm",
             "name": "output:analysis:lcv",
-            "message": "Write lcv?",
+            "message": "Write lcv file?  (required by ADAS) ",
             "default": False,
         },
         {

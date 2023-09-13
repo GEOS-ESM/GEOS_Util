@@ -95,7 +95,14 @@ class analysis(remap_base):
        fname = os.path.basename(f)
        fname = fname + label 
        shutil.move(f, out_dir+'/'+fname)
-    # write lcv
+    # write lcv file
+    #  (Info about "lcv" file provided by Ricardo Todling via email, 1 Sep 2023, 
+    #   paraphrased by Rolf Reichle:
+    #   The lcv files is binary and inherits the nomenclature of the old GCM primary restarts [GEOS-4].
+    #   The file simply carries the date of the restarts, e.g., 20231201 210000. 
+    #   The file is required by the ADAS. 
+    #   LCV stands for Lagrangian Control Volume – which is what the grid coordinates of the model are 
+    #   [on the cubed in the GEOS-5 case].)
      lcv = config['output']['analysis']['lcv']
      if lcv :
        ymd_ = yyyymmddhh_[0:8]
