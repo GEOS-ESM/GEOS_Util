@@ -24,33 +24,33 @@ from remap_catchANDcn  import *
 program_description = textwrap.dedent(f'''
       USAGE:
 
-      There are three ways to use this script to remap restarts.
+      This script provides three options to remap restart files:
 
-      1. Use questionary to convert template remap_params.tpl to
-         remap_params.yaml and then remap:
+      1. Use questionary to create a yaml config file (remap_params.yaml):
+           ./remap_questions.py
+         and then remap:
            ./remap_restarts.py
 
-      2. Use an existing config file to remap:
+      2. Use an existing yaml config file to remap:
            ./remap_restarts.py config_file -c my_config.yaml
 
-      3. Use command line's options as inputs:
-          ./remap_restarts.py command_line -ymdh 2004041421  ....
-          To see more command options, please use 
-          ./remap_restarts.py command_line -h
+      3. Use command line options:
+           ./remap_restarts.py command_line -ymdh 2004041421  ....
+         To see more command line options, please use 
+           ./remap_restarts.py command_line -h
+         Note that the questionary also generates command line inputs.
 
       There are three help commands:
-        ./remap_restarts.py -h
-        ./remap_restarts.py config_file -h
-        ./remap_restarts.py command_line -h
+           ./remap_restarts.py -h
+           ./remap_restarts.py config_file -h
+           ./remap_restarts.py command_line -h
 
-      NOTE: Each individual script can be executed independently
-        1. remap_questions.py generates raw_answer.yaml
-        2. If command_line option is used, the command_line option is converted raw_answers.yaml
-        3. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml
-        4. remap_upper.py uses remap_params.yaml as input for remapping
-        5. remap_lake_landice_saltwater.py uses remap_params.yaml as input for remapping
-        6. remap_catchANDcn.py uses remap_params.yaml as input for remapping
-        7. remap_analysis.py uses remap_params.yaml as input for remapping
+      NOTE: Individual scripts can be executed independently:
+        1. remap_questions.py generates raw_answers.yaml.
+        2. If the command_line option is used with remap_restarts.py, the command line options are converted raw_answers.yaml.
+        3. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml.
+        4. Sets of restarts can be remapped separately with remap_upper.py, remap_lake_landice_saltwater.py, 
+           remap_catchANDcn.py, and remap_analysis.py, all of which use remap_params.yaml as input for remapping.
     ''')
 def main():
 

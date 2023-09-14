@@ -36,46 +36,47 @@ def parse_args(program_description):
      help = "Use command line as input",
     )
     p_command.add_argument('-merra2', action='store_true', default= False, help='use merra2 restarts')
-    p_command.add_argument('-ymdh', help='yyyymmddhh year month date hour of input and output restarts')
-    p_command.add_argument('-grout', help='Grid ID of the output restart, format Cxx')
-    p_command.add_argument('-levsout', help='levels of output restarts')
+    p_command.add_argument('-ymdh',              help='yyyymmddhh year month date hour of input and new restarts')
+    p_command.add_argument('-grout',             help='Grid ID of new restarts, format Cxx')
+    p_command.add_argument('-levsout',           help='Levels for new restarts')
 
-    p_command.add_argument('-out_dir', help='directory for output restarts')
-    p_command.add_argument('-rst_dir', help='directory for input restarts')
+    p_command.add_argument('-out_dir',           help='Directory for new restarts')
+    p_command.add_argument('-rst_dir',           help='Directory of input restarts')
 
-    p_command.add_argument('-expid', help='restart id for input restarts')
-    p_command.add_argument('-newid', default="",help='restart id for output restarts')
+    p_command.add_argument('-expid',             help='Experiment ID of input restarts')
+    p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
 
-    p_command.add_argument('-bcvin',  help='bc_version associated with inputs')
-    p_command.add_argument('-bcvout', help='bc_version associated with outputs')
+    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts')
+    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts')
 
-    p_command.add_argument('-in_wemin',   help='minimum water snow water equivalent for input catch/cn')
-    p_command.add_argument('-out_wemin',  help='minimum water snow water equivalent for output catch/cn')
+    p_command.add_argument('-in_wemin',          help='Min. water snow water equivalent param. used with input restarts')
+    p_command.add_argument('-out_wemin',         help='Min. water snow water equivalent param. to be used with new restarts')
 
     ocean_grids=['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
-    p_command.add_argument('-oceanin',  help='ocean horizontal grid of inputs. \n \
-                                          data model choices: 360x180,1440x720,2880x1440,CS. \n \
-                                          coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids)
-    p_command.add_argument('-oceanout', help='ocean horizontal grid of outputs. \n \
-                                             choices are the same as option "oceanin"', choices=ocean_grids)
 
-    p_command.add_argument('-ocnmdlin', default='data',  help='ocean input model',  choices=['data', 'MOM5', 'MOM6'])
-    p_command.add_argument('-ocnmdlout',default='data',  help='ocean output model', choices=['data', 'MOM5', 'MOM6'])
-    p_command.add_argument('-catch_model',default='catch',  help='catchment model', choices=['catch', 'catchcnclm40', 'catchcnclm45'])
+    p_command.add_argument('-oceanin',           help='Ocean horizontal grid of input restarts. \n \
+                                                       data model choices: 360x180,1440x720,2880x1440,CS. \n \
+                                                       coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids)
+    p_command.add_argument('-oceanout',          help='Ocean horizontal grid of new restarts. \n \
+                                                       choices are the same as option "oceanin"', choices=ocean_grids)
 
-    p_command.add_argument('-nobkg', action='store_true', help="Don't remap bkg files")
-    p_command.add_argument('-nolcv', action='store_true', help="Don't remap lcv files")
-    p_command.add_argument('-np',    action='store_true', help="No prompt. Overwrite config files without prompting questions")
-    p_command.add_argument('-lbl',   action='store_true', help="Label output restarts with bc_versions and resolutions")
-    p_command.add_argument('-in_bcsdir',  default="", help= "users' alternative boundary condition files for input. If not specified (default), it will be deduced from bc_version and resolution information")
-    p_command.add_argument('-out_bcsdir', default="", help= "users' alternative boundary condition files for output. If not specified (default), it will be deduced from bc_version and resolution information")
-    p_command.add_argument('-zoom',   help= "zoom for the surface input")
+    p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=['data', 'MOM5', 'MOM6'])
+    p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts', choices=['data', 'MOM5', 'MOM6'])
+    p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=['catch', 'catchcnclm40', 'catchcnclm45'])
 
-    p_command.add_argument('-qos',    default = "debug", help= "queue of slurm job", choices=['debug', 'allnccs'])
+    p_command.add_argument('-nobkg', action='store_true',     help="Do not remap bkg files")
+    p_command.add_argument('-nolcv', action='store_true',     help="Do not write lcv file")
+    p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
+    p_command.add_argument('-lbl',   action='store_true',     help="Label output restarts with bc_versions and resolutions")
+    p_command.add_argument('-in_bcsdir',  default="",         help="User-supplied directory with boundary conditions of input restarts. If not specified (default), directory deduced from bc_version and resolution info")
+    p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), directory deduced from bc_version and resolution info")
+    p_command.add_argument('-zoom',                           help= "Zoom parameter for the input surface restarts")
+
+    p_command.add_argument('-qos',        default = "debug",  help="Quality-of-service of slurm job", choices=['debug', 'allnccs'])
     account = get_account()
-    p_command.add_argument('-account', default = account,  help= "account of slurm job")
-    p_command.add_argument('-partition', default= 'compute', help= "partition of slurm job")
-    p_command.add_argument('-rs', default= '3', help='flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)', choices=['1','2','3'])
+    p_command.add_argument('-account',    default = account,  help="Account of slurm job")
+    p_command.add_argument('-partition',  default= 'compute', help="Partition of slurm job")
+    p_command.add_argument('-rs',         default= '3',       help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
     args, extra_args = parser.parse_known_args()
