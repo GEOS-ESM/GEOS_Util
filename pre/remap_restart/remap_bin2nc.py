@@ -159,11 +159,11 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
 
 if __name__ == "__main__":
 
-   bin2nc('fvcore_internal_rst',   'fvcore_internal_rst.nc4',    'bin2nc_fv.yaml', isDouble=True, hasHeader=True)
-   bin2nc('moist_internal_rst',    'moist_internal_rst.nc4',     'bin2nc_moist.yaml')
-   bin2nc('pchem_internal_rst',    'pchem_internal_rst.nc4',     'bin2nc_pchem.yaml')
-   bin2nc('gocart_internal_rst',   'gocart_internal_rst.nc4',    'bin2nc_gocart.yaml')
-   bin2nc('lake_internal_rst',     'lake_internal_rst.nc4',      'bin2nc_lake.yaml')
-   bin2nc('landice_internal_rst',  'landice_internal_rst.nc4',   'bin2nc_landice.yaml')
-   bin2nc('saltwater_internal_rst','saltwater_internal_rst.nc4', 'bin2nc_saltwater.yaml')
-   bin2nc('catch_internal_rst',    'catch_internal_rst.nc4',     'bin2nc_catch.yaml')
+   bin2nc('fvcore_internal_rst',   'fvcore_internal_rst.nc4',    'bin2nc_merra2_fv.yaml', isDouble=True, hasHeader=True)
+   bin2nc('moist_internal_rst',    'moist_internal_rst.nc4',     'bin2nc_merra2_moist.yaml')
+   bin2nc('pchem_internal_rst',    'pchem_internal_rst.nc4',     'bin2nc_merra2_pchem.yaml')
+   bin2nc('gocart_internal_rst',   'gocart_internal_rst.nc4',    'bin2nc_merra2_gocart.yaml')
+   bin2nc('lake_internal_rst',     'lake_internal_rst.nc4',      'bin2nc_merra2_lake.yaml')
+   bin2nc('landice_internal_rst',  'landice_internal_rst.nc4',   'bin2nc_merra2_landice.yaml')
+   bin2nc('saltwater_internal_rst','saltwater_internal_rst.nc4', 'bin2nc_merra2_saltwater.yaml')
+   bin2nc('catch_internal_rst',    'catch_internal_rst.nc4',     'bin2nc_merra2_catch.yaml')
