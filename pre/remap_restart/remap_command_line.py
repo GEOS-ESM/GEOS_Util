@@ -46,8 +46,9 @@ def parse_args(program_description):
     p_command.add_argument('-expid',             help='Experiment ID of input restarts')
     p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
 
-    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts')
-    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts')
+    choices_bc   = ['NL3', 'ICA', 'GM4', 'v06']
+    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc)
+    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc)
 
     p_command.add_argument('-in_wemin',          help='Min. water snow water equivalent param. used with input restarts')
     p_command.add_argument('-out_wemin',         help='Min. water snow water equivalent param. to be used with new restarts')
@@ -60,9 +61,13 @@ def parse_args(program_description):
     p_command.add_argument('-oceanout',          help='Ocean horizontal grid of new restarts. \n \
                                                        choices are the same as option "oceanin"', choices=ocean_grids)
 
-    p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=['data', 'MOM5', 'MOM6'])
-    p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts', choices=['data', 'MOM5', 'MOM6'])
-    p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=['catch', 'catchcnclm40', 'catchcnclm45'])
+
+    choices_omodel     = ['data', 'MOM5', 'MOM6']
+    p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
+    p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
+    
+    choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
+    p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
     p_command.add_argument('-nobkg', action='store_true',     help="Do not remap bkg files")
     p_command.add_argument('-nolcv', action='store_true',     help="Do not write lcv file")
