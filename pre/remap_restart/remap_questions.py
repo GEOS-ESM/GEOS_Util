@@ -166,7 +166,7 @@ def ask_questions():
             "type": "select",
             "name": "input:shared:ogrid",
             "message": "Select coupled ocean resolution of input restarts:\n",
-            "choices": choices_ogrid_cpld
+            "choices": choices_ogrid_cpld,
             "when": lambda x: x.get('input:shared:omodel') == 'MOM5' or x.get('input:shared:omodel')== 'MOM6'
         },
 
