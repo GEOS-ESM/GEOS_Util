@@ -62,6 +62,28 @@ def ask_questions():
 
    choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
 
+   bc_message = f'''\nSelect boundary conditions (BCs) version of input restarts:
+    BCs version      | ADAS tags            | GCM tags typically used with BCs version
+    -----------------|----------------------|-----------------------------------------
+    GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
+    ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18   
+    NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
+    ----------------------------------------------------------------------------------
+    Other: Additional choices used in model or DAS development.
+              \n\n '''
+
+   other_bc_message = f'''\nSelect BCs version of input restarts:
+
+             v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n'''
+
+   agrid_message = f'''Enter atmospheric grid of input restarts:
+    C12   C180  C1000  C270
+    C24   C360  C1440  C540
+    C48   C500  C2880  C1080
+    C90   C720  C5760  C2160  C1536\n'''
+
+   valid_agrid = ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536']
+
    questions = [
         {
             "type": "confirm",
@@ -107,12 +129,8 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:agrid",
-            "message": f'''Enter atmospheric grid of input restarts:
-    C12   C180  C1000  C270
-    C24   C360  C1440  C540
-    C48   C500  C2880  C1080
-    C90   C720  C5760  C2160  C1536\n''',
-            "validate": lambda text : text in ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536'],
+            "message": agrid_message,
+            "validate": lambda text : text in valid_agrid,
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
         },
@@ -155,13 +173,9 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:agrid",
-            "message": f'''Enter atmospheric grid for new restarts:
-    C12   C180  C1000  C270
-    C24   C360  C1440  C540
-    C48   C500  C2880  C1080
-    C90   C720  C5760  C2160  C1536\n''',
+            "message": agrid_message,
             "default": 'C360',
-            "validate": lambda text : text in ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536'],
+            "validate": lambda text : text in valid_agrid,
         },
 
         {
@@ -207,15 +221,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": f'''\nSelect boundary conditions (BCs) version of input restarts:
-    BCs version      | ADAS tags            | GCM tags typically used with BCs version
-    -----------------|----------------------|-----------------------------------------
-    GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
-    ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18   
-    NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
-    ----------------------------------------------------------------------------------
-    Other: Additional choices used in model or DAS development.
-              \n\n ''',
+            "message": bc_message,
             "choices": choices_bc_ops,
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -223,9 +229,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": f'''\nSelect BCs version of input restarts:
-
-             v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n''',
+            "message": other_bc_message,
             "choices": choices_bc_other,
             "when": lambda x: x["input:shared:bc_version"] == 'Other',
         },
@@ -233,15 +237,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": f'''\nSelect BCs version for new restarts:
-    BCs version      | ADAS tags            | GCM tags typically used with BCs version
-    -----------------|----------------------|-----------------------------------------
-    GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
-    ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18   
-    NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
-    ----------------------------------------------------------------------------------
-    Other: Additional choices used in model or DAS development.
-              \n\n''',
+            "message": bc_message,
             "choices": choices_bc_ops,
             "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
@@ -259,9 +255,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": f'''\nSelect BCs version of input restarts:
-
-             v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n''',
+            "message": other_bc_message,
             "choices": choices_bc_other,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06'],
         },
