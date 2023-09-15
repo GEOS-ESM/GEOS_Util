@@ -66,6 +66,8 @@ def parse_args(program_description):
     p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
     p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
     
+
+    # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
     choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
