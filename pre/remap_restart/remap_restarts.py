@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 #
+# main script for remapping GEOS restart files to a new resolution and/or boundary conditions version
+#
 # source install/bin/g5_modules
 #
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
@@ -46,11 +48,10 @@ program_description = textwrap.dedent(f'''
            ./remap_restarts.py command_line -h
 
       NOTE: Individual scripts can be executed independently:
-        1. remap_questions.py generates raw_answers.yaml.
-        2. If the command_line option is used with remap_restarts.py, the command line options are converted raw_answers.yaml.
-        3. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml.
-        4. Sets of restarts can be remapped separately with remap_upper.py, remap_lake_landice_saltwater.py, 
-           remap_catchANDcn.py, and remap_analysis.py, all of which use remap_params.yaml as input for remapping.
+        1. remap_questions.py generates remap_params.yaml.
+        2. If the command_line option is used with remap_restarts.py, the command line options are converted remap_params.yaml.
+        3. Subsets of restarts can be remapped separately with remap_upper.py, remap_lake_landice_saltwater.py, 
+           remap_catchANDcn.py, and remap_analysis.py, all of which use remap_params.yaml as configuration input.
     ''')
 def main():
 

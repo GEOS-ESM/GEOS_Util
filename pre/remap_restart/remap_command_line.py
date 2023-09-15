@@ -21,6 +21,9 @@ from remap_params import *
 
 def parse_args(program_description):
 
+   # See remap_utils.py for definitions of "choices", "message" strings, and "validate" lists
+   # that are used multiple times.
+
     parser = argparse.ArgumentParser(description='Remap restarts',epilog=program_description,formatter_class=argparse.RawDescriptionHelpFormatter)
 
     p_sub = parser.add_subparsers(help = 'Sub command help')
@@ -52,12 +55,8 @@ def parse_args(program_description):
     p_command.add_argument('-in_wemin',          help='Min. water snow water equivalent param. used with input restarts')
     p_command.add_argument('-out_wemin',         help='Min. water snow water equivalent param. to be used with new restarts')
 
-    p_command.add_argument('-oceanin',           help='Ocean horizontal grid of input restarts. \n \
-                                                       data model choices: 360x180,1440x720,2880x1440,CS. \n \
-                                                       coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids_cmd)
-    p_command.add_argument('-oceanout',          help='Ocean horizontal grid of new restarts. \n \
-                                                       choices are the same as option "oceanin"', choices=ocean_grids_cmd)
-
+    p_command.add_argument('-oceanin',           help='Ocean resolution of input restarts. See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
+    p_command.add_argument('-oceanout',          help='Ocean resolution of new restarts.   See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
 
     p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
     p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
@@ -90,14 +89,14 @@ def get_answers_from_command_line(cml):
    answers = {}
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
-   answers["input:shared:omodel"]       = cml.ocnmdlin
+   answers["input:shared:omodel"]      = cml.ocnmdlin
    answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
    if  cml.merra2:
       init_merra2(answers)
    else:   
-      answers["input:shared:bc_version"]      = cml.bcvin
+      answers["input:shared:bc_version"]   = cml.bcvin
       answers["input:surface:catch_model"] = cml.catch_model
-      answers["input:shared:rst_dir"] = os.path.abspath(cml.rst_dir + '/')
+      answers["input:shared:rst_dir"]      = os.path.abspath(cml.rst_dir + '/')
       fvcore_name(answers) 
       ogrid                            = cml.oceanin
       if ogrid == "CS":
@@ -107,8 +106,8 @@ def get_answers_from_command_line(cml):
    answers["output:shared:agrid"]      = cml.grout
    answers["output:air:nlevel"]        = cml.levsout
    answers["output:shared:expid"]      = cml.newid
-   answers["output:shared:bc_version"]        = cml.bcvout
-   answers["output:shared:omodel"]      = cml.ocnmdlout
+   answers["output:shared:bc_version"] = cml.bcvout
+   answers["output:shared:omodel"]     = cml.ocnmdlout
    answers["output:shared:label"]      = cml.lbl
    ogrid                               = cml.oceanout
    if ogrid == "CS":
@@ -123,33 +122,33 @@ def get_answers_from_command_line(cml):
    if cml.out_bcsdir.strip():
       answers["output:shared:bcs_dir"] =  cml.out_bcsdir
    else:
-      answers["output:shared:bcs_dir"]  = get_bcsdir(answers, "OUT")
+      answers["output:shared:bcs_dir"] = get_bcsdir(answers, "OUT")
 
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':
-     answers["output:air:remap"]     = True
+     answers["output:air:remap"]       = True
    if cml.rs == '2':
-     answers["output:surface:remap"] = True
+     answers["output:surface:remap"]   = True
    if cml.rs == '3':
-     answers["output:surface:remap"] = True
-     answers["output:air:remap"]     = True
+     answers["output:surface:remap"]   = True
+     answers["output:air:remap"]       = True
 
    if cml.zoom: 
-      answers["input:surface:zoom"] = cml.zoom
+      answers["input:surface:zoom"]    = cml.zoom
    else:
       # zoom_default fills 'input:shared:agrid'
-      answers["input:surface:zoom"] = zoom_default(answers)
+      answers["input:surface:zoom"]    = zoom_default(answers)
 
    if cml.in_wemin :
-     answers["input:surface:wemin"]  = cml.in_wemin
+     answers["input:surface:wemin"]    = cml.in_wemin
    else:
-     answers["input:surface:wemin"]  = wemin_default(answers['input:shared:bc_version'])
+     answers["input:surface:wemin"]    = wemin_default(answers['input:shared:bc_version'])
 
    if cml.out_wemin :
-     answers["output:surface:wemin"] = cml.out_wemin
+     answers["output:surface:wemin"]   = cml.out_wemin
    else:
-     answers["output:surface:wemin"] = wemin_default(answers['output:shared:bc_version'])
+     answers["output:surface:wemin"]   = wemin_default(answers['output:shared:bc_version'])
 
    answers["slurm:account"]    = cml.account
    answers["slurm:qos"]        = cml.qos

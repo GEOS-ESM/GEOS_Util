@@ -53,6 +53,9 @@ def default_partition(x):
 
 def ask_questions():
 
+   # See remap_utils.py for definitions of "choices", "message" strings, and "validate" lists
+   # that are used multiple times.
+
    questions = [
         {
             "type": "confirm",
@@ -98,7 +101,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:agrid",
-            "message": message_agrid,
+            "message": message_agrid_in,
             "validate": lambda text : text in validate_agrid,
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
@@ -142,7 +145,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:agrid",
-            "message": message_agrid,
+            "message": message_agrid_new,
             "default": 'C360',
             "validate": lambda text : text in validate_agrid,
         },
@@ -190,7 +193,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": message_bc_ops,
+            "message": message_bc_ops_in,
             "choices": choices_bc_ops,
             "when": lambda x: not x["input:shared:MERRA-2"],
         },
@@ -198,7 +201,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": message_bc_other,
+            "message": message_bc_other_in,
             "choices": choices_bc_other,
             "when": lambda x: x["input:shared:bc_version"] == 'Other',
         },
@@ -206,7 +209,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_ops,
+            "message": message_bc_ops_new,
             "choices": choices_bc_ops,
             "default": "NL3",
             "when": lambda x: x["input:shared:MERRA-2"],
@@ -224,7 +227,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_other,
+            "message": message_bc_other_new,
             "choices": choices_bc_other,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06'],
         },

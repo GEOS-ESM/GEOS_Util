@@ -9,20 +9,27 @@ import questionary
 import glob
 import shlex
 
-#shared global veriables
+# shared global variables
+#
+# define "choices", "message" strings, and "validate" lists that are used multiple times.
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
+
 choices_bc_other   = ['v06']
+
 choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06']
+
 choices_omodel     = ['data', 'MOM5', 'MOM6']
+
 choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
+
 choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
 
 choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
-ocean_grids_cmd    = ['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
 
+choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
-message_bc_ops     = f'''\nSelect boundary conditions (BCs) version of input restarts:
+message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
  GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
@@ -32,17 +39,27 @@ message_bc_ops     = f'''\nSelect boundary conditions (BCs) version of input res
  Other: Additional choices used in model or DAS development.
            \n\n '''
 
-message_bc_other   = f'''\nSelect BCs version of input restarts:
+message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
+message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
+
+message_bc_other   = f'''\n
 
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n'''
 
-message_agrid      = f'''Enter atmospheric grid of input restarts:
- C12   C180  C1000  C270
- C24   C360  C1440  C540
- C48   C500  C2880  C1080
- C90   C720  C5760  C2160  C1536\n'''
+message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
+message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
-validate_agrid     = ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536']
+message_agrid_list = f'''
+ C12   C180  C540   C1440
+ C24   C270  C720   C1536
+ C48   C360  C1000  C2160
+ C90   C500  C1080  C2880  C5760\n'''
+
+message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
+
+message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
+
+validate_agrid     = ['C12','C24','C48','C90','C180','C270','C360','C500','C540','C720','C1000','C1080','C1440','C1536','C2160','C2880','C5760']
 
 
 def init_merra2(x):
