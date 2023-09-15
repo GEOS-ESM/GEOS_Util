@@ -265,10 +265,13 @@ def get_command_line_from_answers(answers):
      bcvin = " -bcvin " + answers["input:shared:bc_version"]        
    bcvout = " -bcvout " + answers["output:shared:bc_version"]       
 
-   ocnmdlin  = ''
+   ocnmdlin  = '-ocnmdlin data'
    if answers.get("input:shared:omodel"):
       ocnmdlin  = ' -ocnmdlin ' + answers.get("input:shared:omodel")
-   ocnmdlout = ' -ocnmdlout ' + answers["output:shared:omodel"]
+
+   ocnmdlout = ' -ocnmdlout data'
+   if answers.get("output:shared:omodel"):
+      ocnmdlout = ' -ocnmdlout ' + answers["output:shared:omodel"]
 
    oceanin=''
    ogrid = answers.get("input:shared:ogrid")
