@@ -46,29 +46,24 @@ def parse_args(program_description):
     p_command.add_argument('-expid',             help='Experiment ID of input restarts')
     p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
 
-    choices_bc   = ['NL3', 'ICA', 'GM4', 'v06']
-    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc)
-    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc)
+    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_cmd)
+    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_cmd)
 
     p_command.add_argument('-in_wemin',          help='Min. water snow water equivalent param. used with input restarts')
     p_command.add_argument('-out_wemin',         help='Min. water snow water equivalent param. to be used with new restarts')
 
-    ocean_grids=['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
-
     p_command.add_argument('-oceanin',           help='Ocean horizontal grid of input restarts. \n \
                                                        data model choices: 360x180,1440x720,2880x1440,CS. \n \
-                                                       coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids)
+                                                       coupled model choices: 72x36, 360x200,720x410,1440x1080', choices=ocean_grids_cmd)
     p_command.add_argument('-oceanout',          help='Ocean horizontal grid of new restarts. \n \
-                                                       choices are the same as option "oceanin"', choices=ocean_grids)
+                                                       choices are the same as option "oceanin"', choices=ocean_grids_cmd)
 
 
-    choices_omodel     = ['data', 'MOM5', 'MOM6']
     p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
     p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
     
 
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
-    choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
     p_command.add_argument('-nobkg', action='store_true',     help="Do not remap bkg files")

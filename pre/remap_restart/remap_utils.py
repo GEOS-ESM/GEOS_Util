@@ -9,6 +9,42 @@ import questionary
 import glob
 import shlex
 
+#shared global veriables
+
+choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
+choices_bc_other   = ['v06']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06']
+choices_omodel     = ['data', 'MOM5', 'MOM6']
+choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
+choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
+
+choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
+ocean_grids_cmd    = ['360x180','1440x720','2880x1440','CS', '72x36', '360x200','720x410','1440x1080']
+
+
+message_bc_ops     = f'''\nSelect boundary conditions (BCs) version of input restarts:
+ BCs version      | ADAS tags            | GCM tags typically used with BCs version
+ -----------------|----------------------|-----------------------------------------
+ GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
+ ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18   
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
+ ----------------------------------------------------------------------------------
+ Other: Additional choices used in model or DAS development.
+           \n\n '''
+
+message_bc_other   = f'''\nSelect BCs version of input restarts:
+
+          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n\n'''
+
+message_agrid      = f'''Enter atmospheric grid of input restarts:
+ C12   C180  C1000  C270
+ C24   C360  C1440  C540
+ C48   C500  C2880  C1080
+ C90   C720  C5760  C2160  C1536\n'''
+
+validate_agrid     = ['C12','C180','C1000','C270','C24','C360','C1440','C540','C48','C500','C2880','C1080','C90','C720','C5760','C2160','C1536']
+
+
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
