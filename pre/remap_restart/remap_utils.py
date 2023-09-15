@@ -29,7 +29,7 @@ def init_merra2(x):
   else:
      expid = "d5124_m2_jan10"
   x['input:shared:expid'] = expid
-  x['input:shared:model'] = 'data'
+  x['input:shared:omodel'] = 'data'
   x['input:shared:agrid'] = 'C180'
   x['input:shared:ogrid'] = '1440x720'
   x['input:shared:bc_version']   = 'GM4'
@@ -266,9 +266,9 @@ def get_command_line_from_answers(answers):
    bcvout = " -bcvout " + answers["output:shared:bc_version"]       
 
    ocnmdlin  = ''
-   if answers.get("input:shared:model"):
-      ocnmdlin  = ' -ocnmdlin ' + answers.get("input:shared:model")
-   ocnmdlout = ' -ocnmdlout ' + answers["output:shared:model"]
+   if answers.get("input:shared:omodel"):
+      ocnmdlin  = ' -ocnmdlin ' + answers.get("input:shared:omodel")
+   ocnmdlout = ' -ocnmdlout ' + answers["output:shared:omodel"]
 
    oceanin=''
    ogrid = answers.get("input:shared:ogrid")
@@ -429,12 +429,12 @@ def get_bcsdir(x, opt):
   bc_version   = x.get('input:shared:bc_version')
   agrid = x.get('input:shared:agrid')
   ogrid = x.get('input:shared:ogrid')
-  model = x.get('input:shared:model')
+  model = x.get('input:shared:omodel')
   if opt.upper() == "OUT":
     bc_version   = x.get('output:shared:bc_version')
     agrid = x.get('output:shared:agrid')
     ogrid = x.get('output:shared:ogrid')
-    model = x.get('output:shared:model')
+    model = x.get('output:shared:omodel')
 
   bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
   bcdir = bc_base+'/'+ bc_version+'/geometry/'

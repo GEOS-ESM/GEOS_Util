@@ -93,7 +93,7 @@ def get_answers_from_command_line(cml):
    answers = {}
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
-   answers["input:shared:model"]       = cml.ocnmdlin
+   answers["input:shared:omodel"]       = cml.ocnmdlin
    answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
    if  cml.merra2:
       init_merra2(answers)
@@ -111,7 +111,7 @@ def get_answers_from_command_line(cml):
    answers["output:air:nlevel"]        = cml.levsout
    answers["output:shared:expid"]      = cml.newid
    answers["output:shared:bc_version"]        = cml.bcvout
-   answers["output:shared:model"]      = cml.ocnmdlout
+   answers["output:shared:omodel"]      = cml.ocnmdlout
    answers["output:shared:label"]      = cml.lbl
    ogrid                               = cml.oceanout
    if ogrid == "CS":
