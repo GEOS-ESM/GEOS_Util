@@ -17,9 +17,9 @@ class remap_params(object):
      self.common_out    = config_from_question['output']['shared']
      self.upper_out     = config_from_question['output']['air']
      self.slurm_options = config_from_question['slurm']
-     self.surf_in  = config_from_question['input']['surface']
-     self.surf_out = config_from_question['output']['surface']
-     self.ana_out  = config_from_question['output']['analysis']
+     self.surf_in       = config_from_question['input']['surface']
+     self.surf_out      = config_from_question['output']['surface']
+     self.ana_out       = config_from_question['output']['analysis']
 
      # load input yaml
      yaml = ruamel.yaml.YAML() 
@@ -30,28 +30,29 @@ class remap_params(object):
      config_tpl = yaml.load(stream)
 
      # params for shared
-     config_tpl['input']['shared']['MERRA-2']  = self.common_in.get('MERRA-2')
-     config_tpl['input']['shared']['agrid']    = self.common_in.get('agrid')
-     config_tpl['input']['shared']['ogrid']    = self.common_in.get('ogrid')
-     config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
-     config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
-     config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
-     config_tpl['input']['shared']['bc_version']        = self.common_in.get('bc_version')
-     config_tpl['input']['surface']['catch_model']       = self.surf_in.get('catch_model')
+     config_tpl['input']['shared']['MERRA-2']       = self.common_in.get('MERRA-2')
+     config_tpl['input']['shared']['agrid']         = self.common_in.get('agrid')
+     config_tpl['input']['shared']['ogrid']         = self.common_in.get('ogrid')
+     config_tpl['input']['shared']['rst_dir']       = self.common_in['rst_dir']+'/'
+     config_tpl['input']['shared']['expid']         = self.common_in.get('expid')
+     config_tpl['input']['shared']['yyyymmddhh']    = self.common_in['yyyymmddhh']
+     config_tpl['input']['shared']['bc_version']    = self.common_in.get('bc_version')
+     config_tpl['input']['surface']['catch_model']  = self.surf_in.get('catch_model')
 
-     config_tpl['output']['air']['nlevel']               = self.upper_out.get('nlevel')
-     config_tpl['output']['air']['remap']                = self.upper_out.get('remap')
-     config_tpl['output']['surface']['remap_water']      = self.surf_out.get('remap')
-     config_tpl['output']['surface']['remap_catch']      = self.surf_out.get('remap')
-     config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
-     config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
-     config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
-     config_tpl['output']['shared']['expid']   = self.common_out['expid']
-     config_tpl['output']['shared']['bc_version']     = self.common_out.get('bc_version')
-     config_tpl['output']['shared']['label']  = self.common_out.get('label')
+     config_tpl['output']['air']['nlevel']          = self.upper_out.get('nlevel')
+     config_tpl['output']['air']['remap']           = self.upper_out.get('remap')
+     config_tpl['output']['surface']['remap_water'] = self.surf_out.get('remap')
+     config_tpl['output']['surface']['remap_catch'] = self.surf_out.get('remap')
+     config_tpl['output']['shared']['agrid']        = self.common_out['agrid']
+     config_tpl['output']['shared']['ogrid']        = self.common_out['ogrid']
+     config_tpl['output']['shared']['out_dir']      = self.common_out['out_dir'] + '/'
+     config_tpl['output']['shared']['expid']        = self.common_out['expid']
+     config_tpl['output']['shared']['bc_version']   = self.common_out.get('bc_version')
+     config_tpl['output']['shared']['label']        = self.common_out.get('label')
 
-     config_tpl['input']['shared']['bcs_dir']    = self.common_in['bcs_dir']
-     config_tpl['output']['shared']['bcs_dir']   = self.common_out['bcs_dir']
+     config_tpl['input']['shared']['bcs_dir']       = self.common_in['bcs_dir']
+     config_tpl['output']['shared']['bcs_dir']      = self.common_out['bcs_dir']
+
      # params for upper air
      config_tpl = self.params_for_air(config_tpl)
      config_tpl = self.params_for_surface(config_tpl)
@@ -69,27 +70,27 @@ class remap_params(object):
      return config_tpl
 
   def options_for_slurm(self, config_tpl):
-    config_tpl['slurm']['account'] = self.slurm_options['account']
-    config_tpl['slurm']['qos'] = self.slurm_options['qos']
+    config_tpl['slurm']['account']   = self.slurm_options['account']
+    config_tpl['slurm']['qos']       = self.slurm_options['qos']
     config_tpl['slurm']['partition'] = self.slurm_options['partition']
     return config_tpl
 
   def params_for_surface(self, config_tpl):
     config_tpl['output']['surface']['surflay'] = 50.
     bc_version = self.common_out['bc_version']
-    ogrid = self.common_out['ogrid']
+    ogrid      = self.common_out['ogrid']
     config_tpl['output']['surface']['split_saltwater'] = True
     if 'Ganymed' in bc_version :
        config_tpl['output']['surface']['split_saltwater'] = False
-    config_tpl['input']['surface']['zoom']= self.surf_in['zoom']
-    config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
-    config_tpl['output']['surface']['wemin']= self.surf_out['wemin']
-    config_tpl['input']['surface']['catch_model'] = self.surf_in.get('catch_model')
+    config_tpl['input']['surface']['zoom']                = self.surf_in['zoom']
+    config_tpl['input']['surface']['wemin']               = self.surf_in['wemin']
+    config_tpl['output']['surface']['wemin']              = self.surf_out['wemin']
+    config_tpl['input']['surface']['catch_model']         = self.surf_in.get('catch_model')
     return config_tpl
 
   def params_for_analysis(self, config_tpl):
-    config_tpl['output']['analysis']['lcv'] = self.ana_out.get('lcv')
-    config_tpl['output']['analysis']['bkg'] = self.ana_out.get('bkg')
+    config_tpl['output']['analysis']['lcv']  = self.ana_out.get('lcv')
+    config_tpl['output']['analysis']['bkg']  = self.ana_out.get('bkg')
     config_tpl['output']['analysis']['aqua'] = True
     
     return config_tpl

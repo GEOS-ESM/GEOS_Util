@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+#
+# script to convert binary MERRA-2 restarts to nc4
+#
+# As of Sep 2023, MERRA-2 restarts are the only binary restarts that may need to be
+# remapped.  The set of yaml config files "bin2nc_merra2_*.yaml" include hard-wired
+# variables names, long names, and tile/grid dimensions specific to MERRA-2 restarts.
 
 from yaml import safe_load, load, dump
 from netCDF4 import Dataset

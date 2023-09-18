@@ -96,7 +96,7 @@ class catchANDcn(remap_base):
      PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
     
      account    = config['slurm']['account']
-     # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4
+     # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      label = get_label(config) 
 
      suffix     = time+'z.nc4' + label

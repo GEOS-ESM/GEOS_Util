@@ -5,7 +5,7 @@
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
-#  This script parses and converts the command-line arguments to answers equivalent to that from remap_questions.py
+# This script parses and converts the command-line arguments to answers equivalent to those from remap_questions.py
 
 
 import os
@@ -39,12 +39,13 @@ def parse_args(program_description):
      help = "Use command line as input",
     )
     p_command.add_argument('-merra2', action='store_true', default= False, help='use merra2 restarts')
-    p_command.add_argument('-ymdh',              help='yyyymmddhh year month date hour of input and new restarts')
-    p_command.add_argument('-grout',             help='Grid ID of new restarts, format Cxx')
-    p_command.add_argument('-levsout',           help='Levels for new restarts')
 
-    p_command.add_argument('-out_dir',           help='Directory for new restarts')
+    p_command.add_argument('-ymdh',              help='yyyymmddhh year month date hour of input and new restarts')
+    p_command.add_argument('-grout',             help='Grid ID/resolution of new restarts, format C[xxx] (cubed-sphere only for now)')
+    p_command.add_argument('-levsout',           help='No. of levels for new restarts')
+
     p_command.add_argument('-rst_dir',           help='Directory of input restarts')
+    p_command.add_argument('-out_dir',           help='Directory for new restarts')
 
     p_command.add_argument('-expid',             help='Experiment ID of input restarts')
     p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
@@ -52,8 +53,8 @@ def parse_args(program_description):
     p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_cmd)
     p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_cmd)
 
-    p_command.add_argument('-in_wemin',          help='Min. water snow water equivalent param. used with input restarts')
-    p_command.add_argument('-out_wemin',         help='Min. water snow water equivalent param. to be used with new restarts')
+    p_command.add_argument('-in_wemin',          help='Min. snow water equivalent param. used with input restarts')
+    p_command.add_argument('-out_wemin',         help='Min. snow water equivalent param. to be used with new restarts')
 
     p_command.add_argument('-oceanin',           help='Ocean resolution of input restarts. See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
     p_command.add_argument('-oceanout',          help='Ocean resolution of new restarts.   See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
@@ -69,15 +70,15 @@ def parse_args(program_description):
     p_command.add_argument('-nolcv', action='store_true',     help="Do not write lcv file")
     p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
     p_command.add_argument('-lbl',   action='store_true',     help="Label output restarts with bc_versions and resolutions")
-    p_command.add_argument('-in_bcsdir',  default="",         help="User-supplied directory with boundary conditions of input restarts. If not specified (default), directory deduced from bc_version and resolution info")
-    p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), directory deduced from bc_version and resolution info")
-    p_command.add_argument('-zoom',                           help= "Zoom parameter for the input surface restarts")
+    p_command.add_argument('-in_bcsdir',  default="",         help="User-supplied directory with boundary conditions of input restarts. If not specified (default), dir. is deduced from bc_version and resolution info")
+    p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), dir. is deduced from bc_version and resolution info")
+    p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
-    p_command.add_argument('-qos',        default = "debug",  help="Quality-of-service of slurm job", choices=['debug', 'allnccs'])
+    p_command.add_argument('-qos',        default = "debug",  help="SLURM quality-of-service", choices=['debug', 'allnccs'])
     account = get_account()
-    p_command.add_argument('-account',    default = account,  help="Account of slurm job")
-    p_command.add_argument('-partition',  default= 'compute', help="Partition of slurm job")
-    p_command.add_argument('-rs',         default= '3',       help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface) 3 (both)", choices=['1','2','3'])
+    p_command.add_argument('-account',    default = account,  help="SLURM account")
+    p_command.add_argument('-partition',  default= 'compute', help="SLURM partition")
+    p_command.add_argument('-rs',         default= '3',       help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
     args, extra_args = parser.parse_known_args()

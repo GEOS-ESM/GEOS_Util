@@ -220,9 +220,9 @@ def get_label(config):
 
 # NOTE: "wemin" is a configurable parameter that can be set to anything, independent
 #       of the bcs version.  The default set here is simply the "wemin" value that is
-#       typically used with the bcs version.  The user needs to confirm or overwrite
-#       the default value, depending on the "wemin" value used in the simulation 
-#       that is associated with the set of restarts. 
+#       typically used with the bcs version.  The user needs to confirm the default 
+#       value or overwrite it with the "wemin" value used in the simulation that is 
+#       associated with the given set of restarts. 
 def wemin_default(bc_version):
    default_ = '13'
    if bc_version =='GM4' or bc_version == 'ICA' : default_ = '26'

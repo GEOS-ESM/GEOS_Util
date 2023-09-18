@@ -38,11 +38,11 @@ def remove_ogrid_comment(x, opt):
 def echo_bcs(x,opt):
   if opt == "IN":
     x['input:shared:bcs_dir']  = get_bcsdir(x, 'IN')
-    print("\nBc path for the input restart: " + x['input:shared:bcs_dir'])
+    print("\nBc path for input restart: " + x['input:shared:bcs_dir'])
   if opt == "OUT":
     x['output:shared:bcs_dir'] = get_bcsdir(x, 'OUT')
-    print("\nBc path for the output restart: " + x['output:shared:bcs_dir'])
-    print("\nUsers can change the paths in the generated remap_params.yaml file later on")
+    print("\nBc path for output restart: " + x['output:shared:bcs_dir'])
+    print("\nLater on, user can edit paths in generated remap_params.yaml file")
   return False
 
 def default_partition(x):
