@@ -53,13 +53,13 @@ message_agrid_list = f'''
  C12   C180  C540   C1440
  C24   C270  C720   C1536
  C48   C360  C1000  C2160
- C90   C500  C1080  C2880  C5760\n'''
+ C90   C1080 C2880  C5760\n'''
 
 message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
 
 message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
 
-validate_agrid     = ['C12','C24','C48','C90','C180','C270','C360','C500','C540','C720','C1000','C1080','C1440','C1536','C2160','C2880','C5760']
+validate_agrid     = ['C12','C24','C48','C90','C180','C270','C360','C540','C720','C1000','C1080','C1440','C1536','C2160','C2880','C5760']
 
 
 def init_merra2(x):
