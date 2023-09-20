@@ -191,7 +191,7 @@ class lake_landice_saltwater(remap_base):
     surfin = [ merra_2_rst_dir +  expid+'.lake_internal_rst.'     + suffix,
                merra_2_rst_dir +  expid+'.landice_internal_rst.'  + suffix,
                merra_2_rst_dir +  expid+'.saltwater_internal_rst.'+ suffix]
-    bin2nc_yaml = ['remap_lake.yaml', 'remap_landice.yaml','remap_salt.yaml']
+    bin2nc_yaml = ['bin2nc_merra2_lake.yaml', 'bin2nc_merra2_landice.yaml','bin2nc_merra2_salt.yaml']
     bin_path = os.path.dirname(os.path.realpath(__file__))
     for (f,yf) in zip(surfin, bin2nc_yaml):
        fname = os.path.basename(f)

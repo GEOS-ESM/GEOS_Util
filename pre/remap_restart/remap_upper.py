@@ -349,7 +349,7 @@ endif
               merra_2_rst_dir +  expid+'.moist_internal_rst.'  + suffix,
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
-    bin2nc_yaml = ['remap_fv.yaml', 'remap_moist.yaml', 'remap_gocart.yaml', 'remap_pchem.yaml']
+    bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml']
     bin_path = os.path.dirname(os.path.realpath(__file__))
     for (f, yf) in zip(upperin,bin2nc_yaml) :
        fname = os.path.basename(f)
