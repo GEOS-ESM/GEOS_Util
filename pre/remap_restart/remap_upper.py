@@ -148,27 +148,25 @@ class upperair(remap_base):
      # We need to create an input.nml file which is different if we are running stretched grid
      # First, let's define a boolean for whether we are running stretched grid
      # If we are running with imout of 270, 540, 1080, 1536 or 2160, then we are running stretched grid
-     if imout in [270, 540, 1080, 2160]:
-        stretched_grid = True
-        target_lat = 39.5
-        target_lon = -98.35
-        stretch_fac = 2.5
-     elif imout in [1536]:
-        stretched_grid = True
-        target_lat = 39.5
-        target_lon = -98.35
-        stretch_fac = 3.0
-     else:
-        stretched_grid = False
-
      # If we are running stretched grid, we need to pass in the target lat, lon, and stretch factor
      # to interp_restarts.x. Per the code we use:
      #  -stretched_grid target_lon target_lat stretch_fac
      # If we are not running stretched grid, we should pass in a blank string
-     if stretched_grid:
+     stretch = config['output']['shared']['stretch']
+     stretch_str = ""
+     if stretch:
+        target_lat  = 0.0
+        target_lon  = 0.0
+        stretch_fac = 1.0
+        if stretch == 'SG001':
+          target_lat  = 39.5
+          target_lon  = -98.35
+          stretch_fac = 2.5
+        if stretch == 'SG002':
+          target_lat  = 39.5
+          target_lon  = -98.35
+          stretch_fac = 3.0
         stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
-     else:
-        stretch_str = ""
 
      # Now, let's create the input.nml file
      # We need to create a namelist for the upper air remapping

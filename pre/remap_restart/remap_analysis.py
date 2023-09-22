@@ -16,6 +16,7 @@ import fileinput
 import ruamel.yaml
 from remap_base import remap_base
 from remap_utils import get_label
+import fnmatch
 
 class analysis(remap_base):
   def __init__(self, **configs):
@@ -67,11 +68,16 @@ class analysis(remap_base):
      aqua   = config['output']['analysis']['aqua']
      local_fs=[]
      for f in analysis_in:
-       print(f)
        fname    = os.path.basename(f)
-       out_name = fname.replace(expid_in + '.', expid_out)
+       out_name = ''
+       if (expid_in) :
+          out_name = fname.replace(expid_in + '.', expid_out)
+       else:
+          out_name = expid_out+fname
+
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp)
+       print("Copy " + f + ' to ' + f_tmp)
        shutil.copy(f,f_tmp)
        if out_name.find('satbias') != -1 :
          if (aqua):
@@ -83,8 +89,9 @@ class analysis(remap_base):
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
-     bkg_files = glob.glob(tmpdir+'/*.bkg??_eta_rst*')
-     for f in bkg_files:
+
+     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*')
+     for f in dyn2dyn:
         f_orig = f + ".orig"
         shutil.move(f,f_orig)
         cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig

@@ -61,6 +61,8 @@ def parse_args(program_description):
 
     p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
     p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
+    p_command.add_argument('-out_stretch', default= False,    help='Output stretch params',   choices=choices_stretch)
+    p_command.add_argument('-in_stretch', default= False,    help='Output stretch params',   choices=choices_stretch)
     
 
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
@@ -98,7 +100,7 @@ def get_answers_from_command_line(cml):
       answers["input:shared:bc_version"]   = cml.bcvin
       answers["input:surface:catch_model"] = cml.catch_model
       answers["input:shared:rst_dir"]      = os.path.abspath(cml.rst_dir + '/')
-      fvcore_name(answers) 
+      fvcore_info(answers) 
       ogrid                            = cml.oceanin
       if ogrid == "CS":
          ogrid = answers["input:shared:agrid"]
@@ -125,6 +127,8 @@ def get_answers_from_command_line(cml):
    else:
       answers["output:shared:bcs_dir"] = get_bcsdir(answers, "OUT")
 
+   answers["output:shared:stretch"]    = cml.out_stretch
+   answers["input:shared:stretch"]     = cml.in_stretch
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':

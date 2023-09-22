@@ -11,6 +11,7 @@ input:
     # bc_version info here is not critical. It is used in command_line options
     bc_version: none
     MERRA-2: false
+    stretch: false
     agrid:
     bcs_dir:
     expid:
@@ -29,6 +30,8 @@ output:
     # bc_version info here is not critical. It is used in command_line options
     bc_version: none
     label: false
+    # SG001,SG002
+    stretch: false
     agrid:
     bcs_dir:
     expid:

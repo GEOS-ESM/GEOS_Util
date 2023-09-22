@@ -74,7 +74,7 @@ def ask_questions():
             "name": "input:shared:yyyymmddhh",
             "message": "Enter restart date/time:  (Must be 10 digits: yyyymmddhh.)\n",
             "validate": lambda text: len(text)==10 ,
-            "when": lambda x: not x['input:shared:MERRA-2'] and fvcore_time(x),
+            "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
         },
         {
             "type": "text",
@@ -104,7 +104,7 @@ def ask_questions():
             "message": message_agrid_in,
             "validate": lambda text : text in validate_agrid,
             # if it is merra-2 or has_fvcore, agrid is deduced
-            "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_name(x),
+            "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
         },
 
         {
@@ -143,11 +143,46 @@ def ask_questions():
         },
 
         {
+            "type": "confirm",
+            "name": "output:shared:stretch",
+            "message": "Remap to a stretch grid?",
+            "default": False,
+        },
+        {
             "type": "text",
             "name": "output:shared:agrid",
             "message": message_agrid_new,
             "default": 'C360',
             "validate": lambda text : text in validate_agrid,
+            "when": lambda x : not x['output:shared:stretch'],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:stretch",
+            "message": f'''Select stretch parameters:
+                        Stretch factor   Lat    lon
+                        --------------  -----  ------
+                SG001      2.5           39.5   -98.35
+                SG002      3.0           39.5   -98.35 \n''',
+            "choices": ['SG001','SG002'],
+            "when": lambda x : x['output:shared:stretch'],
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:agrid",
+            "message": "Select a stretched grid for the new restart: \n",
+            "choices": ['C270', 'C540', 'C1080', 'C2160'], 
+            "when": lambda x : x.get('output:shared:stretch') == 'SG001',
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:agrid",
+            "message": "Select a stretched grid for the new restart: \n",
+            "choices": ['C1536'], 
+            "when": lambda x : x.get('output:shared:stretch') == 'SG002',
         },
 
         {

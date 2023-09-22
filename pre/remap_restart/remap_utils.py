@@ -8,7 +8,7 @@ import shutil
 import questionary
 import glob
 import shlex
-
+import netCDF4 as nc
 # shared global variables
 #
 # define "choices", "message" strings, and "validate" lists that are used multiple times.
@@ -28,6 +28,8 @@ choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (O
 choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
+
+choices_stretch = [False, 'SG001', 'SG002']
 
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
@@ -50,16 +52,16 @@ message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_o
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
 message_agrid_list = f'''
- C12   C180  C540   C1440
- C24   C270  C720   C1536
- C48   C360  C1000  C2160
- C90   C1080 C2880  C5760\n'''
+ C12   C180    C1440
+ C24   C360    C2880
+ C48   C720    C5760 
+ C90   C1000         \n'''
 
 message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
 
 message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
 
-validate_agrid     = ['C12','C24','C48','C90','C180','C270','C360','C540','C720','C1000','C1080','C1440','C1536','C2160','C2880','C5760']
+validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
 
 
 def init_merra2(x):
@@ -87,89 +89,66 @@ def init_merra2(x):
   x['input:shared:ogrid'] = '1440x720'
   x['input:shared:bc_version']   = 'GM4'
   x['input:surface:catch_model']   = 'catch'
+  x['input:shared:stretch']   = False
   x['input:shared:rst_dir'] = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
 
   return False
 
-def fvcore_name(x):
+def fvcore_info(x):
   if 'input:shared:agrid' in x.keys():
      return True
-  ymdh = x['input:shared:yyyymmddhh']
-  time = ymdh[0:8] + '_'+ymdh[8:10]
   rst_dir = x.get('input:shared:rst_dir')
-
   if not rst_dir : return False
-
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
   files = glob.glob(rst_dir+'/*fvcore_*')
-
   if len (files) == 0 : return False
 
-  if len(files) == 1: 
-    fname = files[0]
+  fname =''
+  ymdh  =''
 
   if len(files) > 1 :
+    ymdh = x.get('input:shared:yyyymmddhh')
+    if (not ymdh): return False
+    time = ymdh[0:8] + '_'+ymdh[8:10]
     files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
     fname = files[0]
-  fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-  cmd = fvrst + fname
-  #print(cmd +'\n')
-  p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-  (output, err) = p.communicate()
-  p_status = p.wait()
-  ss = output.decode().split()
-  lat = int(ss[0])
-  lon = int(ss[1])
-  if (lon != lat*6) :
-      sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
-  ymdh  = x.get('input:shared:yyyymmddhh')
-  ymdh_ = str(ss[3]) + str(ss[4])[0:2]
-  if (ymdh_ != ymdh) :
-      print("Warning: The date in fvcore is " + ymdh_ )
-  x['input:shared:agrid'] = "C"+ss[0] # save for air parameter
-  print("The input fvcore restart has air grid: " + "C" + ss[0] + '\n')
-  expid = os.path.basename(fname).split('fvcore')[0]
-  expid = expid[0:-1]
-  x['input:shared:expid'] = expid 
-  return fname
 
-def fvcore_time(x):
-  rst_dir = x.get('input:shared:rst_dir')
-  if not rst_dir :
-    sys.exit('Input restart directory does not exist.\n')
-
-  x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
-   
-  files = glob.glob(rst_dir+'/*fvcore_*')
-      
-  if len (files) == 0 : return True
-  if len (files)  > 1 : return True
-  fname =''    
   if len(files) == 1: 
     fname = files[0]
-   
-  fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-  cmd = fvrst + fname
-  #print(cmd +'\n')
-  p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-  (output, err) = p.communicate()
-  p_status = p.wait()
-  ss = output.decode().split()
-  lat = int(ss[0])
-  lon = int(ss[1])
-  if (lon != lat*6) :
-      sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
-  ymdh_ = str(ss[3]) + str(ss[4])[0:2]
-  x['input:shared:yyyymmddhh'] = ymdh_
-  print("\nThe fvore has restart time " + ymdh_)
-  x['input:shared:agrid'] = "C"+ss[0] # save for air parameter
-  print("The input fvcore restart has air grid: " + "C" + ss[0] + '\n')
+
+  fvrst = nc.Dataset(fname)
+  lon = fvrst.dimensions['lon'].size
+  lat = fvrst.dimensions['lat'].size
+  ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
+  if (lat != lon*6) :
+      print("jiangjiang", lon, lat)
+      exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+  x['input:shared:yyyymmddhh'] = ymdh
+  x['input:shared:agrid'] = "C"+str(lon)
+  print("The input fvcore restart has air grid: " + "C" + str(lon) + '\n')
+  print("The input fvcore restart has time: " + ymdh + '\n')
   expid = os.path.basename(fname).split('fvcore')[0]
   expid = expid[0:-1]
-  x['input:shared:expid'] = expid 
-  if (expid) : print("The input fvcore's experiment ID " + expid + '\n')
-  return False
+  x['input:shared:expid'] = expid
+  if (expid) : print("The input fvcore restart has experiment ID " + expid + '\n')
+
+  x['input:shared:stretch'] = False
+  stretch_factor = fvrst.__dict__.get('STRETCH_FACTOR')
+  if (stretch_factor) :
+     sg001 = ['2.50', '39.50', '-98.35']
+     sg002 = ['3.00', '39.50', '-98.35']
+     target_lat = fvrst.__dict__.get('TARGET_LAT')
+     target_lon = fvrst.__dict__.get('TARGET_LON')
+     sg = [stretch_factor, target_lat, target_lon]
+     f_ = [f"{number:.{2}f}" for number in sg]
+     print("[stretch_factor, target_lat, target_lon]: ", f_)
+     if f_ == sg001 :
+       x['input:shared:stretch'] = 'SG001'
+     if f_ == sg002 :
+       x['input:shared:stretch'] = 'SG002'
+
+  return True
 
 def catch_model(x):
   ymdh = x['input:shared:yyyymmddhh']
@@ -353,6 +332,13 @@ def get_command_line_from_answers(answers):
    if not os.path.samefile(default_bc, answers.get("output:shared:bcs_dir").strip()) :
      out_bcsdir = ' -out_bcsdir ' + answers.get("output:shared:bcs_dir")
 
+   out_stretch = ''
+   if answers["output:shared:stretch"]:   
+     out_stretch = ' -out_stretch ' + answers["output:shared:stretch"]
+   in_stretch = ''
+   if answers["input:shared:stretch"]:   
+     in_stretch = ' -in_stretch ' + answers["input:shared:stretch"]
+
    zoom = " -zoom " + answers["input:surface:zoom"]
    wemin  = " -in_wemin "  + answers["input:surface:wemin"]
    wemout = " -out_wemin " + answers["output:surface:wemin"]
@@ -388,6 +374,8 @@ def get_command_line_from_answers(answers):
                                           out_dir  + \
                                           in_bcsdir + \
                                           out_bcsdir + \
+                                          out_stretch + \
+                                          in_stretch + \
                                           catch_model + \
                                           zoom + \
                                           wemin + \
@@ -423,7 +411,7 @@ def get_config_from_answers(answers):
 
    return config
 
-def get_grid_subdir(bcdir, agrid, ogrid, model):
+def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
    def get_name_with_grid( grid, names, a_o):
      if not grid :
        return names
@@ -459,6 +447,8 @@ def get_grid_subdir(bcdir, agrid, ogrid, model):
    #dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
    #v2.7
    dirnames = [f for f in os.listdir(bcdir) if os.path.isdir(os.path.join(bcdir,f))]
+   if stretch:
+      dirnames = [dname for dname in dirnames if stretch in dname]
    anames = get_name_with_grid(agrid, dirnames, 'a')
    gridID = get_name_with_grid(ogrid, anames, 'o')
    if len(gridID) == 0 :
@@ -486,18 +476,20 @@ def get_bcsdir(x, opt):
   agrid = x.get('input:shared:agrid')
   ogrid = x.get('input:shared:ogrid')
   model = x.get('input:shared:omodel')
+  stretch = x.get('input:shared:stretch')
   if opt.upper() == "OUT":
     bc_version   = x.get('output:shared:bc_version')
     agrid = x.get('output:shared:agrid')
     ogrid = x.get('output:shared:ogrid')
     model = x.get('output:shared:omodel')
+    stretch = x.get('output:shared:stretch')
 
   bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
   bcdir = bc_base+'/'+ bc_version+'/geometry/'
   if not os.path.exists(bcdir):
      exit("Cannot find bc dir " +  bcdir)
 
-  gridStr = get_grid_subdir(bcdir,agrid, ogrid, model)
+  gridStr = get_grid_subdir(bcdir,agrid, ogrid, model,stretch)
   bcdir =  bcdir + gridStr
 
   return bcdir
