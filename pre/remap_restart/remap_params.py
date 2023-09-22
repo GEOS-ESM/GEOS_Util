@@ -37,7 +37,7 @@ class remap_params(object):
      config_tpl['input']['shared']['expid']         = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh']    = self.common_in['yyyymmddhh']
      config_tpl['input']['shared']['bc_version']    = self.common_in.get('bc_version')
-     config_tpl['input']['shared']['stretch']      = self.common_in.get('stretch')
+     config_tpl['input']['shared']['stretch']       = self.common_in.get('stretch')
      config_tpl['input']['surface']['catch_model']  = self.surf_in.get('catch_model')
 
      config_tpl['output']['air']['nlevel']          = self.upper_out.get('nlevel')

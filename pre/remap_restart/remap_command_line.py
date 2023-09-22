@@ -59,12 +59,11 @@ def parse_args(program_description):
     p_command.add_argument('-oceanin',           help='Ocean resolution of input restarts. See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
     p_command.add_argument('-oceanout',          help='Ocean resolution of new restarts.   See remap_questions.py for choices.\n', choices=choices_ogrid_cmd)
 
-    p_command.add_argument('-ocnmdlin',   default='data',     help='Ocean model of input restarts',  choices=choices_omodel)
-    p_command.add_argument('-ocnmdlout',  default='data',     help='Ocean model for new restarts',   choices=choices_omodel)
-    p_command.add_argument('-out_stretch', default= False,    help='Output stretch params',   choices=choices_stretch)
-    p_command.add_argument('-in_stretch', default= False,    help='Output stretch params',   choices=choices_stretch)
+    p_command.add_argument('-ocnmdlin',    default='data',    help='Ocean model of input restarts',         choices=choices_omodel)
+    p_command.add_argument('-ocnmdlout',   default='data',    help='Ocean model for new restarts',          choices=choices_omodel)
+    p_command.add_argument('-in_stretch',  default=False,     help='Stretched CS params of input restarts', choices=choices_stretch)
+    p_command.add_argument('-out_stretch', default=False,     help='Stretched CS params for new restarts',  choices=choices_stretch)
     
-
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
@@ -76,11 +75,11 @@ def parse_args(program_description):
     p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), dir. is deduced from bc_version and resolution info")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
-    p_command.add_argument('-qos',        default = "debug",  help="SLURM quality-of-service", choices=['debug', 'allnccs'])
+    p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])
     account = get_account()
-    p_command.add_argument('-account',    default = account,  help="SLURM account")
-    p_command.add_argument('-partition',  default= 'compute', help="SLURM partition")
-    p_command.add_argument('-rs',         default= '3',       help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
+    p_command.add_argument('-account',    default=account,    help="SLURM account")
+    p_command.add_argument('-partition',  default='compute',  help="SLURM partition")
+    p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
     args, extra_args = parser.parse_known_args()

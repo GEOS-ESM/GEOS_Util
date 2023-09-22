@@ -29,7 +29,7 @@ choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
-choices_stretch = [False, 'SG001', 'SG002']
+choices_stretch    = [False, 'SG001', 'SG002']
 
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
@@ -122,11 +122,11 @@ def fvcore_info(x):
   lat = fvrst.dimensions['lat'].size
   ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
   if (lat != lon*6) :
-      print("jiangjiang", lon, lat)
+      print("(N_lon,N_lat) = ", lon, lat)
       exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
   x['input:shared:yyyymmddhh'] = ymdh
   x['input:shared:agrid'] = "C"+str(lon)
-  print("The input fvcore restart has air grid: " + "C" + str(lon) + '\n')
+  print("The input fvcore restart has atm grid: " + "C" + str(lon) + '\n')
   print("The input fvcore restart has time: " + ymdh + '\n')
   expid = os.path.basename(fname).split('fvcore')[0]
   expid = expid[0:-1]

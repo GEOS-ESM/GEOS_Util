@@ -159,13 +159,13 @@ class upperair(remap_base):
         target_lon  = 0.0
         stretch_fac = 1.0
         if stretch == 'SG001':
-          target_lat  = 39.5
+          target_lat  =  39.5
           target_lon  = -98.35
-          stretch_fac = 2.5
+          stretch_fac =   2.5
         if stretch == 'SG002':
-          target_lat  = 39.5
+          target_lat  =  39.5
           target_lon  = -98.35
-          stretch_fac = 3.0
+          stretch_fac =   3.0
         stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 
      # Now, let's create the input.nml file
