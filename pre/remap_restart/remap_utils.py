@@ -63,6 +63,9 @@ message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_ag
 
 validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
 
+STRETCH_GRID = {}
+STRETCH_GRID['SG001'] = ['2.50', '39.50', '-98.35']
+STRETCH_GRID['SG002'] = ['3.00', '39.50', '-98.35']
 
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
@@ -136,18 +139,17 @@ def fvcore_info(x):
   x['input:shared:stretch'] = False
   stretch_factor = fvrst.__dict__.get('STRETCH_FACTOR')
   if (stretch_factor) :
-     sg001 = ['2.50', '39.50', '-98.35']
-     sg002 = ['3.00', '39.50', '-98.35']
      target_lat = fvrst.__dict__.get('TARGET_LAT')
      target_lon = fvrst.__dict__.get('TARGET_LON')
      sg = [stretch_factor, target_lat, target_lon]
      f_ = [f"{number:.{2}f}" for number in sg]
      print("[stretch_factor, target_lat, target_lon]: ", f_)
-     if f_ == sg001 :
+     if f_ == STRETCH_GRID['SG001']:
        x['input:shared:stretch'] = 'SG001'
-     if f_ == sg002 :
+     elif f_ == STRETCH_GRID['SG002'] :
        x['input:shared:stretch'] = 'SG002'
-
+     else:
+       exit("This stretched cubed-sphere grid is not supported ")
   return True
 
 def catch_model(x):
