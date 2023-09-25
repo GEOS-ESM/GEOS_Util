@@ -7,7 +7,8 @@ import shlex
 import shutil
 import glob
 from remap_base import remap_base
-from remap_utils import get_label
+from remap_utils import get_label 
+from remap_utils import STRETCH_GRID
 from remap_bin2nc import bin2nc
 
 def get_topodir(bcsdir):
@@ -146,28 +147,25 @@ class upperair(remap_base):
      log_name = out_dir+'/remap_upper_log'
 
      # We need to create an input.nml file which is different if we are running stretched grid
-     # First, let's define a boolean for whether we are running stretched grid
-     # If we are running with imout of 270, 540, 1080, 1536 or 2160, then we are running stretched grid
-     # If we are running stretched grid, we need to pass in the target lat, lon, and stretch factor
+     # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
      # to interp_restarts.x. Per the code we use:
      #  -stretched_grid target_lon target_lat stretch_fac
      # If we are not running stretched grid, we should pass in a blank string
      stretch = config['output']['shared']['stretch']
      stretch_str = ""
      if stretch:
-        target_lat  = 0.0
-        target_lon  = 0.0
-        stretch_fac = 1.0
         if stretch == 'SG001':
-          target_lat  =  39.5
-          target_lon  = -98.35
-          stretch_fac =   2.5
+          stretch_fac = STRETCH_GRID['SG001'][0]
+          target_lat  = STRETCH_GRID['SG001'][1]
+          target_lon  = STRETCH_GRID['SG001'][2]
         elif stretch == 'SG002':
-          target_lat  =  39.5
-          target_lon  = -98.35
-          stretch_fac =   3.0
+          stretch_fac = STRETCH_GRID['SG002'][0]
+          target_lat  = STRETCH_GRID['SG002'][1]
+          target_lon  = STRETCH_GRID['SG002'][2]
         else:
           exit("This stretched grid option is not supported " + str(stretch))
+
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
 
         stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 

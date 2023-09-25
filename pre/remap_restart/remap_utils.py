@@ -9,9 +9,11 @@ import questionary
 import glob
 import shlex
 import netCDF4 as nc
+
 # shared global variables
 #
-# define "choices", "message" strings, and "validate" lists that are used multiple times.
+# define "choices", "message" strings, and "validate" lists that are used multiple times
+#   (and related definitions, even if they are used just once).
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
@@ -29,7 +31,24 @@ choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
+# the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
+#   then assemble message_stretch and choices_stretch using this definition
+
+message_stretch    = f'''Select parameters of stretched cubed-sphere grid for new restarts:
+ Name   Stretch_Factor  Focus_Lat  Focus_Lon
+ -----  --------------  ---------  ---------
+ SG001      2.5            39.5       -98.35
+ SG002      3.0            39.5       -98.35 \n''',
+
+STRETCH_GRID = {}
+STRETCH_GRID['SG001'] = ['2.50', '39.50', '-98.35']
+STRETCH_GRID['SG002'] = ['3.00', '39.50', '-98.35']
+
 choices_stretch    = [False, 'SG001', 'SG002']
+
+choices_res_SG001  = ['C270', 'C540', 'C1080', 'C2160']
+
+choices_res_SG002  = ['C1536']
 
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
@@ -63,9 +82,7 @@ message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_ag
 
 validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
 
-STRETCH_GRID = {}
-STRETCH_GRID['SG001'] = ['2.50', '39.50', '-98.35']
-STRETCH_GRID['SG002'] = ['3.00', '39.50', '-98.35']
+# --------------------------------------------------------------------------------
 
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
@@ -86,14 +103,14 @@ def init_merra2(x):
      expid = "d5124_m2_jun21"
   else:
      expid = "d5124_m2_jan10"
-  x['input:shared:expid'] = expid
-  x['input:shared:omodel'] = 'data'
-  x['input:shared:agrid'] = 'C180'
-  x['input:shared:ogrid'] = '1440x720'
+  x['input:shared:expid']        = expid
+  x['input:shared:omodel']       = 'data'
+  x['input:shared:agrid']        = 'C180'
+  x['input:shared:ogrid']        = '1440x720'
   x['input:shared:bc_version']   = 'GM4'
-  x['input:surface:catch_model']   = 'catch'
-  x['input:shared:stretch']   = False
-  x['input:shared:rst_dir'] = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
+  x['input:surface:catch_model'] = 'catch'
+  x['input:shared:stretch']      = False
+  x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
 
   return False
 
@@ -136,12 +153,14 @@ def fvcore_info(x):
   x['input:shared:expid'] = expid
   if (expid) : print("The input fvcore restart has experiment ID " + expid + '\n')
 
+  # get stretch parameters from input restart file
   x['input:shared:stretch'] = False
   stretch_factor = fvrst.__dict__.get('STRETCH_FACTOR')
   if (stretch_factor) :
      target_lat = fvrst.__dict__.get('TARGET_LAT')
      target_lon = fvrst.__dict__.get('TARGET_LON')
      sg = [stretch_factor, target_lat, target_lon]
+     # verify that stretched cubed-sphere grid is supported by remap_restarts.py
      f_ = [f"{number:.{2}f}" for number in sg]
      print("[stretch_factor, target_lat, target_lon]: ", f_)
      if f_ == STRETCH_GRID['SG001']:

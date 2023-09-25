@@ -160,12 +160,8 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:stretch",
-            "message": f'''Select parameters of stretched cubed-sphere grid for new restarts:
-                Name   Stretch_Factor  Focus_Lat  Focus_Lon
-                -----  --------------  ---------  ---------
-                SG001      2.5            39.5       -98.35
-                SG002      3.0            39.5       -98.35 \n''',
-            "choices": ['SG001','SG002'],
+            "message": message_stretch, 
+            "choices": choices_stretch[1:2],
             "when": lambda x : x['output:shared:stretch'],
         },
 
@@ -173,7 +169,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG001 grid for new restarts: \n",
-            "choices": ['C270', 'C540', 'C1080', 'C2160'], 
+            "choices": choices_res_SG001, 
             "when": lambda x : x.get('output:shared:stretch') == 'SG001',
         },
 
@@ -181,7 +177,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG002 grid for new restarts: \n",
-            "choices": ['C1536'], 
+            "choices": choices_res_SG002, 
             "when": lambda x : x.get('output:shared:stretch') == 'SG002',
         },
 
