@@ -161,7 +161,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:stretch",
             "message": message_stretch, 
-            "choices": choices_stretch[1:2],
+            "choices": choices_stretch[1:3],
             "when": lambda x : x['output:shared:stretch'],
         },
 
