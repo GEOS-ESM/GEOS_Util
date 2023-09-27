@@ -34,11 +34,14 @@ choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
-message_stretch    = f'''Select parameters of stretched cubed-sphere grid for new restarts:
+message_stretch =  f'''\n 
+ Select parameters of stretched cubed-sphere grid for new restarts:
+
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
  -----  --------------  ---------  ---------
  SG001      2.5            39.5       -98.35
- SG002      3.0            39.5       -98.35 \n''',
+ SG002      3.0            39.5       -98.35
+ \n\n'''
 
 STRETCH_GRID = {}
 STRETCH_GRID['SG001'] = ['2.50', '39.50', '-98.35']
