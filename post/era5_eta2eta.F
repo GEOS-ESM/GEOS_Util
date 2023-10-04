@@ -447,11 +447,7 @@ C **********************************************************************
 c Interpolate Analysis to GEOS Model Levels
 c -----------------------------------------
           do L=1,lm
-          do j=1,jm
-          do i=1,im
-          call  sigtopl( q(i,j,L),qana(i,j,:),logpl(i,j,:),logp(i,j,L),1,1,lmana,undef )
-          enddo
-          enddo
+          call  sigtopl( q(:,:,L),qana(:,:,:),logpl(:,:,:),logp(:,:,L),im,jm,lmana,undef )
           enddo
           if( flag.eq.-1 ) then
               q = max( q,0.0 )
@@ -475,12 +471,8 @@ c -----------------------------------------
 c            Interpolate GEOS Model Back to EC Levels and Compute Error
 c            ----------------------------------------------------------
              do L=1,lmana
-             do j=1,jm
-             do i=1,im
-                call  sigtopl( zana(i,j,L),q(i,j,:),logp(i,j,:),logpl(i,j,L),1,1,lm,undef )
-                erana(i,j,L) = zana(i,j,L)-qana(i,j,L)
-             enddo
-             enddo
+                call  sigtopl( zana(:,:,L),q(:,:,:),logp(:,:,:),logpl(:,:,L),im,jm,lm,undef )
+                erana(:,:,L) = zana(:,:,L)-qana(:,:,L)
              enddo
              if( i0.ne.0 .and. j0.ne.0 ) then
              print *
@@ -494,7 +486,7 @@ c            ----------------------------------------------------------
 
 c            Interpolate and Add Error to GEOS Model Levels
 c            ----------------------------------------------
-             call interp3 ( erana,pana,im,jm,lmana, er,pl,lm,ple(1,1,lm+1) )
+             call interp3 ( erana,pana,im,jm,lmana, er,pl,lm,ple(:,:,lm+1) )
              q = q - er
              if( flag.eq.-1 ) then
                  q = max( q,0.0 )
@@ -1355,26 +1347,25 @@ C
       real  qprs(im,jm)
       real  q   (im,jm,lm)
       real logpl(im,jm,lm)
+      real  logp(im,jm)
 
       real  undef
-      real  logp,temp
+      real  temp
 
 c Initialize to UNDEFINED
 c -----------------------
-      do i=1,im*jm
-      qprs(i,1) = undef
-      enddo
+      qprs(:,:) = undef
 
 c Interpolate to Pressure Between Model Levels
 c --------------------------------------------
       do L=1,lm-1
-      if( all( logpl(:,:,L  )>logp ) ) exit
-      if( all( logpl(:,:,L+1)<logp ) ) cycle
+      if( all( logpl(:,:,L  )>logp(:,:) ) ) exit
+      if( all( logpl(:,:,L+1)<logp(:,:) ) ) cycle
 
          do j=1,jm
          do i=1,im
-         if( logp.le.logpl(i,j,L+1) .and. logp.ge.logpl(i,j,L) ) then
-         temp      = ( logpl(i,j,L)-logp ) / ( logpl(i,j,L)-logpl(i,j,L+1) )
+         if( logp(i,j).le.logpl(i,j,L+1) .and. logp(i,j).ge.logpl(i,j,L) ) then
+         temp      = ( logpl(i,j,L)-logp(i,j) ) / ( logpl(i,j,L)-logpl(i,j,L+1) )
 
                  if( q(i,j,L)  .ne.undef  .and.
      .               q(i,j,L+1).ne.undef ) then
@@ -1395,8 +1386,8 @@ c Set Values above and below Model Boundaries
 c -------------------------------------------
       do j=1,jm
       do i=1,im
-      if( logp.le.logpl(i,j,1 ) ) qprs(i,j) = q(i,j,1 )
-      if( logp.ge.logpl(i,j,lm) ) qprs(i,j) = q(i,j,lm)
+      if( logp(i,j).le.logpl(i,j,1 ) ) qprs(i,j) = q(i,j,1 )
+      if( logp(i,j).ge.logpl(i,j,lm) ) qprs(i,j) = q(i,j,lm)
       enddo
       enddo
 
