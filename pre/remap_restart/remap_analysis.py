@@ -77,12 +77,12 @@ class analysis(remap_base):
 
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp)
-       print("Copy " + f + ' to ' + f_tmp)
        shutil.copy(f,f_tmp)
        if out_name.find('satbias') != -1 :
          if (aqua):
             f_ = open(f_tmp, 'w')
             for line in fileinput.input(f):
+               # This is unlikely to be the case with new files
                f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
             f_.close()
 
@@ -90,13 +90,14 @@ class analysis(remap_base):
      agrid_out = config['output']['shared']['agrid']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
 
-     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*')
+     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*') 
      for f in dyn2dyn:
-        f_orig = f + ".orig"
-        shutil.move(f,f_orig)
-        cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
-        print(cmd)
-        subprocess.call(shlex.split(cmd))
+        if "cbkg" not in f: 
+          f_orig = f + ".orig"
+          shutil.move(f,f_orig)
+          cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
+          print(cmd)
+          subprocess.call(shlex.split(cmd))
 
      for f in local_fs:
        fname = os.path.basename(f)
@@ -174,6 +175,7 @@ class analysis(remap_base):
     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
 
     anafiles=[]
+    canafiles=[] 
     for h in [3,4,5,6,7,8,9]:
        delt = timedelta(hours = h-3)
        new_time = rst_time + delt
@@ -200,6 +202,24 @@ class analysis(remap_base):
             anafiles.append(f)
           else:
             print('Warning: Cannot find '+f)
+
+       # cbkg files
+       fname = expid + '.cbkg'+hh+'_eta_rst.'+ymd+'_'+newhh+'z.nc4'
+       f = m2_rst_dir+'/'+fname
+       if(os.path.isfile(f)):
+          canafiles.append(f)
+       else:
+          print('Warning: Cannot find '+f)
+
+       # satb files 
+       for ftype in ['satbias', 'satbang']:
+          fname = expid + '.ana_'+ftype+'_rst.'+ymd+'_'+newhh+'z.txt'
+          f = m2_rst_dir+'/'+fname
+          if(os.path.isfile(f)):
+             canafiles.append(f)
+          else:
+                print('Warning: Cannot find '+f)
+
     # trak.GDA.rst file
     delt = timedelta(hours = 3)
     new_time = rst_time - delt
@@ -211,7 +231,7 @@ class analysis(remap_base):
     f = m2_rst_dir+'/'+fname
     if (os.path.isfile(f)): anafiles.append(f)
 
-    for f in anafiles:
+    for f in anafiles + canafiles:
       fname    = os.path.basename(f)
       f_tmp = rst_dir+'/'+fname
       print("Copy file "+f +" to " + rst_dir)
