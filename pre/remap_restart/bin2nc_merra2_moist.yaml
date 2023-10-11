@@ -6,7 +6,7 @@ variables:
        - lev
        - lat
        - lon
-  - short_name: QLLS 
+  - short_name: QLLS
     long_name: mass_fraction_of_large_scale_cloud_liquid_water
     units: 'kg kg-1'
     dimension:
@@ -41,7 +41,7 @@ variables:
        - lev
        - lat
        - lon
-  - short_name: QICN 
+  - short_name: QICN
     long_name: mass_fraction_of_convective_cloud_ice_water
     units: '1'
     dimension:
@@ -53,4 +53,3 @@ dimensions:
   lat: 1080
   lev: 72
   time: 1
-  

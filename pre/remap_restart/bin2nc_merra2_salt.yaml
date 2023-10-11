@@ -1,32 +1,32 @@
 variables:
-  - short_name:  'HSKINW' 
-    long_name:  'water_skin_layer_mass'     
-    units:  'kg m-2'           
+  - short_name:  'HSKINW'
+    long_name:  'water_skin_layer_mass'
+    units:  'kg m-2'
     dimension:
        - tile
-  - short_name:  'TSKINW' 
-    long_name:  'water_skin_temperature'     
-    units:  'K'           
+  - short_name:  'TSKINW'
+    long_name:  'water_skin_temperature'
+    units:  'K'
     dimension:
        - tile
-  - short_name:  'SSKINW' 
-    long_name:  'water_skin_salinity'     
-    units:  'psu'  
+  - short_name:  'SSKINW'
+    long_name:  'water_skin_salinity'
+    units:  'psu'
     dimension:
        - tile
-  - short_name:  'HSKINI' 
+  - short_name:  'HSKINI'
     long_name:  'ice_skin_layer_mass'
-    units:  'kg m-2'  
+    units:  'kg m-2'
     dimension:
        - tile
-  - short_name:  'TSKINI' 
+  - short_name:  'TSKINI'
     long_name:  'ice_skin_temperature'
-    units:  'K'  
+    units:  'K'
     dimension:
        - tile
-  - short_name:  'SSKINI' 
+  - short_name:  'SSKINI'
     long_name:  'ice_skin_salinity'
-    units:  'psu'  
+    units:  'psu'
     dimension:
        - tile
   - short_name:  'QS'
@@ -65,14 +65,14 @@ variables:
     dimension:
        - subtile
        - tile
-  - short_name:  'TWMTS' 
+  - short_name:  'TWMTS'
     long_name:  'departure_of_skin_temperature_from_mean_interface_temperature'
-    units:  'K'  
+    units:  'K'
     dimension:
        - tile
-  - short_name:  'DTWARM' 
+  - short_name:  'DTWARM'
     long_name:  'departure_of_departure_of_TDEL_from_TS_FOUND'
-    units:  'K'  
+    units:  'K'
     dimension:
        - tile
 dimensions:
