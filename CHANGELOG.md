@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Use of haswell nodes on NCCS machines
+
 ### Deprecated
 
 ## [2.0.3] - 2023-08-24
