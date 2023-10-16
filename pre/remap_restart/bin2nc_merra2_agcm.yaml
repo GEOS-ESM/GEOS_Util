@@ -1,42 +1,42 @@
 variables:
-  - short_name: DMDTANA
-    long_name: vertically_integrated_mass_tendency_due_to_analysis
-    units: 'kg m-2 s-1'
-    dimension:
-       - lev
-       - lat
-       - lon
-  - short_name: DQDTANA
-    long_name: total_specific_humidity_vapor_analysis_tendency
-    units: 'kg kg-1 s-1'
-    dimension:
-       - lev
-       - lat
-       - lon
-  - short_name: DTDTANA
-    long_name: total_temperature_analysis_tendency
-    units: 'K s-1'
-    dimension:
-       - lev
-       - lat
-       - lon
-  - short_name: DUDTANA
-    long_name: total_eastward_wind_analysis_tendency
-    units: 'm s-2'
-    dimension:
-       - lev
-       - lat
-       - lon
-  - short_name: DVDTANA
-    long_name: total_northward_wind_analysis_tendency
-    units: 'm s-2'
-    dimension:
-       - lev
-       - lat
-       - lon
-  - short_name: QVBKG
-    long_name: specific_humidity_background
+  - short_name: DQVDT
+    long_name: specific_humidity_analysis_increment
     units: 'kg kg-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DTDT
+    long_name: temperature_analysis_increment
+    units: 'K'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DPEDT
+    long_name: edge_pressure_analysis_increment
+    units: 'Pa'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DTSDT
+    long_name: skin_temparature_increment
+    units: 'K'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DUDT
+    long_name: eastward_wind_analysis_increment
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DVDT
+    long_name: northward_wind_analysis_increment
+    units: 'm s-1'
     dimension:
        - lev
        - lat
