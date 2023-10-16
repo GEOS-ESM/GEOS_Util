@@ -41,6 +41,7 @@ class remap_params(object):
      config_tpl['input']['surface']['catch_model']  = self.surf_in.get('catch_model')
 
      config_tpl['output']['air']['nlevel']          = self.upper_out.get('nlevel')
+     config_tpl['output']['air']['agcm_import_rst'] = self.upper_out.get('agcm_import_rst')
      config_tpl['output']['air']['remap']           = self.upper_out.get('remap')
      config_tpl['output']['surface']['remap_water'] = self.surf_out.get('remap')
      config_tpl['output']['surface']['remap_catch'] = self.surf_out.get('remap')

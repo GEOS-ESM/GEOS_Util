@@ -168,6 +168,7 @@ if __name__ == "__main__":
    bin2nc('fvcore_internal_rst',   'fvcore_internal_rst.nc4',    'bin2nc_merra2_fv.yaml', isDouble=True, hasHeader=True)
    bin2nc('moist_internal_rst',    'moist_internal_rst.nc4',     'bin2nc_merra2_moist.yaml')
    bin2nc('pchem_internal_rst',    'pchem_internal_rst.nc4',     'bin2nc_merra2_pchem.yaml')
+   bin2nc('agcm_import_rst',        'agcm_import_rst.nc4',       'bin2nc_merra2_agcm.yaml')
    bin2nc('gocart_internal_rst',   'gocart_internal_rst.nc4',    'bin2nc_merra2_gocart.yaml')
    bin2nc('lake_internal_rst',     'lake_internal_rst.nc4',      'bin2nc_merra2_lake.yaml')
    bin2nc('landice_internal_rst',  'landice_internal_rst.nc4',   'bin2nc_merra2_landice.yaml')

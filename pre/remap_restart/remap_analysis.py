@@ -170,7 +170,7 @@ class analysis(remap_base):
     merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
-    print(' Copy MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+    print(' Stage MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
 
     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
 
@@ -234,7 +234,7 @@ class analysis(remap_base):
     for f in anafiles + canafiles:
       fname    = os.path.basename(f)
       f_tmp = rst_dir+'/'+fname
-      print("Copy file "+f +" to " + rst_dir)
+      print("Stage file "+f +" to " + rst_dir)
       shutil.copy(f,f_tmp)
 
 if __name__ == '__main__' :

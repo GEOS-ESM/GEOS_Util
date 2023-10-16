@@ -293,6 +293,15 @@ def ask_questions():
 
         {
             "type": "confirm",
+            "name": "output:air:agcm_import_rst",
+            "message": "Remap agcm_import_rst increment file needed for REPLAY runs? \n \
+                        NOTE: Prefered method is to regenerate this file. \n \
+                              Cannot regrid agcm_import_rst to different number of atmosphere levels.",
+            "default": False,
+        },
+
+        {
+            "type": "confirm",
             "name": "output:surface:remap",
             "message": "Remap surface restarts?",
             "default": True,
@@ -304,6 +313,7 @@ def ask_questions():
             "message": "Remap bkg files?  (Required by ADAS but not mapped onto ADAS grid; run one ADAS cycle to spin up.) ",
             "default": False,
         },
+
         {
             "type": "confirm",
             "name": "output:analysis:lcv",

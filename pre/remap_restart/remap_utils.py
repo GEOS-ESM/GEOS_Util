@@ -309,6 +309,7 @@ def get_command_line_from_answers(answers):
 
    grout     = ' -grout '   + answers["output:shared:agrid"]   
    levsout   = ' -levsout ' + answers["output:air:nlevel"]     
+
    out_dir   = ' -out_dir ' + answers["output:shared:out_dir"]
    newid     = answers["output:shared:expid"]   
    
@@ -378,6 +379,8 @@ def get_command_line_from_answers(answers):
        rs = 2
    out_rs = out_rs + str(rs)
 
+   noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
+
    account = " -account " + answers["slurm:account"]
    qos     = " -qos  " + answers["slurm:qos"]
    partition  = " -partition  " + answers["slurm:partition"]
@@ -406,6 +409,7 @@ def get_command_line_from_answers(answers):
                                           wemout + \
                                           label + \
                                           nobkg + \
+                                          noagcm_import_rst + \
                                           nolcv + \
                                           out_rs + \
                                           account + \

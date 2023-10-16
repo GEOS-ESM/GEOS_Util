@@ -71,6 +71,7 @@ def parse_args(program_description):
     p_command.add_argument('-nolcv', action='store_true',     help="Do not write lcv file")
     p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
     p_command.add_argument('-lbl',   action='store_true',     help="Label output restarts with bc_versions and resolutions")
+    p_command.add_argument('-noagcm_import_rst', action='store_true',     help="Do not remap agcm_import_rst file")
     p_command.add_argument('-in_bcsdir',  default="",         help="User-supplied directory with boundary conditions of input restarts. If not specified (default), dir. is deduced from bc_version and resolution info")
     p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), dir. is deduced from bc_version and resolution info")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
@@ -137,6 +138,8 @@ def get_answers_from_command_line(cml):
    if cml.rs == '3':
      answers["output:surface:remap"]   = True
      answers["output:air:remap"]       = True
+
+   answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 
    if cml.zoom: 
       answers["input:surface:zoom"]    = cml.zoom

@@ -216,7 +216,7 @@ set infiles = ()
 set outfils = ()
 foreach infile ( *_restart_in )
    if ( $infile == fvcore_internal_restart_in ) continue
-   if ( $infile == moist_internal_restart_in  ) continue
+   if ( $infile == moist_internal_restart_in ) continue
 
    set infiles = ( $infiles $infile )
    set outfil = `echo $infile | sed "s/restart_in/rst_out/"`
@@ -342,18 +342,19 @@ endif
     merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
-    print(' Copy MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+    print(' Stage MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
 
     upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.moist_internal_rst.'  + suffix,
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
-              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
-    bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml']
+              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix,
+              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix ]
+    bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml','bin2nc_merra2_agcm.yaml']
     bin_path = os.path.dirname(os.path.realpath(__file__))
     for (f, yf) in zip(upperin,bin2nc_yaml) :
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
-       print("Copy file "+f +" to " + rst_dir)
+       print("Stage file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
        ncdest = dest.replace('z.bin', 'z.nc4')
        yaml_file = bin_path + '/'+yf
