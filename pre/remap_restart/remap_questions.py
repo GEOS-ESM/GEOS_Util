@@ -295,8 +295,7 @@ def ask_questions():
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
             "message": "Remap agcm_import_rst increment file needed for REPLAY runs? \n \
-                        NOTE: Prefered method is to regenerate IAU file. \n \
-                              Cannot regrid IAU file to different number of atmosphere levels.",
+                        NOTE: Prefered method is to regenerate IAU file. Cannot regrid IAU file to different number of atmosphere levels.",
             "default": False,
         },
 
