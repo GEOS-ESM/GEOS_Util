@@ -35,6 +35,13 @@ def remove_ogrid_comment(x, opt):
   
   return False
 
+def echo_level(x):
+  if x["output:air:nlevel"] != "72":
+      print("NOTE: The number of atmosphere levels at input and output does not match! Cannot regrid IAU file.")
+      return False
+  if x["output:air:nlevel"] == "72":
+      return True
+
 def echo_bcs(x,opt):
   if opt == "IN":
     x['input:shared:bcs_dir']  = get_bcsdir(x, 'IN')
@@ -295,9 +302,11 @@ def ask_questions():
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
             "message": "Remap agcm_import_rst increment file needed for REPLAY runs? \n \
-                        NOTE: Prefered method is to regenerate IAU file. Cannot regrid IAU file to different number of atmosphere levels.",
+                        (NOTE: Prefered method is to regenerate IAU file, but IF requested remapping will be performed)",
             "default": False,
+            "when": lambda x: echo_level(x),
         },
+
 
         {
             "type": "confirm",
