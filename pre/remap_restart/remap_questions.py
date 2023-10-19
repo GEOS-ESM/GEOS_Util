@@ -36,11 +36,11 @@ def remove_ogrid_comment(x, opt):
   return False
 
 def echo_level(x):
-  if x["output:air:nlevel"] != "72":
+  if x["output:air:nlevel"] != x["input:air:nlevel"]
       print("NOTE: Different # atm levels in input and new restarts.  Cannot remap agcm_import_rst (a.k.a. IAU) file.")
+      x['output:air:agcm_import_rst'] = False
       return False
-  if x["output:air:nlevel"] == "72":
-      return True
+  return True
 
 def echo_bcs(x,opt):
   if opt == "IN":
