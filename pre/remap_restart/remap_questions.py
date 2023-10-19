@@ -37,7 +37,7 @@ def remove_ogrid_comment(x, opt):
 
 def echo_level(x):
   if x["output:air:nlevel"] != "72":
-      print("NOTE: The number of atmosphere levels at input and output does not match! Cannot regrid IAU file.")
+      print("NOTE: Different # atm levels in input and new restarts.  Cannot remap agcm_import_rst (a.k.a. IAU) file.")
       return False
   if x["output:air:nlevel"] == "72":
       return True
@@ -301,8 +301,8 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": "Remap agcm_import_rst increment file needed for REPLAY runs? \n \
-                        (NOTE: Prefered method is to regenerate IAU file, but IF requested remapping will be performed)",
+            "message": "Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? \n \
+                        (NOTE: Preferred method is to regenerate IAU file, but IF requested remapping will be performed.)",
             "default": False,
             "when": lambda x: echo_level(x),
         },
