@@ -36,7 +36,7 @@ def remove_ogrid_comment(x, opt):
   return False
 
 def echo_level(x):
-  if x["output:air:nlevel"] != x["input:air:nlevel"] :
+  if x["output:air:nlevel"] != str(x.get("input:air:nlevel")) :
       print("NOTE: Different # atm levels in input and new restarts.  Cannot remap agcm_import_rst (a.k.a. IAU) file.")
       x['output:air:agcm_import_rst'] = False
       return False
@@ -387,6 +387,7 @@ def ask_questions():
    answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
+   if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:  
       answers["input:surface:catch_model"] = catch_model(answers)
  

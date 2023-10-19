@@ -114,6 +114,7 @@ def init_merra2(x):
   x['input:surface:catch_model'] = 'catch'
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
+  x['input:air:nlevel'] = 72
 
   return False
 
@@ -143,6 +144,8 @@ def fvcore_info(x):
   fvrst = nc.Dataset(fname)
   lon = fvrst.dimensions['lon'].size
   lat = fvrst.dimensions['lat'].size
+  lev = fvrst.dimensions['lev'].size
+  x['input:air:nlevel'] = lev
   ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
   if (lat != lon*6) :
       print("(N_lon,N_lat) = ", lon, lat)
