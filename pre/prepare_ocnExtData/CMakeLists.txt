@@ -19,6 +19,12 @@ ecbuild_add_executable (
   LIBS ${this})
 set_target_properties(sst_sic_eight.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
+ecbuild_add_executable (
+  TARGET cal_daily_clim.x
+  SOURCES daily_clim_SST_FRACI_eight.F90
+  LIBS ${this})
+set_target_properties(cal_daily_clim.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
 if (USE_F2PY)
    find_package(F2PY2)
    if (F2PY2_FOUND)
