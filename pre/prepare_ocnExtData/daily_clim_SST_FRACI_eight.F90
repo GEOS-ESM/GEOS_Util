@@ -1,4 +1,3 @@
-!
 PROGRAM daily_clim_SST_FRACI_eight
 !---------------------------------------------------------------------------
   USE sst_ice_helpers, only: read_bin_SST_ICE, &
@@ -40,4 +39,3 @@ PROGRAM daily_clim_SST_FRACI_eight
 
 !---------------------------------------------------------------------------
 END PROGRAM daily_clim_SST_FRACI_eight
-!
