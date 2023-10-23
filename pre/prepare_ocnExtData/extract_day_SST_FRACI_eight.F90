@@ -61,7 +61,6 @@ PROGRAM extract_day_SST_FRACI_eight
   ! CALL write_bin( 2023, 1, 1, 2023, 1, 2, '20230101',  1440, 2880, transpose(sst), transpose(ice))
 
   ! netcdf
-  !CALL write_netcdf( 2023, 1, 1, '20230101',  1440, 2880, transpose(sst), transpose(ice))
   CALL write_netcdf( year_s, month_s, day_s, date_str, nlat, nlon, transpose(sst), transpose(ice))
 
   print *, "Done."
