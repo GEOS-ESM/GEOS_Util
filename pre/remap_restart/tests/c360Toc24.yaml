@@ -10,7 +10,8 @@ input:
   shared:
     MERRA-2: false
     agrid: C360
-    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Ostia//CF0360x6C_CF0360x6C/
+    stretch: false
+    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/geometry/CF0360x6C_CF0360x6C/
     expid: x0046a
     ogrid: C360
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c360Toc24/inputs
@@ -24,7 +25,8 @@ input:
 output:
   shared:
     agrid: C24
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/legacy_bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0024x6C_DE0360xPE0180/
+    stretch: false
+    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/geometry/CF0024x6C_DE0360xPE0180/
     expid: C24c_x0046a
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/c360Toc24/
@@ -50,4 +52,4 @@ output:
 slurm:
   account: g0620
   qos: debug
-  constraint: sky
+  partition: compute
