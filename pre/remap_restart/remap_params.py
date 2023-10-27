@@ -33,6 +33,7 @@ class remap_params(object):
      config_tpl['input']['shared']['MERRA-2']       = self.common_in.get('MERRA-2')
      config_tpl['input']['shared']['agrid']         = self.common_in.get('agrid')
      config_tpl['input']['shared']['ogrid']         = self.common_in.get('ogrid')
+     config_tpl['input']['shared']['omodel']        = self.common_in.get('omodel')
      config_tpl['input']['shared']['rst_dir']       = self.common_in['rst_dir']+'/'
      config_tpl['input']['shared']['expid']         = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh']    = self.common_in['yyyymmddhh']
@@ -47,6 +48,7 @@ class remap_params(object):
      config_tpl['output']['surface']['remap_catch'] = self.surf_out.get('remap')
      config_tpl['output']['shared']['agrid']        = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']        = self.common_out['ogrid']
+     config_tpl['output']['shared']['omodel']       = self.common_out['omodel']
      config_tpl['output']['shared']['out_dir']      = self.common_out['out_dir'] + '/'
      config_tpl['output']['shared']['expid']        = self.common_out['expid']
      config_tpl['output']['shared']['bc_version']   = self.common_out.get('bc_version')

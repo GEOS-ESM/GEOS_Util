@@ -44,12 +44,23 @@ def echo_level(x):
 
 def echo_bcs(x,opt):
   if opt == "IN":
-    x['input:shared:bcs_dir']  = get_bcsdir(x, 'IN')
-    print("\nBc path for input restart: " + x['input:shared:bcs_dir'])
+    in_bcsdir = get_bcsdir(x, 'IN')
+    agrid = x.get('input:shared:agrid')
+    ogrid = x.get('input:shared:ogrid')
+    model = x.get('input:shared:omodel')
+    stretch = x.get('input:shared:stretch')
+    land_dir = get_landdir(in_bcsdir, agrid, ogrid, model, stretch)    
+    x['input:shared:bcs_dir']  = in_bcsdir
+    print("\n BC of land for input restart: " + land_dir )
   if opt == "OUT":
-    x['output:shared:bcs_dir'] = get_bcsdir(x, 'OUT')
-    print("\nBc path for output restart: " + x['output:shared:bcs_dir'])
-    print("\nLater on, user can edit paths in generated remap_params.yaml file")
+    out_bcsdir =  get_bcsdir(x, 'OUT')
+    agrid = x.get('output:shared:agrid')
+    ogrid = x.get('output:shared:ogrid')
+    model = x.get('output:shared:omodel')
+    stretch = x.get('output:shared:stretch')
+    land_dir = get_landdir(out_bcsdir, agrid, ogrid, model, stretch)    
+    x['output:shared:bcs_dir'] = out_bcsdir
+    print("\n BC of land for output restart: " + land_dir)
   return False
 
 def default_partition(x):
@@ -301,8 +312,9 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": "Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? \n \
-                        (NOTE: Preferred method is to regenerate IAU file, but IF requested remapping will be performed.)",
+            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? 
+                        (NOTE: Preferred method is to regenerate IAU file, 
+                               but IF requested, remapping will be performed.)''',
             "default": False,
             "when": lambda x: echo_level(x),
         },

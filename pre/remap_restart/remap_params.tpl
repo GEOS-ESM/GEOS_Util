@@ -16,6 +16,8 @@ input:
     bcs_dir:
     expid:
     ogrid:
+    # ocean couple model: data, MOM5, MO6
+    omodel: data
     rst_dir:
     yyyymmddhh:
   surface:
@@ -36,6 +38,8 @@ output:
     bcs_dir:
     expid:
     ogrid:
+    # ocean couple model: data, MOM5, MO6
+    omodel: data
     out_dir:
   air:
     # remap upper air or not

@@ -12,8 +12,10 @@ import netCDF4 as nc
 
 # shared global variables
 #
-# define "choices", "message" strings, and "validate" lists that are used multiple times
+# define "bc_base", "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
+
+bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
@@ -111,6 +113,7 @@ def init_merra2(x):
   x['input:shared:omodel']       = 'data'
   x['input:shared:agrid']        = 'C180'
   x['input:shared:ogrid']        = '1440x720'
+  x['input:shared:omodel']       = 'data'
   x['input:shared:bc_version']   = 'GM4'
   x['input:surface:catch_model'] = 'catch'
   x['input:shared:stretch']      = False
@@ -444,88 +447,76 @@ def get_config_from_answers(answers):
    return config
 
 def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
-   def get_name_with_grid( grid, names, a_o):
-     if not grid :
-       return names
-     namex = []
-     if (grid[0].upper() == 'C'):
-       n = int(grid[1:])
-       s1 ='{:04d}x6C'.format(n)
-       j=n*6
-       s2 =str(n)
-       s3 =str(j)
-       # first try
-       for aoname in names:
-         name = ''
-         if(a_o == 'a'):
-           name = aoname.split('_')[0]
-         else:
-           name = aoname.split('_')[-1]
-         if (name.find(s1) != -1 or (name.find(s2) != -1 and name.find(s3) != -1 )):
-            namex.append(aoname)
-     else:
-       xy = grid.upper().split('X')
-       s2 = xy[0]
-       s3 = xy[1]
-       for aoname in names:
-         name = ''
-         if(a_o == 'a'):
-           name = aoname.split('_')[0]
-         else:
-           name = aoname.split('_')[-1]
-         if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(aoname)
-     return namex
-   #v3.5
-   #dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
-   #v2.7
-   dirnames = [f for f in os.listdir(bcdir) if os.path.isdir(os.path.join(bcdir,f))]
+   aname = ''
+   oname = ''
+   if (agrid[0].upper() == 'C'):
+      n = int(agrid[1:])
+      aname ='CF{:04d}x6C'.format(n)
+   
+   if (ogrid[0].upper() == 'C'):
+      oname = aname
+   else:
+      xy = ogrid.upper().split('X')
+      s0 = int(xy[0])
+      s1 = int(xy[1])
+      if model == 'data':
+         oname = 'DE{:04d}xPE{:04d}'.format(s0,s1)
+      if model == 'MOM5':
+         oname = 'M5TP{:04d}x{:04d}'.format(s0,s1)
+      if model == 'MOM6':
+         oname = 'M6TP{:04d}x{:04d}'.format(s0,s1)
    if stretch:
-      dirnames = [dname for dname in dirnames if stretch in dname]
-   anames = get_name_with_grid(agrid, dirnames, 'a')
-   gridID = get_name_with_grid(ogrid, anames, 'o')
-   if len(gridID) == 0 :
-     exit("cannot find the grid subdirctory of agrid: " +agrid+ " and ogrid " + ogrid + " under "+ bcdir)
-   g = ''
-   gridID.sort(key=len)
-   g = gridID[0]
+      aname = aname + '-' + stretch
 
-   # For new structure BC
-   for g_ in gridID :
-     if model == 'MOM5':
-        if 'M5' in g_ : g = g_
-     if model == 'MOM6':
-        if 'M6' in g_ : g = g_
+   grid_directory = aname +'_' + oname
+   
+   if  not os.path.isdir(os.path.join(bcdir,grid_directory)):
+     exit("cannot find the grid subdirctory of agrid: " + agrid+ " and ogrid " + ogrid + " under "+ bcdir)
 
-   if len(gridID) >= 2 :
-      print("\n Warning! Find many GridIDs in " + bcdir)
-      print(" GridIDs found: ", gridID)
-      #WY note, found many string in the directory
-      print(" This GridID is chosen: " + g)
-   return g
+   return grid_directory
 
 def get_bcsdir(x, opt):
   bc_version   = x.get('input:shared:bc_version')
-  agrid = x.get('input:shared:agrid')
-  ogrid = x.get('input:shared:ogrid')
-  model = x.get('input:shared:omodel')
-  stretch = x.get('input:shared:stretch')
   if opt.upper() == "OUT":
     bc_version   = x.get('output:shared:bc_version')
-    agrid = x.get('output:shared:agrid')
-    ogrid = x.get('output:shared:ogrid')
-    model = x.get('output:shared:omodel')
-    stretch = x.get('output:shared:stretch')
 
-  bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
-  bcdir = bc_base+'/'+ bc_version+'/geometry/'
+  bcdir = bc_base+'/'+ bc_version+'/'
   if not os.path.exists(bcdir):
      exit("Cannot find bc dir " +  bcdir)
 
-  gridStr = get_grid_subdir(bcdir,agrid, ogrid, model,stretch)
-  bcdir =  bcdir + gridStr
-
   return bcdir
 
+def get_topodir(bcsdir, agrid, ogrid, model, stretch):
+  k = bcsdir.find('/land/')
+  if k != -1 :
+     bcsdir = bcsdir[0:k]
+  bcs_geom = bcsdir+'/geometry/'
+  gridStr = get_grid_subdir(bcs_geom, agrid, ogrid, model,stretch)
+  agrid_name = gridStr.split('_')[0]
+  bcs_topo = ''
+  if '/GM4/' in bcsdir :
+     bcs_topo = bcsdir+'/TOPO/TOPO_'+agrid_name
+  else:
+     bcs_topo = bcsdir+'/TOPO/TOPO_'+agrid_name + '/smoothed'
+
+  return bcs_topo
+
+def get_landdir(bcsdir, agrid, ogrid, model, stretch):
+  if '/land/' in bcsdir:
+     return bcsdir
+  bcs_land = bcsdir+'/land/'
+  gridStr = get_grid_subdir(bcs_land, agrid, ogrid, model,stretch)
+  bcs_land = bcs_land + gridStr 
+  return bcs_land
+
+def get_geomdir(bcsdir, agrid, ogrid, model, stretch):
+  if '/land/' in bcsdir:
+     bcs_geom = bcsdir.replace('/land/', '/geometry/')
+     return bcs_geom
+  bcs_geom = bcsdir+'/geometry/'
+  gridStr = get_grid_subdir(bcs_geom, agrid, ogrid, model,stretch)
+  bcs_geom = bcs_geom + gridStr 
+  return bcs_geom
 
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')

@@ -11,7 +11,9 @@ input:
     MERRA-2: false
     agrid: C360
     stretch: false
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/geometry/CF0360x6C_CF0360x6C/
+    # ocean couple model: data, MOM5, MO6
+    omodel: data
+    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
     expid: x0046a
     ogrid: C360
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c360Toc24/inputs
@@ -26,7 +28,9 @@ output:
   shared:
     agrid: C24
     stretch: false
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/geometry/CF0024x6C_DE0360xPE0180/
+    # ocean couple model: data, MOM5, MO6
+    omodel: data
+    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
     expid: C24c_x0046a
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/c360Toc24/

@@ -10,12 +10,9 @@ import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
+from remap_utils import get_landdir
+from remap_utils import get_geomdir
 from remap_utils import get_label
-
-def get_landdir(bcsdir):
-  if bcsdir :
-    bcsdir = bcsdir.replace('/geometry/','/land/')
-  return bcsdir
 
 class catchANDcn(remap_base):
   def __init__(self, **configs):
@@ -56,13 +53,26 @@ class catchANDcn(remap_base):
      if not in_tilefile :
         if not in_bcsdir:
            exit("Must provide either input tile file or input bcs directory")
-        in_tilefile  = glob.glob(in_bcsdir+ '/*.til')[0]
+        agrid = config['input']['shared']['agrid']
+        ogrid = config['input']['shared']['ogrid']
+        omodel = config['input']['shared']['omodel']
+        stretch = config['input']['shared']['stretch']
+        bcs_geomdir = get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
+        in_tilefile  = glob.glob(bcs_geomdir + '/*.til')[0]
 
+     agrid = config['output']['shared']['agrid']
+     ogrid = config['output']['shared']['ogrid']
+     omodel = config['output']['shared']['omodel']
+     stretch = config['output']['shared']['stretch']
      out_tilefile = config['output']['surface']['catch_tilefile']
-     if not out_tilefile :
-        out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
 
-     out_bcsdir = get_landdir(out_bcsdir)
+     if not out_tilefile :
+        if not out_bcsdir:
+           exit("Must provide either input tile file or input bcs directory")
+        bcs_geomdir = get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
+        out_tilefile = glob.glob(bcs_geomdir+ '/*.til')[0]
+
+     out_bcs_landdir = get_landdir(out_bcsdir, agrid, ogrid, omodel, stretch)
 
  # determine NPE based on *approximate* number of input and output tile
       
@@ -75,7 +85,7 @@ class catchANDcn(remap_base):
        in_Ntile = ds.dimensions['tile'].size
        
      out_Ntile = 0
-     with open( out_bcsdir+'/clsm/catchment.def') as f:
+     with open( out_bcs_landdir+'/clsm/catchment.def') as f:
        out_Ntile = int(next(f))
      max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
@@ -148,7 +158,7 @@ set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} )
 $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
-     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
+     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcs_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )

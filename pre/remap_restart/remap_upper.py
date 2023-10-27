@@ -9,18 +9,8 @@ import glob
 from remap_base import remap_base
 from remap_utils import get_label 
 from remap_utils import STRETCH_GRID
+from remap_utils import get_topodir
 from remap_bin2nc import bin2nc
-
-def get_topodir(bcsdir):
-  k = bcsdir.find('/geometry/')
-  if k != -1 :
-     while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
-     agrid_name = os.path.basename(bcsdir).split('_')[0]
-     if '/GM4/' in bcsdir :
-        bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name
-     else:
-        bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name + '/smoothed'
-  return bcsdir
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -92,19 +82,28 @@ class upperair(remap_base):
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
+     agrid = config['input']['shared']['agrid']
+     ogrid = config['input']['shared']['ogrid']
+     omodel = config['input']['shared']['omodel']
+     stretch = config['input']['shared']['stretch']
+     print("get topo:")
+     topo_bcsdir= get_topodir(in_bcsdir, agrid, ogrid, omodel, stretch)
+     print("get topo:")
 
-     in_bcsdir=get_topodir(in_bcsdir)
-
-     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
+     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
+     agrid = config['output']['shared']['agrid']
+     ogrid = config['output']['shared']['ogrid']
+     omodel = config['output']['shared']['omodel']
+     stretch = config['output']['shared']['stretch']
+     topo_bcsdir= get_topodir(out_bcsdir, agrid, ogrid, omodel, stretch)
 
-     out_bcsdir=get_topodir(out_bcsdir)
-     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*.data')[0]
+     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))

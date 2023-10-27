@@ -8,6 +8,7 @@ import ruamel.yaml
 import shlex
 from remap_base import remap_base
 from remap_utils import get_label
+from remap_utils import get_geomdir
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -74,8 +75,19 @@ class lake_landice_saltwater(remap_base):
         if 'roue'      in f : route     = f
         if 'openwater' in f : openwater = f
 
-     in_tile_file  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
-     out_tile_file = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
+     agrid = config['input']['shared']['agrid']
+     ogrid = config['input']['shared']['ogrid']
+     omodel = config['input']['shared']['omodel']
+     stretch = config['input']['shared']['stretch']
+     in_geomdir= get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
+     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+
+     agrid = config['output']['shared']['agrid']
+     ogrid = config['output']['shared']['ogrid']
+     omodel = config['output']['shared']['omodel']
+     stretch = config['output']['shared']['stretch']
+     out_geomdir= get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
+     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      in_til = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
