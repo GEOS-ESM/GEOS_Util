@@ -69,6 +69,16 @@ def default_partition(x):
       return False
    return True
 
+def validate_merra2_time(text):
+   if len(text) == 10 :
+      hh = text[8:]
+      if hh in ['03','09','15','21']:
+         return True
+      else:
+         return False 
+   else:
+     return False
+
 def ask_questions():
 
    # See remap_utils.py for definitions of "choices", "message" strings, and "validate" lists
@@ -97,8 +107,8 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date:  (Must be 8 digits: yyyymmdd; hour=21z.)\n",
-            "validate": lambda text: len(text)==8 ,
+            "message": "Enter restart date:  (Must be 10 digits: yyyymmddhh; hour=03,09,15,21z.)\n",
+            "validate": lambda text: validate_merra2_time(text) ,
             "when": lambda x: x['input:shared:MERRA-2'],
         },
         {
@@ -394,8 +404,6 @@ def ask_questions():
         },
    ]
    answers = questionary.prompt(questions)
-   if answers['input:shared:MERRA-2'] :
-      answers['input:shared:yyyymmddhh'] = answers['input:shared:yyyymmddhh']+ '21'
    answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
