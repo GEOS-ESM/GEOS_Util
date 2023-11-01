@@ -12,6 +12,7 @@ import questionary
 import glob
 import subprocess as sp
 import remap_restarts 
+import remap_utils
 from remap_params import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
@@ -38,7 +39,7 @@ def compare(base, result):
      if "identical." in out :
         print('identical')
      else: 
-        print ( f + ' is different from ' + r)
+        print ( b + ' is different from ' + r)
         return False
   return True
 
@@ -81,6 +82,7 @@ if __name__ == '__main__' :
 
      out_dir = '/discover/nobackup/'+user+'/REMAP_TESTS/'+case+'/'
      config['output']['shared']['out_dir'] = out_dir
+     config['slurm']['account'] = get_account()
      
      test_remap(config)
  
