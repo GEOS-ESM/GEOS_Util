@@ -159,7 +159,7 @@ sub write_and_submit_jobfile {
     if ( $npn == 40 ) {
       $mynodes = "sky";
     } else {
-      $mynodes = "hasw";
+      $mynodes = "sky|cas";
     }
     open JF, "> $jobfile" or die "Error opening jobfile: $jobfile; $!";
     $FH = select;

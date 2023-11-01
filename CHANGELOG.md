@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add CI step to make PR to MAPL3 on push to `main`
+
 ### Changed
 
 - Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
@@ -16,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Removed
+
+- Use of haswell nodes on NCCS machines
 
 ### Deprecated
 
