@@ -5,7 +5,7 @@
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
-
+import os
 import sys, getopt
 import ruamel.yaml
 import questionary
@@ -29,8 +29,10 @@ def compare(base, result):
      return False
   bases.sort()
   results.sort()
+  basedir = os.environ['BASEDIR']
+  NCCMP = basedir+ '/Linux/bin/nccmp'
   for b, r in zip(bases, results):
-     cmd = 'nccmp -dmgfs '+ b + ' ' + r
+     cmd = NCCMP + ' -dmgfs '+ b + ' ' + r
      print(cmd)
      p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
      (out, err) = p.communicate()
