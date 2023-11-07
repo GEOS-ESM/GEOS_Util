@@ -16,7 +16,7 @@ input:
     bcs_dir:
     expid:
     ogrid:
-    # (coupled) ocean model: data, MOM5, MO6
+    # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     rst_dir:
     yyyymmddhh:
@@ -38,7 +38,7 @@ output:
     bcs_dir:
     expid:
     ogrid:
-    # (coupled) ocean model: data, MOM5, MO6
+    # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     out_dir:
   air:

@@ -10,7 +10,7 @@ input:
   shared:
     MERRA-2: false
     stretch: false
-    # (coupled) ocean model: data, MOM5, MO6
+    # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid: C24
     bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
@@ -28,7 +28,7 @@ output:
   shared:
     agrid: C12
     stretch: false
-    # (coupled) ocean model: data, MOM5, MO6
+    # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
     expid: hello
