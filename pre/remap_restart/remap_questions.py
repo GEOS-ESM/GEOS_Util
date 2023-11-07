@@ -53,7 +53,7 @@ def echo_bcs(x,opt):
     x['input:shared:bcs_dir']  = in_bcsdir
     print("\n Land BCs for input restarts: " + land_dir )
   if opt == "OUT":
-    out_bcsdir =  get_bcsdir(x, 'OUT')
+    out_bcsdir = get_bcsdir(x, 'OUT')
     agrid      = x.get('output:shared:agrid')
     ogrid      = x.get('output:shared:ogrid')
     model      = x.get('output:shared:omodel')

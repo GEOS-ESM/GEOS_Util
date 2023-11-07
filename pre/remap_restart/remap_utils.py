@@ -357,9 +357,9 @@ def get_command_line_from_answers(answers):
    in_bcsdir  = ''
    default_bc = get_bcsdir(answers, "IN")
    if not os.path.samefile(default_bc, answers.get("input:shared:bcs_dir").strip()) :
-     in_bcsdir = ' -in_bcsdir ' + answers.get("input:shared:bcs_dir")
+     in_bcsdir  = ' -in_bcsdir ' + answers.get("input:shared:bcs_dir")
 
-   out_bcsdir  = ''
+   out_bcsdir = ''
    default_bc = get_bcsdir(answers, "OUT")
    if not os.path.samefile(default_bc, answers.get("output:shared:bcs_dir").strip()) :
      out_bcsdir = ' -out_bcsdir ' + answers.get("output:shared:bcs_dir")
@@ -367,11 +367,11 @@ def get_command_line_from_answers(answers):
    out_stretch = ''
    if answers["output:shared:stretch"]:   
      out_stretch = ' -out_stretch ' + answers["output:shared:stretch"]
-   in_stretch = ''
+   in_stretch  = ''
    if answers["input:shared:stretch"]:   
-     in_stretch = ' -in_stretch ' + answers["input:shared:stretch"]
+     in_stretch  = ' -in_stretch ' + answers["input:shared:stretch"]
 
-   zoom = " -zoom " + answers["input:surface:zoom"]
+   zoom   = " -zoom "      + answers["input:surface:zoom"]
    wemin  = " -in_wemin "  + answers["input:surface:wemin"]
    wemout = " -out_wemin " + answers["output:surface:wemin"]
    catch_model =''
@@ -482,7 +482,7 @@ def get_bcsdir(x, opt):
 
   bcdir = bc_base+'/'+ bc_version+'/'
   if not os.path.exists(bcdir):
-     exit("Cannot find bc dir " +  bcdir)
+     exit("Cannot find BCs dir " +  bcdir)
 
   return bcdir
 
