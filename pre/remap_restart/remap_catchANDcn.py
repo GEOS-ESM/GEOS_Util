@@ -39,37 +39,37 @@ class catchANDcn(remap_base):
              
      print("\nRemapping " + model + ".....\n")
 
-     cwdir  = os.getcwd()
-     bindir = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
-     out_dir    = config['output']['shared']['out_dir']
-     expid      = config['output']['shared']['expid']
-     in_wemin   = config['input']['surface']['wemin']
-     out_wemin  = config['output']['surface']['wemin']
-     surflay    = config['output']['surface']['surflay']
-     in_tilefile = config['input']['surface']['catch_tilefile']
+     cwdir        = os.getcwd()
+     bindir       = os.path.dirname(os.path.realpath(__file__))
+     in_bcsdir    = config['input']['shared']['bcs_dir']
+     out_bcsdir   = config['output']['shared']['bcs_dir']
+     out_dir      = config['output']['shared']['out_dir']
+     expid        = config['output']['shared']['expid']
+     in_wemin     = config['input']['surface']['wemin']
+     out_wemin    = config['output']['surface']['wemin']
+     surflay      = config['output']['surface']['surflay']
+     in_tilefile  = config['input']['surface']['catch_tilefile']
 
      if not in_tilefile :
         if not in_bcsdir:
            exit("Must provide either input tile file or input bcs directory")
-        agrid = config['input']['shared']['agrid']
-        ogrid = config['input']['shared']['ogrid']
-        omodel = config['input']['shared']['omodel']
-        stretch = config['input']['shared']['stretch']
-        bcs_geomdir = get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
+        agrid        = config['input']['shared']['agrid']
+        ogrid        = config['input']['shared']['ogrid']
+        omodel       = config['input']['shared']['omodel']
+        stretch      = config['input']['shared']['stretch']
+        bcs_geomdir  = get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
         in_tilefile  = glob.glob(bcs_geomdir + '/*.til')[0]
 
-     agrid = config['output']['shared']['agrid']
-     ogrid = config['output']['shared']['ogrid']
-     omodel = config['output']['shared']['omodel']
-     stretch = config['output']['shared']['stretch']
+     agrid        = config['output']['shared']['agrid']
+     ogrid        = config['output']['shared']['ogrid']
+     omodel       = config['output']['shared']['omodel']
+     stretch      = config['output']['shared']['stretch']
      out_tilefile = config['output']['surface']['catch_tilefile']
 
      if not out_tilefile :
         if not out_bcsdir:
            exit("Must provide either input tile file or input bcs directory")
-        bcs_geomdir = get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
+        bcs_geomdir  = get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
         out_tilefile = glob.glob(bcs_geomdir+ '/*.til')[0]
 
      out_bcs_landdir = get_landdir(out_bcsdir, agrid, ogrid, omodel, stretch)

@@ -44,23 +44,23 @@ def echo_level(x):
 
 def echo_bcs(x,opt):
   if opt == "IN":
-    in_bcsdir = get_bcsdir(x, 'IN')
-    agrid = x.get('input:shared:agrid')
-    ogrid = x.get('input:shared:ogrid')
-    model = x.get('input:shared:omodel')
-    stretch = x.get('input:shared:stretch')
-    land_dir = get_landdir(in_bcsdir, agrid, ogrid, model, stretch)    
+    in_bcsdir  = get_bcsdir(x, 'IN')
+    agrid      = x.get('input:shared:agrid')
+    ogrid      = x.get('input:shared:ogrid')
+    model      = x.get('input:shared:omodel')
+    stretch    = x.get('input:shared:stretch')
+    land_dir   = get_landdir(in_bcsdir,  agrid, ogrid, model, stretch)    
     x['input:shared:bcs_dir']  = in_bcsdir
-    print("\n BC of land for input restart: " + land_dir )
+    print("\n Land BCs for input restarts: " + land_dir )
   if opt == "OUT":
     out_bcsdir =  get_bcsdir(x, 'OUT')
-    agrid = x.get('output:shared:agrid')
-    ogrid = x.get('output:shared:ogrid')
-    model = x.get('output:shared:omodel')
-    stretch = x.get('output:shared:stretch')
-    land_dir = get_landdir(out_bcsdir, agrid, ogrid, model, stretch)    
+    agrid      = x.get('output:shared:agrid')
+    ogrid      = x.get('output:shared:ogrid')
+    model      = x.get('output:shared:omodel')
+    stretch    = x.get('output:shared:stretch')
+    land_dir   = get_landdir(out_bcsdir, agrid, ogrid, model, stretch)    
     x['output:shared:bcs_dir'] = out_bcsdir
-    print("\n BC of land for output restart: " + land_dir)
+    print("\n Land BCs for new restarts: " + land_dir)
   return False
 
 def default_partition(x):
@@ -107,7 +107,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date:  (Must be 10 digits: yyyymmddhh; hour=03,09,15,21z.)\n",
+            "message": "Enter restart date:  (Must be 10 digits: yyyymmddhh; hour = 03, 09, 15, or 21 [z].)\n",
             "validate": lambda text: validate_merra2_time(text) ,
             "when": lambda x: x['input:shared:MERRA-2'],
         },

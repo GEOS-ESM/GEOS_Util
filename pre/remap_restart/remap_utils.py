@@ -118,7 +118,7 @@ def init_merra2(x):
   x['input:surface:catch_model'] = 'catch'
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
-  x['input:air:nlevel'] = 72
+  x['input:air:nlevel']          = 72
 
   return False
 
@@ -152,7 +152,7 @@ def fvcore_info(x):
   x['input:air:nlevel'] = lev
   ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
   if (lat != lon*6) :
-      print("(N_lon,N_lat) = ", lon, lat)
+      print("(N_lon, N_lat) = ", lon, lat)
       exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
   x['input:shared:yyyymmddhh'] = ymdh
   x['input:shared:agrid'] = "C"+str(lon)
@@ -471,7 +471,7 @@ def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
    grid_directory = aname +'_' + oname
    
    if  not os.path.isdir(os.path.join(bcdir,grid_directory)):
-     exit("cannot find the grid subdirctory of agrid: " + agrid+ " and ogrid " + ogrid + " under "+ bcdir)
+     exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + bcdir)
 
    return grid_directory
 

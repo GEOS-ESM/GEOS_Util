@@ -82,12 +82,12 @@ class upperair(remap_base):
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
-     agrid = config['input']['shared']['agrid']
-     ogrid = config['input']['shared']['ogrid']
-     omodel = config['input']['shared']['omodel']
-     stretch = config['input']['shared']['stretch']
+     agrid       = config['input']['shared']['agrid']
+     ogrid       = config['input']['shared']['ogrid']
+     omodel      = config['input']['shared']['omodel']
+     stretch     = config['input']['shared']['stretch']
      print("get topo:")
-     topo_bcsdir= get_topodir(in_bcsdir, agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(in_bcsdir,  agrid, ogrid, omodel, stretch)
      print("get topo:")
 
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
@@ -97,11 +97,11 @@ class upperair(remap_base):
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
-     agrid = config['output']['shared']['agrid']
-     ogrid = config['output']['shared']['ogrid']
-     omodel = config['output']['shared']['omodel']
-     stretch = config['output']['shared']['stretch']
-     topo_bcsdir= get_topodir(out_bcsdir, agrid, ogrid, omodel, stretch)
+     agrid       = config['output']['shared']['agrid']
+     ogrid       = config['output']['shared']['ogrid']
+     omodel      = config['output']['shared']['omodel']
+     stretch     = config['output']['shared']['stretch']
+     topo_bcsdir = get_topodir(out_bcsdir, agrid, ogrid, omodel, stretch)
 
      topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
@@ -119,21 +119,21 @@ class upperair(remap_base):
        exit("Only support cs grid so far")
 
      if (imout <90):
-       NPE = 12; nwrit = 1
+       NPE =   12; nwrit = 1
      elif (imout<=180):
-       NPE = 24; nwrit = 1
+       NPE =   24; nwrit = 1
      elif (imout<=540):
-       NPE = 96; nwrit = 1
+       NPE =   96; nwrit = 1
      elif (imout<=720):
-       NPE = 192; nwrit = 2
+       NPE =  192; nwrit = 2
      elif (imout<=1080):
-       NPE = 384; nwrit = 2
+       NPE =  384; nwrit = 2
      elif (imout<=1440):
-       NPE = 576; nwrit = 2
+       NPE =  576; nwrit = 2
      elif (imout< 2880):
-       NPE = 768; nwrit = 2
+       NPE =  768; nwrit = 2
      elif (imout>=2880):
-       NPE = 5400; nwrit= 6
+       NPE = 5400; nwrit = 6
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
      TIME ="#SBATCH --time=1:00:00"

@@ -30,7 +30,7 @@ def compare(base, result):
   bases.sort()
   results.sort()
   basedir = os.environ['BASEDIR']
-  NCCMP = basedir+ '/Linux/bin/nccmp'
+  NCCMP   = basedir+'/Linux/bin/nccmp'
   for b, r in zip(bases, results):
      cmd = NCCMP + ' -dmgfs '+ b + ' ' + r
      print(cmd)
