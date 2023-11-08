@@ -1,5 +1,6 @@
 #
-# This template file can be filled with questionary or manually
+# remap_restarts package:
+#   this template file can be filled via the questionary (remap_questions.py) or manually
 #
 #
 

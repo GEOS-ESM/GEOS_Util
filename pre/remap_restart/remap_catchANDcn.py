@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_catchANDcn.py remaps Catchment[CN] land model restarts using config inputs from `remap_params.yaml`
+#
+# to run, must first load modules (incl. python3) as follows:
+#
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 import sys
 import subprocess

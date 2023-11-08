@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_utils.py contains utility functions and definitions
+#
 import os
 import subprocess
 import ruamel.yaml

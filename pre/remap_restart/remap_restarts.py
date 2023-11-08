@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 #
-# main script for remapping GEOS restart files to a new resolution and/or boundary conditions version
+# remap_restarts package:
+#   remap_restarts.py is the main script for remapping GEOS restart files to a different  
+#   resolution and/or a different version of the associated model boundary conditions
 #
-# source install/bin/g5_modules
+# to run, must first load modules (incl. python3) as follows:
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.11.0_py3.9
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
 #
-
 import sys
 import argparse
 import textwrap
@@ -26,32 +27,28 @@ from remap_catchANDcn  import *
 program_description = textwrap.dedent(f'''
       USAGE:
 
-      This script provides three options to remap restart files:
+      This script provides three options for remapping GEOS restart files:
 
-      1. Use questionary to create a yaml config file (remap_params.yaml):
-           ./remap_questions.py
-         and then remap:
+      1. Use the interactive questionary:
            ./remap_restarts.py
+         The questionary concludes with the option to submit the remapping job.  
+         It also creates a yaml configuration file (`remap_params.yaml`) and 
+         a command line options string (`remap_restarts.CMD`), which can be edited 
+         manually and used in the other two ways of running `remap_restarts.py`.
 
-      2. Use an existing yaml config file to remap:
+      2. Use an existing yaml config file:
            ./remap_restarts.py config_file -c my_config.yaml
 
-      3. Use command line options:
+      3. Use command line arguments:
            ./remap_restarts.py command_line -ymdh 2004041421  ....
-         To see more command line options, please use 
-           ./remap_restarts.py command_line -h
-         Note that the questionary also generates command line inputs.
 
-      There are three help commands:
+      Help commands:
            ./remap_restarts.py -h
            ./remap_restarts.py config_file -h
            ./remap_restarts.py command_line -h
 
-      NOTE: Individual scripts can be executed independently:
-        1. remap_questions.py generates remap_params.yaml.
-        2. If the command_line option is used with remap_restarts.py, the command line options are converted remap_params.yaml.
-        3. Subsets of restarts can be remapped separately with remap_upper.py, remap_lake_landice_saltwater.py, 
-           remap_catchANDcn.py, and remap_analysis.py, all of which use remap_params.yaml as configuration input.
+      For more information, refer to https://github.com/GEOS-ESM/GEOS_Util/wiki
+
     ''')
 def main():
 

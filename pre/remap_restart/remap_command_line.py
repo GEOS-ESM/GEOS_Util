@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 #
-# source install/bin/g5_modules
+# remap_restarts package:
+#   remap_command_line.py parses and converts the command-line arguments and converts the information 
+#   into matching "Answers" for the questionary (remap_questions.py)
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.10.3_py3.9
-#
-# This script parses and converts the command-line arguments to answers equivalent to those from remap_questions.py
-
-
 import os
 import subprocess
 import shlex

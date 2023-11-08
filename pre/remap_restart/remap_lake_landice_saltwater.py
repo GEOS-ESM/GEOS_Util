@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts 
+#   using config inputs from `remap_params.yaml`
+#
+# to run, must first load modules (incl. python3) as follows:
+#
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 import subprocess
 import shutil

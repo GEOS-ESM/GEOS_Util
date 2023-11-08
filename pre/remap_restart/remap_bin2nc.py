@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
-# script to convert binary MERRA-2 restarts to nc4
+# remap_restarts package:
+#   remap_bin2nc.py converts binary MERRA-2 restarts to nc4
 #
 # As of Sep 2023, MERRA-2 restarts are the only binary restarts that may need to be
 # remapped.  The set of yaml config files "bin2nc_merra2_*.yaml" include hard-wired

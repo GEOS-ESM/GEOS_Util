@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 #
-# source install/bin/g5_modules
+# remap_restarts package:
+#   interactive questionary to create a yaml configuration file (remap_params.yaml) and 
+#   a matching command line argument string (remap_restarts.CMD)
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.10.3_py3.9
 #
-
 import os
 import subprocess
 import shlex

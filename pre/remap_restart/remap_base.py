@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#  remap_base.py does [???]
+#
 import os
 import ruamel.yaml
 import shutil

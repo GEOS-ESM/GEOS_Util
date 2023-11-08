@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 #
-# source install/bin/g5_modules
+# remap_restarts package:
+#   remap_analysis.py remaps atmospheric analysis restarts using config inputs from `remap_params.yaml`
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.10.3_py3.9
+# to run, must first load modules (incl. python3) as follows:
 #
-
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 from datetime import datetime, timedelta
 import subprocess

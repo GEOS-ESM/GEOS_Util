@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_params.py uses the dictionary `answers` (from remap_questions.py) as inputs and 
+#   generates a yaml config file named `remap_params.yaml`.
+#
 import os,sys
 import ruamel.yaml
 import shutil
