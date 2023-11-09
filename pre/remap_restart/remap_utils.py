@@ -14,7 +14,13 @@ import shlex
 import netCDF4 as nc
 
 # shared global variables
-#
+
+# top-level directory for BCs (machine-dependent)
+
+bc_base_NCCS       = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
+
+bc_base_NAS        = ''
+
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
@@ -478,8 +484,8 @@ def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
 
 def get_bc_base():
    base = {}
-   base['NAS']  = ''
-   base['NCCS'] = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
+   base['NAS']  = bc_base_NAS
+   base['NCCS'] = bc_base_NCCS
    cmd = 'uname -n'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
    (node, err) = p.communicate()
