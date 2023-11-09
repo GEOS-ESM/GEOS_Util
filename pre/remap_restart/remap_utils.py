@@ -15,10 +15,8 @@ import netCDF4 as nc
 
 # shared global variables
 #
-# define "bc_base", "choices", "message" strings, and "validate" lists that are used multiple times
+# define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
-
-bc_base = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
@@ -478,11 +476,29 @@ def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
 
    return grid_directory
 
+def get_bc_base():
+   base = {}
+   base['NAS']  = ''
+   base['NCCS'] = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
+   cmd = 'uname -n'
+   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+   (node, err) = p.communicate()
+   p_status = p.wait()
+   node = node.decode().split()
+   node0 = node[0]
+   site ='NAS'
+   discover = ['dirac', 'borg','warp', 'discover']
+   for node in discover:
+      if node in node0:
+         site = 'NCCS'
+         break
+   return base[site]
+
 def get_bcsdir(x, opt):
   bc_version   = x.get('input:shared:bc_version')
   if opt.upper() == "OUT":
     bc_version   = x.get('output:shared:bc_version')
-
+  bc_base = get_bc_base()
   bcdir = bc_base+'/'+ bc_version+'/'
   if not os.path.exists(bcdir):
      exit("Cannot find BCs dir " +  bcdir)

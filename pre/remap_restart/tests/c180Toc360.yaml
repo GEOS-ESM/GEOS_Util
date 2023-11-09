@@ -54,6 +54,7 @@ output:
     lcv: false
 
 slurm:
-  account: g0620
+  # account would be set to users' primary account automatically by test_remap_restarts.py
+  account: 
   qos: debug
   partition: compute

@@ -13,12 +13,12 @@ input:
     bc_version: none
     MERRA-2: false
     stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
     agrid:
     bcs_dir:
     expid:
     ogrid:
-    # (coupled) ocean model: data, MOM5, MOM6
-    omodel: data
     rst_dir:
     yyyymmddhh:
   surface:
@@ -35,12 +35,12 @@ output:
     label: false
     # SG001,SG002
     stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
     agrid:
     bcs_dir:
     expid:
     ogrid:
-    # (coupled) ocean model: data, MOM5, MOM6
-    omodel: data
     out_dir:
   air:
     # remap upper air or not
