@@ -2,6 +2,7 @@ esma_set_this()
 
 set ( srcs
   sst_ice_helpers.F90
+  hermes_m_tick.f90
   )
 
 esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL NetCDF::NetCDF_Fortran)

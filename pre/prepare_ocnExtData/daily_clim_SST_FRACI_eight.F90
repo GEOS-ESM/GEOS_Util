@@ -1,5 +1,6 @@
 PROGRAM daily_clim_SST_FRACI_eight
 !---------------------------------------------------------------------------
+  USE m_tick, only: INCYMD
   USE sst_ice_helpers, only: read_bin_SST_ICE, &
                              write_bin,        &
                              write_netcdf
@@ -21,6 +22,14 @@ PROGRAM daily_clim_SST_FRACI_eight
   ice_file = 'dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.2023.data'
 
   nymd_in  = 20230101
+
+  print *, "----------------"
+  print *, INCYMD (nymd_in,1)
+  print *, INCYMD (nymd_in,2)
+  print *, INCYMD (nymd_in,3)
+  print *, INCYMD (nymd_in,4)
+  print *, INCYMD (nymd_in,5)
+  print *, "----------------"
 
   CALL read_bin_SST_ICE( sst_file, nymd_in, nymd_out, NLON, NLAT, LON, LAT, sst)
   CALL read_bin_SST_ICE( ice_file, nymd_in, nymd_out, NLON, NLAT, LON, LAT, ice)
