@@ -58,8 +58,6 @@ class upperair(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
@@ -90,13 +88,13 @@ class upperair(remap_base):
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
+     in_bc_base     = config['input']['shared']['bc_base'] 
+     in_bc_version  = config['input']['shared']['bc_version']
      agrid       = config['input']['shared']['agrid']
      ogrid       = config['input']['shared']['ogrid']
      omodel      = config['input']['shared']['omodel']
      stretch     = config['input']['shared']['stretch']
-     print("get topo:")
-     topo_bcsdir = get_topodir(in_bcsdir,  agrid, ogrid, omodel, stretch)
-     print("get topo:")
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid, ogrid, omodel, stretch)
 
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
@@ -105,11 +103,13 @@ class upperair(remap_base):
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
+     out_bc_base    = config['output']['shared']['bc_base'] 
+     out_bc_version = config['output']['shared']['bc_version']
      agrid       = config['output']['shared']['agrid']
      ogrid       = config['output']['shared']['ogrid']
      omodel      = config['output']['shared']['omodel']
      stretch     = config['output']['shared']['stretch']
-     topo_bcsdir = get_topodir(out_bcsdir, agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
 
      topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'

@@ -42,24 +42,17 @@ def echo_level(x):
   return True
 
 def echo_bcs(x,opt):
-  if opt == "IN":
-    in_bcsdir  = get_bcsdir(x, 'IN')
-    agrid      = x.get('input:shared:agrid')
-    ogrid      = x.get('input:shared:ogrid')
-    model      = x.get('input:shared:omodel')
-    stretch    = x.get('input:shared:stretch')
-    land_dir   = get_landdir(in_bcsdir,  agrid, ogrid, model, stretch)    
-    x['input:shared:bcs_dir']  = in_bcsdir
-    print("\n Land BCs for input restarts: " + land_dir )
-  if opt == "OUT":
-    out_bcsdir = get_bcsdir(x, 'OUT')
-    agrid      = x.get('output:shared:agrid')
-    ogrid      = x.get('output:shared:ogrid')
-    model      = x.get('output:shared:omodel')
-    stretch    = x.get('output:shared:stretch')
-    land_dir   = get_landdir(out_bcsdir, agrid, ogrid, model, stretch)    
-    x['output:shared:bcs_dir'] = out_bcsdir
-    print("\n Land BCs for new restarts: " + land_dir)
+  base      = x.get(opt+':shared:bc_base').split(': ')[-1]
+  bcv       = x.get(opt+':shared:bc_version')
+  agrid     = x.get(opt+':shared:agrid')
+  ogrid     = x.get(opt+':shared:ogrid')
+  model     = x.get(opt+':shared:omodel')
+  stretch   = x.get(opt+':shared:stretch')
+  x[opt+':shared:bc_base']  = base
+  land_dir  = get_landdir(base, bcv, agrid, ogrid, model, stretch)
+  if  not os.path.isdir(land_dir):
+     exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
+  print("\n Land BCs for " + opt + " restarts: " + land_dir )
   return False
 
 def default_partition(x):
@@ -299,16 +292,50 @@ def ask_questions():
         },
 
         {
-            "type": "path",
-            "name": "input:shared:bcs_dir",
-            "message": "Is this BCs version correct for input restarts? If no, enter your own absolute path: \n",
-            "when": lambda x: echo_bcs(x, "IN"),
+            "type": "select",
+            "name": "input:shared:bc_base",
+            "message": "\nSelect BCs base directory for input restarts: \n",
+            "choices": choices_bc_base,
+            "default": get_default_bc_base(),
+            "when": lambda x: not x.get('input:shared:bc_base'),
         },
+
         {
             "type": "path",
-            "name": "output:shared:bcs_dir",
-            "message": "Is this BCs version correct for new restarts? If no, enter your own absolute path: \n",
-            "when": lambda x:  echo_bcs(x, "OUT"),
+            "name": "input:shared:bc_base",
+            "message": "\nEnter BCs base directory for input restarts: \n",
+            "when": lambda x: 'Customize ' in x.get('input:shared:bc_base'),
+        },
+        # dummy (invisible) question to retrieve input:shared:bc_base
+        {
+            "type": "text",
+            "name": "input:shared:bc_base",
+            "message": "retrieve and echo bcs",
+            # always return false, so questions never shows but changes ogrid
+            "when": lambda x: echo_bcs(x, 'input')
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_base",
+            "message": "\nSelect BCs base directory for new restarts: \n",
+            "choices": choices_bc_base,
+            "default": get_default_bc_base(),
+        },
+
+        {
+            "type": "path",
+            "name": "output:shared:bc_base",
+            "message": "\nEnter BCs base directory for new restarts: \n",
+            "when": lambda x: 'Customize ' in x.get('output:shared:bc_base'),
+        },
+        # dummy (invisible) question to retrieve output:shared:bc_base
+        {
+            "type": "text",
+            "name": "output:shared:bc_base",
+            "message": "retrieve and echo bcs",
+            # always return false, so questions never shows but changes ogrid
+            "when": lambda x: echo_bcs(x, 'output')
         },
 
         {

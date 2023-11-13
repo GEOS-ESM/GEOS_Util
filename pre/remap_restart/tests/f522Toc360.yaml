@@ -13,7 +13,8 @@ input:
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid: C720
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/ICA/
+    bc_version: ICA
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
     expid: f522_fp
     ogrid: C720
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/
@@ -29,7 +30,8 @@ output:
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
+    bc_version: NL3
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
     expid: remap
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/f522Toc360/

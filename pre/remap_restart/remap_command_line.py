@@ -68,8 +68,8 @@ def parse_args(program_description):
     p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
     p_command.add_argument('-lbl',   action='store_true',     help="Label output restarts with bc_versions and resolutions")
     p_command.add_argument('-noagcm_import_rst', action='store_true',     help="Do not remap agcm_import_rst file")
-    p_command.add_argument('-in_bcsdir',  default="",         help="User-supplied directory with boundary conditions of input restarts. If not specified (default), dir. is deduced from bc_version and resolution info")
-    p_command.add_argument('-out_bcsdir', default="",         help="User-supplied directory with boundary conditions for new restarts.  If not specified (default), dir. is deduced from bc_version and resolution info")
+    p_command.add_argument('-in_bc_base', default="",        help="Boundary conditions base directory (without bc_version and resolution infomation) for input restart")
+    p_command.add_argument('-out_bc_base',  default="",      help="Boundary conditions base directory (without bc_version and resolution infomation) for new restarts")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
     p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])
@@ -113,15 +113,8 @@ def get_answers_from_command_line(cml):
       ogrid = answers["output:shared:agrid"]
    answers["output:shared:ogrid"]      = ogrid
 
-   if cml.in_bcsdir.strip():
-      answers["input:shared:bcs_dir"]  =  cml.in_bcsdir
-   else:
-      answers["input:shared:bcs_dir"]  = get_bcsdir(answers, "IN")
-
-   if cml.out_bcsdir.strip():
-      answers["output:shared:bcs_dir"] =  cml.out_bcsdir
-   else:
-      answers["output:shared:bcs_dir"] = get_bcsdir(answers, "OUT")
+   answers["input:shared:bc_base"]  =  cml.in_bc_base
+   answers["output:shared:bc_base"] =  cml.out_bc_base
 
    answers["output:shared:stretch"]    = cml.out_stretch
    answers["input:shared:stretch"]     = cml.in_stretch

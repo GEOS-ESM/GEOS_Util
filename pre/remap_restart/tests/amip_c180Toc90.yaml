@@ -13,7 +13,8 @@ input:
     agrid: C180
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
+    bc_version: NL3
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
     expid: JM_v10.22.2_L072_C180_AMIP
     ogrid: 1440X720
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/inputs/
@@ -30,7 +31,8 @@ output:
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
-    bcs_dir: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/
+    bc_version: NL3
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
     expid: C90CS_JM_v10.22.2_L072_C180_AMIP
     ogrid: C90
     out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/

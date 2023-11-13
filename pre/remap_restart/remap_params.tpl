@@ -9,14 +9,13 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
-    # bc_version info here is not critical. It is used in command_line options
-    bc_version: none
     MERRA-2: false
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid:
-    bcs_dir:
+    bc_version: none
+    bc_base:
     expid:
     ogrid:
     rst_dir:
@@ -26,19 +25,18 @@ input:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
-    # if catch_tilefile is null, it searches bcs_dir
+    # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
 output:
   shared:
-    # bc_version info here is not critical. It is used in command_line options
-    bc_version: none
     label: false
     # SG001,SG002
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid:
-    bcs_dir:
+    bc_version: none
+    bc_base:
     expid:
     ogrid:
     out_dir:
@@ -54,7 +52,7 @@ output:
     remap_water: true
     # remap catch(cn)
     remap_catch: true
-    # if catch_tilefile is null, it searches bcs_dir
+    # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
   analysis:
     bkg: true

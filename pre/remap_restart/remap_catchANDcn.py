@@ -49,8 +49,10 @@ class catchANDcn(remap_base):
 
      cwdir        = os.getcwd()
      bindir       = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir    = config['input']['shared']['bcs_dir']
-     out_bcsdir   = config['output']['shared']['bcs_dir']
+     in_bc_base    = config['input']['shared']['bc_base']
+     in_bc_version = config['input']['shared']['bc_version']
+     out_bc_base   = config['output']['shared']['bc_base']
+     out_bc_version= config['output']['shared']['bc_version']
      out_dir      = config['output']['shared']['out_dir']
      expid        = config['output']['shared']['expid']
      in_wemin     = config['input']['surface']['wemin']
@@ -59,14 +61,12 @@ class catchANDcn(remap_base):
      in_tilefile  = config['input']['surface']['catch_tilefile']
 
      if not in_tilefile :
-        if not in_bcsdir:
-           exit("Must provide either input tile file or input bcs directory")
         agrid        = config['input']['shared']['agrid']
         ogrid        = config['input']['shared']['ogrid']
         omodel       = config['input']['shared']['omodel']
         stretch      = config['input']['shared']['stretch']
-        bcs_geomdir  = get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
-        in_tilefile  = glob.glob(bcs_geomdir + '/*.til')[0]
+        bc_geomdir  = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
+        in_tilefile  = glob.glob(bc_geomdir + '/*.til')[0]
 
      agrid        = config['output']['shared']['agrid']
      ogrid        = config['output']['shared']['ogrid']
@@ -75,12 +75,10 @@ class catchANDcn(remap_base):
      out_tilefile = config['output']['surface']['catch_tilefile']
 
      if not out_tilefile :
-        if not out_bcsdir:
-           exit("Must provide either input tile file or input bcs directory")
-        bcs_geomdir  = get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
-        out_tilefile = glob.glob(bcs_geomdir+ '/*.til')[0]
+        bc_geomdir  = get_geomdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+        out_tilefile = glob.glob(bc_geomdir+ '/*.til')[0]
 
-     out_bcs_landdir = get_landdir(out_bcsdir, agrid, ogrid, omodel, stretch)
+     out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
 
  # determine NPE based on *approximate* number of input and output tile
       
@@ -93,7 +91,7 @@ class catchANDcn(remap_base):
        in_Ntile = ds.dimensions['tile'].size
        
      out_Ntile = 0
-     with open( out_bcs_landdir+'/clsm/catchment.def') as f:
+     with open( out_bc_landdir+'/clsm/catchment.def') as f:
        out_Ntile = int(next(f))
      max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
@@ -166,7 +164,7 @@ set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} )
 $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
-     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcs_landdir, \
+     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )

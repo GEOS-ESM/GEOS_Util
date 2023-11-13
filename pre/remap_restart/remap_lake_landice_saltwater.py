@@ -37,8 +37,11 @@ class lake_landice_saltwater(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__)) 
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
+     in_bc_base    = config['input']['shared']['bc_base']
+     in_bc_version = config['input']['shared']['bc_version']
+     out_bc_base   = config['output']['shared']['bc_base']
+     out_bc_version= config['output']['shared']['bc_version']
+
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
@@ -88,14 +91,14 @@ class lake_landice_saltwater(remap_base):
      ogrid         = config['input']['shared']['ogrid']
      omodel        = config['input']['shared']['omodel']
      stretch       = config['input']['shared']['stretch']
-     in_geomdir    = get_geomdir(in_bcsdir, agrid, ogrid, omodel, stretch)
+     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
      in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
 
      agrid         = config['output']['shared']['agrid']
      ogrid         = config['output']['shared']['ogrid']
      omodel        = config['output']['shared']['omodel']
      stretch       = config['output']['shared']['stretch']
-     out_geomdir   = get_geomdir(out_bcsdir, agrid, ogrid, omodel, stretch)
+     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
      out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)

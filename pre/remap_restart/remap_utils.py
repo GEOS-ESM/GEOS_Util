@@ -17,9 +17,9 @@ import netCDF4 as nc
 
 # top-level directory for BCs (machine-dependent)
 
-bc_base_NCCS       = "/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles"
-
-bc_base_NAS        = ''
+choices_bc_base  =[ "DISCOVER  : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
+                    "NAS       : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
+                    "Customize : " ]
 
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
@@ -122,6 +122,7 @@ def init_merra2(x):
   x['input:shared:ogrid']        = '1440x720'
   x['input:shared:omodel']       = 'data'
   x['input:shared:bc_version']   = 'GM4'
+  x['input:shared:bc_base']     = '/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles'
   x['input:surface:catch_model'] = 'catch'
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
@@ -219,16 +220,21 @@ def data_ocean_default(resolution):
    if resolution in ['C12','C24', 'C48'] : default_ = '360x180   (Reynolds)'
    return default_
 
-def get_bcs_basename(bcs):
-  if not bcs: return ""
-  while bcs[-1] == '/': bcs = bcs[0:-1] # remove extra '/'
-  return os.path.basename(bcs)
-
 def get_label(config):
   label = ''
   if config['output']['shared']['label']:
-     in_resolution  = get_bcs_basename(config['input']['shared']['bcs_dir'])
-     out_resolution = get_bcs_basename(config['output']['shared']['bcs_dir'])
+     agrid     = config['output']['shared']['agrid']
+     ogrid     = config['output']['shared']['ogrid']
+     model     = config['output']['shared']['omodel']
+     stretch   = config['output']['shared']['stretch']
+     out_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+
+     agrid     = config['input']['shared']['agrid']
+     ogrid     = config['input']['shared']['ogrid']
+     model     = config['input']['shared']['omodel']
+     stretch   = config['input']['shared']['stretch']
+     in_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+
      in_bcv         =  config['input']['shared']['bc_version']
      out_bcv        =  config['output']['shared']['bc_version']
      label = '.' + in_bcv  + '.' + in_resolution + \
@@ -361,15 +367,8 @@ def get_command_line_from_answers(answers):
   
    label  = ' -lbl ' if answers["output:shared:label"] else ""
     
-   in_bcsdir  = ''
-   default_bc = get_bcsdir(answers, "IN")
-   if not os.path.samefile(default_bc, answers.get("input:shared:bcs_dir").strip()) :
-     in_bcsdir  = ' -in_bcsdir ' + answers.get("input:shared:bcs_dir")
-
-   out_bcsdir = ''
-   default_bc = get_bcsdir(answers, "OUT")
-   if not os.path.samefile(default_bc, answers.get("output:shared:bcs_dir").strip()) :
-     out_bcsdir = ' -out_bcsdir ' + answers.get("output:shared:bcs_dir")
+   in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")
+   out_bc_base = ' -out_bc_base ' + answers.get("output:shared:bc_base")
 
    out_stretch = ''
    if answers["output:shared:stretch"]:   
@@ -413,8 +412,8 @@ def get_command_line_from_answers(answers):
                                           bcvout + \
                                           rst_dir  + \
                                           out_dir  + \
-                                          in_bcsdir + \
-                                          out_bcsdir + \
+                                          in_bc_base + \
+                                          out_bc_base + \
                                           out_stretch + \
                                           in_stretch + \
                                           catch_model + \
@@ -453,7 +452,7 @@ def get_config_from_answers(answers):
 
    return config
 
-def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
+def get_resolutions(agrid, ogrid, model, stretch):
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):
@@ -475,73 +474,42 @@ def get_grid_subdir(bcdir, agrid, ogrid, model, stretch):
    if stretch:
       aname = aname + '-' + stretch
 
-   grid_directory = aname +'_' + oname
+   resolutions = aname +'_' + oname
    
-   if  not os.path.isdir(os.path.join(bcdir,grid_directory)):
-     exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + bcdir)
+   return resolutions
 
-   return grid_directory
-
-def get_bc_base():
-   base = {}
-   base['NAS']  = bc_base_NAS
-   base['NCCS'] = bc_base_NCCS
+def get_default_bc_base():
    cmd = 'uname -n'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
    (node, err) = p.communicate()
    p_status = p.wait()
    node = node.decode().split()
    node0 = node[0]
-   site ='NAS'
    discover = ['dirac', 'borg','warp', 'discover']
    for node in discover:
       if node in node0:
-         site = 'NCCS'
-         break
-   return base[site]
+         return choices_bc_base[0]
+   return choices_bc_base[1]
 
-def get_bcsdir(x, opt):
-  bc_version   = x.get('input:shared:bc_version')
-  if opt.upper() == "OUT":
-    bc_version   = x.get('output:shared:bc_version')
-  bc_base = get_bc_base()
-  bcdir = bc_base+'/'+ bc_version+'/'
-  if not os.path.exists(bcdir):
-     exit("Cannot find BCs dir " +  bcdir)
-
-  return bcdir
-
-def get_topodir(bcsdir, agrid, ogrid, model, stretch):
-  k = bcsdir.find('/land/')
-  if k != -1 :
-     bcsdir = bcsdir[0:k]
-  bcs_geom = bcsdir+'/geometry/'
-  gridStr = get_grid_subdir(bcs_geom, agrid, ogrid, model,stretch)
+def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
+  gridStr = get_resolutions(agrid, ogrid, model,stretch)
   agrid_name = gridStr.split('_')[0]
-  bcs_topo = ''
-  if '/GM4/' in bcsdir :
-     bcs_topo = bcsdir+'/TOPO/TOPO_'+agrid_name
+  bc_topo = ''
+  if 'GM4' == bc_version:
+     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name
   else:
-     bcs_topo = bcsdir+'/TOPO/TOPO_'+agrid_name + '/smoothed'
+     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name + '/smoothed'
 
-  return bcs_topo
+  return bc_topo
 
-def get_landdir(bcsdir, agrid, ogrid, model, stretch):
-  if '/land/' in bcsdir:
-     return bcsdir
-  bcs_land = bcsdir+'/land/'
-  gridStr = get_grid_subdir(bcs_land, agrid, ogrid, model,stretch)
-  bcs_land = bcs_land + gridStr 
-  return bcs_land
+def get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch):
+  gridStr = get_resolutions(agrid, ogrid, model,stretch)
+  bc_land = bc_base+'/'+ bc_version+'/land/'+gridStr
+  return bc_land
 
-def get_geomdir(bcsdir, agrid, ogrid, model, stretch):
-  if '/land/' in bcsdir:
-     bcs_geom = bcsdir.replace('/land/', '/geometry/')
-     return bcs_geom
-  bcs_geom = bcsdir+'/geometry/'
-  gridStr = get_grid_subdir(bcs_geom, agrid, ogrid, model,stretch)
-  bcs_geom = bcs_geom + gridStr 
-  return bcs_geom
+def get_geomdir(bc_base, bc_version, agrid, ogrid, model, stretch):
+  bc_geom =  get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch). replace('/land/', '/geometry/')
+  return bc_geom
 
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
