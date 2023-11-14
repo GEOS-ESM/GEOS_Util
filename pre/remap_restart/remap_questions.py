@@ -304,7 +304,7 @@ def ask_questions():
             "type": "path",
             "name": "input:shared:bc_base",
             "message": "\nEnter BCs base directory for input restarts: \n",
-            "when": lambda x: 'Customize ' in x.get('input:shared:bc_base'),
+            "when": lambda x: 'Custom ' in x.get('input:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve input:shared:bc_base
         {
@@ -327,7 +327,7 @@ def ask_questions():
             "type": "path",
             "name": "output:shared:bc_base",
             "message": "\nEnter BCs base directory for new restarts: \n",
-            "when": lambda x: 'Customize ' in x.get('output:shared:bc_base'),
+            "when": lambda x: 'Custom ' in x.get('output:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve output:shared:bc_base
         {

@@ -17,9 +17,9 @@ import netCDF4 as nc
 
 # top-level directory for BCs (machine-dependent)
 
-choices_bc_base  =[ "DISCOVER  : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
-                    "NAS       : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
-                    "Customize : " ]
+choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
+                    "NAS           : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
+                    "Custom "                                                                                 ]
 
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
