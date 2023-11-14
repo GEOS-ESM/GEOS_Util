@@ -80,7 +80,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "input:shared:MERRA-2",
-            "message": "Remap archived MERRA-2 restarts?\n",
+            "message": "Remap archived MERRA-2 restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
             "default": False,
         },
         {
