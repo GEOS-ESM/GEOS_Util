@@ -14,8 +14,8 @@ input:
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid:
-    bc_version: none
     bc_base:
+    bc_version: none
     expid:
     ogrid:
     rst_dir:
@@ -35,8 +35,8 @@ output:
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
     agrid:
-    bc_version: none
     bc_base:
+    bc_version: none
     expid:
     ogrid:
     out_dir:
