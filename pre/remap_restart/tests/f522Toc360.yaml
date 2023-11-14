@@ -53,6 +53,6 @@ output:
 
 slurm:
   # account will be set to user's primary account automatically by test_remap_restarts.py
-  account: 
+  account:
   qos: debug
   partition: compute
