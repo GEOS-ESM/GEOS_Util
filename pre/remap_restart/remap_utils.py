@@ -435,6 +435,7 @@ def get_command_line_from_answers(answers):
 def get_config_from_answers(answers):
    config  = {}
    config['input'] = {}
+   config['input']['air'] = {}
    config['input']['shared'] = {}
    config['input']['surface'] = {}
    config['output'] = {}
