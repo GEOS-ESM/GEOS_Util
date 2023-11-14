@@ -17,9 +17,9 @@ import netCDF4 as nc
 
 # top-level directory for BCs (machine-dependent)
 
-choices_bc_base  =[ "DISCOVER  : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
-                    "NAS       : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
-                    "Customize : " ]
+choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
+                    "NAS           : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
+                    "Custom "                                                                                 ]
 
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
@@ -497,9 +497,9 @@ def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
   if 'GM4' == bc_version:
-     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name
+     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name
   else:
-     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name + '/smoothed'
+     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name + '/smoothed'
 
   return bc_topo
 

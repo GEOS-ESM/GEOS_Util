@@ -80,7 +80,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "input:shared:MERRA-2",
-            "message": "Remap archived MERRA-2 restarts?\n",
+            "message": "Remap archived MERRA-2 restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
             "default": False,
         },
         {
@@ -304,14 +304,14 @@ def ask_questions():
             "type": "path",
             "name": "input:shared:bc_base",
             "message": "\nEnter BCs base directory for input restarts: \n",
-            "when": lambda x: 'Customize ' in x.get('input:shared:bc_base'),
+            "when": lambda x: 'Custom ' in x.get('input:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve input:shared:bc_base
         {
             "type": "text",
             "name": "input:shared:bc_base",
             "message": "retrieve and echo bcs",
-            # always return false, so questions never shows but changes ogrid
+            # always return false, so questions never shows
             "when": lambda x: echo_bcs(x, 'input')
         },
 
@@ -327,14 +327,14 @@ def ask_questions():
             "type": "path",
             "name": "output:shared:bc_base",
             "message": "\nEnter BCs base directory for new restarts: \n",
-            "when": lambda x: 'Customize ' in x.get('output:shared:bc_base'),
+            "when": lambda x: 'Custom ' in x.get('output:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve output:shared:bc_base
         {
             "type": "text",
             "name": "output:shared:bc_base",
             "message": "retrieve and echo bcs",
-            # always return false, so questions never shows but changes ogrid
+            # always return false, so questions never shows
             "when": lambda x: echo_bcs(x, 'output')
         },
 
