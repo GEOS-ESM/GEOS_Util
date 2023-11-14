@@ -68,8 +68,8 @@ def parse_args(program_description):
     p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
     p_command.add_argument('-lbl',   action='store_true',     help="Label output restarts with bc_versions and resolutions")
     p_command.add_argument('-noagcm_import_rst', action='store_true',     help="Do not remap agcm_import_rst file")
-    p_command.add_argument('-in_bc_base', default="",        help="Boundary conditions base directory (without bc_version and resolution infomation) for input restart")
-    p_command.add_argument('-out_bc_base',  default="",      help="Boundary conditions base directory (without bc_version and resolution infomation) for new restarts")
+    p_command.add_argument('-in_bc_base', default="",         help="Boundary conditions base dir (w/o bc_version and resolution info) for input restarts")
+    p_command.add_argument('-out_bc_base',default="",         help="Boundary conditions base dir (w/o bc_version and resolution info) for new restarts")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
     p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])

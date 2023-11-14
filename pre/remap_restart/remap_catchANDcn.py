@@ -47,25 +47,25 @@ class catchANDcn(remap_base):
              
      print("\nRemapping " + model + ".....\n")
 
-     cwdir        = os.getcwd()
-     bindir       = os.path.dirname(os.path.realpath(__file__))
-     in_bc_base    = config['input']['shared']['bc_base']
-     in_bc_version = config['input']['shared']['bc_version']
-     out_bc_base   = config['output']['shared']['bc_base']
-     out_bc_version= config['output']['shared']['bc_version']
-     out_dir      = config['output']['shared']['out_dir']
-     expid        = config['output']['shared']['expid']
-     in_wemin     = config['input']['surface']['wemin']
-     out_wemin    = config['output']['surface']['wemin']
-     surflay      = config['output']['surface']['surflay']
-     in_tilefile  = config['input']['surface']['catch_tilefile']
+     cwdir          = os.getcwd()
+     bindir         = os.path.dirname(os.path.realpath(__file__))
+     in_bc_base     = config['input']['shared']['bc_base']
+     in_bc_version  = config['input']['shared']['bc_version']
+     out_bc_base    = config['output']['shared']['bc_base']
+     out_bc_version = config['output']['shared']['bc_version']
+     out_dir        = config['output']['shared']['out_dir']
+     expid          = config['output']['shared']['expid']
+     in_wemin       = config['input']['surface']['wemin']
+     out_wemin      = config['output']['surface']['wemin']
+     surflay        = config['output']['surface']['surflay']
+     in_tilefile    = config['input']['surface']['catch_tilefile']
 
      if not in_tilefile :
         agrid        = config['input']['shared']['agrid']
         ogrid        = config['input']['shared']['ogrid']
         omodel       = config['input']['shared']['omodel']
         stretch      = config['input']['shared']['stretch']
-        bc_geomdir  = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
+        bc_geomdir   = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
         in_tilefile  = glob.glob(bc_geomdir + '/*.til')[0]
 
      agrid        = config['output']['shared']['agrid']

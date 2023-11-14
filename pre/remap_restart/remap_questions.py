@@ -311,7 +311,7 @@ def ask_questions():
             "type": "text",
             "name": "input:shared:bc_base",
             "message": "retrieve and echo bcs",
-            # always return false, so questions never shows but changes ogrid
+            # always return false, so questions never shows
             "when": lambda x: echo_bcs(x, 'input')
         },
 
@@ -334,7 +334,7 @@ def ask_questions():
             "type": "text",
             "name": "output:shared:bc_base",
             "message": "retrieve and echo bcs",
-            # always return false, so questions never shows but changes ogrid
+            # always return false, so questions never shows
             "when": lambda x: echo_bcs(x, 'output')
         },
 

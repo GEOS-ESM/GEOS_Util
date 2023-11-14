@@ -496,9 +496,9 @@ def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
   if 'GM4' == bc_version:
-     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name
+     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name
   else:
-     bc_topo = bc_base+ '/'+ bc_version + '/TOPO/TOPO_'+agrid_name + '/smoothed'
+     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name + '/smoothed'
 
   return bc_topo
 
