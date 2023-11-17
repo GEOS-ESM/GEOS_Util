@@ -1,0 +1,81 @@
+variables:
+  - short_name:  'HSKINW'
+    long_name:  'water_skin_layer_mass'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'TSKINW'
+    long_name:  'water_skin_temperature'
+    units:  'K'
+    dimension:
+       - tile
+  - short_name:  'SSKINW'
+    long_name:  'water_skin_salinity'
+    units:  'psu'
+    dimension:
+       - tile
+  - short_name:  'HSKINI'
+    long_name:  'ice_skin_layer_mass'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'TSKINI'
+    long_name:  'ice_skin_temperature'
+    units:  'K'
+    dimension:
+       - tile
+  - short_name:  'SSKINI'
+    long_name:  'ice_skin_salinity'
+    units:  'psu'
+    dimension:
+       - tile
+  - short_name:  'QS'
+    long_name:  'surface_specific_humidity'
+    units:  'kg kg-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CH'
+    long_name:  'surface_heat_exchange_coefficient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CM'
+    long_name:  'surface_momentum_exchange_coefficient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CQ'
+    long_name:  'surface_moisture_exchange_coefficient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'Z0'
+    long_name:  'aerodynamic_roughness'
+    units:  'm'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'WW'
+    long_name:  'vertical_velocity_scale_squared'
+    units:  'm+2 s-2'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'TWMTS'
+    long_name:  'departure_of_skin_temperature_from_mean_interface_temperature'
+    units:  'K'
+    dimension:
+       - tile
+  - short_name:  'DTWARM'
+    long_name:  'departure_of_departure_of_TDEL_from_TS_FOUND'
+    units:  'K'
+    dimension:
+       - tile
+dimensions:
+  tile: 1385431
+  subtile: 2
+  time: 1

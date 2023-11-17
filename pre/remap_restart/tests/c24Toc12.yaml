@@ -9,8 +9,12 @@ input:
     hydrostatic: 0
   shared:
     MERRA-2: false
+    stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
     agrid: C24
-    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0024x6C_DE0360xPE0180/
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+    bc_version: NL3
     expid: ''
     ogrid: 360X180
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c24Toc12/inputs
@@ -24,10 +28,15 @@ input:
 output:
   shared:
     agrid: C12
-    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0012x6C_DE0360xPE0180/
+    stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
+    bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+    bc_version: NL3
     expid: hello
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
+    label: False
   air:
     # remap upper air or not
     remap: true
@@ -47,6 +56,7 @@ output:
     lcv: false
 
 slurm:
-  account: g0610
+  # account will be set to user's primary account automatically by test_remap_restarts.py
+  account:
   qos: debug
-  constraint: hasw
+  partition: compute

@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add CI step to make PR to MAPL3 on push to `main`
-
 ### Changed
 
 - Modified interfaces for variables gFTL container to be V2.  Changes include
@@ -24,9 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Use of haswell nodes on NCCS machines
-
 ### Deprecated
+
+## [2.0.4] - 2023-11-17
+
+### Added
+
+- Add CI step to make PR to MAPL3 on push to `main`
+
+### Changed
+
+- Add/update command_line options: more items such as label and altbcs were added to `remap_params.tpl`
+- Updated paths to the legacy bcs data by pointing to the new "bcs_shared" directory in the GMAO project space.
+- Support for new boundary conditions package output layout
+
+### Removed
+
+- Use of haswell nodes on NCCS machines for `cube_BCs.pl`
 
 ## [2.0.3] - 2023-08-24
 

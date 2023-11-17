@@ -1,0 +1,297 @@
+variables:
+  - short_name:  'BF1'
+    long_name:  'topo_baseflow_param_1'
+    units:  'kg m-4'
+    dimension:
+       - tile
+  - short_name:  'BF2'
+    long_name:  'topo_baseflow_param_2'
+    units:  'm'
+    dimension:
+       - tile
+  - short_name:  'BF3'
+    long_name:  'topo_baseflow_param_3'
+    units:  'log(m)'
+    dimension:
+       - tile
+  - short_name:  'VGWMAX'
+    long_name:  'max_rootzone_water_content'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'CDCR1'
+    long_name:  'moisture_threshold'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'CDCR2'
+    long_name:  'max_water_content'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'PSIS'
+    long_name:  'saturated_matric_potential'
+    units:  'm'
+    dimension:
+       - tile
+  - short_name:  'BEE'
+    long_name:  'clapp_hornberger_b'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'POROS'
+    long_name:  'soil_porosity'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'WPWET'
+    long_name:  'wetness_at_wilting_point'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'COND'
+    long_name:  'sfc_sat_hydraulic_conduct'
+    units:  'm s-1'
+    dimension:
+       - tile
+  - short_name:  'GNU'
+    long_name:  'vertical_transmissivity'
+    units:  'm-1'
+    dimension:
+       - tile
+  - short_name:  'ARS1'
+    long_name:  'wetness_param_1'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARS2'
+    long_name:  'wetness_param_2'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARS3'
+    long_name:  'wetness_param_3'
+    units:  'm+4 kg-2'
+    dimension:
+       - tile
+  - short_name:  'ARA1'
+    long_name:  'shape_param_1'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARA2'
+    long_name:  'shape_param_2'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'ARA3'
+    long_name:  'shape_param_3'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARA4'
+    long_name:  'shape_param_4'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'ARW1'
+    long_name:  'min_theta_param_1'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARW2'
+    long_name:  'min_theta_param_2'
+    units:  'm+2 kg-1'
+    dimension:
+       - tile
+  - short_name:  'ARW3'
+    long_name:  'min_theta_param_3'
+    units:  'm+4 kg-2'
+    dimension:
+       - tile
+  - short_name:  'ARW4'
+    long_name:  'min_theta_param_4'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'TSA1'
+    long_name:  'water_transfer_param_1'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'TSA2'
+    long_name:  'water_transfer_param_2'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'TSB1'
+    long_name:  'water_transfer_param_3'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'TSB2'
+    long_name:  'water_transfer_param_4'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'ATAU'
+    long_name:  'water_transfer_param_5'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'BTAU'
+    long_name:  'water_transfer_param_6'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'OLD_ITY'
+    long_name:  'Placeholder. Used to be vegetation_type.'
+    units:  '1'
+    dimension:
+       - tile
+  - short_name:  'TC'
+    long_name:  'canopy_temperature'
+    units:  'K'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'QC'
+    long_name:  'canopy_specific_humidity'
+    units:  'kg kg-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CAPAC'
+    long_name:  'interception_reservoir_capac'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'CATDEF'
+    long_name:  'catchment_deficit'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'RZEXC'
+    long_name:  'root_zone_excess'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'SRFEXC'
+    long_name:  'surface_excess'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT1'
+    long_name:  'soil_heat_content_layer_1'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT2'
+    long_name:  'soil_heat_content_layer_2'
+    units:  'J_m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT3'
+    long_name:  'soil_heat_content_layer_3'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT4'
+    long_name:  'soil_heat_content_layer_4'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT5'
+    long_name:  'soil_heat_content_layer_5'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'GHTCNT6'
+    long_name:  'soil_heat_content_layer_6'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'TSURF'
+    long_name:  'mean_catchment_temp_incl_snw'
+    units:  'K'
+    dimension:
+       - tile
+  - short_name:  'WESNN1'
+    long_name:  'snow_mass_layer_1'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'WESNN2'
+    long_name:  'snow_mass_layer_2'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'WESNN3'
+    long_name:  'snow_mass_layer_3'
+    units:  'kg m-2'
+    dimension:
+       - tile
+  - short_name:  'HTSNNN1'
+    long_name:  'heat_content_snow_layer_1'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'HTSNNN2'
+    long_name:  'heat_content_snow_layer_2'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'HTSNNN3'
+    long_name:  'heat_content_snow_layer_3'
+    units:  'J m-2'
+    dimension:
+       - tile
+  - short_name:  'SNDZN1'
+    long_name:  'snow_depth_layer_1'
+    units:  'm'
+    dimension:
+       - tile
+  - short_name:  'SNDZN2'
+    long_name:  'snow_depth_layer_2'
+    units:  'm'
+    dimension:
+       - tile
+  - short_name:  'SNDZN3'
+    long_name:  'snow_depth_layer_3'
+    units:  'm'
+    dimension:
+       - tile
+  - short_name:  'CH'
+    long_name:  'surface_heat_exchange_coefficient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CM'
+    long_name:  'surface_momentum_exchange_coefficient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'CQ'
+    long_name:  'surface_moisture_exchange_coffiecient'
+    units:  'kg m-2 s-1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'FR'
+    long_name:  'subtile_fractions'
+    units:  '1'
+    dimension:
+       - subtile
+       - tile
+  - short_name:  'WW'
+    long_name:  'vertical_velocity_scale_squared'
+    units:  'm+2 s-2'
+    dimension:
+       - subtile
+       - tile
+dimensions:
+  tile: 195136
+  subtile: 4
+  time: 1

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_catchANDcn.py remaps Catchment[CN] land model restarts using config inputs from `remap_params.yaml`
+#
+# to run, must first load modules (incl. python3) as follows:
+#
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 import sys
 import subprocess
@@ -10,14 +18,9 @@ import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
-
-def get_landdir(bcsdir):
-  k = bcsdir.find('/geometry/')
-  if k != -1 :
-     while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
-     sub_grids = os.path.basename(bcsdir)
-     bcsdir = bcsdir[0:k]+'/land/'+ sub_grids 
-  return bcsdir
+from remap_utils import get_landdir
+from remap_utils import get_geomdir
+from remap_utils import get_label
 
 class catchANDcn(remap_base):
   def __init__(self, **configs):
@@ -44,25 +47,38 @@ class catchANDcn(remap_base):
              
      print("\nRemapping " + model + ".....\n")
 
-     cwdir  = os.getcwd()
-     bindir = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
-     out_dir    = config['output']['shared']['out_dir']
-     expid      = config['output']['shared']['expid']
-     in_wemin   = config['input']['surface']['wemin']
-     out_wemin  = config['output']['surface']['wemin']
-     surflay    = config['output']['surface']['surflay']
-     in_tilefile = config['input']['surface']['catch_tilefile']
+     cwdir          = os.getcwd()
+     bindir         = os.path.dirname(os.path.realpath(__file__))
+     in_bc_base     = config['input']['shared']['bc_base']
+     in_bc_version  = config['input']['shared']['bc_version']
+     out_bc_base    = config['output']['shared']['bc_base']
+     out_bc_version = config['output']['shared']['bc_version']
+     out_dir        = config['output']['shared']['out_dir']
+     expid          = config['output']['shared']['expid']
+     in_wemin       = config['input']['surface']['wemin']
+     out_wemin      = config['output']['surface']['wemin']
+     surflay        = config['output']['surface']['surflay']
+     in_tilefile    = config['input']['surface']['catch_tilefile']
 
      if not in_tilefile :
-        if not in_bcsdir:
-           exit("Must provide either input tile file or input bcs directory")
-        in_tilefile  = glob.glob(in_bcsdir+ '/*.til')[0]
+        agrid        = config['input']['shared']['agrid']
+        ogrid        = config['input']['shared']['ogrid']
+        omodel       = config['input']['shared']['omodel']
+        stretch      = config['input']['shared']['stretch']
+        bc_geomdir   = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
+        in_tilefile  = glob.glob(bc_geomdir + '/*.til')[0]
 
+     agrid        = config['output']['shared']['agrid']
+     ogrid        = config['output']['shared']['ogrid']
+     omodel       = config['output']['shared']['omodel']
+     stretch      = config['output']['shared']['stretch']
      out_tilefile = config['output']['surface']['catch_tilefile']
+
      if not out_tilefile :
-        out_tilefile = glob.glob(out_bcsdir+ '/*.til')[0]
+        bc_geomdir  = get_geomdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+        out_tilefile = glob.glob(bc_geomdir+ '/*.til')[0]
+
+     out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
 
  # determine NPE based on *approximate* number of input and output tile
       
@@ -75,7 +91,7 @@ class catchANDcn(remap_base):
        in_Ntile = ds.dimensions['tile'].size
        
      out_Ntile = 0
-     with open( out_bcsdir+'/clsm/catchment.def') as f:
+     with open( out_bc_landdir+'/clsm/catchment.def') as f:
        out_Ntile = int(next(f))
      max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
@@ -87,10 +103,19 @@ class catchANDcn(remap_base):
         NPE = 120
      else:
         NPE = 160
+
+     QOS = "#SBATCH --qos="+config['slurm']['qos']
+     TIME ="#SBATCH --time=1:00:00"
+     if NPE >= 160:
+       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
+       TIME = "#SBATCH --time=12:00:00"
+     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
     
      account    = config['slurm']['account']
-     # even the input is binary, the output si nc4
-     suffix     = time+'z.nc4'
+     # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
+     label = get_label(config) 
+
+     suffix     = time+'z.nc4' + label
 
      if (expid) :
         expid = expid + '.'
@@ -114,15 +139,15 @@ class catchANDcn(remap_base):
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
 
-     out_bcsdir = get_landdir(out_bcsdir)
      log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks={NPE}
-#SBATCH --time=1:00:00
 #SBATCH --job-name=mk_catchANDcn
-#SBATCH --qos=debug
 #SBATCH --output={log_name}
+{TIME}
+{QOS}
+{PARTITION}
 #
 
 source {Bin}/g5_modules
@@ -139,10 +164,10 @@ set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} )
 $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
-     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
+     catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
-                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
+                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )
 
      script_name = './mk_catchANDcn.j'
 

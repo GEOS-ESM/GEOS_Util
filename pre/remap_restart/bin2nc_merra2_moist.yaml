@@ -1,0 +1,55 @@
+variables:
+  - short_name: Q
+    long_name: specific_humidity
+    units: 'kg kg-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: QLLS
+    long_name: mass_fraction_of_large_scale_cloud_liquid_water
+    units: 'kg kg-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: QLCN
+    long_name: mass_fraction_of_convective_cloud_liquid_water
+    units: 'kg kg-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: CLLS
+    long_name: large_scale_cloud_area_fraction
+    units: '1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: CLCN
+    long_name: convective_cloud_area_fraction
+    units: '1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: QILS
+    long_name: mass_fraction_of_large_scale_cloud_ice_water
+    units: '1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: QICN
+    long_name: mass_fraction_of_convective_cloud_ice_water
+    units: '1'
+    dimension:
+       - lev
+       - lat
+       - lon
+dimensions:
+  lon: 180
+  lat: 1080
+  lev: 72
+  time: 1
