@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_upper.py remaps atmospheric model restarts using config inputs from `remap_params.yaml`
+#
+# to run, must first load modules (incl. python3) as follows:
+#
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 import ruamel.yaml
 import subprocess
@@ -7,14 +15,10 @@ import shlex
 import shutil
 import glob
 from remap_base import remap_base
-
-def get_topodir(bcsdir):
-  k = bcsdir.find('/geometry/')
-  if k != -1 :
-     while bcsdir[-1] == '/': bcsdir = bcsdir[0:-1] # remove extra '/'
-     agrid_name = os.path.basename(bcsdir).split('_')[0]
-     bcsdir = bcsdir[0:k]+'/TOPO/TOPO_'+agrid_name + '/smoothed'
-  return bcsdir
+from remap_utils import get_label 
+from remap_utils import STRETCH_GRID
+from remap_utils import get_topodir
+from remap_bin2nc import bin2nc
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -54,8 +58,6 @@ class upperair(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__))
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
@@ -71,34 +73,45 @@ class upperair(remap_base):
      os.chdir(tmpdir)
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
-
-     types = 'z.bin'
+     types = '.bin'
      type_str = subprocess.check_output(['file','-b', restarts_in[0]])
      type_str = str(type_str)
      if type_str.find('Hierarchical') >=0:
-        types = 'z.nc4'
+        types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
 
+     label = get_label(config)
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
+     in_bc_base     = config['input']['shared']['bc_base'] 
+     in_bc_version  = config['input']['shared']['bc_version']
+     agrid       = config['input']['shared']['agrid']
+     ogrid       = config['input']['shared']['ogrid']
+     omodel      = config['input']['shared']['omodel']
+     stretch     = config['input']['shared']['stretch']
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid, ogrid, omodel, stretch)
 
-     in_bcsdir=get_topodir(in_bcsdir)
-
-     topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*.data')[0]
+     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
+     out_bc_base    = config['output']['shared']['bc_base'] 
+     out_bc_version = config['output']['shared']['bc_version']
+     agrid       = config['output']['shared']['agrid']
+     ogrid       = config['output']['shared']['ogrid']
+     omodel      = config['output']['shared']['omodel']
+     stretch     = config['output']['shared']['stretch']
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
 
-     out_bcsdir=get_topodir(out_bcsdir)
-     topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*.data')[0]
+     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
@@ -114,52 +127,54 @@ class upperair(remap_base):
        exit("Only support cs grid so far")
 
      if (imout <90):
-       NPE = 12; nwrit = 1
+       NPE =   12; nwrit = 1
      elif (imout<=180):
-       NPE = 24; nwrit = 1
+       NPE =   24; nwrit = 1
      elif (imout<=540):
-       NPE = 96; nwrit = 1
+       NPE =   96; nwrit = 1
      elif (imout<=720):
-       NPE = 192; nwrit = 2
+       NPE =  192; nwrit = 2
      elif (imout<=1080):
-       NPE = 384; nwrit = 2
+       NPE =  384; nwrit = 2
      elif (imout<=1440):
-       NPE = 576; nwrit = 2
+       NPE =  576; nwrit = 2
      elif (imout< 2880):
-       NPE = 768; nwrit = 2
+       NPE =  768; nwrit = 2
      elif (imout>=2880):
-       NPE = 5400; nwrit= 6
+       NPE = 5400; nwrit = 6
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
-     if NPE > 532: QOS = "###" + QOS
-     CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']
+     TIME ="#SBATCH --time=1:00:00"
+     if NPE > 532: 
+       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
+       TIME = "#SBATCH --time=12:00:00"
+
+     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
 
      log_name = out_dir+'/remap_upper_log'
 
      # We need to create an input.nml file which is different if we are running stretched grid
-     # First, let's define a boolean for whether we are running stretched grid
-     # If we are running with imout of 270, 540, 1080, 1536 or 2160, then we are running stretched grid
-     if imout in [270, 540, 1080, 2160]:
-        stretched_grid = True
-        target_lat = 39.5
-        target_lon = -98.35
-        stretch_fac = 2.5
-     elif imout in [1536]:
-        stretched_grid = True
-        target_lat = 39.5
-        target_lon = -98.35
-        stretch_fac = 3.0
-     else:
-        stretched_grid = False
-
-     # If we are running stretched grid, we need to pass in the target lat, lon, and stretch factor
+     # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
      # to interp_restarts.x. Per the code we use:
      #  -stretched_grid target_lon target_lat stretch_fac
      # If we are not running stretched grid, we should pass in a blank string
-     if stretched_grid:
+     stretch = config['output']['shared']['stretch']
+     stretch_str = ""
+     if stretch:
+        if stretch == 'SG001':
+          stretch_fac = STRETCH_GRID['SG001'][0]
+          target_lat  = STRETCH_GRID['SG001'][1]
+          target_lon  = STRETCH_GRID['SG001'][2]
+        elif stretch == 'SG002':
+          stretch_fac = STRETCH_GRID['SG002'][0]
+          target_lat  = STRETCH_GRID['SG002'][1]
+          target_lon  = STRETCH_GRID['SG002'][2]
+        else:
+          exit("This stretched grid option is not supported " + str(stretch))
+
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
+
         stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
-     else:
-        stretch_str = ""
 
      # Now, let's create the input.nml file
      # We need to create a namelist for the upper air remapping
@@ -176,12 +191,12 @@ class upperair(remap_base):
 
      remap_template="""#!/bin/csh -xf
 #SBATCH --account={account}
-#SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name=remap_upper
 #SBATCH --output={log_name}
+{TIME}
 {QOS}
-{CONSTR}
+{PARTITION}
 
 unlimit
 
@@ -208,7 +223,7 @@ set infiles = ()
 set outfils = ()
 foreach infile ( *_restart_in )
    if ( $infile == fvcore_internal_restart_in ) continue
-   if ( $infile == moist_internal_restart_in  ) continue
+   if ( $infile == moist_internal_restart_in ) continue
 
    set infiles = ( $infiles $infile )
    set outfil = `echo $infile | sed "s/restart_in/rst_out/"`
@@ -245,7 +260,7 @@ endif
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic,
+             QOS = QOS, TIME = TIME, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
@@ -283,6 +298,7 @@ endif
      else:
         expid = ''
      suffix = '_rst.' + suffix
+
      for out_rst in glob.glob("*_rst*"):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
@@ -290,6 +306,11 @@ endif
 
      print('\n Move remap_upper.j to ' + out_dir)
      shutil.move('remap_upper.j', out_dir+"/remap_upper.j")
+     with open(out_dir+'/cap_restart', 'w') as f:
+        yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+        time = yyyymmddhh_[0:8]+' '+yyyymmddhh_[8:10]+'0000'
+        print('Create cap_restart')
+        f.write(time)
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
@@ -328,19 +349,28 @@ endif
     merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
-    print(' Copy MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+    print(' Stage MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
 
     upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.moist_internal_rst.'  + suffix,
-              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix,
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
-              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
-
-    for f in upperin :
+              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix,
+              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix ]
+    bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml','bin2nc_merra2_agcm.yaml']
+    bin_path = os.path.dirname(os.path.realpath(__file__))
+    for (f, yf) in zip(upperin,bin2nc_yaml) :
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
-       print("Copy file "+f +" to " + rst_dir)
+       print("Stage file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
+       ncdest = dest.replace('z.bin', 'z.nc4')
+       yaml_file = bin_path + '/'+yf
+       print('Convert bin to nc4:' + dest + ' to \n' + ncdest + '\n')
+       if '_fv' in yf:
+         bin2nc(dest, ncdest, yaml_file, isDouble=True, hasHeader=True)
+       else:
+         bin2nc(dest, ncdest, yaml_file)
+       os.remove(dest)
 
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')

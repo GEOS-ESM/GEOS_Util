@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 #
-# source install/bin/g5_modules
+# remap_restarts package:
+#   remap_analysis.py remaps atmospheric analysis restarts using config inputs from `remap_params.yaml`
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.10.3_py3.9
+# to run, must first load modules (incl. python3) as follows:
 #
-
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
 from datetime import datetime, timedelta
 import subprocess
@@ -15,6 +17,8 @@ import glob
 import fileinput
 import ruamel.yaml
 from remap_base import remap_base
+from remap_utils import get_label
+import fnmatch
 
 class analysis(remap_base):
   def __init__(self, **configs):
@@ -61,12 +65,18 @@ class analysis(remap_base):
      else:
         expid_out = ''
 
+     label = get_label(config)
+
      aqua   = config['output']['analysis']['aqua']
      local_fs=[]
      for f in analysis_in:
-       print(f)
        fname    = os.path.basename(f)
-       out_name = fname.replace(expid_in + '.', expid_out)
+       out_name = ''
+       if (expid_in) :
+          out_name = fname.replace(expid_in + '.', expid_out)
+       else:
+          out_name = expid_out+fname
+
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp)
        shutil.copy(f,f_tmp)
@@ -74,30 +84,41 @@ class analysis(remap_base):
          if (aqua):
             f_ = open(f_tmp, 'w')
             for line in fileinput.input(f):
+               # This is unlikely to be the case with new files
                f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
             f_.close()
 
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
-     bkg_files = glob.glob(tmpdir+'/*.bkg??_eta_rst*')
-     for f in bkg_files:
-        f_orig = f + ".orig"
-        shutil.move(f,f_orig)
-        cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
-        print(cmd)
-        subprocess.call(shlex.split(cmd))
+
+     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*') 
+     for f in dyn2dyn:
+        if "cbkg" not in f: 
+          f_orig = f + ".orig"
+          shutil.move(f,f_orig)
+          cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
+          print(cmd)
+          subprocess.call(shlex.split(cmd))
 
      for f in local_fs:
        fname = os.path.basename(f)
+       fname = fname + label 
        shutil.move(f, out_dir+'/'+fname)
-    # write lcv
+    # write lcv file
+    #  (Info about "lcv" file provided by Ricardo Todling via email, 1 Sep 2023, 
+    #   paraphrased by Rolf Reichle:
+    #   The lcv file is binary and inherits the nomenclature of the old GCM primary restarts [GEOS-4].
+    #   The file simply carries the date of the restarts, e.g., 20231201 210000. 
+    #   The file is required by the ADAS. 
+    #   LCV stands for Lagrangian Control Volume, which is what the grid coordinates of the model are 
+    #   [on the cubed-sphere for GEOS-5].)
      lcv = config['output']['analysis']['lcv']
      if lcv :
        ymd_ = yyyymmddhh_[0:8]
        hh_  = yyyymmddhh_[8:10]
        hms_ = hh_+'0000'
-       rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z.bin'
+       rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z.bin' + label
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
        subprocess.call(shlex.split(cmd))
@@ -151,11 +172,12 @@ class analysis(remap_base):
     merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
-    print(' Copy MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+    print(' Stage MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
 
     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
 
     anafiles=[]
+    canafiles=[] 
     for h in [3,4,5,6,7,8,9]:
        delt = timedelta(hours = h-3)
        new_time = rst_time + delt
@@ -182,6 +204,24 @@ class analysis(remap_base):
             anafiles.append(f)
           else:
             print('Warning: Cannot find '+f)
+
+       # cbkg files
+       fname = expid + '.cbkg'+hh+'_eta_rst.'+ymd+'_'+newhh+'z.nc4'
+       f = m2_rst_dir+'/'+fname
+       if(os.path.isfile(f)):
+          canafiles.append(f)
+       else:
+          print('Warning: Cannot find '+f)
+
+       # satb files 
+       for ftype in ['satbias', 'satbang']:
+          fname = expid + '.ana_'+ftype+'_rst.'+ymd+'_'+newhh+'z.txt'
+          f = m2_rst_dir+'/'+fname
+          if(os.path.isfile(f)):
+             canafiles.append(f)
+          else:
+                print('Warning: Cannot find '+f)
+
     # trak.GDA.rst file
     delt = timedelta(hours = 3)
     new_time = rst_time - delt
@@ -193,10 +233,10 @@ class analysis(remap_base):
     f = m2_rst_dir+'/'+fname
     if (os.path.isfile(f)): anafiles.append(f)
 
-    for f in anafiles:
+    for f in anafiles + canafiles:
       fname    = os.path.basename(f)
       f_tmp = rst_dir+'/'+fname
-      print("Copy file "+f +" to " + rst_dir)
+      print("Stage file "+f +" to " + rst_dir)
       shutil.copy(f,f_tmp)
 
 if __name__ == '__main__' :
