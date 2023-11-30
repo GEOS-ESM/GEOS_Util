@@ -147,9 +147,17 @@ class upperair(remap_base):
      TIME ="#SBATCH --time=1:00:00"
      if NPE > 532: 
        assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
-       TIME = "#SBATCH --time=12:00:00"
+       TIME = "#SBATCH --time=2:00:00"
 
      PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
+
+     if (NPE <=96):
+       nnodes =1; npn = NPE
+     elif (NPE <= 768):
+       npn = 96; nnodes = NPE/npn
+     else:
+       npn = 120; nnodes = NPE/npn
+
 
      log_name = out_dir+'/remap_upper_log'
 
@@ -191,11 +199,13 @@ class upperair(remap_base):
 
      remap_template="""#!/bin/csh -xf
 #SBATCH --account={account}
-#SBATCH --ntasks={NPE}
+##SBATCH --ntasks={NPE}
+#SBATCH --nodes={nnodes} --ntasks-per-node={npn}
 #SBATCH --job-name=remap_upper
 #SBATCH --output={log_name}
+#SBATCH --constraint=mil
 {TIME}
-{QOS}
+#{QOS}
 {PARTITION}
 
 unlimit
@@ -259,7 +269,7 @@ endif
 
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
-             imout = imout, nwrit = nwrit, NPE = NPE, \
+             imout = imout, nwrit = nwrit, NPE = NPE, npn=npn, nnodes=nnodes, \
              QOS = QOS, TIME = TIME, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 

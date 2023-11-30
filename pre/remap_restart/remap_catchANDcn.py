@@ -96,17 +96,19 @@ class catchANDcn(remap_base):
      max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
      if   (max_Ntile <=  112573) : # no more than EASEv2_M36
-        NPE = 40      
+        NPE = 40; nnodes = 1      
      elif (max_Ntile <= 1684725) : # no more than EASEv2_M09
-        NPE = 80
+        NPE = 80; nnodes = 1      
      elif (max_Ntile <= 2496756) : # no more than C720
-        NPE = 120
+        NPE = 120; nnodes = 1      
      else:
-        NPE = 160
+        NPE = 160; nnodes = 2
+
+     npn = int (NPE/nnodes)
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
      TIME ="#SBATCH --time=1:00:00"
-     if NPE >= 160:
+     if NPE > 160:
        assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
        TIME = "#SBATCH --time=12:00:00"
      PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
@@ -142,11 +144,13 @@ class catchANDcn(remap_base):
      log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
-#SBATCH --ntasks={NPE}
+##SBATCH --ntasks={NPE}
+#SBATCH --nodes={nnodes} --ntasks-per-node={npn}
 #SBATCH --job-name=mk_catchANDcn
 #SBATCH --output={log_name}
+#SBATCH --constraint=mil
 {TIME}
-{QOS}
+#{QOS}
 {PARTITION}
 #
 
@@ -166,6 +170,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
+                  npn = npn, nnodes = nnodes, \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )
 
