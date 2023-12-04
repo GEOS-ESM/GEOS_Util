@@ -46,10 +46,10 @@ def echo_bcs(x,opt):
   bcv       = x.get(opt+':shared:bc_version')
   agrid     = x.get(opt+':shared:agrid')
   ogrid     = x.get(opt+':shared:ogrid')
-  model     = x.get(opt+':shared:omodel')
+  omodel    = x.get(opt+':shared:omodel')
   stretch   = x.get(opt+':shared:stretch')
   x[opt+':shared:bc_base']  = base
-  land_dir  = get_landdir(base, bcv, agrid, ogrid, model, stretch)
+  land_dir  = get_landdir(base, bcv, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
   if  not os.path.isdir(land_dir):
      exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
   print("\n Land BCs for " + opt + " restarts: " + land_dir )
@@ -286,7 +286,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": "\nSelect BCs version of input restarts:\n",
+            "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11'],
         },

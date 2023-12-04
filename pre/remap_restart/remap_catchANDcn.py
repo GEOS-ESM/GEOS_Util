@@ -18,9 +18,8 @@ import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
-from remap_utils import get_landdir
-from remap_utils import get_geomdir
-from remap_utils import get_label
+from remap_params import *
+from remap_utils import *
 
 class catchANDcn(remap_base):
   def __init__(self, **configs):
@@ -65,7 +64,9 @@ class catchANDcn(remap_base):
         ogrid        = config['input']['shared']['ogrid']
         omodel       = config['input']['shared']['omodel']
         stretch      = config['input']['shared']['stretch']
-        bc_geomdir   = get_geomdir(in_bc_base, in_bc_version, agrid, ogrid, omodel, stretch)
+        EASE_grid    = config['input']['surface'].get('EASE_grid', None)
+
+        bc_geomdir   = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
         in_tilefile  = glob.glob(bc_geomdir + '/*.til')[0]
 
      agrid        = config['output']['shared']['agrid']
@@ -73,12 +74,13 @@ class catchANDcn(remap_base):
      omodel       = config['output']['shared']['omodel']
      stretch      = config['output']['shared']['stretch']
      out_tilefile = config['output']['surface']['catch_tilefile']
+     EASE_grid    = config['output']['surface'].get('EASE_grid', None)
 
      if not out_tilefile :
-        bc_geomdir  = get_geomdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+        bc_geomdir  = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
         out_tilefile = glob.glob(bc_geomdir+ '/*.til')[0]
 
-     out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+     out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
  # determine NPE based on *approximate* number of input and output tile
       
@@ -225,6 +227,92 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
     print("Copy file "+f +" to " + rst_dir)
     shutil.copy(f, dest)
 
+def ask_catch_questions():
+   questions =[
+        {
+            "type": "path",
+            "name": "input:shared:rst_dir",
+            "message": "Enter input directory with 'rs' and 'rc_out' as subdirectory:\n",
+        },
+
+        {
+            "type": "text",
+            "name": "input:shared:yyyymmddhh",
+            "message": "Enter restart date/time:  (Must be 10 digits: yyyymmddhh.)\n",
+            "validate": lambda text: len(text)==10 ,
+        },
+        
+        {
+            "type": "path",
+            "name": "output:shared:out_dir",
+            "message": "Enter output directory for new restarts:\n"
+        },
+
+        {
+            "type": "text",
+            "name": "output:shared:expid",
+            "message": "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n",
+            "default": "",
+        },  
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_base",
+            "message": "\nSelect BCs base directory for output restarts: \n",
+            "choices": choices_bc_base,
+            "default": get_default_bc_base(),
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": message_bc_ops_new,
+            "choices": choices_bc_ops,
+            "default": "NL3",
+        },
+        {   
+            "type": "select",
+            "name": "output:shared:bc_version",
+            "message": message_bc_other_new,
+            "choices": choices_bc_other,
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other',
+        },
+
+        {   
+            "type": "select",
+            "name": "output:surface::EASE_grid",
+            "message": "Please select EASE grid for the new restart",
+            "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36']
+        },
+   ]
+
+   answers = questionary.prompt(questions)   
+   yyyy = answers['input:shared:yyyymmddhh'][0:4]
+   mm   = answers['input:shared:yyyymmddhh'][4:6]
+   dd   = answers['input:shared:yyyymmddhh'][6:8]
+   hh   = answers['input:shared:yyyymmddhh'][8:10]
+  
+   rst_dir      = answers['input:shared:rst_dir']+'/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
+   rst_file     = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')[0]
+   idx1         = rst_file.find('catch')
+   idx2         = rst_file.find('_internal_rst')
+   catch_model  = rst_file[idx1:idx2]
+   
+   tile_dir     = answers['input:shared:rst_dir']+'/rc_out/'
+   in_tilefiles = glob.glob(tile_dir+'*.til')
+   for file in in_tilefiles:
+      answers['input:surface:catch_tilefile'] = file
+      if 'MAPL_' in file:
+         answers['input:surface:catch_tilefile'] = file
+       
+   answers['input:shared:rst_dir'] = rst_dir
+   answers['input:surface:catch_model'] =  catch_model
+   answers['input:surface:wemin']  = 13
+   answers['output:surface:wemin'] = 13
+
+   return answers
+
 if __name__ == '__main__' :
+
    catch = catchANDcn(params_file='remap_params.yaml')
    catch.remap()

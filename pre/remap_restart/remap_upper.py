@@ -94,7 +94,7 @@ class upperair(remap_base):
      ogrid       = config['input']['shared']['ogrid']
      omodel      = config['input']['shared']['omodel']
      stretch     = config['input']['shared']['stretch']
-     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
 
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
@@ -109,7 +109,7 @@ class upperair(remap_base):
      ogrid       = config['output']['shared']['ogrid']
      omodel      = config['output']['shared']['omodel']
      stretch     = config['output']['shared']['stretch']
-     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
 
      topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'

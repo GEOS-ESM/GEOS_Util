@@ -54,6 +54,8 @@ output:
     remap_catch: true
     # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
+    # the name of ease grid
+    EASE_grid: null
   analysis:
     bkg: true
     aqua: False

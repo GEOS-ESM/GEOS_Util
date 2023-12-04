@@ -225,15 +225,19 @@ def get_label(config):
   if config['output']['shared']['label']:
      agrid     = config['output']['shared']['agrid']
      ogrid     = config['output']['shared']['ogrid']
-     model     = config['output']['shared']['omodel']
+     omodel    = config['output']['shared']['omodel']
      stretch   = config['output']['shared']['stretch']
-     out_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+     EASE_grid = config['output']['surface'].get('EASE_grid', None)
+ 
+     out_resolution = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
      agrid     = config['input']['shared']['agrid']
      ogrid     = config['input']['shared']['ogrid']
-     model     = config['input']['shared']['omodel']
+     omodel    = config['input']['shared']['omodel']
      stretch   = config['input']['shared']['stretch']
-     in_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+     EASE_grid = config['input']['surface'].get('EASE_grid', None)
+
+     in_resolution = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
      in_bcv         =  config['input']['shared']['bc_version']
      out_bcv        =  config['output']['shared']['bc_version']
@@ -453,7 +457,8 @@ def get_config_from_answers(answers):
 
    return config
 
-def get_resolutions(agrid, ogrid, model, stretch):
+def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+   if grid is not None : return grid
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):
@@ -466,11 +471,11 @@ def get_resolutions(agrid, ogrid, model, stretch):
       xy = ogrid.upper().split('X')
       s0 = int(xy[0])
       s1 = int(xy[1])
-      if model == 'data':
+      if omodel == 'data':
          oname = 'DE{:04d}xPE{:04d}'.format(s0,s1)
-      if model == 'MOM5':
+      if omodel == 'MOM5':
          oname = 'M5TP{:04d}x{:04d}'.format(s0,s1)
-      if model == 'MOM6':
+      if omodel == 'MOM6':
          oname = 'M6TP{:04d}x{:04d}'.format(s0,s1)
    if stretch:
       aname = aname + '-' + stretch
@@ -492,8 +497,8 @@ def get_default_bc_base():
          return choices_bc_base[0]
    return choices_bc_base[1]
 
-def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  gridStr = get_resolutions(agrid, ogrid, model,stretch)
+def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
+  gridStr = get_resolutions(agrid=afrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
   if 'GM4' == bc_version:
@@ -503,13 +508,13 @@ def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
 
   return bc_topo
 
-def get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  gridStr = get_resolutions(agrid, ogrid, model,stretch)
+def get_landdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch, grid=grid)
   bc_land = bc_base+'/'+ bc_version+'/land/'+gridStr
   return bc_land
 
-def get_geomdir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  bc_geom =  get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch). replace('/land/', '/geometry/')
+def get_geomdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+  bc_geom =  get_landdir(bc_base, bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=grid). replace('/land/', '/geometry/')
   return bc_geom
 
 if __name__ == '__main__' :
