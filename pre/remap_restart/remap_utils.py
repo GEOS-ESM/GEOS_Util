@@ -498,7 +498,7 @@ def get_default_bc_base():
    return choices_bc_base[1]
 
 def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
-  gridStr = get_resolutions(agrid=afrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
+  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
   if 'GM4' == bc_version:
