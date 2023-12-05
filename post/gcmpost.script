@@ -1343,7 +1343,7 @@ endif
          $GEOSUTIL/plots/configure
          source $SOURCE/plot/.quickplotrc
 
-         set   ntypes = "L P"
+         set   ntypes = "P L"
 foreach type ($ntypes)
 
     if( $type == "L" ) then
@@ -1368,6 +1368,15 @@ foreach plot ($nplots)
          if( $type == "L" ) then
             foreach xyz (tseries qbo vortex)
             set   tseries = `grep "$plot " landscape.list | grep $xyz`
+            if( $#tseries > 0 ) then
+                 set begplt = $begdate
+                 set endplt = $enddate
+            endif
+            end
+         endif
+         if( $type == "P" ) then
+            foreach xyz (residual)
+            set   tseries = `grep "$plot " portrait.list | grep $xyz`
             if( $#tseries > 0 ) then
                  set begplt = $begdate
                  set endplt = $enddate

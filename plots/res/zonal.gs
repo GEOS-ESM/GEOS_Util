@@ -41,20 +41,47 @@ say 'EXPDSC: 'expdsc
 * Note: Assume that we ALWAYS want to create an updated residual.EXPID.ctl and residual.EXPID.data
 * -------------------------------------------------------------------------------------------------
 
-* Check for exp/residual.data
-* ---------------------------
+* Check for residual.EXPID.data under source home directory
+* ---------------------------------------------------------
 'run getenv "SOURCE"'
              source = result
 say 'Checking for 'source'/residual.'expid'.ctl'
+
 '!remove   CHECKFILE.txt'
 '!chckfile 'source'/residual.'expid'.ctl'
  'run getenv CHECKFILE'
              expid.ctl = result
+'!remove   CHECKFILE.txt'
+'!chckfile 'source'/residual.'expid'.data'
+ 'run getenv CHECKFILE'
+             expid.data = result
+             expid.ctl = NULL
+             pause EXPID.CTL = expid.ctl
  
-* Check EP_UPDATE to over-ride default
-* ------------------------------------
+* Check for residual.EXPID.data under plot Output directory
+* ---------------------------------------------------------
+if( expid.ctl = 'NULL' )
+    say 'Checking for 'pwd'/../residual.'expid'.ctl'
+
+    '!remove   CHECKFILE.txt'
+    '!chckfile 'pwd'/../residual.'expid'.ctl'
+     'run getenv CHECKFILE'
+                 expid.ctl = result
+    '!remove   CHECKFILE.txt'
+    '!chckfile 'pwd'/../residual.'expid'.data'
+     'run getenv CHECKFILE'
+                 expid.data = result
+                 pause EXPID.DATA = expid.data
+endif
+ 
+* Check EP_UPDATE to over-ride defaults
+* -------------------------------------
  'run getenv EP_UPDATE'
              EP_UPDATE = result
+
+* Setting EP_UPDATE = TRUE to force re-calculation
+* ------------------------------------------------
+*            EP_UPDATE = TRUE
 
 if( expid.ctl = 'NULL' | EP_UPDATE != 'NULL' )
 
@@ -63,16 +90,32 @@ if( expid.ctl = 'NULL' | EP_UPDATE != 'NULL' )
          say '!/bin/mv -f 'source'/residual.'expid'.ctl  'source'/residual.'expid'.ctl.old  '
          say '!/bin/mv -f 'source'/residual.'expid'.data 'source'/residual.'expid'.data.old '
 
-             '!/bin/mv -f 'source'/residual.'expid'.ctl  'source'/residual.'expid'.ctl.old  '
-             '!/bin/mv -f 'source'/residual.'expid'.data 'source'/residual.'expid'.data.old '
-                expid.ctl = 'NULL'
+         '!remove   CHECKFILE.txt'
+         '!chckfile 'source'/residual.'expid'.ctl'
+         'run getenv CHECKFILE'
+             CHECKFILE  = result
+         if( CHECKFILE != 'NULL' )
+          '!/bin/mv -f 'source'/residual.'expid'.ctl  'source'/residual.'expid'.ctl.old  '
+         endif
+
+         '!remove   CHECKFILE.txt'
+         '!chckfile 'source'/residual.'expid'.data'
+         'run getenv CHECKFILE'
+             CHECKFILE  = result
+         if( CHECKFILE != 'NULL' )
+          '!/bin/mv -f 'source'/residual.'expid'.data 'source'/residual.'expid'.data.old  '
+         endif
+
+         expid.ctl = 'NULL'
 
 else
-*            Previous method to use existing residual.EXPID.data
-*            ---------------------------------------------------
+*            Using existing residual.EXPID.data
+*            ----------------------------------
          say 'Using existing residual.EXPID.data'
-             '!/bin/cp 'source'/residual.'expid'.ctl  .'
-             '!/bin/cp 'source'/residual.'expid'.data .'
+*            '!/bin/cp 'source'/residual.'expid'.ctl  .'
+*            '!/bin/cp 'source'/residual.'expid'.data .'
+             '!/bin/cp 'expid.ctl'  .'
+             '!/bin/cp 'expid.data' .'
              '!remove sedfile'
              '!touch  sedfile'
              '!echo "s?@EXPID?"'expid'?g   >> sedfile'
@@ -82,6 +125,13 @@ else
              '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
              '!remove VERIFICATION.rc.tmpl'
          endif
+
+say  ' '
+say  'expid: 'expid
+say  'expid.ctl: 'expid.ctl
+say  'expid.data: 'expid.data
+say  ' '
+*pause
 
 * Perform residual calculations
 * -----------------------------
@@ -322,6 +372,13 @@ say ' 'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
 '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
 '!remove VERIFICATION.rc.tmpl'
 
+* Copy DATA to plot Output and Source Directory
+* ---------------------------------------------
+'!/bin/cp -f residual.'expid'.ctl     ../'
+'!/bin/cp -f residual.'expid'.data    ../'
+'!/bin/cp -f VERIFICATION.'expid'.rc  ../'
+'!/bin/cp -f ../residual.'expid'.* ../../'
+
 endif
 * -----------------------------------------------------
 
@@ -374,23 +431,48 @@ say 'GETVAR output: 'result
 
 say 'Comparison   ID: 'obsid
 say 'Comparison Desc: 'obsdsc
+pause
 
 
-* Check for exp/residual.data
-* Note: if  exp/residual.data exists, then create an associated VERIFICATION.obsid.rc
-* -----------------------------------------------------------------------------------
+* Check for residual.OBSID.data in comparison experiment directory
+* Note: if  residual.OBSID.data exists, then create an associated VERIFICATION.obsid.rc
+* -------------------------------------------------------------------------------------
   say 'Checking for 'exp'/residual.'obsid'.ctl'
 '!remove   CHECKFILE.txt'
 '!chckfile 'exp'/residual.'obsid'.ctl'
  'run getenv CHECKFILE'
              obsid.ctl = result
-             say 'obsid.ctl = 'obsid.ctl
+'!remove   CHECKFILE.txt'
+'!chckfile 'exp'/residual.'obsid'.data'
+ 'run getenv CHECKFILE'
+             obsid.data = result
+             obsid.ctl = NULL
+
+* Check for residual.OBSID.data in plot Output directory
+* ------------------------------------------------------
+if( obsid.ctl = 'NULL' )
+    say 'Checking for 'pwd'/../residual.'obsid'.ctl'
+    '!remove   CHECKFILE.txt'
+    '!chckfile 'pwd'/../residual.'obsid'.ctl'
+     'run getenv CHECKFILE'
+                 obsid.ctl = result
+    '!remove   CHECKFILE.txt'
+    '!chckfile 'pwd'/../residual.'obsid'.data'
+     'run getenv CHECKFILE'
+                 obsid.data = result
+endif
+ 
+* Setting obsid.ctl = NULL to force re-calculation
+* ------------------------------------------------
+*            obsid.ctl  = 'NULL'
 
          if( obsid.ctl != 'NULL' )
 
-             say 'Creating VERIFICATION.'obsid'.rc for 'exp'/residual.'obsid'.data'
-             '!/bin/cp 'exp'/residual.'obsid'.ctl  .'
-             '!/bin/cp 'exp'/residual.'obsid'.data .'
+             say 'Creating VERIFICATION.'obsid'.rc for 'pwd'/../residual.'obsid'.data'
+*            '!/bin/cp 'pwd'/../residual.'obsid'.ctl  .'
+*            '!/bin/cp 'pwd'/../residual.'obsid'.data .'
+             '!/bin/cp 'obsid.ctl'  .'
+             '!/bin/cp 'obsid.data' .'
              '!remove sedfile'
              '!touch  sedfile'
              '!echo "s?@EXPID?"'obsid'?g   >> sedfile'
@@ -414,14 +496,21 @@ say 'Comparison Desc: 'obsdsc
              say 'VERIFICATION.'obsid'.rc exists'
          endif
 
-* Perform residual calculations
-* -----------------------------
+
+* Setting obsid.rc = NULL to force re-calculation
+* -----------------------------------------------
+*            obsid.rc = 'NULL'
+
 say  ' '
 say  'obsid: 'obsid
 say  'obsid.ctl: 'obsid.ctl
+say  'obsid.data: 'obsid.data
 say  'obsid.rc: 'obsid.rc
 say  ' '
+*pause
 
+* Perform residual calculations
+* -----------------------------
          if( obsid != 'ERA5' & ( obsid.ctl = 'NULL' | obsid.rc = 'NULL' ) )
  
 'set dfile 'vfile
@@ -641,6 +730,12 @@ say ' 'geosutil'/bin/zonal_'arch'.x -tag 'obsid' -desc 'desco
 '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
 '!remove VERIFICATION.rc.tmpl'
 '!cat sedfile'
+
+* Copy DATA to Output Directory
+* -----------------------------
+'!/bin/cp -f residual.'obsid'.ctl     ../'
+'!/bin/cp -f residual.'obsid'.data    ../'
+'!/bin/cp -f VERIFICATION.'obsid'.rc  ../'
 
 * End VERIFICATION.obsid.rc CHECKFILE Test
 * ----------------------------------------

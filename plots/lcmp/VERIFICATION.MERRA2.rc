@@ -2,8 +2,8 @@
 OBSNAM: MERRA2
 OBSDSC: GEOSadas-5_12_4_(MERRA2)
 
-        filename:   'VERIFICATION/MERRA2_MEANS/inst3_3d_asm_Np/xdf.tabl'
-        filetype:   'HDF'
+        filename:   'VERIFICATION/MERRA2_MEANS/instM_3d_asm_Np'
+        filetype:   'BIN'
         fields:     'ZLE'      , 'DYN'           , 'H'      , 1
                     'T'        , 'DYN'           , 'T'      , 1
                     'U'        , 'DYN'           , 'U'      , 1

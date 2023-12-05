@@ -1,9 +1,29 @@
 function setup_wstar (args)
 
+say ' '
+say 'Inside setup_wstar'
+say ' '
+*pause
+
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
-season = subwrd(args,4)
+
+* Define Seasons to Process
+* -------------------------
+seasons  = ''
+       k = 4
+while( k > 0 )
+    season = subwrd(args,k)
+if( season = '' )
+    k = -1
+else
+    seasons = seasons % ' ' % season
+k = k+1
+endif
+endwhile
+'uppercase 'seasons
+            seasons = result
 
 'getinfo numfiles'
          numfiles = result
@@ -23,11 +43,17 @@ if( numfiles = 'NULL' )
 while( num <= numrc )
         loc = num + 1
      rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
    '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
     'run getenv CTLFILE '
                 CTLFILE.num = result
 
-    '!echo `basename 'rcfile' | cut -d. -f2 > CMPID.txt`'
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b1-'length' > CMPID.txt'
     'run getenv CMPID '
                 CMPID.num = result
 
@@ -179,12 +205,28 @@ endwhile
 'run getenv "GEOSUTIL"'
              geosutil = result
 
+       k = 1
+while( k > 0 )
+        season = subwrd(seasons,k)
+    if( season != '' )
+             k = k+1
 
-'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
-'c'
+   'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
+    pause
+   'c'
 
-'run 'geosutil'/plots/res/plot_season.gs avrg 'output
-'c'
-'run 'geosutil'/plots/res/plot_season.gs indv 'output
-'c'
+   'run 'geosutil'/plots/res/plot_season.gs levl 'output
+    pause
+   'c'
+   'run 'geosutil'/plots/res/plot_season.gs avrg 'output
+    pause
+   'c'
+   'run 'geosutil'/plots/res/plot_season.gs indv 'output
+    pause
+   'c'
+
+    else
+             k = -1
+    endif
+endwhile
 
