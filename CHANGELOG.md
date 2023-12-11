@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Updates from ltakacs to fix WSTAR plots
+
 ### Removed
 
 ### Deprecated
@@ -22,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix issue in `remap_bin2nc.py` for remapping MERRA2 restarts to levels other than 72
-- Updates from ltakacs to fix WSTAR plots
 
 ## [2.0.4] - 2023-11-17
 
