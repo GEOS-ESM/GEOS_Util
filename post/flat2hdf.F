@@ -178,7 +178,7 @@ C **********************************************************************
       enddo
       print *
  1001 format(1x,a,'  ',a)
- 1002 format(1x,i,'  ',a)
+ 1002 format(1x,i0,'  ',a)
 
 C **********************************************************************
 C ****              Read and Interpolate Eta File                   ****
@@ -369,7 +369,7 @@ c ---------------
 C **********************************************************************
 C ****           Initialize Constants And Local Arrays              ****
 C **********************************************************************
- 
+
       if( ecmwf ) then ! add SPHU for ECMWF (Note: UNDEF above 100-mb)
           n3dEC = 1
       else
@@ -381,7 +381,7 @@ C **********************************************************************
 C **********************************************************************
 C ****                     Initialize GFIO File                     ****
 C **********************************************************************
- 
+
       allocate (    vname(nvars) )
       allocate (   vtitle(nvars) )
       allocate (   vunits(nvars) )
@@ -440,7 +440,7 @@ c --------------
 C **********************************************************************
 C ****                     Value Added Products                     ****
 C **********************************************************************
- 
+
 c Create GFIO file
 c ----------------
       allocate ( vrange(2,nvars) )
@@ -468,12 +468,12 @@ C **********************************************************************
       do n=1,n3d
          call writit( q3d(1,1,1,n),im,jm,1,lm,id,name3d(n),nymd,nhms,yrev )
 
-         if( trim( name3d(n) ).eq.'tmpu'           .or. 
-     .       trim( name3d(n) ).eq.'tmpes'          .or. 
+         if( trim( name3d(n) ).eq.'tmpu'           .or.
+     .       trim( name3d(n) ).eq.'tmpes'          .or.
      .       trim( name3d(n) ).eq.'temperature'     ) tmpu = q3d(:,:,:,n)
 
-         if( trim( name3d(n) ).eq.'rh'              .or. 
-     .       trim( name3d(n) ).eq.'rhes'            .or. 
+         if( trim( name3d(n) ).eq.'rh'              .or.
+     .       trim( name3d(n) ).eq.'rhes'            .or.
      .       trim( name3d(n) ).eq.'relative_humidi'  ) rh = q3d(:,:,:,n)
 
       enddo
@@ -493,7 +493,7 @@ C **********************************************************************
           enddo
           call writit( sphu,im,jm,1,lm,id,vname(nvars),nymd,nhms,yrev )
       endif
-     
+
 C **********************************************************************
 C ****                  De-Allocate Dynamics Arrays                 ****
 C **********************************************************************
@@ -555,45 +555,45 @@ C***********************************************************************
       NSEC = NSEC - 86400
       NYMD = INCYMD (NYMD,1)
       ENDDO
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.EQ.86400)  THEN
       NSEC = 0
       NYMD = INCYMD (NYMD,1)
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.LT.00000)  THEN
       DO WHILE (NSEC.LT.0)
       NSEC = 86400 + NSEC
       NYMD = INCYMD (NYMD,-1)
       ENDDO
-      ENDIF   
-               
-      NHMS = NHMSF (NSEC)
-      ENDIF   
+      ENDIF
 
-      RETURN  
+      NHMS = NHMSF (NSEC)
+      ENDIF
+
+      RETURN
       end subroutine tick
 
       function incymd (NYMD,M)
-C***********************************************************************        
-C  PURPOSE                                                                      
-C     INCYMD:  NYMD CHANGED BY ONE DAY                                          
-C     MODYMD:  NYMD CONVERTED TO JULIAN DATE                                    
-C  DESCRIPTION OF PARAMETERS                                                    
-C     NYMD     CURRENT DATE IN YYMMDD FORMAT                                    
-C     M        +/- 1 (DAY ADJUSTMENT)                                           
-C                                                                               
-C***********************************************************************        
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
-C***********************************************************************        
+C***********************************************************************
+C  PURPOSE
+C     INCYMD:  NYMD CHANGED BY ONE DAY
+C     MODYMD:  NYMD CONVERTED TO JULIAN DATE
+C  DESCRIPTION OF PARAMETERS
+C     NYMD     CURRENT DATE IN YYMMDD FORMAT
+C     M        +/- 1 (DAY ADJUSTMENT)
+C
+C***********************************************************************
+C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+C***********************************************************************
 
       INTEGER NDPM(12)
       DATA    NDPM /31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
       LOGICAL LEAP
       LEAP(NY) = MOD(NY,4).EQ.0 .AND. (MOD(NY,100).NE.0 .OR. MOD(NY,400).EQ.0)
 
-C***********************************************************************        
+C***********************************************************************
 C
       NY = NYMD / 10000
       NM = MOD(NYMD,10000) / 100
@@ -624,9 +624,9 @@ C
       INCYMD = NY*10000 + NM*100 + ND
       RETURN
 
-C***********************************************************************        
-C                      E N T R Y    M O D Y M D                                 
-C***********************************************************************        
+C***********************************************************************
+C                      E N T R Y    M O D Y M D
+C***********************************************************************
 
       ENTRY MODYMD (NYMD)
       NY = NYMD / 10000
@@ -899,9 +899,9 @@ C***********************************************************************
       REAL TT, P, Q, DQDT
       LOGICAL LDQDT
       REAL AIRMW, H2OMW
-      
-      PARAMETER ( AIRMW  = 28.97      )                                         
-      PARAMETER ( H2OMW  = 18.01      )                                         
+
+      PARAMETER ( AIRMW  = 28.97      )
+      PARAMETER ( H2OMW  = 18.01      )
 
       REAL ESFAC, ERFAC
       PARAMETER ( ESFAC = H2OMW/AIRMW       )
@@ -1007,7 +1007,7 @@ c ********************************************************
 
       REAL        TMAX, TICE
       PARAMETER ( TMAX=323.15, TICE=273.16)
-      
+
       REAL T, D, W, QX, DQX
       T = MIN(TT,TMAX) - TICE
       DQX = 0.
