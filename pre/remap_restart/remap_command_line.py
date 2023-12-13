@@ -75,7 +75,7 @@ def parse_args(program_description):
     p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="SLURM account")
-    p_command.add_argument('-partition',  default='compute',  help="SLURM partition")
+    p_command.add_argument('-partition',  default='',         help="SLURM partition")
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts

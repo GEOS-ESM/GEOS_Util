@@ -111,8 +111,15 @@ class catchANDcn(remap_base):
      if NPE >= 160:
        assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
        TIME = "#SBATCH --time=12:00:00"
-     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
-    
+     PARTITION =''
+     partition = config['slurm']['partition']
+     if (partition != ''):
+        PARTITION = "#SBATCH --partition=" + partition
+
+     CONSTRAINT = '#SBATCH --constraint="[cas|sky]"'
+     if BUILT_ON_SLES15:
+        CONSTRAINT = '#SBATCH --constraint=mil'
+ 
      account    = config['slurm']['account']
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      label = get_label(config) 
@@ -149,6 +156,7 @@ class catchANDcn(remap_base):
 #SBATCH --output={log_name}
 {TIME}
 {QOS}
+{CONSTRAINT}
 {PARTITION}
 #
 
@@ -169,7 +177,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
-                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, PARTITION = PARTITION, QOS=QOS )
+                  in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, QOS=QOS, CONSTRAINT=CONSTRAINT, PARTITION=PARTITION )
 
      script_name = './mk_catchANDcn.j'
 

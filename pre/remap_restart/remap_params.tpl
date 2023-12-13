@@ -63,4 +63,4 @@ output:
 slurm:
   account:
   qos:
-  partition:
+  partition: ''

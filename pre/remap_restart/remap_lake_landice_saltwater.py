@@ -10,7 +10,7 @@
 #   source g5_modules       [csh]
 #
 import os
-import subprocess
+import subprocess as sp
 import shutil
 import glob
 import ruamel.yaml
@@ -49,17 +49,17 @@ class lake_landice_saltwater(remap_base):
      os.chdir(out_dir)
 
      InData_dir = out_dir+'/InData/'
-     if os.path.exists(InData_dir) : subprocess.call(['rm', '-rf',InData_dir])
+     if os.path.exists(InData_dir) : sp.call(['rm', '-rf',InData_dir])
      print ("mkdir " + InData_dir)
      os.makedirs(InData_dir)
 
      OutData_dir = out_dir+'/OutData/'
-     if os.path.exists(OutData_dir) : subprocess.call(['rm', '-rf',OutData_dir])
+     if os.path.exists(OutData_dir) : sp.call(['rm', '-rf',OutData_dir])
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
      types = '.bin'
-     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
+     type_str = sp.check_output(['file','-b', restarts_in[0]])
      type_str = str(type_str)
      if 'Hierarchical' in type_str:
         types = '.nc4'
@@ -113,46 +113,44 @@ class lake_landice_saltwater(remap_base):
 
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
      zoom = config['input']['surface']['zoom']
+     log_name = out_dir+'/remap_lake_landice_saltwater_log'
+     if os.path.exists(log_name):
+        os.remove(log_name)
 
      if (saltwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
   
        # split Saltwater
        if  config['output']['surface']['split_saltwater']:
          print("\nSplitting Saltwater...\n")
          cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
-         print('\n'+cmd)
-         subprocess.call(shlex.split(cmd))
+#         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
+         self.run_and_log(cmd, log_name)
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (seaice):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + seaice + ' 0 ' + str(zoom)
        print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (lake):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + lake + ' 19 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (landice):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + landice + ' 20 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (route):
        route = bindir + '/mk_RouteRestarts.x '
        cmd = route + out_til + ' ' + yyyymmddhh_[0:6]
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      expid = config['output']['shared']['expid']
      if (expid) :
@@ -168,6 +166,19 @@ class lake_landice_saltwater(remap_base):
      os.chdir(cwdir)
 
      self.remove_merra2()
+
+  def run_and_log(self, cmd, log_name):
+     print('\n'+cmd)
+     process =sp.Popen(shlex.split(cmd), stdout=sp.PIPE, stderr=sp.PIPE)
+     stdout, stderr = process.communicate()
+     stdout = stdout.decode()
+     stderr = stderr.decode()
+     print('\n'+ stdout)
+     print('\n'+ stderr)
+     with open(log_name, "a") as log_:
+        log_.write(cmd)
+        log_.write(stdout)
+        log_.write(stderr)
 
   def find_rst(self):
      surf_restarts =[

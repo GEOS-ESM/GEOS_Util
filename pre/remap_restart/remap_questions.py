@@ -424,9 +424,8 @@ def ask_questions():
         {
             "type": "text",
             "name": "slurm:partition",
-            "message": "SLURM partition?",
-            "default": "compute",
-            "when": lambda x : default_partition(x),
+            "message": "Enter the SLURM partition only if you want particular partiton, otherwise keep empty as default: ",
+            "default": '',
         },
    ]
    answers = questionary.prompt(questions)

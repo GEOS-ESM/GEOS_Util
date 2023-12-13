@@ -15,6 +15,15 @@ import netCDF4 as nc
 
 # shared global variables
 
+#During cmake step, the string will be changed according to the system
+
+BUILT_ON_SLES15 = "NO@BUILT_ON_SLES15@"
+
+if BUILT_ON_SLES15== "NO":
+  BUILT_ON_SLES15 = False
+else:
+  BUILT_ON_SLES15 = True
+
 # top-level directory for BCs (machine-dependent)
 
 choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
@@ -400,8 +409,9 @@ def get_command_line_from_answers(answers):
 
    account = " -account " + answers["slurm:account"]
    qos     = " -qos  " + answers["slurm:qos"]
-   partition  = " -partition  " + answers["slurm:partition"]
-
+   partition = ''
+   if answers["slurm:partition"] != '':
+      partition  = " -partition  " + answers["slurm:partition"]
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
                                           ymdh  + \

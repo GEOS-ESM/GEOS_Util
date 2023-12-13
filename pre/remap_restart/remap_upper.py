@@ -15,9 +15,7 @@ import shlex
 import shutil
 import glob
 from remap_base import remap_base
-from remap_utils import get_label 
-from remap_utils import STRETCH_GRID
-from remap_utils import get_topodir
+from remap_utils import *
 from remap_bin2nc import bin2nc
 
 class upperair(remap_base):
@@ -148,8 +146,14 @@ class upperair(remap_base):
      if NPE > 532: 
        assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
        TIME = "#SBATCH --time=12:00:00"
+     PARTITION =''
+     partition = config['slurm']['partition']
+     if (partition != ''):
+        PARTITION = "#SBATCH --partition=" + partition
 
-     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
+     CONSTRAINT = '#SBATCH --constraint="[cas|sky]"'
+     if BUILT_ON_SLES15:
+        CONSTRAINT = '#SBATCH --constraint=mil'
 
      log_name = out_dir+'/remap_upper_log'
 
@@ -196,8 +200,8 @@ class upperair(remap_base):
 #SBATCH --output={log_name}
 {TIME}
 {QOS}
+{CONSTRAINT}
 {PARTITION}
-
 unlimit
 
 cd {out_dir}/upper_data
@@ -260,7 +264,7 @@ endif
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS, TIME = TIME, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
+             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
