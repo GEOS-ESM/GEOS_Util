@@ -211,10 +211,14 @@ while( k > 0 )
     if( season != '' )
              k = k+1
 
+*  Plot turn-around-latitudes
+* ---------------------------
    'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
     pause
    'c'
 
+*  Plot wstar profiles for ALL experiments
+* ----------------------------------------
    'run 'geosutil'/plots/res/plot_season.gs levl 'output
     pause
    'c'
@@ -224,6 +228,68 @@ while( k > 0 )
    'run 'geosutil'/plots/res/plot_season.gs indv 'output
     pause
    'c'
+
+*  Plot wstar profiles for Individual experiments
+* -----------------------------------------------
+    say ' '
+   'q files'
+    say result
+    say ' '
+
+    n = 1
+    while( n<=numfiles )
+           'set dfile 'n
+           'getinfo desc'
+                    desc = result
+            node = ''
+            m = 2
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            EXP.n = node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            while( node != 'ctl' & node != 'data' )
+            EXP.n = EXP.n'.'node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            endwhile
+        if( EXP.n  = expid )
+            nexpid = n
+        endif
+        n = n + 1
+    endwhile
+
+    alfbet = 'abcdefghijklmnopqrstuvwxyz'
+    alfexp = substr(alfbet,nexpid,1)
+    say 'alfexp = 'alfexp
+    pause
+
+    n = 1
+    while( n<=numfiles )
+    if( n != nexpid )
+        string = substr(alfbet,n,1)
+       'run 'geosutil'/plots/res/plot_season.gs levl 'output' 'alfexp' 'string 
+        pause
+       'c'
+       'run 'geosutil'/plots/res/plot_season.gs avrg 'output' 'alfexp' 'string
+        pause
+       'c'
+       'run 'geosutil'/plots/res/plot_season.gs indv 'output' 'alfexp' 'string
+        pause
+       'c'
+    endif
+    n = n + 1
+    endwhile
 
     else
              k = -1

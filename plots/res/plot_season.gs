@@ -64,6 +64,7 @@ function plot_season (args)
 
 
     tags = ''
+    exps = ''
 if( numargs=2 )
     n = 1
     while( n<=numfiles )
@@ -135,9 +136,13 @@ axmax = -1e15
 axmin =  1e15
 n = 1
 while( n<=numfiles )
-   m = 1
-   while( m<=numfiles )
-     if( pltfile.m = n )
+
+* Note: Scaling will be based on ALL experiments
+* ----------------------------------------------
+*  m = 1
+*  while( m<=numfiles )
+*    if( pltfile.m = n )
+
        'set dfile 'n
        'set lev 'levmax' 'levmin
        'set y 1'
@@ -333,9 +338,12 @@ while( n<=numfiles )
        'set lev 'levmax' 'levmin
        'sety'
 
-     endif
-   m = m + 1
-   endwhile
+* Note: Scaling will be based on ALL experiments
+* ----------------------------------------------
+*    endif
+*  m = m + 1
+*  endwhile
+
 n = n + 1
 endwhile
 
@@ -346,13 +354,19 @@ endwhile
   say 'Adjusted axmin: 'axmin'  axmax: 'axmax
 
   if( season = 'DJF' ) 
-      if( axmin >= 0.24 & axmax <= 0.48 )
-          axmin  = 0.23999 ; axmax  = 0.48001
+      if( axmin >= 0.24 )
+          axmin  = 0.23999
+      endif
+      if( axmax <= 0.48 )
+          axmax  = 0.48001
       endif
   endif
   if( season = 'JJA' ) 
-      if( axmin >= 0.14 & axmax <= 0.32 )
-          axmin  = 0.13999 ; axmax  = 0.32001
+      if( axmin >= 0.14 )
+          axmin  = 0.13999
+      endif
+      if( axmax <= 0.32 )
+          axmax  = 0.32001
       endif
   endif
 
@@ -787,6 +801,11 @@ endif
               if( numargs>2 ) 
                    index = id.n
                    tags = tags''index
+                   if( exps = '' )
+                       exps = EXP.n
+                   else
+                       exps = exps'.'EXP.n
+                   endif
               endif
              'set dfile 'n
 
@@ -857,7 +876,8 @@ endif
 if( tags = '' )
     filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'season
 else
-    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'tags'.'season
+*   filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'tags'.'season
+    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'exps'.'season
 endif
 
 'myprint -name 'output'/'filename
