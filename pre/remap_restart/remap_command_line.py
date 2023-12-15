@@ -72,10 +72,10 @@ def parse_args(program_description):
     p_command.add_argument('-out_bc_base',default="",         help="Boundary conditions base dir (w/o bc_version and resolution info) for new restarts")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
-    p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])
+    p_command.add_argument('-qos',        default="debug",    help="slurm_pbs quality-of-service", choices=['debug', 'allnccs', 'normal'])
     account = get_account()
-    p_command.add_argument('-account',    default=account,    help="SLURM account")
-    p_command.add_argument('-partition',  default='',         help="SLURM partition")
+    p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
+    p_command.add_argument('-partition',  default='',         help="slurm_pbs partition")
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
@@ -146,9 +146,9 @@ def get_answers_from_command_line(cml):
    else:
      answers["output:surface:wemin"]   = wemin_default(answers['output:shared:bc_version'])
 
-   answers["slurm:account"]    = cml.account
-   answers["slurm:qos"]        = cml.qos
-   answers["slurm:partition"]  = cml.partition
+   answers["slurm_pbs:account"]    = cml.account
+   answers["slurm_pbs:qos"]        = cml.qos
+   answers["slurm_pbs:partition"]  = cml.partition
   
    return answers
 

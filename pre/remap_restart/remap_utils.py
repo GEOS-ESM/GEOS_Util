@@ -104,6 +104,28 @@ message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_ag
 
 validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
 
+job_directive = {"SLURM": """#!/bin/csh -f
+#SBATCH --account={account}
+#SBATCH --ntasks={NPE}
+#SBATCH --job-name={job_name}
+#SBATCH --output={log_name}
+#SBATCH --qos={QOS}
+#SBATCH --time={TIME}
+#SBATCH --constraint={CONSTRAINT}
+{PARTITION}
+""",
+"PBS": """#!/bin/csh -f
+#PBS -l walltime={TIME}
+#PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
+#PBS -N {job_name}
+#PBS -q {QOS}
+#PBS -W group_list={account}
+#PBS -o {log_name}
+#PBS -j oe
+{PARTITION}
+"""
+}
+
 # --------------------------------------------------------------------------------
 
 def init_merra2(x):
@@ -407,11 +429,11 @@ def get_command_line_from_answers(answers):
 
    noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
 
-   account = " -account " + answers["slurm:account"]
-   qos     = " -qos  " + answers["slurm:qos"]
+   account = " -account " + answers["slurm_pbs:account"]
+   qos     = " -qos  " + answers["slurm_pbs:qos"]
    partition = ''
-   if answers["slurm:partition"] != '':
-      partition  = " -partition  " + answers["slurm:partition"]
+   if answers["slurm_pbs:partition"] != '':
+      partition  = " -partition  " + answers["slurm_pbs:partition"]
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
                                           ymdh  + \
@@ -457,7 +479,7 @@ def get_config_from_answers(answers):
    config['output']['air'] = {}
    config['output']['surface'] = {}
    config['output']['analysis'] = {}
-   config['slurm'] = {}
+   config['slurm_pbs'] = {}
    for key, value in answers.items():
      keys = key.split(":")
      if len(keys) == 2:

@@ -60,7 +60,7 @@ output:
     bkg: true
     aqua: False
     lcv: false
-slurm:
+slurm_pbs:
   account:
   qos:
   partition: ''

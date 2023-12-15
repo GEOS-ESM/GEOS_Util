@@ -17,13 +17,13 @@ from remap_utils import *
 
 class remap_params(object):
   def __init__(self, config_from_question):
-     self.common_in     = config_from_question['input']['shared']
-     self.common_out    = config_from_question['output']['shared']
-     self.upper_out     = config_from_question['output']['air']
-     self.slurm_options = config_from_question['slurm']
-     self.surf_in       = config_from_question['input']['surface']
-     self.surf_out      = config_from_question['output']['surface']
-     self.ana_out       = config_from_question['output']['analysis']
+     self.common_in         = config_from_question['input']['shared']
+     self.common_out        = config_from_question['output']['shared']
+     self.upper_out         = config_from_question['output']['air']
+     self.slurm_pbs_options = config_from_question['slurm_pbs']
+     self.surf_in           = config_from_question['input']['surface']
+     self.surf_out          = config_from_question['output']['surface']
+     self.ana_out           = config_from_question['output']['analysis']
 
      # load input yaml
      yaml = ruamel.yaml.YAML() 
@@ -65,7 +65,7 @@ class remap_params(object):
      config_tpl = self.params_for_air(config_tpl)
      config_tpl = self.params_for_surface(config_tpl)
      config_tpl = self.params_for_analysis(config_tpl)
-     config_tpl = self.options_for_slurm(config_tpl)
+     config_tpl = self.options_for_slurm_pbs(config_tpl)
 
      self.config = config_tpl
 
@@ -77,10 +77,10 @@ class remap_params(object):
 
      return config_tpl
 
-  def options_for_slurm(self, config_tpl):
-    config_tpl['slurm']['account']   = self.slurm_options['account']
-    config_tpl['slurm']['qos']       = self.slurm_options['qos']
-    config_tpl['slurm']['partition'] = self.slurm_options['partition']
+  def options_for_slurm_pbs(self, config_tpl):
+    config_tpl['slurm_pbs']['account']   = self.slurm_pbs_options['account']
+    config_tpl['slurm_pbs']['qos']       = self.slurm_pbs_options['qos']
+    config_tpl['slurm_pbs']['partition'] = self.slurm_pbs_options['partition']
     return config_tpl
 
   def params_for_surface(self, config_tpl):

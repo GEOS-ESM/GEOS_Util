@@ -56,8 +56,8 @@ def echo_bcs(x,opt):
   return False
 
 def default_partition(x):
-   if x['slurm:qos'] == 'debug':
-      x['slurm:partition'] = 'compute'
+   if x['slurm_pbs:qos'] == 'debug':
+      x['slurm_pbs:partition'] = 'compute'
       return False
    return True
 
@@ -410,21 +410,21 @@ def ask_questions():
 
         {
             "type": "text",
-            "name": "slurm:qos",
-            "message": "SLURM quality-of-service (qos)?  (If on NCCS and atm resolution is c1440 or higher, enter allnccs.) ",
+            "name": "slurm_pbs:qos",
+            "message": "slurm or pbs quality-of-service (qos)?  (If resolution is c1440 or higher, enter allnccs on NCCS or normal on NAS.) ",
             "default": "debug",
         },
 
         {
             "type": "text",
-            "name": "slurm:account",
-            "message": "SLURM account?",
+            "name": "slurm_pbs:account",
+            "message": "slurm_pbs account?",
             "default": get_account(),
         },
         {
             "type": "text",
-            "name": "slurm:partition",
-            "message": "Enter the SLURM partition only if you want particular partiton, otherwise keep empty as default: ",
+            "name": "slurm_pbs:partition",
+            "message": "Enter the slurm or pbs partition only if you want particular partiton, otherwise keep empty as default: ",
             "default": '',
         },
    ]

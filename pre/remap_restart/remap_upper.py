@@ -94,6 +94,9 @@ class upperair(remap_base):
      stretch     = config['input']['shared']['stretch']
      topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
 
+     job = 'SLURM'
+     if "gmao_SIteam/ModelData" in in_bc_base: job='PBS'
+
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
 
@@ -141,21 +144,24 @@ class upperair(remap_base):
      elif (imout>=2880):
        NPE = 5400; nwrit = 6
 
-     QOS = "#SBATCH --qos="+config['slurm']['qos']
-     TIME ="#SBATCH --time=1:00:00"
-     if NPE > 532: 
-       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
-       TIME = "#SBATCH --time=12:00:00"
      PARTITION =''
-     partition = config['slurm']['partition']
-     if (partition != ''):
-        PARTITION = "#SBATCH --partition=" + partition
+     QOS  = config['slurm_pbs']['qos']
+     TIME = "1:00:00"
+     if NPE > 532: 
+        assert config['slurm_pbs']['qos'] != 'debug', "qos should be allnccs or normal on NAS"
+        TIME = "12:00:00"
+     NNODE = ''
+     if job == 'SLURM':
+        partition = config['slurm_pbs']['partition']
+        if (partition != ''):
+           PARTITION = "#SBATCH --partition=" + partition
 
-     CONSTRAINT = '#SBATCH --constraint="[cas|sky]"'
-     if BUILT_ON_SLES15:
-        CONSTRAINT = '#SBATCH --constraint=mil'
-
-     log_name = out_dir+'/remap_upper_log'
+        CONSTRAINT = '"[cas|sky]"'
+        if BUILT_ON_SLES15:
+           CONSTRAINT = 'mil'
+     else:
+       CONSTRAINT = 'cas_ait'
+       NNODE = (NPE-1)//40 + 1
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
@@ -193,19 +199,12 @@ class upperair(remap_base):
      with open('input.nml', 'w') as f:
         f.write(nml_file)
 
-     remap_template="""#!/bin/csh -xf
-#SBATCH --account={account}
-#SBATCH --ntasks={NPE}
-#SBATCH --job-name=remap_upper
-#SBATCH --output={log_name}
-{TIME}
-{QOS}
-{CONSTRAINT}
-{PARTITION}
-unlimit
+     remap_template = job_directive[job] + \
+"""
+source {Bin}/g5_modules
+limit stacksize unlimited
 
 cd {out_dir}/upper_data
-source {Bin}/g5_modules
 /bin/touch input.nml
 
 # The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
@@ -256,14 +255,15 @@ endif
    -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
 
 """
-     account = config['slurm']['account']
+     account = config['slurm_pbs']['account']
      drymassFLG  = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
-
+     log_name = out_dir+'/remap_upper_log'
+     job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
-             imout = imout, nwrit = nwrit, NPE = NPE, \
+             out_dir = out_dir, log_name = log_name, job_name= job_name, drymassFLG = drymassFLG, \
+             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
              QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
@@ -273,25 +273,31 @@ endif
      upper.write(remap_upper_script)
      upper.close()
 
-     interactive = os.getenv('SLURM_JOB_ID', default = None)
+     interactive = None
+     if job == "SLURM":  interactive = os.getenv('SLURM_JOB_ID', default = None)
+     if job == 'PBS':    interactive = os.getenv('PBS_JOBID', default = None)
 
      if (interactive) :
        print('interactive mode\n')
-       ntasks = os.getenv('SLURM_NTASKS', default = None)
-       if ( not ntasks):
-         nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
-         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
-         ntasks = nnodes * ncpus
-       ntasks = int(ntasks)
-       if (ntasks < NPE ):
-         print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+       if job == 'SLURM':
+         ntasks = os.getenv('SLURM_NTASKS', default = None)
+         if ( not ntasks):
+           nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
+           ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
+           ntasks = nnodes * ncpus
+         ntasks = int(ntasks)
+         if (ntasks < NPE ):
+           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
 
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-     else :
+     elif job == "SLURM" :
        print('sbatch -W '+ script_name +'\n')
        subprocess.call(['sbatch', '-W', script_name])
+     else:
+       print('qsub -W  block=true '+ script_name +'\n')
+       subprocess.call(['qsub', '-W','block=true', script_name])
 
 #
 #    post process

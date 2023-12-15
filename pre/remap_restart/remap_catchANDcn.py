@@ -59,6 +59,9 @@ class catchANDcn(remap_base):
      surflay        = config['output']['surface']['surflay']
      in_tilefile    = config['input']['surface']['catch_tilefile']
 
+     job = 'SLURM'
+     if "gmao_SIteam/ModelData" in out_bc_base: job='PBS' 
+
      if not in_tilefile :
         agrid        = config['input']['shared']['agrid']
         ogrid        = config['input']['shared']['ogrid']
@@ -106,21 +109,25 @@ class catchANDcn(remap_base):
      else:
         NPE = 160
 
-     QOS = "#SBATCH --qos="+config['slurm']['qos']
-     TIME ="#SBATCH --time=1:00:00"
-     if NPE >= 160:
-       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
-       TIME = "#SBATCH --time=12:00:00"
      PARTITION =''
-     partition = config['slurm']['partition']
-     if (partition != ''):
-        PARTITION = "#SBATCH --partition=" + partition
+     QOS  = config['slurm_pbs']['qos']
+     TIME  = "1:00:00"
+     if QOS != "debug": TIME="12:00:00"
 
-     CONSTRAINT = '#SBATCH --constraint="[cas|sky]"'
-     if BUILT_ON_SLES15:
-        CONSTRAINT = '#SBATCH --constraint=mil'
- 
-     account    = config['slurm']['account']
+     NNODE = ''
+     if job == 'SLURM':
+        partition = config['slurm_pbs']['partition']
+        if (partition != ''):
+           PARTITION = "#SBATCH --partition=" + partition
+
+        CONSTRAINT = '"[cas|sky]"'
+        if BUILT_ON_SLES15:
+           CONSTRAINT = 'mil'
+     elif job == "PBS":
+       CONSTRAINT = 'cas_ait'
+       NNODE = (NPE-1)//40 + 1
+
+     account    = config['slurm_pbs']['account']
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      label = get_label(config) 
 
@@ -149,19 +156,10 @@ class catchANDcn(remap_base):
      in_rstfile = dest
 
      log_name = out_dir+'/'+'mk_catchANDcn_log'
-     mk_catch_j_template = """#!/bin/csh -f
-#SBATCH --account={account}
-#SBATCH --ntasks={NPE}
-#SBATCH --job-name=mk_catchANDcn
-#SBATCH --output={log_name}
-{TIME}
-{QOS}
-{CONSTRAINT}
-{PARTITION}
-#
-
+     job_name = "mk_catchANDcn"
+     mk_catch_j_template = job_directive[job]+ \
+"""
 source {Bin}/g5_modules
-
 limit stacksize unlimited
 
 set esma_mpirun_X = ( {Bin}/esma_mpirun -np {NPE} )
@@ -175,7 +173,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
-                  model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, NPE = NPE,  \
+                  model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, job_name = job_name, \
+                   NPE = NPE, NNODE=NNODE, \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, QOS=QOS, CONSTRAINT=CONSTRAINT, PARTITION=PARTITION )
 
@@ -184,27 +183,34 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      catch_scrpt = open(script_name,'wt')
      catch_scrpt.write(catch1script)
      catch_scrpt.close()
-    
+
+     interactive = None
+     if job == "SLURM":  interactive = os.getenv('SLURM_JOB_ID', default = None)
+     if job == 'PBS':    interactive = os.getenv('PBS_JOBID', default = None)
+
      interactive = os.getenv('SLURM_JOB_ID', default = None)
      if ( interactive ) :
        print('interactive mode\n')
-       ntasks = os.getenv('SLURM_NTASKS', default = None)
-       if ( not ntasks):
-         nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
-         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '40'))
-         ntasks = nnodes * ncpus
-       ntasks = int(ntasks)
+       if job == "SLURM":
+         ntasks = os.getenv('SLURM_NTASKS', default = None)
+         if ( not ntasks):
+           nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
+           ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '40'))
+           ntasks = nnodes * ncpus
+         ntasks = int(ntasks)
 
-       if (ntasks < NPE):
-         print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+         if (ntasks < NPE):
+           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
 
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-
+     elif job == "SLURM" :
+       print('sbatch -W '+ script_name +'\n')
+       subprocess.call(['sbatch', '-W', script_name])
      else:
-       print("sbatch -W " + script_name +"\n")
-       subprocess.call(['sbatch','-W', script_name])
+       print('qsub -W  block=true '+ script_name +'\n')
+       subprocess.call(['qsub', '-W','block=true', script_name])
 
      print( "cd " + cwdir)
      os.chdir(cwdir)
