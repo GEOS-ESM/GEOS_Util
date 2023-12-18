@@ -17,7 +17,7 @@ def writeCVars(coordVars,dimensions):
    for v in coordVars:
        if v=='time':
           coordVars[v][:]=0
-       elif (v=='lat') | (v=='lon') | (v=='lev') | (v=='edges'):
+       elif (v=='lat') | (v=='lon') | (v=='lev') | (v=='edge'):
           dsize=dimensions[v]
           coords=np.arange(1,dsize+1)
           coordVars[v][:]=coords
@@ -55,8 +55,8 @@ def writeVar(v, vars, dimensions, bintype, binf):
          for i in range(dimensions.get('lev')):
             rec = binf.read_reals(dtype=bintype)
             var[i,:,:]=rec
-      elif 'edges' in dims:
-         for i in range(dimensions.get('edges')):
+      elif 'edge' in dims:
+         for i in range(dimensions.get('edge')):
             rec = binf.read_reals(dtype=bintype)
             var[i,:,:]=rec
       else:
@@ -64,7 +64,7 @@ def writeVar(v, vars, dimensions, bintype, binf):
          var[:,:]=rec
    # is just lev
    else:
-      if 'edges' in dims:
+      if 'edge' in dims:
          rec = binf.read_reals(dtype=bintype)
          var[:]=rec
 
@@ -90,10 +90,10 @@ def defineDimVars(fid,dims):
           setattr(newVar,'positive','down')
           setattr(newVar,'formulaTerms','ap: ak b: bk ps: ps p0: p00')
           coordVars.update([(d,newVar)])
-       if d=="edges":
+       if d=="edge":
           newVar=fid.createVariable(d,'f8',d)
           setattr(newVar,'units','level')
-          setattr(newVar,'long_name','sigma_at_layer edges')
+          setattr(newVar,'long_name','sigma_at_layer edge')
           setattr(newVar,'standard_name','atmosphere_hybrid_sigma_pressure_coordinate')
           setattr(newVar,'coordinate','eta')
           setattr(newVar,'positive','down')

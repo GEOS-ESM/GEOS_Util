@@ -3,12 +3,12 @@ variables:
     long_name: hybrid_sigma_pressure_a
     units: 'Pa'
     dimension:
-       - edges
+       - edge
   - short_name: BK
     long_name: hybrid_sigma_pressure_b
     units: '1'
     dimension:
-       - edges
+       - edge
   - short_name: U
     long_name: eastward_wind
     units: 'm s-1'
@@ -34,7 +34,7 @@ variables:
     long_name: air_pressure
     units: 'Pa'
     dimension:
-       - edges
+       - edge
        - lat
        - lon
   - short_name: PKZ
@@ -62,5 +62,5 @@ dimensions:
   lon: 180
   lat: 1080
   lev: 72
-  edges: 73
+  edge: 73
   time: 1

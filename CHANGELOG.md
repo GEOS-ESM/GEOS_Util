@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.0.5] - 2023-12-11
+
+### Fixed
+
+- Fix issue in `remap_bin2nc.py` for remapping MERRA2 restarts to levels other than 72
+
 ## [2.0.4] - 2023-11-17
 
 ### Added
