@@ -188,7 +188,6 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      if job == "SLURM":  interactive = os.getenv('SLURM_JOB_ID', default = None)
      if job == 'PBS':    interactive = os.getenv('PBS_JOBID', default = None)
 
-     interactive = os.getenv('SLURM_JOB_ID', default = None)
      if ( interactive ) :
        print('interactive mode\n')
        if job == "SLURM":
