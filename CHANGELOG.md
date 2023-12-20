@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+1)Add EASE grid option to remapping of surface restarts in remap_restarts.py package
+2)Added support for SLES15, NAS site and log for remap_lake_landice_saltwater in remap_restarts.py package
+
+
 ### Changed
 
 ### Fixed
