@@ -1080,7 +1080,7 @@ contains
     file_hist = "File created on " // trim(date_creation) // trim(time_creation) // ". In yyyymmddHHMMSS.millisec"
 
     write(DTSTR,10) today_year, today_mon, today_day
- 10 FORMAT(I4,'-', I2, '-', I0.2)
+ 10 FORMAT(I0.4,'-', I0.2, '-', I0.2)
     TIME_UNITS = "days since " // trim(DTSTR) //" 12:00:00" 
 
     dlat = 180./real(nlat); dlon = 360./real(nlon)
@@ -1097,7 +1097,7 @@ contains
 
     sst_out(:,:, 1) = sst; fraci_out(:,:, 1) = ice
 
-    fileName = 'sst_fraci_' // today //'.nc4'
+    fileName = 'sst_fraci_' // today //'.nc'
 
     call check( nf90_create(fileName, nf90_clobber, ncid)) ! Create the file. 
 
@@ -1189,7 +1189,7 @@ contains
    integer rc, ix
 !  ....................................................................
 
-      print *, 'Input date: ', nymd_in
+      !print *, 'Input date: ', nymd_in
 
       open (10,file=fileName,form='unformatted',access='sequential', STATUS = 'old')
 !     ....................................................................
@@ -1224,7 +1224,7 @@ contains
          if (nymd1 .eq. nymd_in) then ! Found the date for which data is requested.
             nymd_out = nymd1
 
-            print *, 'Yay! Found data for: ', nymd_out
+!           print *, 'Yay! Found data for: ', nymd_out
 !!          print *, bcs_field
 
             LAT(1) = -90. + dLat/2.
@@ -1241,7 +1241,7 @@ contains
             close(10)
             RETURN 
          else
-            print *, "Date in sequential file: ", nymd1, "Continue looking: ", nymd_in
+!           print *, "Date in sequential file: ", nymd1, "Continue looking: ", nymd_in
          end if
       end do 
 !     ....................................................................
