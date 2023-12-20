@@ -70,6 +70,11 @@ def validate_merra2_time(text):
          return False 
    else:
      return False
+def SITE_MERRA2(x):
+  if SITE == "NAS":
+     x['input:shared:MERRA-2']= False
+     return False
+  return True
 
 def ask_questions():
 
@@ -82,6 +87,7 @@ def ask_questions():
             "name": "input:shared:MERRA-2",
             "message": "Remap archived MERRA-2 restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
             "default": False,
+            "when": lambda x: SITE_MERRA2(x),
         },
         {
             "type": "path",
