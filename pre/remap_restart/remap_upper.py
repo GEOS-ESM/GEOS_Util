@@ -94,8 +94,8 @@ class upperair(remap_base):
      stretch     = config['input']['shared']['stretch']
      topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
 
-     job = 'SLURM'
-     if "gmao_SIteam/ModelData" in in_bc_base: job='PBS'
+     if "gmao_SIteam/ModelData" in in_bc_base:
+        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
 
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
@@ -151,17 +151,20 @@ class upperair(remap_base):
         assert config['slurm_pbs']['qos'] != 'debug', "qos should be allnccs or normal on NAS"
         TIME = "12:00:00"
      NNODE = ''
-     if job == 'SLURM':
-        partition = config['slurm_pbs']['partition']
-        if (partition != ''):
-           PARTITION = "#SBATCH --partition=" + partition
-
-        CONSTRAINT = '"[cas|sky]"'
-        if BUILT_ON_SLES15:
-           CONSTRAINT = 'mil'
-     else:
+     job=''
+     if GEOS_SITE == "NAS":
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
+       job='PBS'
+     else:
+       job='SLURM'
+       partition = config['slurm_pbs']['partition']
+       if (partition != ''):
+         PARTITION = "#SBATCH --partition=" + partition
+
+       CONSTRAINT = '"[cas|sky]"'
+       if BUILT_ON_SLES15:
+         CONSTRAINT = 'mil'
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
@@ -274,12 +277,14 @@ endif
      upper.close()
 
      interactive = None
-     if job == "SLURM":  interactive = os.getenv('SLURM_JOB_ID', default = None)
-     if job == 'PBS':    interactive = os.getenv('PBS_JOBID', default = None)
+     if GEOS_SITE == 'NAS':
+       interactive = os.getenv('PBS_JOBID', default = None)
+     else:
+       interactive = os.getenv('SLURM_JOB_ID', default = None)
 
      if (interactive) :
        print('interactive mode\n')
-       if job == 'SLURM':
+       if GEOS_SITE != 'NAS':
          ntasks = os.getenv('SLURM_NTASKS', default = None)
          if ( not ntasks):
            nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
@@ -292,12 +297,12 @@ endif
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-     elif job == "SLURM" :
-       print('sbatch -W '+ script_name +'\n')
-       subprocess.call(['sbatch', '-W', script_name])
-     else:
+     elif GEOS_SITE == "NAS" :
        print('qsub -W  block=true '+ script_name +'\n')
        subprocess.call(['qsub', '-W','block=true', script_name])
+     else:
+       print('sbatch -W '+ script_name +'\n')
+       subprocess.call(['sbatch', '-W', script_name])
 
 #
 #    post process

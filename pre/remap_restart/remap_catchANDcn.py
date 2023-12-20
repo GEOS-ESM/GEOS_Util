@@ -59,8 +59,8 @@ class catchANDcn(remap_base):
      surflay        = config['output']['surface']['surflay']
      in_tilefile    = config['input']['surface']['catch_tilefile']
 
-     job = 'SLURM'
-     if "gmao_SIteam/ModelData" in out_bc_base: job='PBS' 
+     if "gmao_SIteam/ModelData" in out_bc_base: 
+        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
 
      if not in_tilefile :
         agrid        = config['input']['shared']['agrid']
@@ -115,17 +115,20 @@ class catchANDcn(remap_base):
      if QOS != "debug": TIME="12:00:00"
 
      NNODE = ''
-     if job == 'SLURM':
-        partition = config['slurm_pbs']['partition']
-        if (partition != ''):
-           PARTITION = "#SBATCH --partition=" + partition
-
-        CONSTRAINT = '"[cas|sky]"'
-        if BUILT_ON_SLES15:
-           CONSTRAINT = 'mil'
-     elif job == "PBS":
+     job = ''
+     if GEOS_SITE == 'NAS':
+       job = "PBS"
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
+     else:
+       job = "SLURM"
+       partition = config['slurm_pbs']['partition']
+       if (partition != ''):
+         PARTITION = "#SBATCH --partition=" + partition
+
+       CONSTRAINT = '"[cas|sky]"'
+       if BUILT_ON_SLES15:
+         CONSTRAINT = 'mil'
 
      account    = config['slurm_pbs']['account']
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
@@ -185,12 +188,14 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      catch_scrpt.close()
 
      interactive = None
-     if job == "SLURM":  interactive = os.getenv('SLURM_JOB_ID', default = None)
-     if job == 'PBS':    interactive = os.getenv('PBS_JOBID', default = None)
+     if GEOS_SITE == 'NAS':
+       interactive = os.getenv('PBS_JOBID', default = None)
+     else:
+       interactive = os.getenv('SLURM_JOB_ID', default = None)
 
      if ( interactive ) :
        print('interactive mode\n')
-       if job == "SLURM":
+       if GEOS_SITE != "NAS":
          ntasks = os.getenv('SLURM_NTASKS', default = None)
          if ( not ntasks):
            nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
@@ -204,12 +209,12 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-     elif job == "SLURM" :
-       print('sbatch -W '+ script_name +'\n')
-       subprocess.call(['sbatch', '-W', script_name])
-     else:
+     elif GEOS_SITE == "NAS" :
        print('qsub -W  block=true '+ script_name +'\n')
        subprocess.call(['qsub', '-W','block=true', script_name])
+     else:
+       print('sbatch -W '+ script_name +'\n')
+       subprocess.call(['sbatch', '-W', script_name])
 
      print( "cd " + cwdir)
      os.chdir(cwdir)

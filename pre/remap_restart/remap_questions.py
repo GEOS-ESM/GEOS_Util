@@ -71,7 +71,7 @@ def validate_merra2_time(text):
    else:
      return False
 def SITE_MERRA2(x):
-  if SITE == "NAS":
+  if GEOS_SITE == "NAS":
      x['input:shared:MERRA-2']= False
      return False
   return True
