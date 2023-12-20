@@ -3,10 +3,10 @@ add_subdirectory(prepare_ocnExtData)
 
 file(GLOB pythonscripts CONFIGURE_DEPENDS ./remap_restart/remap*  ./remap_restart/bin2nc_merra2* ./remap_restart/tests/*.*)
 
+list(FILTER pythonscripts EXCLUDE REGEX "remap_utils.py")
+
 foreach (file ${pythonscripts})
-  if ( NOT ${file} MATCHES "./remap_restart/remap_utils.py") 
-    install(PROGRAMS ${file} DESTINATION bin)
-  endif()
+  install(PROGRAMS ${file} DESTINATION bin)
 endforeach()
 
 set(file ./remap_restart/remap_utils.py)
