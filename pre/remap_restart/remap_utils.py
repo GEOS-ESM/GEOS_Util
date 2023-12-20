@@ -72,6 +72,15 @@ choices_res_SG001  = ['C270', 'C540', 'C1080', 'C2160']
 
 choices_res_SG002  = ['C1536']
 
+message_datetime    = "Enter restart date/time:  (Must be 10 digits: yyyymmddhh"
+
+message_out_dir     = "Enter output directory for new restarts:\n"
+
+message_expid       = "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n"
+
+message_bc_base_in  = "BCs base directory for input restarts: \n"
+message_bc_base_new = "BCs base directory for new restarts: \n"
+
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------

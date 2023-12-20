@@ -98,21 +98,21 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date/time:  (Must be 10 digits: yyyymmddhh.)\n",
+            "message": (message_datetime + ".)\n"),
             "validate": lambda text: len(text)==10 ,
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date:  (Must be 10 digits: yyyymmddhh; hour = 03, 09, 15, or 21 [z].)\n",
+            "message": (message_datetime + "; hour = 03, 09, 15, or 21 [z].)\n"),
             "validate": lambda text: validate_merra2_time(text) ,
             "when": lambda x: x['input:shared:MERRA-2'],
         },
         {
             "type": "path",
             "name": "output:shared:out_dir",
-            "message": "Enter output directory for new restarts:\n"
+            "message": message_out_dir,
         },
 
         # dummy (invisible) question to run function that initializes MERRA-2 config
@@ -300,7 +300,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_base",
-            "message": "\nSelect BCs base directory for input restarts: \n",
+            "message": ("\nSelect " + message_bc_base_in),
             "choices": choices_bc_base,
             "default": get_default_bc_base(),
             "when": lambda x: not x.get('input:shared:bc_base'),
@@ -309,7 +309,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "input:shared:bc_base",
-            "message": "\nEnter BCs base directory for input restarts: \n",
+            "message": ("\nEnter " + message_bc_base_in),
             "when": lambda x: 'Custom ' in x.get('input:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve input:shared:bc_base
@@ -324,7 +324,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_base",
-            "message": "\nSelect BCs base directory for new restarts: \n",
+            "message": ("\nSelect " + message_bc_base_new),
             "choices": choices_bc_base,
             "default": get_default_bc_base(),
         },
@@ -332,7 +332,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "output:shared:bc_base",
-            "message": "\nEnter BCs base directory for new restarts: \n",
+            "message": ("\nEnter " + message_bc_base_new),
             "when": lambda x: 'Custom ' in x.get('output:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve output:shared:bc_base
@@ -404,7 +404,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:expid",
-            "message": "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n",
+            "message": message_expid,
             "default": "",
         },
         {

@@ -256,27 +256,27 @@ def ask_catch_questions():
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date/time:  (Must be 10 digits: yyyymmddhh.)\n",
+            "message": (message_datetime + ".)\n"),
             "validate": lambda text: len(text)==10 ,
         },
         
         {
             "type": "path",
             "name": "output:shared:out_dir",
-            "message": "Enter output directory for new restarts:\n"
+            "message": message_out_dir, 
         },
 
         {
             "type": "text",
             "name": "output:shared:expid",
-            "message": "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n",
+            "message": message_expid,
             "default": "",
         },  
 
         {
             "type": "select",
             "name": "output:shared:bc_base",
-            "message": "\nSelect BCs base directory for output restarts: \n",
+            "message": ("\nSelect " + message_bc_base_new),
             "choices": choices_bc_base,
             "default": get_default_bc_base(),
         },
@@ -298,8 +298,8 @@ def ask_catch_questions():
 
         {   
             "type": "select",
-            "name": "output:surface::EASE_grid",
-            "message": "Please select EASE grid for the new restart",
+            "name": "output:surface:EASE_grid",
+            "message": "Select EASE grid for new restarts",
             "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36']
         },
    ]
