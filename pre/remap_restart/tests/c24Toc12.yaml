@@ -55,7 +55,7 @@ output:
     aqua: true
     lcv: false
 
-slurm:
+slurm_pbs:
   # account will be set to user's primary account automatically by test_remap_restarts.py
   account:
   qos: debug

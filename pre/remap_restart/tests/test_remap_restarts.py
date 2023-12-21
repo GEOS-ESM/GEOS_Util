@@ -84,7 +84,7 @@ if __name__ == '__main__' :
 
      out_dir = '/discover/nobackup/'+user+'/REMAP_TESTS/'+case+'/'
      config['output']['shared']['out_dir'] = out_dir
-     config['slurm']['account'] = get_account()
+     config['slurm_pbs']['account'] = get_account()
      
      test_remap(config)
  
