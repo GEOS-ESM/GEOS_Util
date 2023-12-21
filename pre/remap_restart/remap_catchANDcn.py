@@ -246,18 +246,43 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
     shutil.copy(f, dest)
 
 def ask_catch_questions():
+   catch_input_shared_rst_dir = ''
+   def has_rs_rc_out(path):
+     if os.path.exists(path):
+        dirs = os.listdir(path)   
+        if 'rs' in dirs and 'rc_out' in dirs:
+           nonlocal catch_input_shared_rst_dir
+           catch_input_shared_rst_dir = path
+           return True
+     return False
+
+   def has_catch_rst(text):
+     if len(text) !=10: return False
+     yyyy = text[0:4]
+     mm   = text[4:6]
+     dd   = text[6:8]
+     hh   = text[8:10]
+     nonlocal catch_input_shared_rst_dir
+     rst_dir   = catch_input_shared_rst_dir + '/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
+     rst_files = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')
+     if len(rst_files) !=1 :
+       return False 
+     return True
+
    questions =[
         {
             "type": "path",
             "name": "input:shared:rst_dir",
-            "message": "Enter input directory with 'rs' and 'rc_out' as subdirectory:\n",
+            "message": "Enter input directory with both 'rs' and 'rc_out' subdirectories:\n",
+            "validate": lambda path : has_rs_rc_out(path)
         },
 
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": (message_datetime + ".)\n"),
-            "validate": lambda text: len(text)==10 ,
+            "message": (message_datetime + " and the rst file exists.)\n"),
+            #"validate": lambda x, text: has_catch_rst(x, text),
+            "validate": lambda text: has_catch_rst(text)
         },
         
         {
@@ -302,6 +327,27 @@ def ask_catch_questions():
             "message": "Select EASE grid for new restarts",
             "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36']
         },
+
+        {
+            "type": "text",
+            "name": "slurm_pbs:qos",
+            "message": "slurm or pbs quality-of-service (qos)?  (If resolution is c1440 or higher, enter allnccs on NCCS or normal on NAS.) ",
+            "default": "debug",
+        },
+
+        {
+            "type": "text",
+            "name": "slurm_pbs:account",
+            "message": "slurm_pbs account?",
+            "default": get_account(),
+        },
+        {
+            "type": "text",
+            "name": "slurm_pbs:partition",
+            "message": "Enter the slurm or pbs partition only if you want particular partiton, otherwise keep empty as default: ",
+            "default": '',
+        },  
+
    ]
 
    answers = questionary.prompt(questions)   
@@ -332,5 +378,11 @@ def ask_catch_questions():
 
 if __name__ == '__main__' :
 
-   catch = catchANDcn(params_file='remap_params.yaml')
+   answers = ask_catch_questions()
+   raw_config = get_config_from_answers(answers)
+   params = remap_params(raw_config)
+   config = params.config
+   config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml' 
+   config_to_yaml(config, config_yaml) 
+   catch = catchANDcn(params_file=config_yaml)
    catch.remap()
