@@ -975,7 +975,7 @@ contains
 !
 ! Write out a binary file with `HEADER` and data, see below for its format.
 !
-    SUBROUTINE write_bin( today_year, today_mon, today_day, &
+    SUBROUTINE write_bin( fileName_pref, today_year, today_mon, today_day, &
                           tomrw_year, tomrw_mon, tomrw_day, &
                           today, nlat, nlon, sst, ice)
 !---------------------------------------------------------------------------
@@ -984,6 +984,8 @@ contains
     INTEGER, INTENT(IN)     :: today_year, today_mon, today_day, &
                                tomrw_year, tomrw_mon, tomrw_day, &
                                nlat, nlon
+
+    CHARACTER (LEN=*),INTENT(IN) :: fileName_pref
     CHARACTER (LEN=*),INTENT(IN) :: today
 
     REAL, INTENT(IN)        :: sst(nlon, nlat), &
@@ -1002,8 +1004,8 @@ contains
 !---------------------------------------------------------------------------
 !   Write out SST and ICE concentration data
 !
-    fileName_sst = 'Ostia_sst_' // today //'.bin'
-    fileName_ice = 'Ostia_ice_' // today //'.bin'
+    fileName_sst = fileName_pref // '_sst_' // today //'.bin'
+    fileName_ice = fileName_pref // '_ice_' // today //'.bin'
 
     OPEN (UNIT = 991, FILE = fileName_sst, FORM = 'unformatted', STATUS = 'new')
     OPEN (UNIT = 992, FILE = fileName_ice, FORM = 'unformatted', STATUS = 'new')
@@ -1024,7 +1026,7 @@ contains
 !
 ! Write out a netcdf file, see below for its format.
 !
-    SUBROUTINE write_netcdf( today_year, today_mon, today_day, &
+    SUBROUTINE write_netcdf( fileName_pref, today_year, today_mon, today_day, &
                              today, nlat, nlon, sst, ice)
 !---------------------------------------------------------------------------
     IMPLICIT NONE
@@ -1036,7 +1038,8 @@ contains
     REAL, INTENT(IN)        :: sst(nlon, nlat), &
                                ice(nlon, nlat)
 
-    CHARACTER (LEN = 40)    :: fileName
+    CHARACTER (LEN=*),INTENT(IN)   :: fileName_pref
+    CHARACTER (LEN=60)             :: fileName
 
     integer                        :: ncid
     integer, parameter             :: ndims     = 3
@@ -1097,7 +1100,7 @@ contains
 
     sst_out(:,:, 1) = sst; fraci_out(:,:, 1) = ice
 
-    fileName = 'sst_fraci_' // today //'.nc'
+    fileName = fileName_pref // '_' // today //'.nc'
 
     call check( nf90_create(fileName, nf90_clobber, ncid)) ! Create the file. 
 
