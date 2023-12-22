@@ -12,7 +12,7 @@ import questionary
 import glob
 import subprocess as sp
 import remap_restarts 
-import remap_utils
+from remap_utils import *
 from remap_params import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
@@ -59,6 +59,9 @@ def test_remap(config):
 
 if __name__ == '__main__' :
 
+  if GEOS_SITE == "NAS" :
+     print("Test baseline data are not available at NAS.  Please run tests on NCCS/Discover.")
+     exit()
   yaml = ruamel.yaml.YAML()
   stream =''
   cases_yaml = 'test_remap_cases.yaml'
@@ -84,7 +87,7 @@ if __name__ == '__main__' :
 
      out_dir = '/discover/nobackup/'+user+'/REMAP_TESTS/'+case+'/'
      config['output']['shared']['out_dir'] = out_dir
-     config['slurm']['account'] = get_account()
+     config['slurm_pbs']['account'] = get_account()
      
      test_remap(config)
  
