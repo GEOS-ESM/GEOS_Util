@@ -60,7 +60,7 @@ def test_remap(config):
 if __name__ == '__main__' :
 
   if GEOS_SITE == "NAS" :
-     print("It should be run on NCCS/discoer")
+     print("Test baseline data are not available at NAS.  Please run tests on NCCS/Discover.")
      exit()
   yaml = ruamel.yaml.YAML()
   stream =''
