@@ -371,18 +371,21 @@ def ask_catch_questions():
        
    answers['input:shared:rst_dir'] = rst_dir
    answers['input:surface:catch_model'] =  catch_model
-   answers['input:surface:wemin']  = 13
-   answers['output:surface:wemin'] = 13
+   answers['input:surface:wemin']  = "13"
+   answers['output:surface:wemin'] = "13"
+   answers['output:surface:remap_catch'] = True
+   bc_base= answers['output:shared:bc_base'].split(": ")[-1]
+   answers['output:shared:bc_base'] = bc_base
+   answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
    return answers
 
 if __name__ == '__main__' :
 
    answers = ask_catch_questions()
-   raw_config = get_config_from_answers(answers)
-   params = remap_params(raw_config)
-   config = params.config
-   config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml' 
+   config = get_config_from_answers(answers, config_tpl = True)
+   print_config(config)
+   config_yaml = config['output']['shared']['out_dir']+'/remap_params.yaml'
    config_to_yaml(config, config_yaml) 
    catch = catchANDcn(params_file=config_yaml)
    catch.remap()

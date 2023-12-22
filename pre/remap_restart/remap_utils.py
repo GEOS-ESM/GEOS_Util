@@ -241,13 +241,9 @@ def catch_model(x):
   files = glob.glob(rst_dir+'/*catch*')
 
   if len (files) == 0 : return False
-  fname= ''
-  if len(files) == 1:
-    fname = os.path.basename(files[0])
+  fname = ''
+  fname = os.path.basename(files[0])
 
-  if len(files) > 1 :
-    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
-    fname = os.path.basename(files[0])
   model = 'catch'
   if 'cnclm40' in fname.lower():
     model = 'catchcnclm40'
@@ -336,6 +332,8 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               shutil.move(yaml_file, new_name)
               break
    yaml = ruamel.yaml.YAML()
+   out_dir = os.path.dirname(yaml_file)
+   if not os.path.exists(out_dir) : os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
       yaml.dump(config, f)
 
@@ -478,25 +476,35 @@ def get_command_line_from_answers(answers):
          
    return cmdl
 
-def get_config_from_answers(answers):
+def get_config_from_answers(answers, config_tpl = False):
+
    config  = {}
-   config['input'] = {}
-   config['input']['air'] = {}
-   config['input']['shared'] = {}
-   config['input']['surface'] = {}
-   config['output'] = {}
-   config['output']['shared'] = {}
-   config['output']['air'] = {}
-   config['output']['surface'] = {}
-   config['output']['analysis'] = {}
-   config['slurm_pbs'] = {}
+   if config_tpl:
+     # load input yaml
+     yaml = ruamel.yaml.YAML()
+     stream = ''
+     remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+     with  open(remap_tpl, 'r') as f:
+       stream = f.read()
+     config = yaml.load(stream)
+   else:  
+     config['input'] = {}
+     config['input']['air'] = {}
+     config['input']['shared'] = {}
+     config['input']['surface'] = {}
+     config['output'] = {}
+     config['output']['shared'] = {}
+     config['output']['air'] = {}
+     config['output']['surface'] = {}
+     config['output']['analysis'] = {}
+     config['slurm_pbs'] = {}
+
    for key, value in answers.items():
      keys = key.split(":")
      if len(keys) == 2:
        config[keys[0]][keys[1]] = value
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
-
    return config
 
 def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
