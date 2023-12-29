@@ -14,6 +14,10 @@ PROGRAM extract_day_SST_FRACI_eight
   integer               :: extract_date
   integer               :: date_out, nlon_out, nlat_out
 
+  character (len = 200) :: data_path
+  character (len = 200) :: sst_file_pref, ice_file_pref
+  character (len = 200) :: sst_file_suff, ice_file_suff
+
   character (len=8)     :: date_str, format_str = "(I8)"
   character (len = 200) :: sst_file, ice_file
 
@@ -41,8 +45,15 @@ PROGRAM extract_day_SST_FRACI_eight
   extract_date = year_s*10000+month_s*100+day_s
   write (date_str, format_str) extract_date
 
-  sst_file = 'dataoceanfile_OSTIA_REYNOLDS_SST.2880x1440.'//trim(date_str(1:4))//'.data'
-  ice_file = 'dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.'//trim(date_str(1:4))//'.data'
+  ! GMAO OPS has following fixed
+  data_path= '/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/'
+  sst_file_pref = 'dataoceanfile_OSTIA_REYNOLDS_SST.2880x1440.'
+  ice_file_pref = 'dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.'
+  sst_file_suff = '.data'
+  ice_file_suff = '.data'
+
+  sst_file = trim(data_path)//"/"//trim(sst_file_pref)//trim(date_str(1:4))//trim(sst_file_suff)
+  ice_file = trim(data_path)//"/"//trim(ice_file_pref)//trim(date_str(1:4))//trim(ice_file_suff)
 
   print *, " "
   print *, "Read: ", sst_file, ice_file
@@ -58,10 +69,10 @@ PROGRAM extract_day_SST_FRACI_eight
   print *, "Write out the data..."
 
   ! binary write
-  ! CALL write_bin( 2023, 1, 1, 2023, 1, 2, '20230101',  1440, 2880, transpose(sst), transpose(ice))
+  ! CALL write_bin( 'daily_', 2023, 1, 1, 2023, 1, 2, '20230101',  1440, 2880, transpose(sst), transpose(ice))
 
   ! netcdf
-  CALL write_netcdf( year_s, month_s, day_s, date_str, nlat, nlon, transpose(sst), transpose(ice))
+  CALL write_netcdf( 'sst_ice', year_s, month_s, day_s, date_str, nlat, nlon, transpose(sst), transpose(ice))
 
   print *, "Done."
   print *, " "
