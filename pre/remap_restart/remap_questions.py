@@ -441,6 +441,9 @@ def ask_questions():
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:  
       answers["input:surface:catch_model"] = catch_model(answers)
+   answers["output:surface:remap_water"] = answers["output:surface:remap"]
+   answers["output:surface:remap_catch"] = answers["output:surface:remap"]
+   del answers["output:surface:remap"]
  
    return answers
 

@@ -429,9 +429,9 @@ def get_command_line_from_answers(answers):
 
    out_rs = " -rs " 
    rs = 3
-   if answers['output:air:remap'] and not answers['output:surface:remap']:
+   if answers['output:air:remap'] and not answers['output:surface:remap_catch']:
        rs = 1
-   if answers['output:surface:remap'] and not answers['output:air:remap']:
+   if answers['output:surface:remap_catch'] and not answers['output:air:remap']:
        rs = 2
    out_rs = out_rs + str(rs)
 
@@ -475,6 +475,17 @@ def get_command_line_from_answers(answers):
 
          
    return cmdl
+
+def flatten_nested(nested_dict, result=None, prefix=''):
+  if result is None:
+    result = dict()
+  for k, v in nested_dict.items():
+    new_k = ':'.join((prefix, k)) if prefix else k
+    if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
+      result.update({new_k: v})
+    else:
+      flatten_nested(v, result, new_k)
+  return result
 
 def get_config_from_answers(answers, config_tpl = False):
 

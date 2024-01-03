@@ -121,12 +121,17 @@ def get_answers_from_command_line(cml):
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = False
+     answers["output:surface:remap_catch"]  = False
    if cml.rs == '2':
-     answers["output:surface:remap"]   = True
+     answers["output:air:remap"]            = False
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
    if cml.rs == '3':
-     answers["output:surface:remap"]   = True
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
 
    answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 

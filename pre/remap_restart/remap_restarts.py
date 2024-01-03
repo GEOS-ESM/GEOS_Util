@@ -74,9 +74,10 @@ def main():
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
       # just for debugging
+      # raw_config = get_config_from_answers(answers)
       # with open("raw_answers.yaml", "w") as f:
       #   yaml.dump(raw_config, f)
-      params = remap_params(raw_config)
+      params = remap_params(answers)
       config = params.config
       config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml'
 

@@ -58,7 +58,7 @@ output:
     EASE_grid: null
   analysis:
     bkg: true
-    aqua: False
+    aqua: true
     lcv: false
 slurm_pbs:
   account:
