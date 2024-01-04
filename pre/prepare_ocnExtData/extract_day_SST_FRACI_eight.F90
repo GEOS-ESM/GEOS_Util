@@ -1,7 +1,8 @@
 PROGRAM extract_day_SST_FRACI_eight
 !---------------------------------------------------------------------------
+  USE m_tick, only: INCYMD
   USE sst_ice_helpers, only: read_bin_SST_ICE, &
-!                            write_bin,        &
+                             write_bin,        &
                              write_netcdf
 
   IMPLICIT NONE
@@ -24,12 +25,15 @@ PROGRAM extract_day_SST_FRACI_eight
   character (len=4) :: arg
   integer :: numArgs
   integer :: year_s, month_s, day_s
+  integer :: tom, tom_year, tom_mon, tom_day
+
+  logical :: save_bin
 !----
 
   numArgs = iargc()!nargs() for ifort
-  if (numArgs < 3)  then
-    print *, "Need 3 inputs, in following format. Try again!"
-    print *, "year month day"
+  if (numArgs < 4)  then
+    print *, "Need minmum of 4 inputs, in following format (example). Try again!"
+    print *, "year month day .false."
     STOP
   end if
 
@@ -40,6 +44,8 @@ PROGRAM extract_day_SST_FRACI_eight
   read(arg, '(I14)') month_s
   call getarg(3, arg)
   read(arg, '(I14)') day_s
+  call getarg(4, arg)
+  read(arg, *) save_bin
   
   !-- form a string of input date
   extract_date = year_s*10000+month_s*100+day_s
@@ -69,8 +75,16 @@ PROGRAM extract_day_SST_FRACI_eight
   print *, "Write out the data..."
 
   ! binary write
-  ! CALL write_bin( 'daily_', 2023, 1, 1, 2023, 1, 2, '20230101',  1440, 2880, transpose(sst), transpose(ice))
+  if (save_bin) then
+    tom = INCYMD( year_s*10000+month_s*100+day_s, 1) ! next day
 
+    tom_year = int(tom/10000)
+    tom_mon  = int((tom-tom_year*10000)/100)
+    tom_day  = tom - (tom_year*10000+tom_mon*100)
+    !print *, "Tomorrow day:", tom_year, tom_mon, tom_day
+    CALL write_bin( 'sst_ice', year_s, month_s, day_s, tom_year, tom_mon, tom_day, date_str,  nlat, nlon, transpose(sst), transpose(ice))
+  end if
+  
   ! netcdf
   CALL write_netcdf( 'sst_ice', year_s, month_s, day_s, date_str, nlat, nlon, transpose(sst), transpose(ice))
 
