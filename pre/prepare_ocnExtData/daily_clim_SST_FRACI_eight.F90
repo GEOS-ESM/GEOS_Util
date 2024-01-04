@@ -152,6 +152,7 @@ PROGRAM daily_clim_SST_FRACI_eight
   clim_tom_mon  = int((clim_tom-clim_tom_year*10000)/100)
   clim_tom_day = clim_tom - (clim_tom_year*10000+clim_tom_mon*100)
   if(verbose) print *, "Tomorrow day:", clim_tom_year, clim_tom_mon, clim_tom_day
+
   write (clim_date_str,'(I0.8)') clim_year*10000+month*100+day
   if(verbose) print *, clim_date_str
 
