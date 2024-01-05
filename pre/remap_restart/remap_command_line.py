@@ -13,7 +13,6 @@ import questionary
 import glob
 import argparse
 from remap_utils import *
-from remap_params import * 
 
 def parse_args(program_description):
 
@@ -29,6 +28,11 @@ def parse_args(program_description):
     )
 
     p_config.add_argument('-c', '--config_file',  help='YAML config file')
+
+    p_landonly  = p_sub.add_parser(
+     'land_only',
+     help = "remap catchxxx only",
+    )
 
     p_command = p_sub.add_parser(
      'command_line',
@@ -167,7 +171,7 @@ if __name__ == "__main__":
    with open("raw_command.yaml", "w") as f:
      yaml.dump(config, f)
 
-   params = remap_params(config) 
+   config = get_config_from_answers(answers, config_tpl= True) 
    with open("params_from_command.yaml", "w") as f:
-     yaml.dump(params.config, f)
+     yaml.dump(config, f)
 

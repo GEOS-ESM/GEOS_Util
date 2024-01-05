@@ -18,7 +18,6 @@ import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
-from remap_params import *
 from remap_utils import *
 
 class catchANDcn(remap_base):
@@ -380,8 +379,7 @@ def ask_catch_questions():
 
    return answers
 
-if __name__ == '__main__' :
-
+def remap_land_only():
    answers = ask_catch_questions()
    config = get_config_from_answers(answers, config_tpl = True)
    print_config(config)
@@ -389,3 +387,7 @@ if __name__ == '__main__' :
    config_to_yaml(config, config_yaml) 
    catch = catchANDcn(params_file=config_yaml)
    catch.remap()
+
+if __name__ == '__main__' :
+
+   remap_land_only()

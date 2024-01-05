@@ -487,17 +487,19 @@ def flatten_nested(nested_dict, result=None, prefix=''):
       flatten_nested(v, result, new_k)
   return result
 
-def get_config_from_answers(answers, config_tpl = False):
+def get_config_from_file(file):
+  yaml = ruamel.yaml.YAML()
+  stream = ''
+  with  open(file, 'r') as f:
+    stream = f.read()
+  config = yaml.load(stream)
+  return config
 
+def get_config_from_answers(answers, config_tpl = False):
    config  = {}
    if config_tpl:
-     # load input yaml
-     yaml = ruamel.yaml.YAML()
-     stream = ''
      remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
-     with  open(remap_tpl, 'r') as f:
-       stream = f.read()
-     config = yaml.load(stream)
+     config = get_config_from_file(remap_tpl)
    else:  
      config['input'] = {}
      config['input']['air'] = {}
@@ -516,6 +518,12 @@ def get_config_from_answers(answers, config_tpl = False):
        config[keys[0]][keys[1]] = value
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
+
+   bc_version = config['output']['shared'].get('bc_version')
+   config['output']['surface']['split_saltwater'] = True
+   if 'Ganymed' in bc_version :
+     config['output']['surface']['split_saltwater'] = False
+
    return config
 
 def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
