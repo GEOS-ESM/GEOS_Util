@@ -13,7 +13,6 @@ import questionary
 import glob
 import argparse
 from remap_utils import *
-from remap_params import * 
 
 def parse_args(program_description):
 
@@ -29,6 +28,11 @@ def parse_args(program_description):
     )
 
     p_config.add_argument('-c', '--config_file',  help='YAML config file')
+
+    p_landonly  = p_sub.add_parser(
+     'land_only',
+     help = "remap catchxxx only",
+    )
 
     p_command = p_sub.add_parser(
      'command_line',
@@ -121,12 +125,17 @@ def get_answers_from_command_line(cml):
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = False
+     answers["output:surface:remap_catch"]  = False
    if cml.rs == '2':
-     answers["output:surface:remap"]   = True
+     answers["output:air:remap"]            = False
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
    if cml.rs == '3':
-     answers["output:surface:remap"]   = True
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
 
    answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 
@@ -162,7 +171,7 @@ if __name__ == "__main__":
    with open("raw_command.yaml", "w") as f:
      yaml.dump(config, f)
 
-   params = remap_params(config) 
+   config = get_config_from_answers(answers, config_tpl= True) 
    with open("params_from_command.yaml", "w") as f:
-     yaml.dump(params.config, f)
+     yaml.dump(config, f)
 

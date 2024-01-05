@@ -241,13 +241,9 @@ def catch_model(x):
   files = glob.glob(rst_dir+'/*catch*')
 
   if len (files) == 0 : return False
-  fname= ''
-  if len(files) == 1:
-    fname = os.path.basename(files[0])
+  fname = ''
+  fname = os.path.basename(files[0])
 
-  if len(files) > 1 :
-    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
-    fname = os.path.basename(files[0])
   model = 'catch'
   if 'cnclm40' in fname.lower():
     model = 'catchcnclm40'
@@ -336,6 +332,8 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               shutil.move(yaml_file, new_name)
               break
    yaml = ruamel.yaml.YAML()
+   out_dir = os.path.dirname(yaml_file)
+   if not os.path.exists(out_dir) : os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
       yaml.dump(config, f)
 
@@ -431,9 +429,9 @@ def get_command_line_from_answers(answers):
 
    out_rs = " -rs " 
    rs = 3
-   if answers['output:air:remap'] and not answers['output:surface:remap']:
+   if answers['output:air:remap'] and not answers['output:surface:remap_catch']:
        rs = 1
-   if answers['output:surface:remap'] and not answers['output:air:remap']:
+   if answers['output:surface:remap_catch'] and not answers['output:air:remap']:
        rs = 2
    out_rs = out_rs + str(rs)
 
@@ -478,24 +476,53 @@ def get_command_line_from_answers(answers):
          
    return cmdl
 
-def get_config_from_answers(answers):
+def flatten_nested(nested_dict, result=None, prefix=''):
+  if result is None:
+    result = dict()
+  for k, v in nested_dict.items():
+    new_k = ':'.join((prefix, k)) if prefix else k
+    if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
+      result.update({new_k: v})
+    else:
+      flatten_nested(v, result, new_k)
+  return result
+
+def get_config_from_file(file):
+  yaml = ruamel.yaml.YAML()
+  stream = ''
+  with  open(file, 'r') as f:
+    stream = f.read()
+  config = yaml.load(stream)
+  return config
+
+def get_config_from_answers(answers, config_tpl = False):
    config  = {}
-   config['input'] = {}
-   config['input']['air'] = {}
-   config['input']['shared'] = {}
-   config['input']['surface'] = {}
-   config['output'] = {}
-   config['output']['shared'] = {}
-   config['output']['air'] = {}
-   config['output']['surface'] = {}
-   config['output']['analysis'] = {}
-   config['slurm_pbs'] = {}
+   if config_tpl:
+     remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+     config = get_config_from_file(remap_tpl)
+   else:  
+     config['input'] = {}
+     config['input']['air'] = {}
+     config['input']['shared'] = {}
+     config['input']['surface'] = {}
+     config['output'] = {}
+     config['output']['shared'] = {}
+     config['output']['air'] = {}
+     config['output']['surface'] = {}
+     config['output']['analysis'] = {}
+     config['slurm_pbs'] = {}
+
    for key, value in answers.items():
      keys = key.split(":")
      if len(keys) == 2:
        config[keys[0]][keys[1]] = value
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
+
+   bc_version = config['output']['shared'].get('bc_version')
+   config['output']['surface']['split_saltwater'] = True
+   if 'Ganymed' in bc_version :
+     config['output']['surface']['split_saltwater'] = False
 
    return config
 
