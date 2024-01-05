@@ -13,7 +13,6 @@ import glob
 import subprocess as sp
 import remap_restarts 
 from remap_utils import *
-from remap_params import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
 from remap_analysis  import *
