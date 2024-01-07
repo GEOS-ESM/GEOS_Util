@@ -22,7 +22,8 @@ PROGRAM extract_day_SST_FRACI_eight
   character (len=8)     :: date_str, format_str = "(I8)"
   character (len = 200) :: sst_file, ice_file
 
-  character (len=4) :: arg
+  integer :: i, iarg, argc, iargc
+  character (len=255) :: argv
   integer :: numArgs
   integer :: year_s, month_s, day_s
   integer :: tom, tom_year, tom_mon, tom_day
@@ -30,29 +31,63 @@ PROGRAM extract_day_SST_FRACI_eight
   logical :: save_bin
 !----
 
-  numArgs = iargc()!nargs() for ifort
-  if (numArgs < 4)  then
-    print *, "Need minmum of 4 inputs, in following format (example). Try again!"
-    print *, "year month day .false."
+  argc = iargc()
+  if (argc < 3)  then
+    print *, "Need minmum 3 inputs, see below examples. Try again!"
+    print *, "extract_daily_sst_ice.x -year 2010 -month 1 -day 1"
+    print *, " "
+    print *, "** 2 additional optional inputs are allowed ** "
+    print *, "extract_daily_sst_ice.x -year 2010 -month 1 -day 1 -save_bin"
+    print *, " "
+    print *, "extract_daily_sst_ice.x -year 2010 -month 1 -day 1 -input_data_path xx"
+    print *, " "
+    print *, "extract_daily_sst_ice.x -year 2010 -month 1 -day 1 -save_bin -input_data_path xx"
+    print *, " "
     STOP
   end if
 
+  ! Following 2 variables have defaults that can be overridden by user inputs.
+  save_bin = .false.
+  ! GMAO OPS data path
+  data_path= '/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/'
+
   !-- read user inputs
-  call getarg(1, arg)
-  read(arg, '(I14)') year_s ! default
-  call getarg(2, arg)
-  read(arg, '(I14)') month_s
-  call getarg(3, arg)
-  read(arg, '(I14)') day_s
-  call getarg(4, arg)
-  read(arg, *) save_bin
-  
+  iarg = 0
+  do i = 1, 99
+    iarg = iarg + 1
+    if ( iarg > argc ) exit
+    call getarg(iarg, argv)
+
+    select case (argv)
+      case ("-year")
+        iarg = iarg + 1
+        call getarg ( iarg, argv )
+        read(argv, '(I14)') year_s
+      case ("-month")
+        iarg = iarg + 1
+        call getarg ( iarg, argv )
+        read(argv, '(I14)') month_s
+      case ("-day")
+        iarg = iarg + 1
+        call getarg ( iarg, argv )
+        read(argv, '(I14)') day_s
+      case ("-save_bin")
+        save_bin = .true.
+      case ("-input_data_path")
+        iarg = iarg + 1
+        call getarg ( iarg, argv )
+        read(argv, *) data_path
+        data_path = trim(data_path)
+      case default
+    end select
+  end do 
+  print *, year_s, month_s, day_s, save_bin, data_path
+
   !-- form a string of input date
   extract_date = year_s*10000+month_s*100+day_s
   write (date_str, format_str) extract_date
 
   ! GMAO OPS has following fixed
-  data_path= '/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/'
   sst_file_pref = 'dataoceanfile_OSTIA_REYNOLDS_SST.2880x1440.'
   ice_file_pref = 'dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.'
   sst_file_suff = '.data'
@@ -82,7 +117,7 @@ PROGRAM extract_day_SST_FRACI_eight
     tom_mon  = int((tom-tom_year*10000)/100)
     tom_day  = tom - (tom_year*10000+tom_mon*100)
     !print *, "Tomorrow day:", tom_year, tom_mon, tom_day
-    CALL write_bin( 'sst_ice', year_s, month_s, day_s, tom_year, tom_mon, tom_day, date_str,  nlat, nlon, transpose(sst), transpose(ice))
+    CALL write_bin( 'bcs_2880x1440', year_s, month_s, day_s, tom_year, tom_mon, tom_day, date_str,  nlat, nlon, transpose(sst), transpose(ice))
   end if
   
   ! netcdf
