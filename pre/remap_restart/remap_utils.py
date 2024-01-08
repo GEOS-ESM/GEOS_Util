@@ -586,6 +586,26 @@ def get_geomdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretc
   bc_geom =  get_landdir(bc_base, bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=grid). replace('/land/', '/geometry/')
   return bc_geom
 
+def remove_ogrid_comment(x, opt):
+  ogrid = ''
+  if opt == "IN":
+    ogrid = x.get('input:shared:ogrid')
+  else:
+    ogrid = x.get('output:shared:ogrid')
+  if not ogrid: return False
+
+  ogrid = ogrid.split()[0]
+  if opt == "IN":
+    if ogrid == 'CS':
+       ogrid = x['input:shared:agrid']
+    x['input:shared:ogrid'] = ogrid
+  else:
+    if ogrid == 'CS':
+       ogrid = x['output:shared:agrid']
+    x['output:shared:ogrid'] = ogrid
+
+  return False
+
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
    print_config(config)

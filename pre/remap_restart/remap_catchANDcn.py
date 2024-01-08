@@ -324,8 +324,36 @@ def ask_catch_questions():
             "type": "select",
             "name": "output:surface:EASE_grid",
             "message": "Select EASE grid for new restarts",
-            "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36']
+            "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36', 'Cubed-Sphere']
         },
+
+        {
+            "type": "text",
+            "name": "output:shared:agrid",
+            "message": message_agrid_new,
+            "default": 'C360',
+            "validate": lambda text : text in validate_agrid,
+            "when": lambda x : x['output:surface:EASE_grid'] == 'Cubed-Sphere',
+        },
+
+        {
+            "type": "select",
+            "name": "output:shared:ogrid",
+            "message": "Select data ocean grid/resolution for new restarts:\n",
+            "choices": choices_ogrid_data,
+            "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
+            "when": lambda x : x['output:surface:EASE_grid'] == 'Cubed-Sphere',
+        },
+
+        # dummy (invisible) question to remove parenthetical comments from selected output:shared:ogrid
+        {
+            "type": "text",
+            "name": "output:shared:ogrid",
+            "message": "remove the comment of ogrid",
+            # always return false, so questions never shows but changes ogrid
+            "when": lambda x: remove_ogrid_comment(x, 'OUT')
+        },
+
 
         {
             "type": "text",
@@ -377,14 +405,31 @@ def ask_catch_questions():
    answers['output:shared:bc_base'] = bc_base
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
+   if answers['output:surface:EASE_grid'] == 'Cubed-Sphere' :
+      remove_ogrid_comment(answers, 'OUT')
+      del answers['output:surface:EASE_grid']
    return answers
 
 def remap_land_only():
    answers = ask_catch_questions()
    config = get_config_from_answers(answers, config_tpl = True)
-   print_config(config)
    config_yaml = config['output']['shared']['out_dir']+'/remap_params.yaml'
-   config_to_yaml(config, config_yaml) 
+   config_to_yaml(config, config_yaml)
+   print_config(config)
+
+   question = [
+           {
+               "type": "confirm",
+               "name": "Continue",
+               "message": "Above is the YAML config file, would you like to continue?",
+               "default": True
+           },]
+   answer = questionary.prompt(question)
+
+   if not answer['Continue'] :
+       print("\nYou answered not to continue, exiting.\n")
+       sys.exit(0)
+
    catch = catchANDcn(params_file=config_yaml)
    catch.remap()
 

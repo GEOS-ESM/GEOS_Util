@@ -14,26 +14,6 @@ import questionary
 import glob
 from remap_utils import *
 
-def remove_ogrid_comment(x, opt):
-  ogrid = ''
-  if opt == "IN":
-    ogrid = x.get('input:shared:ogrid')
-  else:
-    ogrid = x.get('output:shared:ogrid')
-  if not ogrid: return False
-
-  ogrid = ogrid.split()[0]
-  if opt == "IN":
-    if ogrid == 'CS':
-       ogrid = x['input:shared:agrid']
-    x['input:shared:ogrid'] = ogrid
-  else:
-    if ogrid == 'CS':
-       ogrid = x['output:shared:agrid']
-    x['output:shared:ogrid'] = ogrid
-  
-  return False
-
 def echo_level(x):
   if x["output:air:nlevel"] != str(x.get("input:air:nlevel")) :
       print("NOTE: Different # atm levels in input and new restarts.  Cannot remap agcm_import_rst (a.k.a. IAU) file.")
