@@ -41,10 +41,8 @@ program_description = textwrap.dedent(f'''
       3. Use command line arguments:
            ./remap_restarts.py command_line -ymdh 2004041421  ....
 
-      3. Remap land (catchxxx) only:
+      4. Remap land (catchxxx) global domain only:
            ./remap_restarts.py land_only
-
-      Help commands:
 
       Help commands:
            ./remap_restarts.py -h

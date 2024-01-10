@@ -323,7 +323,7 @@ def ask_catch_questions():
         {   
             "type": "select",
             "name": "output:surface:EASE_grid",
-            "message": "Select EASE grid for new restarts",
+            "message": "Select a grid for new restarts",
             "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36', 'Cubed-Sphere']
         },
 
@@ -411,6 +411,7 @@ def ask_catch_questions():
    return answers
 
 def remap_land_only():
+   print("\n It remaps catcment(cn) restarts with GLOBAL domain only. \n")
    answers = ask_catch_questions()
    config = get_config_from_answers(answers, config_tpl = True)
    config_yaml = config['output']['shared']['out_dir']+'/remap_params.yaml'

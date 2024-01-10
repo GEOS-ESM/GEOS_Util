@@ -31,7 +31,7 @@ def parse_args(program_description):
 
     p_landonly  = p_sub.add_parser(
      'land_only',
-     help = "remap catchxxx only",
+     help = "remap catchxxx global domain only",
     )
 
     p_command = p_sub.add_parser(
