@@ -120,7 +120,7 @@ message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is 
 
 message_account    = "Select/enter SLURM or PBS account:\n",
 
-message_partition  = "Enter SLURM or PBS partition (can leave blank):\n",
+message_partition  = "Enter SLURM or PBS partition: (If desired; can leave blank.)\n",
 
 
 job_directive = {"SLURM": """#!/bin/csh -f

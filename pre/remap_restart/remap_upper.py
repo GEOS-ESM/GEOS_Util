@@ -148,7 +148,7 @@ class upperair(remap_base):
      QOS  = config['slurm_pbs']['qos']
      TIME = "1:00:00"
      if NPE > 532: 
-        assert config['slurm_pbs']['qos'] != 'debug', "qos should be allnccs or normal on NAS"
+        assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
         TIME = "12:00:00"
      NNODE = ''
      job=''
