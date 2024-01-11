@@ -410,7 +410,7 @@ def ask_catch_questions():
    return answers
 
 def remap_land_only():
-   print("\n It remaps catcment(cn) restarts with GLOBAL domain only. \n")
+   print("\n Remap land (catch[cn]) restart only; global domain only; ens0000 only. \n")
    answers = ask_catch_questions()
    config = get_config_from_answers(answers, config_tpl = True)
    config_yaml = config['output']['shared']['out_dir']+'/remap_params.yaml'
