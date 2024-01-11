@@ -125,7 +125,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select data ocean grid/resolution of input restarts:\n",
+            "message": message_ogrid_in,
             "choices": choices_ogrid_data,
             "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'],
@@ -397,20 +397,20 @@ def ask_questions():
         {
             "type": "text",
             "name": "slurm_pbs:qos",
-            "message": "slurm or pbs quality-of-service (qos)?  (If resolution is c1440 or higher, enter allnccs on NCCS or normal on NAS.) ",
+            "message": message_qos,
             "default": "debug",
         },
 
         {
             "type": "text",
             "name": "slurm_pbs:account",
-            "message": "slurm_pbs account?",
+            "message": message_account,
             "default": get_account(),
         },
         {
             "type": "text",
             "name": "slurm_pbs:partition",
-            "message": "Enter the slurm or pbs partition only if you want particular partiton, otherwise keep empty as default: ",
+            "message": message_partition,
             "default": '',
         },
    ]

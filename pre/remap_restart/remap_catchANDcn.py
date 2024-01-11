@@ -37,7 +37,7 @@ class catchANDcn(remap_base):
      time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
      in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*'+time+'*')
      if len(in_rstfiles) == 0:
-        print('\n try catchXX file without time stamp')
+        print('\n try catch[cn] restart file without time stamp')
         in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*')
      if len(in_rstfiles) == 0:
         return
@@ -272,15 +272,14 @@ def ask_catch_questions():
         {
             "type": "path",
             "name": "input:shared:rst_dir",
-            "message": "Enter input directory with both 'rs' and 'rc_out' subdirectories:\n",
+            "message": "Enter input directory that contains './rs' and './rc_out' subdirectories:\n",
             "validate": lambda path : has_rs_rc_out(path)
         },
 
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": (message_datetime + " and the rst file exists.)\n"),
-            #"validate": lambda x, text: has_catch_rst(x, text),
+            "message": (message_datetime + " and rst file must exist.)\n"),
             "validate": lambda text: has_catch_rst(text)
         },
         
@@ -323,7 +322,7 @@ def ask_catch_questions():
         {   
             "type": "select",
             "name": "output:surface:EASE_grid",
-            "message": "Select a grid for new restarts",
+            "message": "Select grid for new restart:\n",
             "choices": ['EASEv2_M03', 'EASEv2_M09', 'EASEv2_M25', 'EASEv2_M36', 'Cubed-Sphere']
         },
 
@@ -339,7 +338,7 @@ def ask_catch_questions():
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select data ocean grid/resolution for new restarts:\n",
+            "message": message_ogrid_in,
             "choices": choices_ogrid_data,
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x : x['output:surface:EASE_grid'] == 'Cubed-Sphere',
@@ -358,20 +357,20 @@ def ask_catch_questions():
         {
             "type": "text",
             "name": "slurm_pbs:qos",
-            "message": "slurm or pbs quality-of-service (qos)?  (If resolution is c1440 or higher, enter allnccs on NCCS or normal on NAS.) ",
+            "message": message_qos,
             "default": "debug",
         },
 
         {
             "type": "text",
             "name": "slurm_pbs:account",
-            "message": "slurm_pbs account?",
+            "message": message_account,
             "default": get_account(),
         },
         {
             "type": "text",
             "name": "slurm_pbs:partition",
-            "message": "Enter the slurm or pbs partition only if you want particular partiton, otherwise keep empty as default: ",
+            "message": message_partition,
             "default": '',
         },  
 

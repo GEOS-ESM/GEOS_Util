@@ -114,6 +114,15 @@ message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_ag
 
 validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
 
+message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
+
+message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+
+message_account    = "Select/enter SLURM or PBS account:\n",
+
+message_partition  = "Enter SLURM or PBS partition (can leave blank):\n",
+
+
 job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks={NPE}

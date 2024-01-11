@@ -41,7 +41,7 @@ program_description = textwrap.dedent(f'''
       3. Use command line arguments:
            ./remap_restarts.py command_line -ymdh 2004041421  ....
 
-      4. Remap land (catchxxx) global domain only:
+      4. For GEOSldas: Remap land (catch[cn]) restart only; global domain only; ens0000 only:
            ./remap_restarts.py land_only
 
       Help commands:
