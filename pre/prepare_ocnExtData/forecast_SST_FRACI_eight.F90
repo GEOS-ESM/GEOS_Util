@@ -144,8 +144,6 @@ PROGRAM forecast_SST_FRACI_eight
 
     write (today_str, format_str) today_year*10000+today_mon*100+today_day
     write (tom_str,   format_str) tom_year*10000  +tom_mon*100  +tom_day
-
-    !print *, today_year,"/",today_mon,"/",today_day, ">>", tom_year,"/",tom_mon,"/",tom_day
     print *, trim(today_str), "---->", trim(tom_str)
 
     CALL write_bin( 'bcs_2880x1440', today_year, today_mon, today_day, tom_year, tom_mon, tom_day, today_str, &
