@@ -32,6 +32,12 @@ ecbuild_add_executable (
   LIBS ${this})
 set_target_properties(extract_daily_sst_ice.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
+ecbuild_add_executable (
+  TARGET gen_forecast_bcs.x
+  SOURCES forecast_SST_FRACI_eight.F90
+  LIBS ${this})
+set_target_properties(gen_forecast_bcs.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
 if (USE_F2PY)
    find_package(F2PY2)
    if (F2PY2_FOUND)

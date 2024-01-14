@@ -1017,8 +1017,8 @@ contains
     CLOSE(991)
     CLOSE(992)
 
-    PRINT*, "Finished writing:"
-    PRINT*, fileName_sst, fileName_ice
+    !PRINT*, "Finished writing:"
+    !PRINT*, fileName_sst, fileName_ice
 !---------------------------------------------------------------------------
 
     END SUBROUTINE write_bin
@@ -1150,7 +1150,7 @@ contains
     call check( nf90_close(ncid) ) ! Close the file.
 !---------------------------------------------------------------------------
 
-    PRINT*, "Finished writing ... ", fileName
+    !PRINT*, "Finished writing ... ", fileName
 
     END SUBROUTINE write_netcdf
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
