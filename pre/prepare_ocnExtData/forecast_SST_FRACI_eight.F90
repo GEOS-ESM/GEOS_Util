@@ -12,6 +12,8 @@ PROGRAM forecast_SST_FRACI_eight
   real               :: lon(nlon), lat(nlat)
   real               :: sst(nlat, nlon), ice(nlat, nlon)
   real               :: sst0(nlat, nlon), ice0(nlat, nlon)
+  real               :: sst_daily_clim(nlat, nlon), ice_daily_clim(nlat, nlon)
+  real               :: anom_sst0(nlat, nlon), anom_ice0(nlat, nlon)
 
   integer               :: extract_date
   integer               :: date_out, nlon_out, nlat_out
@@ -26,14 +28,13 @@ PROGRAM forecast_SST_FRACI_eight
 
   integer :: i, iarg, argc, iargc
   character (len=255) :: argv
+  character (len=255) :: method
   integer :: numArgs
   integer :: year_s, month_s, day_s, tom
   integer :: tom_year, tom_mon, tom_day
   integer :: today_year, today_mon, today_day
 
   integer :: fcst_nDays
-
-  character (len=255), parameter :: method = "persistence"
 !----
 
   print *, " "
@@ -47,20 +48,23 @@ PROGRAM forecast_SST_FRACI_eight
     print *, "Need minmum 3 inputs, see below examples. Try again!"
     print *, "gen_forecast_bcs.x -year 2010 -month 1 -day 1"
     print *, " "
-    print *, "** 2 additional optional inputs are allowed ** "
+    print *, "** 3 additional optional inputs are allowed ** "
     print *, "gen_forecast_bcs.x -year 2010 -month 1 -day 1 -fcst_nDays NN"
     print *, " "
     print *, "gen_forecast_bcs.x -year 2010 -month 1 -day 1 -input_data_path xx"
     print *, " "
     print *, "gen_forecast_bcs.x -year 2010 -month 1 -day 1 -fcst_nDays NN -input_data_path xx"
     print *, " "
+    print *, "gen_forecast_bcs.x -year 2010 -month 1 -day 1 -fcst_nDays NN -input_data_path xx -method yy"
+    print *, " "
     STOP
   end if
 
-  ! Following 2 variables have defaults that can be overridden by user inputs.
+  ! Following variables have defaults that can be overridden by user inputs.
   fcst_nDays = 15 ! default length of each forecast: 15 days.
   ! GMAO OPS data path
   data_path= '/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/'
+  method   = 'persistence'
 
   !-- read user inputs
   iarg = 0
@@ -91,11 +95,16 @@ PROGRAM forecast_SST_FRACI_eight
         call getarg ( iarg, argv )
         read(argv, *) data_path
         data_path = trim(data_path)
+      case ("-method")
+        iarg = iarg + 1
+        call getarg ( iarg, argv )
+        read(argv, *) method
+        method = trim(method)
       case default
     end select
   end do 
   print *, "Inputs: "
-  print *, year_s, month_s, day_s, fcst_nDays, data_path
+  print *, year_s, month_s, day_s, fcst_nDays, data_path, method
   print *, " "
 
   ! --- Read forecast start date data ---
@@ -138,13 +147,26 @@ PROGRAM forecast_SST_FRACI_eight
     tom_mon  = int((tom-tom_year*10000)/100)
     tom_day  = tom - (tom_year*10000+tom_mon*100)
 
-    if (method == "persistence") then
-     sst = sst0; ice = ice0
-    end if
-
     write (today_str, format_str) today_year*10000+today_mon*100+today_day
     write (tom_str,   format_str) tom_year*10000  +tom_mon*100  +tom_day
     print *, trim(today_str), "---->", trim(tom_str)
+
+    if (method == "persistence") then
+      sst = sst0; ice = ice0
+    else if (method == "persist_anomaly") then
+      call get_daily_clim( today_str, nlat_out, nlon_out, sst_daily_clim, ice_daily_clim)
+      if (i > 1) then
+        sst = sst_daily_clim + anom_sst0
+        ice = ice_daily_clim + anom_ice0
+      else
+        sst = sst0; ice = ice0 ! forecast day-1: just write out the same field(s).
+       anom_sst0 = sst0 - sst_daily_clim
+       anom_ice0 = ice0 - ice_daily_clim
+      end if
+    else
+      print *, "Unknown method: ", method, "Exiting. Fix and try again."
+      STOP
+    end if
 
     CALL write_bin( 'bcs_2880x1440', today_year, today_mon, today_day, tom_year, tom_mon, tom_day, today_str, &
     nlat, nlon, transpose(sst), transpose(ice))
@@ -160,5 +182,50 @@ PROGRAM forecast_SST_FRACI_eight
   print *, "Done."
   print *, " "
 
+!---------------------------------------------------------------------------
+  CONTAINS
+  SUBROUTINE get_daily_clim(today_str, nlat_out, nlon_out, sst_daily_clim, ice_daily_clim)
+
+    integer :: date_out, nlon_out, nlat_out
+    real    :: sst_daily_clim(nlat, nlon), ice_daily_clim(nlat, nlon)
+    character (len = 200) :: clim_data_path, sst_clim_pref, ice_clim_pref
+    character (len=8)     :: today_str
+
+    clim_data_path = "/discover/nobackup/projects/gmao/advda/sakella/future_sst_fraci/data/binFiles/"
+    sst_clim_pref  = "daily_clim_mean_sst_0001" !clim_year  = 1 ! from daily_clim_SST_FRACI_eight.F90
+    ice_clim_pref  = "daily_clim_mean_ice_0001"
+
+    sst_file = trim(clim_data_path)//"/"//trim(sst_clim_pref)//trim(today_str(5:8))//".bin"
+    ice_file = trim(clim_data_path)//"/"//trim(ice_clim_pref)//trim(today_str(5:8))//".bin"
+    print *, "Reading daily clim from: "
+    print *, sst_file
+    print *, ice_file
+
+    CALL read_daily_clim(sst_file, sst_daily_clim, nlat, nlon) ! read sst anomaly
+    CALL read_daily_clim(ice_file, ice_daily_clim, nlat, nlon) ! read fraci anomaly
+    print *, nlat, nlon
+  END SUBROUTINE get_daily_clim
+
+  SUBROUTINE read_daily_clim(fName, bcs_field, nlat, nlon)
+    integer, intent(in) :: nlat, nlon
+    character (len=*), intent(in) :: fName
+    real, intent(out) :: bcs_field(nlat, nlon)
+
+    real    year1,month1,day1,hour1,min1,sec1, year2,month2,day2,hour2,min2,sec2
+    real    dum1,dum2, field(nlon,nlat)
+    integer rc
+
+    open (10,file=fName,form='unformatted',access='sequential', STATUS = 'old') ! these files only 1 record (header+data)
+    rc = 0
+    do while (rc.eq.0)
+      ! read header
+      read (10,iostat=rc) year1,month1,day1,hour1,min1,sec1,&
+                          year2,month2,day2,hour2,min2,sec2,dum1,dum2
+      ! read data
+      if( rc.eq.0 ) read (10,iostat=rc) field
+      bcs_field = TRANSPOSE(field)
+      close(10)
+    end do
+  END SUBROUTINE read_daily_clim
 !---------------------------------------------------------------------------
 END PROGRAM forecast_SST_FRACI_eight
