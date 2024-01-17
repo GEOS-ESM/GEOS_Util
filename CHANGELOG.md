@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.2] - 2023-06-28
 
+### Added
+
+- Addition of SST and FRACI forecast (ocean) boundary conditions generation capability in `pre/prepare_ocnExtData`
+
 ### Fixed
 
 - Updates to fix dates for comparison plots. Updates for plot levels.
