@@ -1,0 +1,67 @@
+variables:
+  - short_name: TS
+    long_name: surface_skin_temperature
+    units: 'K'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: QS
+    long_name: surface_specific_humidity
+    units: 'kg kg-1'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: FR
+    long_name: ice_fraction
+    units: '1'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: CH
+    long_name: surface_heat_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: CM
+    long_name: surface_momentum_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: CQ
+    long_name: surface_moisture_exchange_coefficient
+    units: 'kg m-2 s-1'
+    dimension:
+       - unknown_dim1
+       - tile
+  - short_name: WESN
+    long_name: snow_layer_mass
+    units: 'kg m-2'
+    dimension:
+       - unknown_dim2
+       - tile
+  - short_name: HTSN
+    long_name: snow_layer_heat_content
+    units: 'J m-2'
+    dimension:
+       - unknown_dim2
+       - tile
+  - short_name: SNDZ
+    long_name: snow_layer_heat_depth
+    units: 'm'
+    dimension:
+       - unknown_dim2
+       - tile
+  - short_name: TICE
+    long_name: ice_layer_temperature
+    units: 'k'
+    dimension:
+       - unknown_dim2
+       - unknown_dim1
+       - tile
+dimensions:
+  tile: 5997
+  unknown_dim1: 2
+  unknown_dim2: 15
+  time: 1

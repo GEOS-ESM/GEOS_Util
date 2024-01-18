@@ -717,7 +717,7 @@ if( toplev >= 100 )
     levmin  = 100
 endif
 
-if (1 = 0)
+*if (1 = 0)
 loop = 1
 while( loop <= loopdim )
            if( loop = 1 ) ; levmin = 100 ; loopflag = ""  ; endif
@@ -819,7 +819,7 @@ endwhile
 
 loop = loop + 1
 endwhile
-endif
+*endif
 
 ************************************************************************
 

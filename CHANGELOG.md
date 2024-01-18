@@ -17,6 +17,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.0.5] - 2023-12-11
+
+### Fixed
+
+- Fix issue in `remap_bin2nc.py` for remapping MERRA2 restarts to levels other than 72
+
+## [2.0.4] - 2023-11-17
+
+### Added
+
+- Add CI step to make PR to MAPL3 on push to `main`
+
+### Changed
+
+- Add/update command_line options: more items such as label and altbcs were added to `remap_params.tpl`
+- Updated paths to the legacy bcs data by pointing to the new "bcs_shared" directory in the GMAO project space.
+- Support for new boundary conditions package output layout
+
+### Removed
+
+- Use of haswell nodes on NCCS machines for `cube_BCs.pl`
+
+## [2.0.3] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs default from CircleCI orb
+
+### Fixed
+
+- Eliminate accidental post-processing of *.nc4-partial files
+- fixed the cmpz plots for rms and anomaly correlation
+
 ## [2.0.2] - 2023-06-28
 
 ### Added
