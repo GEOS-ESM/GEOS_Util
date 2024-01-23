@@ -187,7 +187,7 @@ def fvcore_info(x):
   if not rst_dir : return False
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
-  files = glob.glob(rst_dir+'/*fvcore_*')
+  files = glob.glob(rst_dir+'/*fvcore_internal*')
   if len (files) == 0 : return False
 
   fname =''
@@ -197,7 +197,7 @@ def fvcore_info(x):
     ymdh = x.get('input:shared:yyyymmddhh')
     if (not ymdh): return False
     time = ymdh[0:8] + '_'+ymdh[8:10]
-    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
+    files = glob.glob(rst_dir+'/*fvcore_internal*'+time+'*')
     fname = files[0]
 
   if len(files) == 1: 

@@ -59,7 +59,7 @@ class lake_landice_saltwater(remap_base):
      os.makedirs(OutData_dir)
 
      types = '.bin'
-     type_str = sp.check_output(['file','-b', restarts_in[0]])
+     type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
      type_str = str(type_str)
      if 'Hierarchical' in type_str:
         types = '.nc4'

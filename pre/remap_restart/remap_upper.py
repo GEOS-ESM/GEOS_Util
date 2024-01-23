@@ -72,7 +72,7 @@ class upperair(remap_base):
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
      types = '.bin'
-     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
+     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
      type_str = str(type_str)
      if type_str.find('Hierarchical') >=0:
         types = '.nc4'
