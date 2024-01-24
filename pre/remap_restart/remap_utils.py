@@ -15,6 +15,16 @@ import netCDF4 as nc
 
 # shared global variables
 
+#During cmake step, the string will be changed according to the system
+
+BUILT_ON_SLES15 = "NO@BUILT_ON_SLES15@"
+GEOS_SITE       = "@GEOS_SITE@"
+
+if BUILT_ON_SLES15== "NO":
+  BUILT_ON_SLES15 = False
+else:
+  BUILT_ON_SLES15 = True
+
 # top-level directory for BCs (machine-dependent)
 
 choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
@@ -62,6 +72,15 @@ choices_res_SG001  = ['C270', 'C540', 'C1080', 'C2160']
 
 choices_res_SG002  = ['C1536']
 
+message_datetime    = "Enter restart date/time:  (Must be 10 digits: yyyymmddhh"
+
+message_out_dir     = "Enter output directory for new restarts:\n"
+
+message_expid       = "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n"
+
+message_bc_base_in  = "BCs base directory for input restarts: \n"
+message_bc_base_new = "BCs base directory for new restarts: \n"
+
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
@@ -94,6 +113,37 @@ message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_ag
 message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
 
 validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
+
+message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
+
+message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+
+message_account    = "Select/enter SLURM or PBS account:\n",
+
+message_partition  = "Enter SLURM or PBS partition: (If desired; can leave blank.)\n",
+
+
+job_directive = {"SLURM": """#!/bin/csh -f
+#SBATCH --account={account}
+#SBATCH --ntasks={NPE}
+#SBATCH --job-name={job_name}
+#SBATCH --output={log_name}
+#SBATCH --qos={QOS}
+#SBATCH --time={TIME}
+#SBATCH --constraint={CONSTRAINT}
+{PARTITION}
+""",
+"PBS": """#!/bin/csh -f
+#PBS -l walltime={TIME}
+#PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
+#PBS -N {job_name}
+#PBS -q {QOS}
+#PBS -W group_list={account}
+#PBS -o {log_name}
+#PBS -j oe
+{PARTITION}
+"""
+}
 
 # --------------------------------------------------------------------------------
 
@@ -137,7 +187,7 @@ def fvcore_info(x):
   if not rst_dir : return False
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
-  files = glob.glob(rst_dir+'/*fvcore_*')
+  files = glob.glob(rst_dir+'/*fvcore_internal*')
   if len (files) == 0 : return False
 
   fname =''
@@ -147,7 +197,7 @@ def fvcore_info(x):
     ymdh = x.get('input:shared:yyyymmddhh')
     if (not ymdh): return False
     time = ymdh[0:8] + '_'+ymdh[8:10]
-    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
+    files = glob.glob(rst_dir+'/*fvcore_internal*'+time+'*')
     fname = files[0]
 
   if len(files) == 1: 
@@ -200,13 +250,9 @@ def catch_model(x):
   files = glob.glob(rst_dir+'/*catch*')
 
   if len (files) == 0 : return False
-  fname= ''
-  if len(files) == 1:
-    fname = os.path.basename(files[0])
+  fname = ''
+  fname = os.path.basename(files[0])
 
-  if len(files) > 1 :
-    files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
-    fname = os.path.basename(files[0])
   model = 'catch'
   if 'cnclm40' in fname.lower():
     model = 'catchcnclm40'
@@ -225,15 +271,19 @@ def get_label(config):
   if config['output']['shared']['label']:
      agrid     = config['output']['shared']['agrid']
      ogrid     = config['output']['shared']['ogrid']
-     model     = config['output']['shared']['omodel']
+     omodel    = config['output']['shared']['omodel']
      stretch   = config['output']['shared']['stretch']
-     out_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+     EASE_grid = config['output']['surface'].get('EASE_grid', None)
+ 
+     out_resolution = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
      agrid     = config['input']['shared']['agrid']
      ogrid     = config['input']['shared']['ogrid']
-     model     = config['input']['shared']['omodel']
+     omodel    = config['input']['shared']['omodel']
      stretch   = config['input']['shared']['stretch']
-     in_resolution = get_resolutions(agrid, ogrid, model, stretch) 
+     EASE_grid = config['input']['surface'].get('EASE_grid', None)
+
+     in_resolution = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
      in_bcv         =  config['input']['shared']['bc_version']
      out_bcv        =  config['output']['shared']['bc_version']
@@ -291,6 +341,8 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               shutil.move(yaml_file, new_name)
               break
    yaml = ruamel.yaml.YAML()
+   out_dir = os.path.dirname(yaml_file)
+   if not os.path.exists(out_dir) : os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
       yaml.dump(config, f)
 
@@ -386,18 +438,19 @@ def get_command_line_from_answers(answers):
 
    out_rs = " -rs " 
    rs = 3
-   if answers['output:air:remap'] and not answers['output:surface:remap']:
+   if answers['output:air:remap'] and not answers['output:surface:remap_catch']:
        rs = 1
-   if answers['output:surface:remap'] and not answers['output:air:remap']:
+   if answers['output:surface:remap_catch'] and not answers['output:air:remap']:
        rs = 2
    out_rs = out_rs + str(rs)
 
    noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
 
-   account = " -account " + answers["slurm:account"]
-   qos     = " -qos  " + answers["slurm:qos"]
-   partition  = " -partition  " + answers["slurm:partition"]
-
+   account = " -account " + answers["slurm_pbs:account"]
+   qos     = " -qos  " + answers["slurm_pbs:qos"]
+   partition = ''
+   if answers["slurm_pbs:partition"] != '':
+      partition  = " -partition  " + answers["slurm_pbs:partition"]
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
                                           ymdh  + \
@@ -432,18 +485,42 @@ def get_command_line_from_answers(answers):
          
    return cmdl
 
-def get_config_from_answers(answers):
+def flatten_nested(nested_dict, result=None, prefix=''):
+  if result is None:
+    result = dict()
+  for k, v in nested_dict.items():
+    new_k = ':'.join((prefix, k)) if prefix else k
+    if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
+      result.update({new_k: v})
+    else:
+      flatten_nested(v, result, new_k)
+  return result
+
+def get_config_from_file(file):
+  yaml = ruamel.yaml.YAML()
+  stream = ''
+  with  open(file, 'r') as f:
+    stream = f.read()
+  config = yaml.load(stream)
+  return config
+
+def get_config_from_answers(answers, config_tpl = False):
    config  = {}
-   config['input'] = {}
-   config['input']['air'] = {}
-   config['input']['shared'] = {}
-   config['input']['surface'] = {}
-   config['output'] = {}
-   config['output']['shared'] = {}
-   config['output']['air'] = {}
-   config['output']['surface'] = {}
-   config['output']['analysis'] = {}
-   config['slurm'] = {}
+   if config_tpl:
+     remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+     config = get_config_from_file(remap_tpl)
+   else:  
+     config['input'] = {}
+     config['input']['air'] = {}
+     config['input']['shared'] = {}
+     config['input']['surface'] = {}
+     config['output'] = {}
+     config['output']['shared'] = {}
+     config['output']['air'] = {}
+     config['output']['surface'] = {}
+     config['output']['analysis'] = {}
+     config['slurm_pbs'] = {}
+
    for key, value in answers.items():
      keys = key.split(":")
      if len(keys) == 2:
@@ -451,9 +528,15 @@ def get_config_from_answers(answers):
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
 
+   bc_version = config['output']['shared'].get('bc_version')
+   config['output']['surface']['split_saltwater'] = True
+   if 'Ganymed' in bc_version :
+     config['output']['surface']['split_saltwater'] = False
+
    return config
 
-def get_resolutions(agrid, ogrid, model, stretch):
+def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+   if grid is not None : return grid
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):
@@ -466,11 +549,11 @@ def get_resolutions(agrid, ogrid, model, stretch):
       xy = ogrid.upper().split('X')
       s0 = int(xy[0])
       s1 = int(xy[1])
-      if model == 'data':
+      if omodel == 'data':
          oname = 'DE{:04d}xPE{:04d}'.format(s0,s1)
-      if model == 'MOM5':
+      if omodel == 'MOM5':
          oname = 'M5TP{:04d}x{:04d}'.format(s0,s1)
-      if model == 'MOM6':
+      if omodel == 'MOM6':
          oname = 'M6TP{:04d}x{:04d}'.format(s0,s1)
    if stretch:
       aname = aname + '-' + stretch
@@ -492,8 +575,8 @@ def get_default_bc_base():
          return choices_bc_base[0]
    return choices_bc_base[1]
 
-def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  gridStr = get_resolutions(agrid, ogrid, model,stretch)
+def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
+  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
   if 'GM4' == bc_version:
@@ -503,14 +586,34 @@ def get_topodir(bc_base, bc_version, agrid, ogrid, model, stretch):
 
   return bc_topo
 
-def get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  gridStr = get_resolutions(agrid, ogrid, model,stretch)
+def get_landdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch, grid=grid)
   bc_land = bc_base+'/'+ bc_version+'/land/'+gridStr
   return bc_land
 
-def get_geomdir(bc_base, bc_version, agrid, ogrid, model, stretch):
-  bc_geom =  get_landdir(bc_base, bc_version, agrid, ogrid, model, stretch). replace('/land/', '/geometry/')
+def get_geomdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
+  bc_geom =  get_landdir(bc_base, bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=grid). replace('/land/', '/geometry/')
   return bc_geom
+
+def remove_ogrid_comment(x, opt):
+  ogrid = ''
+  if opt == "IN":
+    ogrid = x.get('input:shared:ogrid')
+  else:
+    ogrid = x.get('output:shared:ogrid')
+  if not ogrid: return False
+
+  ogrid = ogrid.split()[0]
+  if opt == "IN":
+    if ogrid == 'CS':
+       ogrid = x['input:shared:agrid']
+    x['input:shared:ogrid'] = ogrid
+  else:
+    if ogrid == 'CS':
+       ogrid = x['output:shared:agrid']
+    x['output:shared:ogrid'] = ogrid
+
+  return False
 
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
