@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added EASE grid option for remapping of land restarts in remap_restarts.py package (facilitates use of package in GEOSldas setup script)
+- Added support for SLES15, NAS site and log for remap_lake_landice_saltwater in remap_restarts.py package
+- Added "land_only" option for remapping of restarts
+
 ### Changed
 
 - Modified interfaces for variables gFTL container to be V2.  Changes include
