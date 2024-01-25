@@ -255,14 +255,14 @@ PROGRAM proc_SST_FRACI_eight
         READ( tomrw_Day,  99) tomrw_iDay
 
         if (bin_output == 'yes') then
-          call write_bin(today_iYear, today_iMon, today_iDay, &
+          call write_bin('bcs_2880x1440', today_iYear, today_iMon, today_iDay, &
                          tomrw_iYear, tomrw_iMon, tomrw_iDay, &
                          today,                               &
                          NLAT_out,    NLON_out,               &
                          ostia_SST_eigth, ostia_ICE_eigth)
         endif
 
-        call write_netcdf(today_iYear, today_iMon, today_iDay, &
+        call write_netcdf('sst_ice', today_iYear, today_iMon, today_iDay, &
                           today,                               &
                           NLAT_out,    NLON_out,               &
                           ostia_SST_eigth, ostia_ICE_eigth)
