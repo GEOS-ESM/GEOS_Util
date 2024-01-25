@@ -17,6 +17,7 @@ import glob
 from remap_base import remap_base
 from remap_utils import *
 from remap_bin2nc import bin2nc
+import netCDF4 as nc
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -59,6 +60,20 @@ class upperair(remap_base):
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
+
+     types = '.bin'
+     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
+     type_str = str(type_str)
+     if type_str.find('Hierarchical') >=0:
+        types = '.nc4'
+     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+
+     label = get_label(config)
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
+
+     no_remap = self.link_without_remap(restarts_in, suffix)
+     if (no_remap) : return
+
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
@@ -71,15 +86,6 @@ class upperair(remap_base):
      os.chdir(tmpdir)
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
-     types = '.bin'
-     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
-     type_str = str(type_str)
-     if type_str.find('Hierarchical') >=0:
-        types = '.nc4'
-     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-
-     label = get_label(config)
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
@@ -371,6 +377,7 @@ endif
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix,
               merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix ]
+
     bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml','bin2nc_merra2_agcm.yaml']
     bin_path = os.path.dirname(os.path.realpath(__file__))
     for (f, yf) in zip(upperin,bin2nc_yaml) :
@@ -387,6 +394,43 @@ endif
          bin2nc(dest, ncdest, yaml_file)
        os.remove(dest)
 
+  def link_without_remap(self, restarts_in, suffix):
+     config = self.config
+     in_agrid        = config['input']['shared']['agrid']
+     out_agrid       = config['output']['shared']['agrid']
+     out_levels      = config['output']['air']['nlevel']
+     in_bc_version   = config['input']['shared']['bc_version']
+     out_bc_version  = config['output']['shared']['bc_version']
+     in_stretch      = config['input']['shared']['stretch']
+     out_stretch     = config['output']['shared']['stretch']
+
+     if (in_agrid == out_agrid and \
+         in_bc_version == out_bc_version and in_stretch  == out_stretch) :
+
+       for rst in restarts_in :
+         if 'fvcore_internal' in rst:
+           fvrst     = nc.Dataset(rst)
+           in_levels = fvrst.dimensions['lev'].size
+           if in_levels != int(out_levels): return False
+
+       out_dir = config['output']['shared']['out_dir']
+       expid = config['output']['shared']['expid']
+       if (expid) :
+          expid = expid + '.'
+       else:
+          expid = ''
+
+       print('\nUpper air restart files link to orignal restart files without remapping" \n')
+       for rst in restarts_in :
+         f = expid + os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_rst.'+suffix
+         cmd = '/bin/ln -s  ' + rst + ' ' + out_dir+'/'+f
+         print('\n'+cmd)
+         subprocess.call(shlex.split(cmd))
+
+       return True
+
+     return False
+  
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')
    air.remap()
