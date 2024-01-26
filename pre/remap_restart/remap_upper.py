@@ -420,7 +420,7 @@ endif
        else:
           expid = ''
 
-       print('\nUpper air restart files link to orignal restart files without remapping" \n')
+       print('\nLinking upper air restart files to orignal restart files without remapping\n')
        for rst in restarts_in :
          f = expid + os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_rst.'+suffix
          cmd = '/bin/ln -s  ' + rst + ' ' + out_dir+'/'+f
