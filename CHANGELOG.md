@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `begin()` and `end()` become `ftn_begin()` and `ftn_end()` respectively.
   - `iter%next()` goes to top of loop instead of bottom.
   - any other `iter%next()` for a `cycle` statement should be deleted.
+- Update CI to v2 orb
 
 ### Fixed
 
