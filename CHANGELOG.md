@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Do not remap (link instead) upper air restarts when it is not necessary
+- Addition of SST and FRACI forecast (ocean) boundary conditions generation capability in `pre/prepare_ocnExtData`
 - Added EASE grid option for remapping of land restarts in remap_restarts.py package (facilitates use of package in GEOSldas setup script)
 - Added support for SLES15, NAS site and log for remap_lake_landice_saltwater in remap_restarts.py package
 - Added "land_only" option for remapping of restarts
@@ -56,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed the cmpz plots for rms and anomaly correlation
 
 ## [2.0.2] - 2023-06-28
+
 
 ### Fixed
 

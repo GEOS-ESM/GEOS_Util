@@ -2,6 +2,7 @@ esma_set_this()
 
 set ( srcs
   sst_ice_helpers.F90
+  hermes_m_tick.f90
   )
 
 esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL NetCDF::NetCDF_Fortran)
@@ -18,6 +19,24 @@ ecbuild_add_executable (
   SOURCES proc_SST_FRACI_eight.F90
   LIBS ${this})
 set_target_properties(sst_sic_eight.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
+ecbuild_add_executable (
+  TARGET cal_daily_clim.x
+  SOURCES daily_clim_SST_FRACI_eight.F90
+  LIBS ${this})
+set_target_properties(cal_daily_clim.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
+ecbuild_add_executable (
+  TARGET extract_daily_sst_ice.x
+  SOURCES extract_day_SST_FRACI_eight.F90
+  LIBS ${this})
+set_target_properties(extract_daily_sst_ice.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
+ecbuild_add_executable (
+  TARGET gen_forecast_bcs.x
+  SOURCES forecast_SST_FRACI_eight.F90
+  LIBS ${this})
+set_target_properties(gen_forecast_bcs.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 if (USE_F2PY)
    find_package(F2PY2)
