@@ -71,7 +71,34 @@ class upperair(remap_base):
      label = get_label(config)
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
-     no_remap = self.link_without_remap(restarts_in, suffix)
+     in_bc_base     = config['input']['shared']['bc_base'] 
+     if "gmao_SIteam/ModelData" in in_bc_base:
+        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
+
+     in_bc_version  = config['input']['shared']['bc_version']
+     agrid       = config['input']['shared']['agrid']
+     ogrid       = config['input']['shared']['ogrid']
+     omodel      = config['input']['shared']['omodel']
+     stretch     = config['input']['shared']['stretch']
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
+
+     out_bc_base    = config['output']['shared']['bc_base'] 
+     out_bc_version = config['output']['shared']['bc_version']
+     agrid       = config['output']['shared']['agrid']
+     ogrid       = config['output']['shared']['ogrid']
+     omodel      = config['output']['shared']['omodel']
+     stretch     = config['output']['shared']['stretch']
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
+
+     expid = config['output']['shared']['expid']
+     if (expid) :
+        expid = expid + '.'
+     else:
+        expid = ''
+
+     no_remap = self.copy_without_remap(restarts_in, topoin, topoout, suffix)
      if (no_remap) : return
 
      print( "cd " + out_dir)
@@ -92,40 +119,15 @@ class upperair(remap_base):
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
-     in_bc_base     = config['input']['shared']['bc_base'] 
-     in_bc_version  = config['input']['shared']['bc_version']
-     agrid       = config['input']['shared']['agrid']
-     ogrid       = config['input']['shared']['ogrid']
-     omodel      = config['input']['shared']['omodel']
-     stretch     = config['input']['shared']['stretch']
-     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-
-     if "gmao_SIteam/ModelData" in in_bc_base:
-        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
-
-     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
-     out_bc_base    = config['output']['shared']['bc_base'] 
-     out_bc_version = config['output']['shared']['bc_version']
-     agrid       = config['output']['shared']['agrid']
-     ogrid       = config['output']['shared']['ogrid']
-     omodel      = config['output']['shared']['omodel']
-     stretch     = config['output']['shared']['stretch']
-     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-
-     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
-     #fname = os.path.basename(topoout)
-     #cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
-     #print('\n'+cmd)
-     #subprocess.call(shlex.split(cmd))
 
      agrid  = config['output']['shared']['agrid']
      if agrid[0].upper() == 'C':
@@ -313,11 +315,6 @@ endif
 #
 #    post process
 #
-     expid = config['output']['shared']['expid']
-     if (expid) :
-        expid = expid + '.'
-     else:
-        expid = ''
      suffix = '_rst.' + suffix
 
      for out_rst in glob.glob("*_rst*"):
@@ -394,43 +391,6 @@ endif
          bin2nc(dest, ncdest, yaml_file)
        os.remove(dest)
 
-  def link_without_remap(self, restarts_in, suffix):
-     config = self.config
-     in_agrid        = config['input']['shared']['agrid']
-     out_agrid       = config['output']['shared']['agrid']
-     out_levels      = config['output']['air']['nlevel']
-     in_bc_version   = config['input']['shared']['bc_version']
-     out_bc_version  = config['output']['shared']['bc_version']
-     in_stretch      = config['input']['shared']['stretch']
-     out_stretch     = config['output']['shared']['stretch']
-
-     if (in_agrid == out_agrid and \
-         in_bc_version == out_bc_version and in_stretch  == out_stretch) :
-
-       for rst in restarts_in :
-         if 'fvcore_internal' in rst:
-           fvrst     = nc.Dataset(rst)
-           in_levels = fvrst.dimensions['lev'].size
-           if in_levels != int(out_levels): return False
-
-       out_dir = config['output']['shared']['out_dir']
-       expid = config['output']['shared']['expid']
-       if (expid) :
-          expid = expid + '.'
-       else:
-          expid = ''
-
-       print('\nUpper air restart files link to orignal restart files without remapping" \n')
-       for rst in restarts_in :
-         f = expid + os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_rst.'+suffix
-         cmd = '/bin/ln -s  ' + rst + ' ' + out_dir+'/'+f
-         print('\n'+cmd)
-         subprocess.call(shlex.split(cmd))
-
-       return True
-
-     return False
-  
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')
    air.remap()

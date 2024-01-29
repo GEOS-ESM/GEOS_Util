@@ -43,7 +43,6 @@ class catchANDcn(remap_base):
         return
      in_rstfile = in_rstfiles[0]  
              
-     print("\nRemapping " + model + ".....\n")
 
      cwdir          = os.getcwd()
      bindir         = os.path.dirname(os.path.realpath(__file__))
@@ -84,6 +83,19 @@ class catchANDcn(remap_base):
 
      out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
+     label = get_label(config) 
+
+     suffix     = time+'z.nc4' + label
+
+     if (expid) :
+        expid = expid + '.'
+     else:
+        expid = ''
+
+     no_remap = self.copy_without_remap([in_rstfile], in_tilefile, out_tilefile, suffix)
+     if (no_remap) : return
+
+     print("\nRemapping " + model + ".....\n")
  # determine NPE based on *approximate* number of input and output tile
       
      in_Ntile  = 0
@@ -131,14 +143,6 @@ class catchANDcn(remap_base):
 
      account    = config['slurm_pbs']['account']
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
-     label = get_label(config) 
-
-     suffix     = time+'z.nc4' + label
-
-     if (expid) :
-        expid = expid + '.'
-     else:
-        expid = ''
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix
 
@@ -432,6 +436,8 @@ def remap_land_only():
 
    catch = catchANDcn(params_file=config_yaml)
    catch.remap()
+
+
 
 if __name__ == '__main__' :
 

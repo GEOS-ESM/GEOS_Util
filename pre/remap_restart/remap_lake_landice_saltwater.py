@@ -37,12 +37,45 @@ class lake_landice_saltwater(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__)) 
+
      in_bc_base    = config['input']['shared']['bc_base']
      in_bc_version = config['input']['shared']['bc_version']
      out_bc_base   = config['output']['shared']['bc_base']
      out_bc_version= config['output']['shared']['bc_version']
 
+     agrid         = config['input']['shared']['agrid']
+     ogrid         = config['input']['shared']['ogrid']
+     omodel        = config['input']['shared']['omodel']
+     stretch       = config['input']['shared']['stretch']
+     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+
+     agrid         = config['output']['shared']['agrid']
+     ogrid         = config['output']['shared']['ogrid']
+     omodel        = config['output']['shared']['omodel']
+     stretch       = config['output']['shared']['stretch']
+     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+
+     types = '.bin'
+     type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
+     type_str = str(type_str)
+     if 'Hierarchical' in type_str:
+        types = '.nc4'
+     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+
+     label = get_label(config) 
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
+
      out_dir    = config['output']['shared']['out_dir']
+     expid = config['output']['shared']['expid']
+     if (expid) :
+        expid = expid + '.'
+     else:
+        expid = ''
+
+     no_remap = self.copy_without_remap(restarts_in, in_tile_file, out_tile_file, suffix)
+     if no_remap : return
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
@@ -58,15 +91,6 @@ class lake_landice_saltwater(remap_base):
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
-     types = '.bin'
-     type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
-     type_str = str(type_str)
-     if 'Hierarchical' in type_str:
-        types = '.nc4'
-     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-
-     label = get_label(config) 
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
      saltwater = ''
      seaice    = ''
@@ -86,20 +110,6 @@ class lake_landice_saltwater(remap_base):
         if 'lake'      in f : lake      = f
         if 'roue'      in f : route     = f
         if 'openwater' in f : openwater = f
-
-     agrid         = config['input']['shared']['agrid']
-     ogrid         = config['input']['shared']['ogrid']
-     omodel        = config['input']['shared']['omodel']
-     stretch       = config['input']['shared']['stretch']
-     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
-
-     agrid         = config['output']['shared']['agrid']
-     ogrid         = config['output']['shared']['ogrid']
-     omodel        = config['output']['shared']['omodel']
-     stretch       = config['output']['shared']['stretch']
-     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
@@ -152,11 +162,6 @@ class lake_landice_saltwater(remap_base):
        cmd = route + out_til + ' ' + yyyymmddhh_[0:6]
        self.run_and_log(cmd, log_name)
 
-     expid = config['output']['shared']['expid']
-     if (expid) :
-        expid = expid + '.'
-     else:
-        expid = ''
      suffix = '_rst.' + suffix
      for out_rst in glob.glob("OutData/*_rst*"):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
