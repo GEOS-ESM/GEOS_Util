@@ -104,11 +104,12 @@ class catchANDcn(remap_base):
      else:
         NPE = 160
 
-     QOS = "#SBATCH --qos="+config['slurm']['qos']
-     TIME ="#SBATCH --time=1:00:00"
-     if NPE >= 160:
-       assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
-       TIME = "#SBATCH --time=12:00:00"
+#    QOS = "#SBATCH --qos="+config['slurm']['qos']
+     TIME ="#SBATCH --time=3:00:00"
+#    if NPE >= 160:
+#      assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
+#      TIME = "#SBATCH --time=12:00:00"
+     QOS = "#SBATCH --constraint=mil"
      PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
     
      account    = config['slurm']['account']

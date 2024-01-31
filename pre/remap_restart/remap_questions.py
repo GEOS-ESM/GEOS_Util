@@ -57,7 +57,7 @@ def echo_bcs(x,opt):
 
 def default_partition(x):
    if x['slurm:qos'] == 'debug':
-      x['slurm:partition'] = 'compute'
+      x['slurm:partition'] = 'scutest'
       return False
    return True
 
@@ -425,7 +425,7 @@ def ask_questions():
             "type": "text",
             "name": "slurm:partition",
             "message": "SLURM partition?",
-            "default": "compute",
+            "default": "scutest",
             "when": lambda x : default_partition(x),
         },
    ]

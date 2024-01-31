@@ -1046,8 +1046,16 @@
                     zlev(lev).eq.750 .or. zlev(lev).eq.600 .or. &
                     zlev(lev).eq.500 .or. zlev(lev).eq.400 .or. &
                     zlev(lev).eq.300 .or. zlev(lev).eq.200 .or. &
-                    zlev(lev).eq.100 .or. zlev(lev).eq.70  .or. &
-                    zlev(lev).eq.30  .or. zlev(lev).eq.10  ) then
+                    zlev(lev).eq.100 .or. zlev(lev).eq.90  .or. &
+                    zlev(lev).eq.80  .or. zlev(lev).eq.70  .or. &
+                    zlev(lev).eq.60  .or. zlev(lev).eq.50  .or. &
+                    zlev(lev).eq.40  .or. zlev(lev).eq.30  .or. &
+                    zlev(lev).eq.20  .or. zlev(lev).eq.10  .or. &
+                    zlev(lev).eq.9   .or. zlev(lev).eq.8   .or. &
+                    zlev(lev).eq.7   .or. zlev(lev).eq.6   .or. &
+                    zlev(lev).eq.5   .or. zlev(lev).eq.4   .or. &
+                    zlev(lev).eq.3   .or. zlev(lev).eq.2   .or. &
+                    zlev(lev).eq.1 ) then
                     write(6,1005) int(zlev(lev)),trim(regions(iregion)),&
                                   trim(fields_3d(n)%name),nymd,nhms,hour,&
                                   rms(iregion,lev,nfield,nt,1),&
