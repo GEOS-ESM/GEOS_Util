@@ -54,7 +54,7 @@ class remap_base(object):
 
        cmd = 'diff -q ' + compared_file_in + ' ' + compared_file_out
        print('\n' + cmd)
-       diff  = subprocess.call(shlex.split(cmd)))
+       diff  = subprocess.call(shlex.split(cmd))
        # diff = 0 means no difference
        if diff != 0: return False
 
