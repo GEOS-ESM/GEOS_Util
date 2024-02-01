@@ -92,7 +92,7 @@ class catchANDcn(remap_base):
      else:
         expid = ''
 
-     no_remap = self.copy_without_remap([in_rstfile], in_tilefile, out_tilefile, suffix)
+     no_remap = self.copy_without_remap([in_rstfile], in_tilefile, out_tilefile, suffix, catch=True)
      if (no_remap) : return
 
      print("\nRemapping " + model + ".....\n")

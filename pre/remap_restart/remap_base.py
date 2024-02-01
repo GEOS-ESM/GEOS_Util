@@ -34,7 +34,7 @@ class remap_base(object):
       print(" remove temporary folder that contains MERRA-2 archived files ... \n")
       subprocess.call(['/bin/rm', '-rf', self.config['input']['shared']['rst_dir']])
 
-  def copy_without_remap(self, restarts_in, compared_file_in, compared_file_out, suffix):
+  def copy_without_remap(self, restarts_in, compared_file_in, compared_file_out, suffix, catch=False):
      config = self.config
      in_agrid        = config['input']['shared']['agrid']
      out_agrid       = config['output']['shared']['agrid']
@@ -57,6 +57,10 @@ class remap_base(object):
        diff  = subprocess.call(shlex.split(cmd)))
        # diff = 0 means no difference
        if diff != 0: return False
+
+       # for catchment, even tile files are the same, if bc is different, it still need remap
+       if (catch) :
+          if in_bc_version != out_bc_version : return False
 
        expid = config['output']['shared']['expid']
        if (expid) :
