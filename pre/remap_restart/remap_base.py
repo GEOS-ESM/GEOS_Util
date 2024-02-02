@@ -42,7 +42,7 @@ class remap_base(object):
 #    restarts     | agrid/stretch | #levels | topo files | tile file | bcs version
 #    ----------------------------------------------------------------------------
 #    upper air    |       X       |    X    |     X      |           |
-#    catch/vegdyn |       X	  |         |            |     X     |     X
+#    catch/vegdyn |       X       |         |            |     X     |     X
 #    landice      |       X       |         |            |     X     |
 #
      config = self.config
