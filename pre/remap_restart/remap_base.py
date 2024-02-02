@@ -35,6 +35,16 @@ class remap_base(object):
       subprocess.call(['/bin/rm', '-rf', self.config['input']['shared']['rst_dir']])
 
   def copy_without_remap(self, restarts_in, compared_file_in, compared_file_out, suffix, catch=False):
+#
+#    Determine if remapping is needed for a group of restart files, or if the input restart files 
+#    can just simply be copied to the output dir, based on the following dependency table:
+#
+#    restarts     | agrid/stretch | #levels | topo files | tile file | bcs version
+#    ----------------------------------------------------------------------------
+#    upper air    |       X       |    X    |     X      |           |
+#    catch/vegdyn |       X	  |         |            |     X     |     X
+#    landice      |       X       |         |            |     X     |
+#
      config = self.config
      in_agrid        = config['input']['shared']['agrid']
      out_agrid       = config['output']['shared']['agrid']
