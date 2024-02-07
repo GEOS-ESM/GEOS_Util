@@ -4,7 +4,9 @@ function rmscmp (args)
  numargs = result
 
 'run getenv SOURCE'
-        SOURCE = result
+            SOURCE = result
+'run getenv GEOSUTIL'
+            GEOSUTIL = result
 
 field = h
 desc  = ''
@@ -554,9 +556,18 @@ critval999 = subwrd(result,3)
 'q defval astudtout 1 1'
 critval9999 = subwrd(result,3)
 
+* Set critval for Synoptic Variability Confidence Interval
+* --------------------------------------------------------
+ synopconf = 0.95
+asynopconf = 1 - synopconf
+'astudt 'dof'  'asynopconf
+'q defval astudtout 1 1'
+critsynop = subwrd(result,3)
 
-* Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment (90% Confidence)
-* -----------------------------------------------------------------------------------------------------------------
+say 'CRITVAL for Synoptic Variability estimates based on 'synopconf*100' % Confidence'
+
+* Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment
+* ------------------------------------------------------------------------------------------------
 'set dfile 'dfile
 'set t 1   'tmin
 'define zvarave = lev-lev'
@@ -572,7 +583,7 @@ while( m<=mexps )
 endwhile
 'define zvarave = zvarave / 'mexps
 'define se = sqrt( (zvar0 + zvarave)/'numfiles' )'
-'define dx = se*'critval95
+'define dx = se*'critsynop
 'define rUave = pow( abs(zave0+dx),'irmsfact' )'
 'define rLave = pow( abs(zave0-dx),'irmsfact' )'
 
@@ -608,6 +619,10 @@ while( m<=mexps )
 'define dx       =  se*'critval9999
 'define rUp9999'm' = pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 'define rLp9999'm' = pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+
+'define dx       =  se*'critsynop
+'define rUsyn'm' = pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLsyn'm' = pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
 m = m + 1
 endwhile
@@ -745,8 +760,8 @@ endif
 
 
 
-* Plot 95% Confidence Intervals for Synoptic Variance from Average of All Experiment
-* ----------------------------------------------------------------------------------
+* Plot critsynop Confidence Intervals for Synoptic Variance from Average of All Experiment
+* ----------------------------------------------------------------------------------------
 'set cmark 0'
 'set cthick 2'
 'set cstyle 3'
@@ -832,8 +847,8 @@ endif
 m = m + 1
 endwhile
 
-* Compute Upper and Lower Bounds for 95% Confidence Interval Values for Synoptic Variability
-* ------------------------------------------------------------------------------------------
+* Compute Upper and Lower Bounds for Synoptic Variability Confidence Interval Values
+* ----------------------------------------------------------------------------------
 'set dfile 'dfile
 'set t 'tmin
 'd rUave'
@@ -842,8 +857,8 @@ valrU = subwrd(result,4)
 valrL = subwrd(result,4)
 
 
-* Compute Upper & Lower Bounds for 95% Confidence Interval Values for Paired Hypothesis Test
-* ------------------------------------------------------------------------------------------
+* Compute Upper & Lower Bounds for Range of Confidence Interval Values for Paired Hypothesis Test
+* -----------------------------------------------------------------------------------------------
 m = 1
 while( m<=mexps )
 'set dfile 'ddif.m
@@ -879,16 +894,21 @@ valrUp9999.m = subwrd(result,4)
 'd rLp9999'm
 valrLp9999.m = subwrd(result,4)
 
+'d rUsyn'm
+valrUsyn.m = subwrd(result,4)
+'d rLsyn'm
+valrLsyn.m = subwrd(result,4)
+
 'set t 'tbeg.m' 'tdif.m
 'minmax rave'm'-rave0'
 raveMX.m = subwrd(result,1)
 raveMN.m = subwrd(result,2)
 'set t 'tdif.m
-say 'tdif.'m': 'tdif.m' 68.00% Confidence rUp: 'valrUp68.m' rLp: 'valrLp68.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 90.00% Confidence rUp: 'valrUp90.m' rLp: 'valrLp90.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 95.00% Confidence rUp: 'valrUp95.m' rLp: 'valrLp95.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 99.00% Confidence rUp: 'valrUp99.m' rLp: 'valrLp99.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 99.90% Confidence rUp: 'valrUp999.m' rLp: 'valrLp999.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 68.00% Confidence rUp: '  valrUp68.m' rLp: '  valrLp68.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 90.00% Confidence rUp: '  valrUp90.m' rLp: '  valrLp90.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 95.00% Confidence rUp: '  valrUp95.m' rLp: '  valrLp95.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 99.00% Confidence rUp: '  valrUp99.m' rLp: '  valrLp99.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 99.90% Confidence rUp: ' valrUp999.m' rLp: ' valrLp999.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
 say 'tdif.'m': 'tdif.m' 99.99% Confidence rUp: 'valrUp9999.m' rLp: 'valrLp9999.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
 m = m + 1
 endwhile
@@ -897,16 +917,16 @@ endwhile
 * Plot Difference plus Significance
 * ---------------------------------
 axfac = 1.2
-axmax = valrUp95.1*axfac
-axmin = valrLp95.1*axfac
+axmax = valrUsyn.1*axfac
+axmin = valrLsyn.1*axfac
 
 * Compute Axis Limits based on Error Bars
 * ---------------------------------------
 if( mexps>1 )
     m = 2
     while( m<=mexps )
-    if( valrUp95.m*axfac > axmax ) ; axmax = valrUp95.m*axfac ; endif
-    if( valrLp95.m*axfac < axmin ) ; axmin = valrLp95.m*axfac ; endif
+    if( valrUsyn.m*axfac > axmax ) ; axmax = valrUsyn.m*axfac ; endif
+    if( valrLsyn.m*axfac < axmin ) ; axmin = valrLsyn.m*axfac ; endif
     m = m + 1
     endwhile
 else
@@ -981,7 +1001,7 @@ if( mexps=1 )
 *  'd rUp9999'm'*1000;rLp9999'm'*1000'
 else
    'set ccolor 'expcol.m
-   'd rUp95'm'*1000;rLp95'm'*1000'
+   'd rUsyn'm'*1000;rLsyn'm'*1000'
 endif
 
 m = m + 1
@@ -1172,9 +1192,9 @@ endwhile
     if( rms = 4 ) ; rms_label = '_PHASE'      ; endif
 
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 
 if( debug = "TRUE" )

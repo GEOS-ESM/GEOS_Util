@@ -45,6 +45,7 @@ endwhile
 'set dfile 'modfil1
 'sety'
 'setz'
+'setdates'
 'getdates'
 'run getenv "BEGDATE"'
              begdate  = result

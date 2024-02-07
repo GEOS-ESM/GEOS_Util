@@ -18,6 +18,10 @@ function plot_season (args)
 'run getenv ENDDATE'
             enddate = result
 
+'q gxout'
+   gxout = sublin(result,4)
+   gxout = subwrd(gxout,6)
+
 * Choose "indv" or "avrg" for Turn-Around Lats (talats) based on Turn-Around Functions (tafunc) "wstr" or "psi"
 * -------------------------------------------------------------------------------------------------------------
     if( talats = avrg ) ; talatsz = 'Averaged'        ; endif
@@ -59,8 +63,6 @@ function plot_season (args)
 'getinfo ydim'
           RSLV = (result-1)/2
          CRSLV = C''RSLV
-
-'set xlab on'
 
 
     tags = ''
@@ -121,6 +123,322 @@ if( numargs>2 & M2FLAG = 'NOM2' )
     endwhile
 endif
 
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+*                          Get Experiment Names
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
+    n = 1
+    while( n<=numfiles )
+           'set dfile 'n
+           'getinfo desc'
+                    desc = result
+            node = ''
+            m = 2
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            EXP.n = node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            while( node != 'ctl' & node != 'data' )
+            EXP.n = EXP.n'.'node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            endwhile
+
+*       Generate and Use WSTAR files stored in OUTPUT directory
+*       -------------------------------------------------------
+          FILE.n = 'WSTAR_'talats'.'EXP.n
+        LOCATION = '../'
+        LOCATION = ''
+
+        n = n + 1
+    endwhile
+
+    axmax = -1e15
+    axmin =  1e15
+
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+*      Loop over ALL experiments to Compute Latitudinally-Averged Data
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
+n = 1
+while( n<=numfiles )
+
+       'set dfile 'n
+
+       'run getdates'
+       'getinfo tmin'
+                tmin = result
+       'getinfo tmax'
+                tmax = result
+                tdim = tmax - tmin + 1
+
+       'set lev 'levmax
+       'getinfo zpos'
+                zmin = result
+       'set lev 'levmin
+       'getinfo zpos'
+                zmax = result
+                zdim = zmax - zmin + 1
+        say 'File: 'n'  zmax: 'zmax'  zmin: 'zmin'  zdim: 'zdim
+
+        levels = ''
+               z  = zmin
+        while( z <= zmax )
+          'set z '  z
+          'getinfo level'
+                   level = result
+           levels = levels' 'level
+                z = z+1
+        endwhile
+        say 'Levels: 'levels
+        say ' '
+
+* ------------------------------------------------------------------------
+*   Compute w* for Level- and Time- Independentment Turn-Around Latitudes
+* ------------------------------------------------------------------------
+
+       if( talats=indv | talats=avrg | talats=hard )
+
+       'set lev 'levmax' 'levmin
+       'set y 1'
+
+       if( hardmin != -999 ) ; latmin = latmax  ; endif
+       if( hardmax != -999 ) ; latmax = hardmax ; endif
+
+       if(talats=avrg)
+          if(tafunc=wstr)
+            'run getenv wstr'season'latmx'  ; latmax = result
+            'run getenv wstr'season'latmn'  ; latmin = result
+          endif
+          if(tafunc=psi)
+            'run getenv  psi'season'latmx'  ; latmax = result
+            'run getenv  psi'season'latmn'  ; latmin = result
+          endif
+         'getint 'latmax*100
+                  latmax = result/100
+         'getint 'latmin*100
+                  latmin = result/100
+       endif
+
+       if(talats=indv)
+          if(tafunc=wstr)
+            'run getenv wstr'season'latmx'n ; latmax = result
+            'run getenv wstr'season'latmn'n ; latmin = result
+          endif
+          if(tafunc=psi)
+            'run getenv  psi'season'latmx'n ; latmax = result
+            'run getenv  psi'season'latmn'n ; latmin = result
+          endif
+         'getint 'latmax*100
+                  latmax = result/100
+         'getint 'latmin*100
+                  latmin = result/100
+       endif
+
+ say  'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
+      'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
+      'minmax dumdum'n
+         dmax = subwrd(result,1)
+         dmin = subwrd(result,2)
+       say 'talats: 'talats'  File: 'n'  latmin: 'latmin'  latmax: 'latmax'  wstar_min = 'dmin' wstar_max = 'dmax
+       if(dmax > axmax ) ; axmax = dmax ; endif
+       if(dmin < axmin ) ; axmin = dmin ; endif
+      'q dims'
+       say result
+*      pause
+
+*      End if( talats=indv | talats=avrg | talats=hard ) test
+*      ------------------------------------------------------
+       endif
+
+* ------------------------------------------------------------------------
+*    Compute w* for Level- and Time- Dependentment Turn-Around Latitudes
+* ------------------------------------------------------------------------
+
+   if( talats=levl )
+
+*      Create CTL File for Each Experiment
+*      -----------------------------------
+       ioflag = 1-sublin( read(LOCATION''FILE.n'.ctl'),1 )
+       say 'ioflag for 'LOCATION''FILE.n'.ctl: 'ioflag
+*      pause
+       if(  ioflag = 0 )
+
+      '!remove 'LOCATION''FILE.n'.ctl'
+      '!touch  'LOCATION''FILE.n'.ctl'
+      '!echo dset ^'FILE.n'.data                        >> 'LOCATION''FILE.n'.ctl'
+      '!echo title WSTAR                                >> 'LOCATION''FILE.n'.ctl'
+      '!echo undef 1e15                                 >> 'LOCATION''FILE.n'.ctl'
+      '!echo xdef  1     linear -180 1                  >> 'LOCATION''FILE.n'.ctl'
+      '!echo ydef  1     linear  -90 1                  >> 'LOCATION''FILE.n'.ctl'
+      '!echo zdef 'zdim' levels 'levels'                >> 'LOCATION''FILE.n'.ctl'
+      '!echo tdef 'tdim' linear 'begdate'    1mo        >> 'LOCATION''FILE.n'.ctl'
+      '!echo vars  3                                    >> 'LOCATION''FILE.n'.ctl'
+      '!echo minlats  'zdim' 0 minlats                  >> 'LOCATION''FILE.n'.ctl'
+      '!echo maxlats  'zdim' 0 maxlats                  >> 'LOCATION''FILE.n'.ctl'
+      '!echo wstrlats 'zdim' 0 wstar                    >> 'LOCATION''FILE.n'.ctl'
+      '!echo endvars                                    >> 'LOCATION''FILE.n'.ctl'
+
+*    Loop over Time to create Time-Dependent Level Data
+*    --------------------------------------------------
+            t = tmin
+     while( t<= tmax )
+       'set t 't
+         'getinfo date'
+                  date = result
+         say 'Date: 'date
+
+*      Loop over Levels
+*      ----------------
+              z  = zmin
+       while( z <= zmax )
+         'set z ' z
+         'set x 1'
+         'sety'
+         'getinfo level'
+                  level = result
+
+         dummy = get_lats( 'wstar'n )
+         latmin.t.z = subwrd(dummy,1)
+         latmax.t.z = subwrd(dummy,2)
+
+*      Compute Transport Poleward of Turn-Around Latitudes
+*      ---------------------------------------------------
+*         if( latmin.t.z != 1e15 & latmax.t.z != 1e15 )
+*             latmin.t.z  = latmax.t.z
+*             latmax.t.z  = 90
+*         endif
+
+         'd 'latmin.t.z
+          a = subwrd(result,4)
+         'd 'latmax.t.z
+          b = subwrd(result,4)
+
+*      Compute w* Averaged between Turn-Around Latitudes
+*      -------------------------------------------------
+          if( a = 1e15 | b = 1e15 )
+              dumw.t.z = 1e15
+          else
+*         say 'd ave(wstar'n',lat='a',lat='b')*1000'
+              'd ave(wstar'n',lat='a',lat='b')*1000'
+               result1  = sublin(result,2)
+               dumw.t.z = subwrd(result1,4)
+          endif
+
+         say '  Level: 'level'  Lats: 'latmin.t.z' 'latmax.t.z' wstar: 'dumw.t.z
+
+*      End Level Loop
+*      --------------
+       z = z+1
+       endwhile
+
+*    End Time Loop
+*    -------------
+     t = t+1
+     endwhile
+
+* ------------------------------------------------------------------------
+*                    Create DATA File for Each Experiment
+* ------------------------------------------------------------------------
+
+    'set gxout fwrite'
+    'set fwrite 'LOCATION''FILE.n'.data'
+
+            t = tmin
+     while( t<= tmax )
+       
+       'set t 't
+       'set y 1'
+              z  = zmin
+       while( z <= zmax )
+         'set z 'z
+         'd 'latmin.t.z
+          z = z+1
+       endwhile
+              z  = zmin
+       while( z <= zmax )
+         'set z 'z
+         'd 'latmax.t.z
+          z = z+1
+       endwhile
+              z  = zmin
+       while( z <= zmax )
+         'set z 'z
+         'd 'dumw.t.z
+          z = z+1
+       endwhile
+     t = t+1
+     endwhile
+
+    'disable fwrite'
+    'set gxout 'gxout
+
+*    End IOFLAG Test
+*    ---------------
+     endif
+
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
+* Note: Scaling will be based on ALL experiments
+* ----------------------------------------------
+    'open 'LOCATION''FILE.n'.ctl'
+    'getinfo numfiles'
+             dumfile = result
+    'set dfile 'dumfile
+    'set x 1'
+    'set y 1'
+    'setz   '
+    'run getdates'
+*   'run setenv DO_STD TRUE'
+    'seasonal wstrlats 'n
+
+    'minmax wstrlats'season''n
+       dmax = subwrd(result,1)
+       dmin = subwrd(result,2)
+       say 'talats: 'talats'  File: 'n'  wstar_min = 'dmin' wstar_max = 'dmax
+       if(dmax > axmax ) ; axmax = dmax ; endif
+       if(dmin < axmin ) ; axmin = dmin ; endif
+
+    'close 'dumfile
+
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
+*  End if( talats=levl ) test
+*  --------------------------
+   endif
+
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
+*  End File Loop
+*  -------------
+   n = n + 1
+endwhile
+
+
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+*             Plot Latitudinally-Averaged WSTAR Vertical Profiles
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
 'set vpage off'
 'set parea off'
 
@@ -132,220 +450,7 @@ endif
 'set vpage 0 11 0 8.5'
 'set parea 1.0 7 0.75 8'
 'set grads off'
-axmax = -1e15
-axmin =  1e15
-n = 1
-while( n<=numfiles )
-
-* Note: Scaling will be based on ALL experiments
-* ----------------------------------------------
-*  m = 1
-*  while( m<=numfiles )
-*    if( pltfile.m = n )
-
-       'set dfile 'n
-       'set lev 'levmax' 'levmin
-       'set y 1'
-
- if( talats=indv | talats=avrg | talats=hard )
-
-       if(talats=indv)
-          if(tafunc=wstr)
-            'run getenv wstr'season'latmx'n ; latmax = result
-            'run getenv wstr'season'latmn'n ; latmin = result
-          endif
-          if(tafunc=psi)
-            'run getenv  psi'season'latmx'n ; latmax = result
-            'run getenv  psi'season'latmn'n ; latmin = result
-          endif
-       endif
-
-       if(talats=avrg)
-          if(tafunc=wstr)
-            'run getenv wstr'season'latmx'  ; latmax = result
-            'run getenv wstr'season'latmn'  ; latmin = result
-          endif
-          if(tafunc=psi)
-            'run getenv  psi'season'latmx'  ; latmax = result
-            'run getenv  psi'season'latmn'  ; latmin = result
-          endif
-       endif
-
-       if( hardmin != -999 ) ; latmin = hardmin ; endif
-       if( hardmax != -999 ) ; latmax = hardmax ; endif
-
-        say 'LATMIN: 'latmin
-        say 'LATMAX: 'latmax
-
-       'getint 'latmax*100
-                latmax = result/100
-       'getint 'latmin*100
-                latmin = result/100
-
-       say 'Turn-Around wstr'n' latmin: 'latmin
-       say 'Turn-Around wstr'n' latmax: 'latmax
-
-       'define dumdum = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
-       'minmax dumdum'
-          dmax = subwrd(result,1)
-          dmin = subwrd(result,2)
-       say 'File: 'n'  min = 'dmin' max = 'dmax
-       if(dmax > axmax ) ; axmax = dmax ; endif
-       if(dmin < axmin ) ; axmin = dmin ; endif
-
- else
-
-       'q gxout'
-          gxout = sublin(result,4)
-          gxout = subwrd(gxout,6)
-        levels = ''
-       'set lev 'levmax
-       'getinfo undef'
-                undef = result
-       'getinfo zpos'
-                zmin = result
-       'set lev 'levmin
-       'getinfo zpos'
-                zmax = result
-                zdim = zmax - zmin + 1
-        say 'File: 'n'  zmax: 'zmax'  zmin: 'zmin'  zdim: 'zdim
-
-            ptot = 0
-       latminave = 0
-       latmaxave = 0
-              z  = zmin
-       while( z <= zmax )
-                'set z ' z
-        'getinfo level'
-                 level = result
-
-                 zm1 = z-1
-         'set z 'zm1
-         'getinfo level'
-                  levm1 = result
-                  delph = (levm1 - level)/2
-         zp1 = z+1
-         'set z 'zp1
-         'getinfo level'
-                  levp1 = result
-                  delp  = delph + (level - levp1)/2
-
-         'set z 'z
-         'set x 1'
-         'sety'
-         'getinfo level'
-                  level = result
-         levels = levels' 'level
-*        Find Latitudes of Zero Line Crossings for wstar from each experiment for each level
-*        -----------------------------------------------------------------------------------
-         dummy    = get_lats( 'w'type''season''time''n )
-         latmin.z = subwrd(dummy,1)
-         latmax.z = subwrd(dummy,2)
-         foundS   = subwrd(dummy,3)
-         foundN   = subwrd(dummy,4)
-         'set x 1'
-         'set y 1'
-         if( foundS = TRUE & foundN = TRUE )
-            'define dumdum'z' = ave(w'type''season''time''n',lat='latmin.z',lat='latmax.z')*1000'
-            'd      dumdum'z
-             dumdum.z = subwrd(result,4)
-             say 'latmina: 'latminave'  latmin.z: 'latmin.z'  delp: 'delp'  dumdum.z: 'dumdum.z
-             latminave = latminave + latmin.z * delp
-             latmaxave = latmaxave + latmax.z * delp
-                 ptot  = ptot      +            delp
-         else
-             dumdum.z = undef
-         endif
-         say 'File: 'n'  z: 'z'  Level: 'level'  LatMin: 'latmin.z'  LatMax: 'latmax.z'  FoundS: 'foundS'   FoundN: 'foundN'  wstar: 'dumdum.z
-         z = z+1
-       endwhile
-       if( ptot != 0 )
-           latminave = latminave / ptot
-           latmaxave = latmaxave / ptot
-       else
-           latminave = undef
-           latmaxave = undef
-       endif
-
-*      Write ctl file
-*      --------------
-      '!remove FILE_'n'.ctl'
-      '!touch  FILE_'n'.ctl'
-      '!echo dset ^FILE_'n'.data                        >> FILE_'n'.ctl'
-      '!echo title WSTAR                                >> FILE_'n'.ctl'
-      '!echo undef 1e15                                 >> FILE_'n'.ctl'
-      '!echo xdef  1     linear  0 1                    >> FILE_'n'.ctl'
-      '!echo ydef  1     linear  0 1 1                  >> FILE_'n'.ctl'
-      '!echo zdef 'zdim' levels 'levels'                >> FILE_'n'.ctl'
-      '!echo tdef  1     linear 'begdate' 1mo           >> FILE_'n'.ctl'
-      '!echo vars  5                                    >> FILE_'n'.ctl'
-      '!echo minlata  1     0 average minlats           >> FILE_'n'.ctl'
-      '!echo maxlata  1     0 average maxlats           >> FILE_'n'.ctl'
-      '!echo minlats 'zdim' 0 minlats                   >> FILE_'n'.ctl'
-      '!echo maxlats 'zdim' 0 maxlats                   >> FILE_'n'.ctl'
-      '!echo wstar   'zdim' 0 wstar                     >> FILE_'n'.ctl'
-      '!echo endvars                                    >> FILE_'n'.ctl'
-
-      'set gxout fwrite'
-      'set fwrite FILE_'n'.data'
-         'd 'latminave
-         'd 'latmaxave
-              z  = zmin
-       while( z <= zmax )
-         'set z 'z
-         'd 'latmin.z
-          z = z+1
-       endwhile
-              z  = zmin
-       while( z <= zmax )
-         'set z 'z
-         'd 'latmax.z
-          z = z+1
-       endwhile
-              z  = zmin
-       while( z <= zmax )
-         'set z 'z
-         'd 'dumdum.z
-          z = z+1
-       endwhile
-
-      'disable fwrite'
-      'set gxout 'gxout
-
-      'open FILE_'n'.ctl'
-       newfile = numfiles + 1
-      'set dfile 'newfile
-      'set x 1'
-      'set y 1'
-      'set t 1'
-      'setz'
-      'define wstarz'n' = wstar'
-
-       'minmax wstarz'n
-          dmax = subwrd(result,1)
-          dmin = subwrd(result,2)
-       say 'File: 'n'  min = 'dmin' max = 'dmax
-       if(dmax > axmax ) ; axmax = dmax ; endif
-       if(dmin < axmin ) ; axmin = dmin ; endif
-
-      'close 'newfile
-
- endif
-
-* --------------------------------------------------------------------
-
-        say ' '
-       'set lev 'levmax' 'levmin
-       'sety'
-
-* Note: Scaling will be based on ALL experiments
-* ----------------------------------------------
-*    endif
-*  m = m + 1
-*  endwhile
-
-n = n + 1
-endwhile
+'set xlab on'
 
   say 'Initial  axmin: 'axmin'  axmax: 'axmax
   delax = ( axmax - axmin )/15
@@ -372,6 +477,8 @@ endwhile
 
   say 'Final   axmin: 'axmin'  axmax: 'axmax
   say ' '
+          axmin  = 0.21509
+          axmax  = 0.44501
  'set  axlim  'axmin' 'axmax
 
    id.1  = 'a'
@@ -390,8 +497,6 @@ endwhile
    id.14 = 'n'
    id.15 = 'o'
 
-color.1  = 23
-color.2  = 25
 color.3  = 28
 color.4  = 33
 color.5  = 35
@@ -406,11 +511,7 @@ color.13 = 63
 color.14 = 65
 color.15 = 68
 
- color.1  = 23
- color.2  = 25
  color.3  = 27
- color.4  = 33
- color.5  = 35
  color.6  = 39
  color.7  = 58
  color.8  = 42
@@ -446,19 +547,26 @@ color.15 = 68
     color.6  = 7
     color.7  = 12
 
-*   color.1  = 2
+*   color.1  = 4
 *   color.2  = 5
 *   color.3  = 3
-*   color.4  = 4
+*   color.4  = 1  
+*   color.5  = 1
+*   color.6  = 3
+*   color.7  = 1
 
-* Plot Latitudinally-Averaged WSTAR
-* ---------------------------------
+* Plot Latitudinally-Averaged WSTAR for Selected Input Files
+* ----------------------------------------------------------
 n = 1
 while( n<=numfiles )
    m = 1
    while( m<=numfiles )
      if( pltfile.m = n )
+
        'set dfile 'n
+       'run getdates'
+       'getinfo tmin'
+                tmin = result
        'getinfo desc'
                 desc.n = result
        '!remove DESC.txt'
@@ -470,7 +578,7 @@ while( n<=numfiles )
        'set zlog on'
        'set y 1'
        'set grid on'
-       'set t 1'
+       'set t 'tmin
        'set ccolor 'color.n
                    'set cthick 3'
        if( n=1 ) ; 'set cthick 10' ; endif
@@ -478,67 +586,35 @@ while( n<=numfiles )
                     k = n - 3 * math_int(n/3) + 1
        'set cstyle 'k
        'set cstyle '1
-*      if( n=2 ) ; 'set cstyle 1' ; endif
        'set cmark  0'
-*      'set cmark  3'
-
- if ( talats=indv | talats=avrg | talats=hard )
-       if(talats=indv)
-          if(tafunc=wstr)
-            'run getenv wstr'season'latmx'n ; latmax = result
-            'run getenv wstr'season'latmn'n ; latmin = result
-          endif
-          if(tafunc=psi)
-            'run getenv  psi'season'latmx'n ; latmax = result
-            'run getenv  psi'season'latmn'n ; latmin = result
-          endif
-       endif
-
-       if(talats=avrg)
-          if(tafunc=wstr)
-            'run getenv wstr'season'latmx'  ; latmax = result
-            'run getenv wstr'season'latmn'  ; latmin = result
-          endif
-          if(tafunc=psi)
-            'run getenv  psi'season'latmx'  ; latmax = result
-            'run getenv  psi'season'latmn'  ; latmin = result
-          endif
-       endif
-
-       if( hardmin != -999 ) ; latmin = hardmin ; endif
-       if( hardmax != -999 ) ; latmax = hardmax ; endif
-
-       'getint 'latmax*100
-                latmax = result/100
-       'getint 'latmin*100
-                latmin = result/100
-
-       say 'Turn-Around wstr'n' latmin: 'latmin
-       say 'Turn-Around wstr'n' latmax: 'latmax
-
-*      Perform Smoothing Option
-*      ------------------------
-       if( nsmooth > 0 )
-          'sety'
-          'define wstrsmth = smth9( w'type''season''time''n')'
-           countr = 1
-           while( countr < nsmooth )
-                 'define wstrsmth = smth9( wstrsmth )'
-           countr = countr + 1
-           endwhile
-          'set y 1'
-          'd ave(wstrsmth,lat='latmin',lat='latmax')*1000'
-       else
-          'd ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
-       endif
-
- else
 
 *      Plot wstar based on Level-Dependent Turn-Around Latitudes
 *      ---------------------------------------------------------
-       'd wstarz'n
+       if( talats=levl )
 
- endif
+          'd wstrlats'season''n
+
+*         Add Standard Deviation to selected experiments
+*         ----------------------------------------------
+*         if( n=4 )
+*           'set cstyle 3'
+*           'set cthick 1'
+*           'set ccolor 1'
+*           'd wstrlats'season''n' + wstrlats'season'std'n
+*           'set cstyle 3'
+*           'set cthick 1'
+*           'set ccolor 1'
+*           'd wstrlats'season''n' - wstrlats'season'std'n
+*         endif
+
+       else
+
+*         Plot wstar based on Level-Independent Turn-Around Latitudes
+*         -----------------------------------------------------------
+          'd dumdum'n
+          'q dims'
+
+       endif
 
      endif
    m = m + 1
@@ -547,8 +623,12 @@ n = n + 1
 endwhile
 'draw ylab Pressure (hPa)'
 
-* Plot Latitude x Height Cross-Section
-* ------------------------------------
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+*                 Plot Latitude x Height WSTAR Cross-Sections
+* ------------------------------------------------------------------------
+* ------------------------------------------------------------------------
+
 if(3>2)
 'set vpage off'
 'set parea off'
@@ -556,11 +636,10 @@ if(3>2)
 'set vpage 7.0 11.0 0.0 8.5'
 
 count = 0
-ymax = 8.35
  ymax = 8.55
  ymin = ymax
-ydel = 0.24
-ydif = 0.00
+ ydel = 0.24
+ ydif = 0.00
 
 n = 1
 while( n<=numfiles )
@@ -700,22 +779,26 @@ while( n<=numfiles )
 
  else
 
-       'open FILE_'n'.ctl'
+       'open 'LOCATION''FILE.n'.ctl'
        'getinfo numfiles'
                 newfile = result
        'set dfile 'newfile
        'set axlim -90 90'
        'set xaxis -90 90 30'
+       'set x 1'
        'set y 1'
        'set t 1'
        'set lev 'levmax' 'levmin
+       'seasonal minlats'
+       'seasonal maxlats'
+       'set t 1'
        'set digsiz 0.02'
        'set ccolor 1'
        'set cmark  3'
-       'd minlats'
+       'd minlats'season
        'set ccolor 1'
        'set cmark  3'
-       'd maxlats'
+       'd maxlats'season
        'close 'newfile
        'set lat -90 90'
 
@@ -729,14 +812,14 @@ while( n<=numfiles )
    endwhile
 n = n + 1
 endwhile
-endif
 
-*ydif = ymax-ymin
-ymax = ybot - 0.2
-ymin = ymax-ydif
+ ymax = ybot - 0.2
+ ymin = ymax-ydif
+ say 'ymin: 'ymin'  ymax: 'ymax
+ if( ymin < 0.1 ) ; ymin = 0.1 ; endif
 say 'ymin: 'ymin'  ymax: 'ymax
-if( ymin < 0.1 ) ; ymin = 0.1 ; endif
-say 'ymin: 'ymin'  ymax: 'ymax
+
+endif
 
 
 'set vpage off'
@@ -761,37 +844,6 @@ endif
 '!remove plot_'season'.stack'
 '!remove DESC.txt'
 '!echo 'count' > plot_'season'.stack'
-
-    n = 1
-    while( n<=numfiles )
-           'set dfile 'n
-           'getinfo desc'
-                    desc = result
-            node = ''
-            m = 2
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            EXP.n = node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            while( node != 'ctl' & node != 'data' )
-            EXP.n = EXP.n'.'node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            endwhile
-        n = n + 1
-    endwhile
-
 
     n = 1
     while( n<=numfiles )
@@ -895,11 +947,21 @@ function get_lats( wstr )
 * ------------------------------------------------------------------------
 foundS  =  FALSE
 foundN  =  FALSE
+wstrlatmax = 1e15
+wstrlatmin = 1e15
 
-latbegS = - 5
-latendS = -70
-latbegN =   5
-latendN =  70
+* Create Smoothed Version of Monthly w* for Turn-Around Latitude Calculation
+* --------------------------------------------------------------------------
+'define wstrsmth = smth9( 'wstr' )'
+ countr = 1
+ while( countr < 20 )
+       'define wstrsmth = smth9( wstrsmth )'
+ countr = countr + 1
+ endwhile
+
+* --------------------------------------------------------------------------
+latendS = -5
+latbegS = -60
 
 'set lat 'latbegS
 'getinfo ypos'
@@ -910,14 +972,14 @@ latendN =  70
 
 lat1 = latbegS
 'set y 'ybeg
-'d 'wstr
+'d wstrsmth'
    val1 = subwrd(result,4)
-       y = ybeg-1
-while( y>= yend )
+       y = ybeg+1
+while( y<= yend )
    'set y 'y
    'getinfo lat'
             lat2 = result
-   'd 'wstr
+    'd wstrsmth'
       val2 = subwrd(result,4)
 *  say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
 *  pause
@@ -928,18 +990,17 @@ while( y>= yend )
            else
                wstrlatmin = lat1 - val1*( lat1-lat2 )/( val1-val2 )
            endif
-                    y = yend - 1
+                    y = yend + 1
      else
        val1 = val2
        lat1 = lat2
      endif
-   y = y - 1
+   y = y + 1
 endwhile
 
-latbegS = -15
-latendS = -70
-latbegN =  15
-latendN =  70
+* --------------------------------------------------------------------------
+latbegN =  60
+latendN =  5
 
 'set lat 'latbegN
 'getinfo ypos'
@@ -949,15 +1010,14 @@ latendN =  70
          yend = result
 lat1 = latbegN
 'set y 'ybeg
-'d 'wstr
+'d wstrsmth'
    val1 = subwrd(result,4)
-say 'y = 'ybeg'  val = 'val1
-       y = ybeg+1
-while( y<= yend )
+       y = ybeg-1
+while( y>= yend )
    'set y 'y
    'getinfo lat'
             lat2 = result
-   'd 'wstr
+   'd wstrsmth'
       val2 = subwrd(result,4)
 *  say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
 *  pause
@@ -968,12 +1028,12 @@ while( y<= yend )
            else
                wstrlatmax = lat1 - val1*( lat1-lat2 )/( val1-val2 )
            endif
-                    y = yend + 1
+                    y = yend - 1
      else
        val1 = val2
        lat1 = lat2
      endif
-   y = y + 1
+   y = y - 1
 endwhile
 
 return wstrlatmin' 'wstrlatmax' 'foundS' 'foundN

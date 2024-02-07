@@ -4,7 +4,9 @@ function corcmp (args)
  numargs = result
 
 'run getenv SOURCE'
-        SOURCE = result
+            SOURCE   = result
+'run getenv GEOSUTIL'
+            GEOSUTIL = result
 
 field = h
 desc  = ''
@@ -498,6 +500,15 @@ critval95 = subwrd(result,3)
 'q defval astudtout 1 1'
 critval99 = subwrd(result,3)
 
+* Set critval for Synoptic Variability Confidence Interval
+* --------------------------------------------------------
+ synopconf = 0.95
+asynopconf = 1 - synopconf
+'astudt 'dof'  'asynopconf
+'q defval astudtout 1 1'
+critsynop = subwrd(result,3)
+
+say 'CRITVAL for Synoptic Variability estimates based on 'synopconf*100' % Confidence'
 
 * Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment
 * ------------------------------------------------------------------------------------------------
@@ -513,7 +524,7 @@ while( m<=mexps )
 endwhile
 'define zvarave = zvarave / 'mexps
 'define se = sqrt( (zvar0 + zvarave)/'numfiles' )'
-'define dx = se*'critval95
+'define dx = se*'critsynop
 'define rUave = (exp( 2*(zave0+dx))-1)/(exp( 2*(zave0+dx))+1)'
 'define rLave = (exp( 2*(zave0-dx))-1)/(exp( 2*(zave0-dx))+1)'
 
@@ -530,7 +541,7 @@ while( m<=mexps )
 'define rUp68'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp68'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
-'define dx       = se*'critval95
+'define dx       = se*'critval90
 'define rUp90'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp90'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
@@ -541,6 +552,10 @@ while( m<=mexps )
 'define dx       = se*'critval99
 'define rUp99'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp99'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
+
+'define dx       = se*'critsynop
+'define rUsyn'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
+'define rLsyn'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
 m = m + 1
 endwhile
@@ -643,8 +658,8 @@ endwhile
 'draw ylab Anomaly Correlation'
 
 
-* Plot 95% Confidence Intervals for Synoptic Variance from Average of All Experiment
-* ----------------------------------------------------------------------------------
+* Plot critsynop Confidence Intervals for Synoptic Variance from Average of All Experiment
+* ----------------------------------------------------------------------------------------
 'set cmark 0'
 'set cthick 2'
 'set cstyle 3'
@@ -715,8 +730,8 @@ endif
 m = m + 1
 endwhile
 
-* Compute Upper and Lower Bounds for 95% Confidence Interval Values for Synoptic Variability
-* ------------------------------------------------------------------------------------------
+* Compute Upper and Lower Bounds for critsynop Confidence Interval Values for Synoptic Variability
+* ------------------------------------------------------------------------------------------------
 'set dfile 'dfile
 'set t 'tmin
 'd rUave'
@@ -751,6 +766,11 @@ valrUp99.m = subwrd(result,4)
 'd rLp99'm
 valrLp99.m = subwrd(result,4)
 
+'d rUsyn'm
+valrUsyn.m = subwrd(result,4)
+'d rLsyn'm
+valrLsyn.m = subwrd(result,4)
+
 'set t 'tbeg.m' 'tdif.m
 'minmax rave'm'-rave0'
 raveMX.m = subwrd(result,1)
@@ -767,16 +787,16 @@ endwhile
 * Plot Difference plus Significance
 * ---------------------------------
 axfac = 1.2
-axmax = valrUp95.1*axfac
-axmin = valrLp95.1*axfac
+axmax = valrUsyn.1*axfac
+axmin = valrLsyn.1*axfac
 
 * Compute Axis Limits based on Error Bars
 * ---------------------------------------
 if( mexps>1 )
     m = 2
     while( m<=mexps )
-    if( valrUp95.m*axfac > axmax ) ; axmax = valrUp95.m*axfac ; endif
-    if( valrLp95.m*axfac < axmin ) ; axmin = valrLp95.m*axfac ; endif
+    if( valrUsyn.m*axfac > axmax ) ; axmax = valrUsyn.m*axfac ; endif
+    if( valrLsyn.m*axfac < axmin ) ; axmin = valrLsyn.m*axfac ; endif
     m = m + 1
     endwhile
 else
@@ -836,7 +856,7 @@ if( mexps=1 )
    'd rUp99'm'*1000;rLp99'm'*1000'
 else
    'set ccolor 'expcol.m
-   'd rUp95'm'*1000;rLp95'm'*1000'
+   'd rUsyn'm'*1000;rLsyn'm'*1000'
 endif
 
 m = m + 1
@@ -1014,9 +1034,9 @@ endwhile
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 
 if( debug = "TRUE" )
