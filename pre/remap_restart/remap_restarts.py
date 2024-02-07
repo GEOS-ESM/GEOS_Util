@@ -26,26 +26,27 @@ from remap_catchANDcn  import *
 program_description = textwrap.dedent(f'''
       USAGE:
 
-      This script provides three options for remapping GEOS restart files:
+      This script provides four options for remapping GEOS restart files:
 
-      1. Use the interactive questionary:
+      1. Use the interactive questionnaire (recommended):
            ./remap_restarts.py
-         The questionary concludes with the option to submit the remapping job.  
+         The questionnaire concludes with the option to submit the remapping job.  
          It also creates a yaml configuration file (`remap_params.yaml`) and 
-         a command line options string (`remap_restarts.CMD`), which can be edited 
-         manually and used in the other two ways of running `remap_restarts.py`.
+         a matching command line argument string (`remap_restarts.CMD`), which can be edited 
+         manually and used in the next two run options.
 
-      2. Use an existing yaml config file:
+      2. Use an existing yaml config file*:
            ./remap_restarts.py config_file -c my_config.yaml
-         NOTE: The yaml interface may not backward compatible across releases.  If the  
-         existing yaml file does not work, use the questionary option above to generate 
-         an updated yaml file. 
 
-      3. Use command line arguments:
-           ./remap_restarts.py command_line -ymdh 2004041421  ....
+      3. Use command line arguments*:
+           ./remap_restarts.py command_line -ymdh 2004041421  ...
 
       4. For GEOSldas: Remap land (catch[cn]) restart only; global domain only; ens0000 only:
            ./remap_restarts.py land_only
+
+         *NOTE: The yaml and command-line interfaces may not backward compatible across 
+                releases.  If existing yaml files or command-line strings do not work, 
+                use the questionnaire option to generate updated versions.
 
       Help commands:
            ./remap_restarts.py -h
