@@ -37,6 +37,9 @@ program_description = textwrap.dedent(f'''
 
       2. Use an existing yaml config file:
            ./remap_restarts.py config_file -c my_config.yaml
+         NOTE: The yaml interface may not backward compatible across releases.  If the  
+         existing yaml file does not work, use the questionary option above to generate 
+         an updated yaml file. 
 
       3. Use command line arguments:
            ./remap_restarts.py command_line -ymdh 2004041421  ....
