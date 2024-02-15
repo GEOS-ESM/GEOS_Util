@@ -1,5 +1,7 @@
-add_subdirectory(pre)
-add_subdirectory(plots)
-add_subdirectory(post)
-add_subdirectory(coupled_diagnostics)
-
+set (alldirs
+  pre
+  plots
+  post
+  coupled_diagnostic
+  )
+esma_add_subdirectories (${alldirs})
