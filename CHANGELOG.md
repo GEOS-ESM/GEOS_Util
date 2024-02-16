@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update CMakeLists.txt so it is ready for sparse checkout
 - Update CI to v2 orb
 
 ### Fixed
