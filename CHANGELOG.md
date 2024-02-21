@@ -11,15 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.0.7] - 2024-02-21
+
+### Changed
+
 - Update of transport plots.
 
 ### Fixed
 
 - Fixed `q gxout` bug affecting the stats montage plots.
-
-### Removed
-
-### Deprecated
 
 ## [2.0.6] - 2024-02-21
 
