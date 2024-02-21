@@ -17,6 +17,7 @@ import glob
 from remap_base import remap_base
 from remap_utils import *
 from remap_bin2nc import bin2nc
+import netCDF4 as nc
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -59,6 +60,47 @@ class upperair(remap_base):
      out_dir    = config['output']['shared']['out_dir']
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
+
+     types = '.bin'
+     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
+     type_str = str(type_str)
+     if type_str.find('Hierarchical') >=0:
+        types = '.nc4'
+     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+
+     label = get_label(config)
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
+
+     in_bc_base     = config['input']['shared']['bc_base'] 
+     if "gmao_SIteam/ModelData" in in_bc_base:
+        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
+
+     in_bc_version  = config['input']['shared']['bc_version']
+     agrid       = config['input']['shared']['agrid']
+     ogrid       = config['input']['shared']['ogrid']
+     omodel      = config['input']['shared']['omodel']
+     stretch     = config['input']['shared']['stretch']
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
+
+     out_bc_base    = config['output']['shared']['bc_base'] 
+     out_bc_version = config['output']['shared']['bc_version']
+     agrid       = config['output']['shared']['agrid']
+     ogrid       = config['output']['shared']['ogrid']
+     omodel      = config['output']['shared']['omodel']
+     stretch     = config['output']['shared']['stretch']
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
+
+     expid = config['output']['shared']['expid']
+     if (expid) :
+        expid = expid + '.'
+     else:
+        expid = ''
+
+     no_remap = self.copy_without_remap(restarts_in, topoin, topoout, suffix)
+     if (no_remap) : return
+
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
@@ -71,55 +113,21 @@ class upperair(remap_base):
      os.chdir(tmpdir)
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
-     types = '.bin'
-     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
-     type_str = str(type_str)
-     if type_str.find('Hierarchical') >=0:
-        types = '.nc4'
-     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-
-     label = get_label(config)
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
      for rst in restarts_in :
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
-     in_bc_base     = config['input']['shared']['bc_base'] 
-     in_bc_version  = config['input']['shared']['bc_version']
-     agrid       = config['input']['shared']['agrid']
-     ogrid       = config['input']['shared']['ogrid']
-     omodel      = config['input']['shared']['omodel']
-     stretch     = config['input']['shared']['stretch']
-     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-
-     if "gmao_SIteam/ModelData" in in_bc_base:
-        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
-
-     topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
-     out_bc_base    = config['output']['shared']['bc_base'] 
-     out_bc_version = config['output']['shared']['bc_version']
-     agrid       = config['output']['shared']['agrid']
-     ogrid       = config['output']['shared']['ogrid']
-     omodel      = config['output']['shared']['omodel']
-     stretch     = config['output']['shared']['stretch']
-     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-
-     topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
-     #fname = os.path.basename(topoout)
-     #cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
-     #print('\n'+cmd)
-     #subprocess.call(shlex.split(cmd))
 
      agrid  = config['output']['shared']['agrid']
      if agrid[0].upper() == 'C':
@@ -324,11 +332,6 @@ endif
 #
 #    post process
 #
-     expid = config['output']['shared']['expid']
-     if (expid) :
-        expid = expid + '.'
-     else:
-        expid = ''
      suffix = '_rst.' + suffix
 
      for out_rst in glob.glob("*_rst*"):
@@ -388,6 +391,7 @@ endif
               merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
               merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix,
               merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix ]
+
     bin2nc_yaml = ['bin2nc_merra2_fv.yaml', 'bin2nc_merra2_moist.yaml', 'bin2nc_merra2_gocart.yaml', 'bin2nc_merra2_pchem.yaml','bin2nc_merra2_agcm.yaml']
     bin_path = os.path.dirname(os.path.realpath(__file__))
     for (f, yf) in zip(upperin,bin2nc_yaml) :
