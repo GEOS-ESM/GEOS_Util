@@ -17,7 +17,6 @@ import questionary
 from remap_utils import *
 from remap_questions import *
 from remap_command_line import *
-from remap_params import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
 from remap_analysis  import *
@@ -41,6 +40,9 @@ program_description = textwrap.dedent(f'''
 
       3. Use command line arguments:
            ./remap_restarts.py command_line -ymdh 2004041421  ....
+
+      4. For GEOSldas: Remap land (catch[cn]) restart only; global domain only; ens0000 only:
+           ./remap_restarts.py land_only
 
       Help commands:
            ./remap_restarts.py -h
@@ -66,18 +68,20 @@ def main():
      if sys.argv[1] == 'command_line':
         answers = get_answers_from_command_line(cmdl)
         noprompt = cmdl.np
+     if sys.argv[1] == 'land_only':
+        remap_land_only()
+        sys.exit(0)       
   if (len(sys.argv) == 1 or answers) :
       if not answers:
          answers = ask_questions()
          question_flag = True
-      raw_config = get_config_from_answers(answers)
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
       # just for debugging
+      # raw_config = get_config_from_answers(answers)
       # with open("raw_answers.yaml", "w") as f:
       #   yaml.dump(raw_config, f)
-      params = remap_params(raw_config)
-      config = params.config
+      config = get_config_from_answers(answers, config_tpl = True)
       config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml'
 
   print('\n')

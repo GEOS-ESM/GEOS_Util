@@ -14,26 +14,6 @@ import questionary
 import glob
 from remap_utils import *
 
-def remove_ogrid_comment(x, opt):
-  ogrid = ''
-  if opt == "IN":
-    ogrid = x.get('input:shared:ogrid')
-  else:
-    ogrid = x.get('output:shared:ogrid')
-  if not ogrid: return False
-
-  ogrid = ogrid.split()[0]
-  if opt == "IN":
-    if ogrid == 'CS':
-       ogrid = x['input:shared:agrid']
-    x['input:shared:ogrid'] = ogrid
-  else:
-    if ogrid == 'CS':
-       ogrid = x['output:shared:agrid']
-    x['output:shared:ogrid'] = ogrid
-  
-  return False
-
 def echo_level(x):
   if x["output:air:nlevel"] != str(x.get("input:air:nlevel")) :
       print("NOTE: Different # atm levels in input and new restarts.  Cannot remap agcm_import_rst (a.k.a. IAU) file.")
@@ -46,18 +26,21 @@ def echo_bcs(x,opt):
   bcv       = x.get(opt+':shared:bc_version')
   agrid     = x.get(opt+':shared:agrid')
   ogrid     = x.get(opt+':shared:ogrid')
-  model     = x.get(opt+':shared:omodel')
+  omodel    = x.get(opt+':shared:omodel')
   stretch   = x.get(opt+':shared:stretch')
   x[opt+':shared:bc_base']  = base
-  land_dir  = get_landdir(base, bcv, agrid, ogrid, model, stretch)
+  land_dir  = get_landdir(base, bcv, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
   if  not os.path.isdir(land_dir):
      exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
   print("\n Land BCs for " + opt + " restarts: " + land_dir )
   return False
 
 def default_partition(x):
-   if x['slurm:qos'] == 'debug':
-      x['slurm:partition'] = 'scutest'
+   if x['slurm_pbs:qos'] == 'debug':
+      if (BUILT_ON_SLES15):
+         x['slurm_pbs:partition'] = 'scutest'
+      else:
+         x['slurm_pbs:partition'] = 'compute'
       return False
    return True
 
@@ -70,6 +53,11 @@ def validate_merra2_time(text):
          return False 
    else:
      return False
+def SITE_MERRA2(x):
+  if GEOS_SITE == "NAS":
+     x['input:shared:MERRA-2']= False
+     return False
+  return True
 
 def ask_questions():
 
@@ -82,6 +70,7 @@ def ask_questions():
             "name": "input:shared:MERRA-2",
             "message": "Remap archived MERRA-2 restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
             "default": False,
+            "when": lambda x: SITE_MERRA2(x),
         },
         {
             "type": "path",
@@ -92,21 +81,21 @@ def ask_questions():
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date/time:  (Must be 10 digits: yyyymmddhh.)\n",
+            "message": (message_datetime + ".)\n"),
             "validate": lambda text: len(text)==10 ,
             "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": "Enter restart date:  (Must be 10 digits: yyyymmddhh; hour = 03, 09, 15, or 21 [z].)\n",
+            "message": (message_datetime + "; hour = 03, 09, 15, or 21 [z].)\n"),
             "validate": lambda text: validate_merra2_time(text) ,
             "when": lambda x: x['input:shared:MERRA-2'],
         },
         {
             "type": "path",
             "name": "output:shared:out_dir",
-            "message": "Enter output directory for new restarts:\n"
+            "message": message_out_dir,
         },
 
         # dummy (invisible) question to run function that initializes MERRA-2 config
@@ -139,7 +128,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:ogrid",
-            "message": "Select data ocean grid/resolution of input restarts:\n",
+            "message": message_ogrid_in,
             "choices": choices_ogrid_data,
             "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'],
@@ -286,7 +275,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": "\nSelect BCs version of input restarts:\n",
+            "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11'],
         },
@@ -294,7 +283,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_base",
-            "message": "\nSelect BCs base directory for input restarts: \n",
+            "message": ("\nSelect " + message_bc_base_in),
             "choices": choices_bc_base,
             "default": get_default_bc_base(),
             "when": lambda x: not x.get('input:shared:bc_base'),
@@ -303,7 +292,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "input:shared:bc_base",
-            "message": "\nEnter BCs base directory for input restarts: \n",
+            "message": ("\nEnter " + message_bc_base_in),
             "when": lambda x: 'Custom ' in x.get('input:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve input:shared:bc_base
@@ -318,7 +307,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_base",
-            "message": "\nSelect BCs base directory for new restarts: \n",
+            "message": ("\nSelect " + message_bc_base_new),
             "choices": choices_bc_base,
             "default": get_default_bc_base(),
         },
@@ -326,7 +315,7 @@ def ask_questions():
         {
             "type": "path",
             "name": "output:shared:bc_base",
-            "message": "\nEnter BCs base directory for new restarts: \n",
+            "message": ("\nEnter " + message_bc_base_new),
             "when": lambda x: 'Custom ' in x.get('output:shared:bc_base'),
         },
         # dummy (invisible) question to retrieve output:shared:bc_base
@@ -398,7 +387,7 @@ def ask_questions():
         {
             "type": "text",
             "name": "output:shared:expid",
-            "message": "Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)\n",
+            "message": message_expid,
             "default": "",
         },
         {
@@ -410,22 +399,22 @@ def ask_questions():
 
         {
             "type": "text",
-            "name": "slurm:qos",
-            "message": "SLURM quality-of-service (qos)?  (If on NCCS and atm resolution is c1440 or higher, enter allnccs.) ",
+            "name": "slurm_pbs:qos",
+            "message": message_qos,
             "default": "debug",
         },
 
         {
             "type": "text",
-            "name": "slurm:account",
-            "message": "SLURM account?",
+            "name": "slurm_pbs:account",
+            "message": message_account,
             "default": get_account(),
         },
         {
             "type": "text",
-            "name": "slurm:partition",
-            "message": "SLURM partition?",
-            "default": "scutest",
+            "name": "slurm_pbs:partition",
+            "message": message_partition,
+            "default": '',
             "when": lambda x : default_partition(x),
         },
    ]
@@ -436,6 +425,9 @@ def ask_questions():
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:  
       answers["input:surface:catch_model"] = catch_model(answers)
+   answers["output:surface:remap_water"] = answers["output:surface:remap"]
+   answers["output:surface:remap_catch"] = answers["output:surface:remap"]
+   del answers["output:surface:remap"]
  
    return answers
 

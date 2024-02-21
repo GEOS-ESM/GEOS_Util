@@ -15,9 +15,7 @@ import shlex
 import shutil
 import glob
 from remap_base import remap_base
-from remap_utils import get_label 
-from remap_utils import STRETCH_GRID
-from remap_utils import get_topodir
+from remap_utils import *
 from remap_bin2nc import bin2nc
 
 class upperair(remap_base):
@@ -74,7 +72,7 @@ class upperair(remap_base):
 
      print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
      types = '.bin'
-     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
+     type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
      type_str = str(type_str)
      if type_str.find('Hierarchical') >=0:
         types = '.nc4'
@@ -94,7 +92,10 @@ class upperair(remap_base):
      ogrid       = config['input']['shared']['ogrid']
      omodel      = config['input']['shared']['omodel']
      stretch     = config['input']['shared']['stretch']
-     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+
+     if "gmao_SIteam/ModelData" in in_bc_base:
+        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
 
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      # link topo file
@@ -109,7 +110,7 @@ class upperair(remap_base):
      ogrid       = config['output']['shared']['ogrid']
      omodel      = config['output']['shared']['omodel']
      stretch     = config['output']['shared']['stretch']
-     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid, ogrid, omodel, stretch)
+     topo_bcsdir = get_topodir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
 
      topoout = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
@@ -143,16 +144,27 @@ class upperair(remap_base):
      elif (imout>=2880):
        NPE = 5400; nwrit = 6
 
-#    QOS = "#SBATCH --qos="+config['slurm']['qos']
-     TIME ="#SBATCH --time=3:00:00"
-#    if NPE > 532: 
-#      assert config['slurm']['qos'] != 'debug', "qos should be allnccs"
-#      TIME = "#SBATCH --time=12:00:00"
+     PARTITION =''
+     QOS  = config['slurm_pbs']['qos']
+     TIME = "1:00:00"
+     if NPE > 532: 
+        assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
+        TIME = "3:00:00"
+     NNODE = ''
+     job=''
+     if GEOS_SITE == "NAS":
+       CONSTRAINT = 'cas_ait'
+       NNODE = (NPE-1)//40 + 1
+       job='PBS'
+     else:
+       job='SLURM'
+       partition = config['slurm_pbs']['partition']
+       if (partition != ''):
+         PARTITION = "#SBATCH --partition=" + partition
 
-     QOS = "#SBATCH --constraint=mil"
-     PARTITION = "#SBATCH --partition=" + config['slurm']['partition']
-
-     log_name = out_dir+'/remap_upper_log'
+       CONSTRAINT = '"[cas|sky]"'
+       if BUILT_ON_SLES15:
+         CONSTRAINT = 'mil'
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
@@ -207,19 +219,12 @@ class upperair(remap_base):
      with open('input.nml', 'w') as f:
         f.write(nml_file)
 
-     remap_template="""#!/bin/csh -xf
-#SBATCH --account={account}
-#SBATCH --ntasks={NPE}
-#SBATCH --job-name=remap_upper
-#SBATCH --output={log_name}
-{TIME}
-{QOS}
-{PARTITION}
-
-unlimit
+     remap_template = job_directive[job] + \
+"""
+source {Bin}/g5_modules
+limit stacksize unlimited
 
 cd {out_dir}/upper_data
-source {Bin}/g5_modules
 /bin/touch input.nml
 
 # The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
@@ -270,15 +275,16 @@ endif
    -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
 
 """
-     account = config['slurm']['account']
+     account = config['slurm_pbs']['account']
      drymassFLG  = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
-
+     log_name = out_dir+'/remap_upper_log'
+     job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
-             imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS, TIME = TIME, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
+             out_dir = out_dir, log_name = log_name, job_name= job_name, drymassFLG = drymassFLG, \
+             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
+             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
              stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
@@ -287,23 +293,31 @@ endif
      upper.write(remap_upper_script)
      upper.close()
 
-     interactive = os.getenv('SLURM_JOB_ID', default = None)
+     interactive = None
+     if GEOS_SITE == 'NAS':
+       interactive = os.getenv('PBS_JOBID', default = None)
+     else:
+       interactive = os.getenv('SLURM_JOB_ID', default = None)
 
      if (interactive) :
        print('interactive mode\n')
-       ntasks = os.getenv('SLURM_NTASKS', default = None)
-       if ( not ntasks):
-         nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
-         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
-         ntasks = nnodes * ncpus
-       ntasks = int(ntasks)
-       if (ntasks < NPE ):
-         print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+       if GEOS_SITE != 'NAS':
+         ntasks = os.getenv('SLURM_NTASKS', default = None)
+         if ( not ntasks):
+           nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
+           ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
+           ntasks = nnodes * ncpus
+         ntasks = int(ntasks)
+         if (ntasks < NPE ):
+           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
 
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
-     else :
+     elif GEOS_SITE == "NAS" :
+       print('qsub -W  block=true '+ script_name +'\n')
+       subprocess.call(['qsub', '-W','block=true', script_name])
+     else:
        print('sbatch -W '+ script_name +'\n')
        subprocess.call(['sbatch', '-W', script_name])
 

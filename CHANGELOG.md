@@ -9,13 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Addition of SST and FRACI forecast (ocean) boundary conditions generation capability in `pre/prepare_ocnExtData`
+- Added EASE grid option for remapping of land restarts in remap_restarts.py package (facilitates use of package in GEOSldas setup script)
+- Added support for SLES15, NAS site and log for remap_lake_landice_saltwater in remap_restarts.py package
+- Added "land_only" option for remapping of restarts
+
 ### Changed
+
+- Update CI to v2 orb
 
 ### Fixed
 
 ### Removed
 
 ### Deprecated
+
+## [2.0.5] - 2023-12-11
+
+### Fixed
+
+- Fix issue in `remap_bin2nc.py` for remapping MERRA2 restarts to levels other than 72
 
 ## [2.0.4] - 2023-11-17
 
@@ -45,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed the cmpz plots for rms and anomaly correlation
 
 ## [2.0.2] - 2023-06-28
+
 
 ### Fixed
 

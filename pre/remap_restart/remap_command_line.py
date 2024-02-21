@@ -13,7 +13,6 @@ import questionary
 import glob
 import argparse
 from remap_utils import *
-from remap_params import * 
 
 def parse_args(program_description):
 
@@ -29,6 +28,11 @@ def parse_args(program_description):
     )
 
     p_config.add_argument('-c', '--config_file',  help='YAML config file')
+
+    p_landonly  = p_sub.add_parser(
+     'land_only',
+     help = "Remap land (catch[cn]) restart only; global domain only; ens0000 only.\n",
+    )
 
     p_command = p_sub.add_parser(
      'command_line',
@@ -72,10 +76,13 @@ def parse_args(program_description):
     p_command.add_argument('-out_bc_base',default="",         help="Boundary conditions base dir (w/o bc_version and resolution info) for new restarts")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
-    p_command.add_argument('-qos',        default="debug",    help="SLURM quality-of-service", choices=['debug', 'allnccs'])
+    p_command.add_argument('-qos',        default="debug",    help="slurm_pbs quality-of-service", choices=['debug', 'allnccs', 'normal'])
     account = get_account()
-    p_command.add_argument('-account',    default=account,    help="SLURM account")
-    p_command.add_argument('-partition',  default='scutest',  help="SLURM partition")
+    p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
+    if (BUILDT_ON_SLES15):
+      p_command.add_argument('-partition',  default='scutest',help="slurm_pbs partition")
+    else:
+      p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
@@ -121,12 +128,17 @@ def get_answers_from_command_line(cml):
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = False
+     answers["output:surface:remap_catch"]  = False
    if cml.rs == '2':
-     answers["output:surface:remap"]   = True
+     answers["output:air:remap"]            = False
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
    if cml.rs == '3':
-     answers["output:surface:remap"]   = True
-     answers["output:air:remap"]       = True
+     answers["output:air:remap"]            = True
+     answers["output:surface:remap_water"]  = True
+     answers["output:surface:remap_catch"]  = True
 
    answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 
@@ -146,9 +158,9 @@ def get_answers_from_command_line(cml):
    else:
      answers["output:surface:wemin"]   = wemin_default(answers['output:shared:bc_version'])
 
-   answers["slurm:account"]    = cml.account
-   answers["slurm:qos"]        = cml.qos
-   answers["slurm:partition"]  = cml.partition
+   answers["slurm_pbs:account"]    = cml.account
+   answers["slurm_pbs:qos"]        = cml.qos
+   answers["slurm_pbs:partition"]  = cml.partition
   
    return answers
 
@@ -162,7 +174,7 @@ if __name__ == "__main__":
    with open("raw_command.yaml", "w") as f:
      yaml.dump(config, f)
 
-   params = remap_params(config) 
+   config = get_config_from_answers(answers, config_tpl= True) 
    with open("params_from_command.yaml", "w") as f:
-     yaml.dump(params.config, f)
+     yaml.dump(config, f)
 
