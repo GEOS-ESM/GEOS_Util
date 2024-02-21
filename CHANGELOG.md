@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+- Update of transport plots.
+
+### Fixed
+
+- Fixed `q gxout` bug affecting the stats montage plots.
+
+### Removed
+
+### Deprecated
+
+## [2.0.6] - 2024-02-21
+
+### Added
+
+- Do not remap groups of restarts when it is not necessary, make copies instead.
 - Addition of SST and FRACI forecast (ocean) boundary conditions generation capability in `pre/prepare_ocnExtData`
 - Added EASE grid option for remapping of land restarts in remap_restarts.py package (facilitates use of package in GEOSldas setup script)
 - Added support for SLES15, NAS site and log for remap_lake_landice_saltwater in remap_restarts.py package
@@ -16,16 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update CI to v2 orb.
-- Update of transport plots.
-
-### Fixed
-
-- Fixed `q gxout` bug affecting the stats montage plots. 
-
-### Removed
-
-### Deprecated
+- Update CMakeLists.txt so it is ready for sparse checkout
+- Update CI to v2 orb
+- Move to use `cp` and `tar` at NAS rather than the deprecated `mcp` and `mtar`
 
 ## [2.0.5] - 2023-12-11
 
