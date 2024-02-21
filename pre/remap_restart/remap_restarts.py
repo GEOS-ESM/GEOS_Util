@@ -1,104 +1,122 @@
 #!/usr/bin/env python3
 #
-# source install/bin/g5_modules
+# remap_restarts package:
+#   remap_restarts.py is the main script for remapping GEOS restart files to a different  
+#   resolution and/or a different version of the associated model boundary conditions
 #
-# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
-#   module load python/GEOSpyD/Min4.11.0_py3.9
+# to run, must first load modules (incl. python3) as follows:
 #
-
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import sys
 import argparse
 import textwrap
 import ruamel.yaml
 import questionary
 from remap_utils import *
-from remap_questions import get_config_from_questionary
-from remap_params import *
+from remap_questions import *
+from remap_command_line import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
 from remap_analysis  import *
 from remap_catchANDcn  import *
 
-# Define the argument parser
-def parse_args():
 
-    program_description = textwrap.dedent(f'''
+program_description = textwrap.dedent(f'''
       USAGE:
 
-      There are three ways to use this script to remap restarts.
+      This script provides four options for remapping GEOS restart files:
 
-      1. Use an existing config file to remap:
-           ./remap_restarts.py -c my_config.yaml
-
-      2. Use questionary to convert template remap_params.tpl to
-         remap_params.yaml and then remap:
+      1. Use the interactive questionnaire (recommended):
            ./remap_restarts.py
+         The questionnaire concludes with the option to submit the remapping job.  
+         It also creates a yaml configuration file (`remap_params.yaml`) and 
+         a matching command line argument string (`remap_restarts.CMD`), which can be edited 
+         manually and used in the next two run options.
 
-      3. Use command line to input a flattened yaml file:
-           ./remap_restarts.py -o input:air:drymass=1 input:air:hydrostatic=0 ...
+      2. Use an existing yaml config file*:
+           ./remap_restarts.py config_file -c my_config.yaml
 
-      NOTE: Each individual script can be executed independently
-        1. remap_questions.py generates raw_answer.yaml
-        2. remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml
-        3. remap_upper.py uses remap_params.yaml as input for remapping
-        4. remap_lake_landice_saltwater.py uses remap_params.yaml as input for remapping
-        5. remap_catchANDcn.py uses remap_params.yaml as input for remapping
-        6. remap_analysis.py uses remap_params.yaml as input for remapping
+      3. Use command line arguments*:
+           ./remap_restarts.py command_line -ymdh 2004041421  ...
+
+      4. For GEOSldas: Remap land (catch[cn]) restart only; global domain only; ens0000 only:
+           ./remap_restarts.py land_only
+
+         *NOTE: The yaml and command-line interfaces may not backward compatible across 
+                releases.  If existing yaml files or command-line strings do not work, 
+                use the questionnaire option to generate updated versions.
+
+      Help commands:
+           ./remap_restarts.py -h
+           ./remap_restarts.py config_file -h
+           ./remap_restarts.py command_line -h
+
+      For more information, refer to https://github.com/GEOS-ESM/GEOS_Util/wiki
+
     ''')
-
-    parser = argparse.ArgumentParser(description='Remap restarts',epilog=program_description,formatter_class=argparse.RawDescriptionHelpFormatter)
-    # define a mutually exclusive group of arguments
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('-c', '--config_file', help='YAML config file')
-    group.add_argument('-o', '--flattened_yaml', help='Flattened YAML config', metavar='input:air:drymass=1 input:air:hydrostatic=0 ...')
-
-    # Parse using parse_known_args so we can pass the rest to the remap scripts
-    # If config_file is used, then extra_args will be empty
-    # If flattened_yaml is used, then extra_args will be populated
-    args, extra_args = parser.parse_known_args()
-    return args, extra_args
-
 def main():
 
   question_flag = False
   config        = ''
-
+  yaml = ruamel.yaml.YAML()
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
-  command_line_args, extra_args = parse_args()
-  config_yaml = command_line_args.config_file
-  flattened_yaml = command_line_args.flattened_yaml
-
-  if config_yaml:
-      config = yaml_to_config(config_yaml)
-  elif flattened_yaml:
-      config_yaml = 'remap_params.yaml'
-      config  = args_to_config(extra_args)
-  else:
-      raw_config = get_config_from_questionary()
-      params = remap_params(raw_config)
-      config = params.config
-      question_flag = True
-      config_yaml = 'remap_params.yaml'
+  cmdl, extra_args = parse_args(program_description)
+  answers = {}
+  config_yaml =''
+  noprompt = False
+  if (len(sys.argv) > 1) :
+     if sys.argv[1] == 'config_file' :
+      config_yaml = cmdl.config_file
+     if sys.argv[1] == 'command_line':
+        answers = get_answers_from_command_line(cmdl)
+        noprompt = cmdl.np
+     if sys.argv[1] == 'land_only':
+        remap_land_only()
+        sys.exit(0)       
+  if (len(sys.argv) == 1 or answers) :
+      if not answers:
+         answers = ask_questions()
+         question_flag = True
+      cmd = get_command_line_from_answers(answers)
+      write_cmd(answers['output:shared:out_dir'], cmd)
+      # just for debugging
+      # raw_config = get_config_from_answers(answers)
+      # with open("raw_answers.yaml", "w") as f:
+      #   yaml.dump(raw_config, f)
+      config = get_config_from_answers(answers, config_tpl = True)
+      config_yaml = answers['output:shared:out_dir']+'/remap_params.yaml'
 
   print('\n')
-  print_config(config)
+  if config:
+     print_config(config)
 
-  questions = [
-        {
-            "type": "confirm",
-            "name": "Continue",
-            "message": "Above is the YAML config file, would you like to continue?",
-            "default": True
-        },]
-  answer = questionary.prompt(questions)
+     if not noprompt :
+       questions = [
+           {
+               "type": "confirm",
+               "name": "Continue",
+               "message": "Above is the YAML config file, would you like to continue?",
+               "default": True
+           },]
+       answer = questionary.prompt(questions)
 
-  if not answer['Continue'] :
-     print("\nYou answered not to continue, exiting.\n")
-     sys.exit(0)
+       if not answer['Continue'] :
+         print("\nYou answered not to continue, exiting.\n")
+         sys.exit(0)
 
-  if config_yaml or question_flag: write_cmd(config)
-  if flattened_yaml or question_flag: config_to_yaml(config, config_yaml)
+       # write config to yaml file
+     config_to_yaml(config, config_yaml,noprompt = noprompt)
 
+     if not noprompt :
+       submit = questionary.confirm("Submit the jobs now ?" , default=True).ask()
+       if not submit :
+         print("\nYou can submit the jobs by the command later on: \n")
+         print("./remap_restarts.py config_file -c " + config_yaml + "\n")
+         sys.exit(0)
+
+  print(config_yaml)
   # upper air
   upper = upperair(params_file=config_yaml)
   upper.remap()
@@ -117,4 +135,4 @@ def main():
 
 if __name__ == '__main__' :
   main()
-
+  

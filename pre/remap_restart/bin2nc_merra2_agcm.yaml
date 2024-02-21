@@ -1,0 +1,48 @@
+variables:
+  - short_name: DUDT
+    long_name: eastward_wind_analysis_increment
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DVDT
+    long_name: northward_wind_analysis_increment
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DTDT
+    long_name: temperature_analysis_increment
+    units: 'K'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DPEDT
+    long_name: edge_pressure_analysis_increment
+    units: 'Pa'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DQVDT
+    long_name: specific_humidity_analysis_increment
+    units: 'kg kg-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DO3DT
+    long_name: ozone_analysis_increment
+    units: 'ppmv'
+    dimension:
+       - lev
+       - lat
+       - lon
+dimensions:
+  lon: 180
+  lat: 1080
+  lev: 72
+  time: 1

@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
 #
+# remap_restarts package:
+#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts 
+#   using config inputs from `remap_params.yaml`
+#
+# to run, must first load modules (incl. python3) as follows:
+#
+#   source g5_modules.sh    [bash]
+#   source g5_modules       [csh]
+#
 import os
-import subprocess
+import subprocess as sp
 import shutil
 import glob
 import ruamel.yaml
 import shlex
 from remap_base import remap_base
+from remap_utils import get_label
+from remap_utils import get_geomdir
+from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
   def __init__(self, **configs):
@@ -25,31 +37,60 @@ class lake_landice_saltwater(remap_base):
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__)) 
-     in_bcsdir  = config['input']['shared']['bcs_dir']
-     out_bcsdir = config['output']['shared']['bcs_dir']
+
+     in_bc_base    = config['input']['shared']['bc_base']
+     in_bc_version = config['input']['shared']['bc_version']
+     out_bc_base   = config['output']['shared']['bc_base']
+     out_bc_version= config['output']['shared']['bc_version']
+
+     agrid         = config['input']['shared']['agrid']
+     ogrid         = config['input']['shared']['ogrid']
+     omodel        = config['input']['shared']['omodel']
+     stretch       = config['input']['shared']['stretch']
+     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+
+     agrid         = config['output']['shared']['agrid']
+     ogrid         = config['output']['shared']['ogrid']
+     omodel        = config['output']['shared']['omodel']
+     stretch       = config['output']['shared']['stretch']
+     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+
+     types = '.bin'
+     type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
+     type_str = str(type_str)
+     if 'Hierarchical' in type_str:
+        types = '.nc4'
+     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
+
+     label = get_label(config) 
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
+
      out_dir    = config['output']['shared']['out_dir']
+     expid = config['output']['shared']['expid']
+     if (expid) :
+        expid = expid + '.'
+     else:
+        expid = ''
+
+     no_remap = self.copy_without_remap(restarts_in, in_tile_file, out_tile_file, suffix)
+     if no_remap : return
 
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
      InData_dir = out_dir+'/InData/'
-     if os.path.exists(InData_dir) : subprocess.call(['rm', '-rf',InData_dir])
+     if os.path.exists(InData_dir) : sp.call(['rm', '-rf',InData_dir])
      print ("mkdir " + InData_dir)
      os.makedirs(InData_dir)
 
      OutData_dir = out_dir+'/OutData/'
-     if os.path.exists(OutData_dir) : subprocess.call(['rm', '-rf',OutData_dir])
+     if os.path.exists(OutData_dir) : sp.call(['rm', '-rf',OutData_dir])
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
-     types = 'z.bin'
-     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
-     type_str = str(type_str)
-     if 'Hierarchical' in type_str:
-        types = 'z.nc4'
-     yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
 
      saltwater = ''
      seaice    = ''
@@ -70,10 +111,7 @@ class lake_landice_saltwater(remap_base):
         if 'roue'      in f : route     = f
         if 'openwater' in f : openwater = f
 
-     in_tile_file  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
-     out_tile_file = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
-
-     in_til = InData_dir+'/' + os.path.basename(in_tile_file)
+     in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
 
      if os.path.exists(in_til)  : shutil.remove(in_til)
@@ -85,52 +123,45 @@ class lake_landice_saltwater(remap_base):
 
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
      zoom = config['input']['surface']['zoom']
+     log_name = out_dir+'/remap_lake_landice_saltwater_log'
+     if os.path.exists(log_name):
+        os.remove(log_name)
 
      if (saltwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
   
        # split Saltwater
        if  config['output']['surface']['split_saltwater']:
          print("\nSplitting Saltwater...\n")
          cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
-         print('\n'+cmd)
-         subprocess.call(shlex.split(cmd))
+#         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
+         self.run_and_log(cmd, log_name)
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (seaice):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + seaice + ' 0 ' + str(zoom)
        print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (lake):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + lake + ' 19 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (landice):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + landice + ' 20 ' + str(zoom)
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
      if (route):
        route = bindir + '/mk_RouteRestarts.x '
        cmd = route + out_til + ' ' + yyyymmddhh_[0:6]
-       print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       self.run_and_log(cmd, log_name)
 
-     expid = config['output']['shared']['expid']
-     if (expid) :
-        expid = expid + '.'
-     else:
-        expid = ''
      suffix = '_rst.' + suffix
      for out_rst in glob.glob("OutData/*_rst*"):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
@@ -140,6 +171,19 @@ class lake_landice_saltwater(remap_base):
      os.chdir(cwdir)
 
      self.remove_merra2()
+
+  def run_and_log(self, cmd, log_name):
+     print('\n'+cmd)
+     process =sp.Popen(shlex.split(cmd), stdout=sp.PIPE, stderr=sp.PIPE)
+     stdout, stderr = process.communicate()
+     stdout = stdout.decode()
+     stderr = stderr.decode()
+     print('\n'+ stdout)
+     print('\n'+ stderr)
+     with open(log_name, "a") as log_:
+        log_.write(cmd)
+        log_.write(stdout)
+        log_.write(stderr)
 
   def find_rst(self):
      surf_restarts =[
@@ -187,12 +231,18 @@ class lake_landice_saltwater(remap_base):
     surfin = [ merra_2_rst_dir +  expid+'.lake_internal_rst.'     + suffix,
                merra_2_rst_dir +  expid+'.landice_internal_rst.'  + suffix,
                merra_2_rst_dir +  expid+'.saltwater_internal_rst.'+ suffix]
-
-    for f in surfin :
+    bin2nc_yaml = ['bin2nc_merra2_lake.yaml', 'bin2nc_merra2_landice.yaml','bin2nc_merra2_salt.yaml']
+    bin_path = os.path.dirname(os.path.realpath(__file__))
+    for (f,yf) in zip(surfin, bin2nc_yaml):
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
        print("Copy file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
+       ncdest = dest.replace('z.bin', 'z.nc4')
+       yaml_file = bin_path + '/'+yf
+       print('Convert bin to nc4:' + dest + ' to \n' + ncdest + '\n')
+       bin2nc(dest, ncdest, yaml_file)
+       os.remove(dest)
 
 if __name__ == '__main__' :
    lls = lake_landice_saltwater(params_file='remap_params.yaml')

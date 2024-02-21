@@ -256,9 +256,9 @@ if( $ARCH == 'Linux'  ) then
                               setenv MASTOR lfe
                               setenv MASDIR /u/$LOGNAME/GEOS5.0/$expid
                               setenv BATCHQ normal
-                              set scpvar = "mcp -a"
-                              set cpvar  = "mcp -a"
-                              set mytar  = "mtar"
+                              set scpvar = "cp -a"
+                              set cpvar  = "cp -a"
+                              set mytar  = "tar"
                               set batch_cmd  = "qsub"
     endif
     if( $HOST == 'discover' ) then

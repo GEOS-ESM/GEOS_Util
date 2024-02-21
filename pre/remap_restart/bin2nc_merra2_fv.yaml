@@ -1,0 +1,66 @@
+variables:
+  - short_name: AK
+    long_name: hybrid_sigma_pressure_a
+    units: 'Pa'
+    dimension:
+       - edge
+  - short_name: BK
+    long_name: hybrid_sigma_pressure_b
+    units: '1'
+    dimension:
+       - edge
+  - short_name: U
+    long_name: eastward_wind
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: V
+    long_name: northward_wind
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: PT
+    long_name: scaled_potential_temperature
+    units: 'K Pa$^{-\kappa}$'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: PE
+    long_name: air_pressure
+    units: 'Pa'
+    dimension:
+       - edge
+       - lat
+       - lon
+  - short_name: PKZ
+    long_name: pressure_to_kappa
+    units: 'Pa$^\kappa$'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: DZ
+    long_name: height_thickness
+    units: 'm'
+    dimension:
+       - lev
+       - lat
+       - lon
+  - short_name: W
+    long_name: vertical_velocity
+    units: 'm s-1'
+    dimension:
+       - lev
+       - lat
+       - lon
+dimensions:
+  lon: 180
+  lat: 1080
+  lev: 72
+  edge: 73
+  time: 1

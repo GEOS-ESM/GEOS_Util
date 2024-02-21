@@ -1,5 +1,6 @@
 #
-# This template file can be filled with questionary or manually
+# remap_restarts package:
+#   this template file can be filled via the questionary (remap_questions.py) or manually
 #
 #
 
@@ -9,8 +10,12 @@ input:
     hydrostatic: 0
   shared:
     MERRA-2: false
+    stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
     agrid:
-    bcs_dir:
+    bc_base:
+    bc_version: none
     expid:
     ogrid:
     rst_dir:
@@ -20,12 +25,18 @@ input:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
-    # if catch_tilefile is null, it searches bcs_dir
+    # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
 output:
   shared:
+    label: false
+    # SG001,SG002
+    stretch: false
+    # (coupled) ocean model: data, MOM5, MOM6
+    omodel: data
     agrid:
-    bcs_dir:
+    bc_base:
+    bc_version: none
     expid:
     ogrid:
     out_dir:
@@ -35,20 +46,21 @@ output:
     nlevel:
   surface:
     split_saltwater: false
-    surflay: 20.
+    surflay: 50.
     wemin:
     # remap lake, saltwater, landicet
     remap_water: true
     # remap catch(cn)
     remap_catch: true
-    # if catch_tilefile is null, it searches bcs_dir
+    # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
+    # the name of ease grid
+    EASE_grid: null
   analysis:
     bkg: true
-    aqua: False
+    aqua: true
     lcv: false
-
-slurm:
+slurm_pbs:
   account:
   qos:
-  constraint:
+  partition: ''
