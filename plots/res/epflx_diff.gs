@@ -120,26 +120,27 @@ say 'ENDDATE = 'enddate
           skipval = result
        if(skipval < 1 ) ; skipval = 1 ; endif
 
-'set gxout shaded'
-'set arrlab off'
-
-' set grads off '
-' set ylopts 1 3 0.15 '
-
-
-' vpage 1 1 2 2 -top 0.6 -bot -0.10'
-' set csmooth on'
-' set lev 925  1'
-' setlevs '
-
+* Compute Generic CINT for EPDIFF
+* -------------------------------
+' set lev 500 10'
 ' shades epdiff 0'
          cint = subwrd(result,1)
          cint = 100 * cint
 'getint 'cint
          cint = result / 100
-'shades 'cint
 
-' d      epdiff'
+'set gxout shaded'
+'set arrlab off'
+'set grads off '
+'set ylopts 1 3 0.15 '
+
+' vpage 1 1 2 2 -top 0.6 -bot -0.10'
+' set lev 1000 0.8'
+' set lev  925 0.8'
+' setlevs '
+' set csmooth on'
+' shades 'cint
+' d epdiff'
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
@@ -167,16 +168,11 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 
 ' vpage 2 1 2 2 -top 0.6 -bot -0.10'
 ' set csmooth on'
-' set lev 925 100'
-
-' shades epdiff 0'
-         cint = subwrd(result,1)
-         cint = 100 * cint
-'getint 'cint
-         cint = result / 100
-'shades 'cint
-
-' d      epdiff'
+' set lev 1000 8'
+' set lev  925 8'
+' setlevs '
+' shades 'cint
+' d epdiff'
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
@@ -204,17 +200,11 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 
 ' vpage 1 2 2 2 -top 0.25 -bot 0.25'
 ' set csmooth on'
-' set lev 925 100'
+' set lev 1000 80'
+' set lev  925 80'
 ' set zlog off '
-
-' shades epdiff 0'
-         cint = subwrd(result,1)
-         cint = 100 * cint
-'getint 'cint
-         cint = result / 100
-'shades 'cint
-
-' d      epdiff'
+' shades 'cint
+' d epdiff'
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
@@ -243,10 +233,11 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' vpage 2 2 2 2 -top 0.25 -bot 0.25'
 ' set csmooth on'
 ' set grads off '
-' set lev 100 8'
-' set lev 100 20'
+' set lev 100 18'
 ' set zlog on '
 
+* Compute Stratospheric CINT for EPDIFF
+* -------------------------------------
 ' shades epdiff 0'
          cint = subwrd(result,1)
          cint = 100 * cint
@@ -254,7 +245,7 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
          cint = result / 100
 'shades 'cint
 
-' d      epdiff'
+' d epdiff'
 ' cbarn -xmid 6 -ndot 1'
 ' draw ylab hPa '
 ' set ccolor 1'
