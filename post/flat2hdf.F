@@ -163,20 +163,22 @@ C **********************************************************************
                     print *
                     print *, '2-D Fields:'
                     do n=1,n2d
-                    print *,   trim(name2d(n)),'  ',trim(titl2d(n))
+                    write(6,1001) trim(name2d(n)),trim(titl2d(n))
                     enddo
                     print *
                     print *, '3-D Fields:'
                     do n=1,n3d
-                    print *,   trim(name3d(n)),'  ',trim(titl3d(n))
+                    write(6,1001) trim(name3d(n)),trim(titl3d(n))
                     enddo
                     print *
 
       print *, 'Files: '
       do n=1,nfiles
-      print *, n,trim(fname(n))
+                 write(6,1002) n,trim(fname(n))
       enddo
       print *
+ 1001 format(1x,a,'  ',a)
+ 1002 format(1x,i0,'  ',a)
 
 C **********************************************************************
 C ****              Read and Interpolate Eta File                   ****
@@ -199,20 +201,22 @@ C **********************************************************************
 
       close(10)
       if( lrec.eq.-1 ) then
-          print *, 'Opening ',trim(fname(n)),' access = sequential, endian: ',trim(endian)
+          write(6,1003) trim(fname(n)),trim(endian)
           if( trim(endian).eq.'big_endian' ) then
               open (10,file=trim(fname(n)),form='unformatted',access='sequential',convert='big_endian')
           else
               open (10,file=trim(fname(n)),form='unformatted',access='sequential')
           endif
       else
-          print *, 'Opening ',trim(fname(n)),' access = direct, endian: ',trim(endian)
+          write(6,1004) trim(fname(n)),trim(endian)
           if( trim(endian).eq.'big_endian' ) then
               open (10,file=trim(fname(n)),form='unformatted',access='direct',recl=im*jm*4,convert='big_endian')
           else
               open (10,file=trim(fname(n)),form='unformatted',access='direct',recl=im*jm*4)
           endif
       endif
+ 1003    format(1x,'Opening: ',a,', access = sequential, endian: ',a)
+ 1004    format(1x,'Opening: ',a,', access = direct    , endian: ',a)
 
       rc = 0
       ntime     =  0
@@ -227,15 +231,16 @@ C **********************************************************************
 
               if( rc.eq.0 ) then
                   call flat2hdf ( q2d,q3d,name2d,name3d,titl2d,titl3d,n2d,n3d,undef,
-     .                           im,jm,lm,lats,lons,levs,nymd,nhms,ndt,
-     .                           fid,hdfcreate,hdfile,yrev,ecmwf )
+     .                            im,jm,lm,lats,lons,levs,nymd,nhms,ndt,
+     .                            fid,hdfcreate,hdfile,yrev,ecmwf )
                   call tick (nymd,nhms,ndt)
                   hdfcreate = .false.
               else
                   call gfio_close ( fid,gfrc )
                   lrec = 0
                   print *
-                  print *, 'Created: ',trim(hdfile)
+                     write(6,1005) trim(hdfile)
+ 1005                format(1x,'Created: ',a)
                   print *
               endif
               enddo
@@ -462,8 +467,15 @@ C **********************************************************************
 
       do n=1,n3d
          call writit( q3d(1,1,1,n),im,jm,1,lm,id,name3d(n),nymd,nhms,yrev )
-         if( name3d(n).eq.'Temperature'       ) tmpu = q3d(:,:,:,n)
-         if( name3d(n).eq.'Relative_humidity' )   rh = q3d(:,:,:,n)
+
+         if( trim( name3d(n) ).eq.'tmpu'           .or. 
+     .       trim( name3d(n) ).eq.'tmpes'          .or. 
+     .       trim( name3d(n) ).eq.'temperature'     ) tmpu = q3d(:,:,:,n)
+
+         if( trim( name3d(n) ).eq.'rh'              .or. 
+     .       trim( name3d(n) ).eq.'rhes'            .or. 
+     .       trim( name3d(n) ).eq.'relative_humidi'  ) rh = q3d(:,:,:,n)
+
       enddo
 
       if( ecmwf ) then

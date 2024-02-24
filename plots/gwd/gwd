@@ -246,6 +246,7 @@ say result
 'seasonal dtdtrayz'
 
 
+
        m  = 10
 while( m <= 14 ) 
  if( qfile.m != "NULL" )

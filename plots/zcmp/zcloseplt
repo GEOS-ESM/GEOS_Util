@@ -500,7 +500,7 @@ if( scale = LOG ) ; 'setlevs' ; endif
      say 'int dqrel = 'dqrel
 
      if( dpct = 'NULL' )
-     dpct  = 0.1
+         dpct = 0.1
      else
         'd 'dpct
          dpct = subwrd(result,4)
@@ -631,7 +631,7 @@ if( climexp != 'Actual' | climobs != 'Actual' )
    'set strsiz .08'
    'set string 2 l 7'
    'draw string 0.050 10.00  WARNING:'
-'set strsiz .07'
+   'set strsiz .07'
    'set string 1 l 4'
    'draw string 0.050 9.85  Actual Dates'
    'draw string 0.050 9.70  NOT Used!'
