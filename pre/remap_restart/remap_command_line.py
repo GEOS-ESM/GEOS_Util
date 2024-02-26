@@ -79,7 +79,7 @@ def parse_args(program_description):
     p_command.add_argument('-qos',        default="debug",    help="slurm_pbs quality-of-service", choices=['debug', 'allnccs', 'normal'])
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
-    if (BUILDT_ON_SLES15):
+    if (BUILT_ON_SLES15):
       p_command.add_argument('-partition',  default='scutest',help="slurm_pbs partition")
     else:
       p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
