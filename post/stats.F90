@@ -326,8 +326,9 @@
       endif
 
       if( rcfile /= "NULL" ) then
-      print *, 'Stats RC File: ',trim(rcfile)
+      print *, 'Stats RC File:'
       print *, '-------------- '
+          write(6,1001) trim(rcfile)
       print *
       endif
 
@@ -1007,6 +1008,12 @@
        else
            corr(iregion,lev,nfield,nt) = c1/(sqrt(c2)*sqrt(c3))
        endif
+       if( r1.lt.0.0 .or. r2.lt.0.0 .or. r3.lt.0.0 ) then
+           print *, 'Changing Sign for MSE Round-Off Error:  r1,r2,r3 = ',r1,r2,r3
+           r1 = abs(r1)
+           r2 = abs(r2)
+           r3 = abs(r3)
+       endif
        rms(iregion,lev,nfield,nt,1) = sqrt(r1)
        rms(iregion,lev,nfield,nt,2) = sqrt(r2)
        rms(iregion,lev,nfield,nt,3) = sqrt(r3)
@@ -1284,7 +1291,7 @@
 
  5001 format('DSET    ^',a)
  5002 format('TITLE   Stats',/,'FORMAT  sequential big_endian')
- 5003 format('UNDEF  ',g12.6)
+ 5003 format('UNDEF  ',g13.6)
  5004 format('XDEF  ',i3,' LINEAR  1 1')
  8004 format('XDEF  ',i3,' LINEAR  -180 ',f8.5)
  5005 format('YDEF    1 LINEAR  1 1')
@@ -1356,8 +1363,8 @@
 
 !     write(6,100) lat1 ,jbeg, lat2,jend,  &
 !                  long1,ibeg,long2,iend
-  100 format(/1x,f6.1,' (',i3,')',2x,f6.1,' (',i3,')',/,  &
-              1x,f6.1,' (',i3,')',2x,f6.1,' (',i3,')',/)
+! 100 format(/1x,f6.1,' (',i3,')',2x,f6.1,' (',i3,')',/,  &
+!             1x,f6.1,' (',i3,')',2x,f6.1,' (',i3,')',/)
       return                                
       end 
 

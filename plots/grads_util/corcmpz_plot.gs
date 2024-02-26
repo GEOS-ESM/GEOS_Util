@@ -4,7 +4,9 @@ function corcmpz (args)
  numargs = result
 
 'run getenv SOURCE'
-        SOURCE = result
+            SOURCE = result
+'run getenv GEOSUTIL'
+            GEOSUTIL = result
 
 field = h
 desc  = ''
@@ -705,9 +707,9 @@ say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
@@ -1099,9 +1101,9 @@ say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 
 if( debug = "TRUE" )

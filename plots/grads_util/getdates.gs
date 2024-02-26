@@ -1,8 +1,12 @@
 function getdates
 
-
 * Initialize Time based on Existance of Pre-Set Environment Variables
-* -------------------------------------------------------------------
+* ----------------------------------------------------------------------
+* Note:  BEGDATE & ENDDATE are set from the QUICKPLOT setdates utility.  
+*        SETDATES is called from the Control Experiment: EXPID.  Thus, 
+*        EXPID determines the BEGDATE & ENDATE, while the comparison CMPIDs
+*        are evaluated using the pre-determined BEGDATE & ENDDATE.
+* ----------------------------------------------------------------------
 'run getenv "BEGDATE"'
              begdate  = result
 'run getenv "ENDDATE"'
@@ -40,8 +44,8 @@ if( tmin<1 | tmax>tdim )
         enddate = result
        'set t 1 'tdim
 
-* Set TIME Boundaries based on CLIM tabl file (if necessary)
-* ----------------------------------------------------------
+*   Check for TIME Boundaries based on ddf files which contain Climatology MetaCode
+*   -------------------------------------------------------------------------------
        'getinfo desc'
                 desc = result
        '!froot 'desc
@@ -64,21 +68,6 @@ if( tmin<1 | tmax>tdim )
         endwhile
 
        if( begYYYYMM != 'NULL' & endYYYYMM != 'NULL' )
-*      if(  basename = clim.tabl )
-*          'q ctlinfo'
-*          title = sublin(result,2)
-*          n = 1
-*          word = subwrd(title,n)
-*          while( word != '' )
-*          n = n + 1
-*          word = subwrd(title,n)
-
-*          if(    word = "Climatology:" )
-*              begYYYYMM = subwrd(title,n+1)
-*              endYYYYMM = subwrd(title,n+3)
-*          endif   
-*          endwhile
-            
             begyear  = substr(begYYYYMM,1,4)
             begmonth = substr(begYYYYMM,5,2)
                month = getmon(begmonth)
@@ -88,7 +77,6 @@ if( tmin<1 | tmax>tdim )
             endmonth = substr(endYYYYMM,5,2)
                month = getmon(endmonth)
             enddate  = time''month''endyear
-       
        endif
 endif
 
