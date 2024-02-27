@@ -612,9 +612,9 @@ endwhile
 *              -----------------------------------
                'run getenv "CLIMATE"'
                                   climate.numexp = result
-                        anafile = cfile.numexp
-                        anadsc  = cdesc.numexp
-                        ananam  =  ctag.numexp
+                        anafile =   cfile.numexp
+                        anadsc  =   cdesc.numexp
+                        ananam  =    ctag.numexp
                 climcmp.ananam  = climate.numexp
 
             say 'numexp  = 'numexp
@@ -758,53 +758,53 @@ say '----------------------------------------------------------'
 while( k <= numexp )
 say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
 
-     TAG   = k
+     TAG = k
 
      if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
 
-* Loop over Seasons to Process
-* ----------------------------
-       m = 1
-while( m > 0 )
-    season = subwrd(seasons,m)
+*    Loop over Seasons to Process
+*    ----------------------------
+            m = 1
+     while( m > 0 )
+         season = subwrd(seasons,m)
 
-if( season = '' )
-         m = -1
-else
-         m = m+1
-         say 'Processing Season: 'season
+         if( season = '' )
+              m = -1
+         else
+              m = m+1
+              say 'Processing Season: 'season
 
-'set dfile 'qfile
-'set gxout shaded'
-'rgbset'
-'run getenv "DIFFTYPE"'
-             DIFFTYPE = result
-'run setenv "LEVTYPE" 'DIFFTYPE'LEVS'
+             'set dfile 'qfile
+             'set gxout shaded'
+             'rgbset'
+             'run getenv "DIFFTYPE"'
+                          DIFFTYPE = result
+             'run setenv "LEVTYPE" 'DIFFTYPE'LEVS'
 
-* Horizontal Closeness Plot (Experiment_vs_Comparison to Verification)
-* --------------------------------------------------------------------
-            n  = 1
-     while( n <= numexp )
-     say 'Testing 'qtag' and 'ctag.n' for closeness with 'ctag.TAG
+*             Horizontal Closeness Plot (Experiment_vs_Comparison to Verification)
+*             --------------------------------------------------------------------
+                     n  = 1
+              while( n <= numexp )
+                     say 'Testing 'qtag' and 'ctag.n' for closeness with 'ctag.TAG
+                     if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != ctag.TAG & type.n != V & cname.n != 'NULL' )
 
-     if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != ctag.TAG & type.n != V & cname.n != 'NULL' )
-         say 'Closeness plot between  exp: 'qtag
-         say '                       cexp: 'ctag.n
-         say '                        obs: 'ctag.TAG
+                     say 'Closeness plot between  exp: 'qtag
+                     say '                       cexp: 'ctag.n
+                     say '                        obs: 'ctag.TAG
                                                 nname = ctag.n
                                                 kname = ctag.k
                      say '                    climexp: 'climexp
                      say '                    climcmp: 'climcmp.nname
                      say '                    climobs: 'climcmp.kname
-         say '              Total  numexp: 'numexp
-         say ''
+                     say '              Total  numexp: 'numexp
+                     say ''
 
                     'define zcmp'TAG''season' = regrid2( qcmp'TAG''season',0.625,0.5,bs_p1,0,-90 )'
                     'define zcmp'n''season'   = regrid2( qcmp'n''season'  ,0.625,0.5,bs_p1,0,-90 )'
                     'define zmod'season'      = regrid2( qmod'season'     ,0.625,0.5,bs_p1,0,-90 )'
 
-                 flag = ""
-         while ( flag = "" )
+                                 flag = ""
+                         while ( flag = "" )
                               say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
                              'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zcmp''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'cdesc.TAG' -MFILE 'qfile' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n' -OFILE 'cfile.TAG' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.nname' -CLIMOBS 'climcmp.kname' -GC 'GC' -MATH 'NULL' -LEVEL 'level
 
@@ -837,26 +837,26 @@ else
 *                                     ' -MATH 'NULL
 *                                     ' -LEVEL 'level
 
-             'myprint -name 'output'/horiz_'ctag.n'_'pname'_'level'_closeness_'ctag.TAG'.'season
+                             'myprint -name 'output'/horiz_'ctag.n'_'pname'_'level'_closeness_'ctag.TAG'.'season
 
-              if( debug = "debug" )
-                  say "Hit ENTER to repeat plot, or NON-BLANK to continue"
-                  pull flag
-              else
-                  flag = "next"
-              endif
-             'c'
-         endwhile ;* END While_FLAG Loop
+                              if( debug = "debug" )
+                                  say "Hit ENTER to repeat plot, or NON-BLANK to continue"
+                                  pull flag
+                              else
+                                  flag = "next"
+                              endif
+                              'c'
+                         endwhile ;* END While_FLAG Loop
                      endif ;* END ctag.n Test
 
-     n = n + 1
+              n = n + 1
               endwhile ;* END While_N Loop over NUMEXPs
 *             -----------------------------------------
 
-endif ;* End Season Test
+         endif ;* End Season Test
 *        ------------------------
 
-endwhile ;* END SEASON Loop
+     endwhile ;* End Season Loop
 *    ---------------------------
 
      else
@@ -1189,6 +1189,7 @@ while( month != '' )
        m = m+1
        month = subwrd(months,m)
 endwhile
+
 
 ***********************************************************************************
 

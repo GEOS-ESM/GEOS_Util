@@ -33,8 +33,8 @@ offset = subwrd(args,3)
 if( offset="" ) ; offset = 0 ; endif
 if( file="_"  ) ; file = ""  ; endif
 
-* Initialize Time based on Existance of Environment Variables
-* -----------------------------------------------------------
+* Initialize Time based on Existance of BEGDATE & ENDDATE Environment Variables
+* -----------------------------------------------------------------------------
 'run getenv "DO_STD"'
              do_std   = result
 'run getenv "BEGDATE"'
@@ -46,6 +46,21 @@ if( file="_"  ) ; file = ""  ; endif
 
 'run uppercase 'do_std
                 do_std = result
+
+* Check if ddf file contains Climatology MetaCode
+* -----------------------------------------------
+    ClimMetaCode = 'FALSE'
+    'q ctlinfo'
+    title = sublin(result,2)
+    n = 1
+    word = subwrd(title,n)
+    while( word != '' )
+              n = n + 1
+           word = subwrd(title,n)
+       if( word = "Climatology:" )
+           ClimMetaCode = 'TRUE'
+       endif
+    endwhile
 
 tmin = 0
 tmax = tdim + 1
@@ -64,14 +79,16 @@ endif
 
 if( tmin<1 | tmax>tdim )
     tmin = 1
-    'set t ' tmin
-    'getinfo date'
-          begdate = result
-    'set t 'tdim
-    'getinfo date'
-          enddate = result
-     tmax = tdim
-    'run setenv "CLIMATE" Climatology'
+   'set t ' tmin
+   'getinfo date'
+         begdate = result
+   'set t 'tdim
+   'getinfo date'
+         enddate = result
+    tmax = tdim
+    if( ClimMetaCode = 'FALSE' )
+        'run setenv "CLIMATE" Climatology'
+    endif
 endif
 
 'set time  'begdate

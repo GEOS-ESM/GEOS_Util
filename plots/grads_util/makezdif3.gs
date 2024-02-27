@@ -37,10 +37,6 @@ endwhile
          undef = result
 '    set undef ' undef
 
-'q gxout'
-   gxout = sublin(result,4)
-   gxout = subwrd(gxout ,6)
-
 'getinfo zfreq'
          zfreq = result
      if( zfreq = 'varying' )
@@ -316,9 +312,9 @@ endwhile
 
 *'close 'newfile
 
-* Reset Initial Environment Settings
-* ----------------------------------
-'set gxout 'gxout
+* Reset GXOUT Graphic Environment
+* -------------------------------
+'set gxout contour'
 'set dfile 'dfile
 'set x 'xpos
 'set y 'ypos

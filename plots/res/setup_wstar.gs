@@ -1,9 +1,36 @@
 function setup_wstar (args)
 
+say ' '
+say 'Inside setup_wstar'
+say ' '
+*pause
+
+* -------------------------------------------------
+* Set TIME flag:  A => Common Times, B => All Times
+* -------------------------------------------------
+      TFLAG = A
+* -------------------------------------------------
+* -------------------------------------------------
+
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
-season = subwrd(args,4)
+
+* Define Seasons to Process
+* -------------------------
+seasons  = ''
+       k = 4
+while( k > 0 )
+    season = subwrd(args,k)
+if( season = '' )
+    k = -1
+else
+    seasons = seasons % ' ' % season
+k = k+1
+endif
+endwhile
+'uppercase 'seasons
+            seasons = result
 
 'getinfo numfiles'
          numfiles = result
@@ -12,6 +39,7 @@ if( numfiles = 'NULL' )
 
 * Loop over Experiment Datasets
 * -----------------------------
+say ''
 'getpwd'
     pwd = result
 
@@ -23,11 +51,17 @@ if( numfiles = 'NULL' )
 while( num <= numrc )
         loc = num + 1
      rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
    '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
     'run getenv CTLFILE '
                 CTLFILE.num = result
 
-    '!echo `basename 'rcfile' | cut -d. -f2 > CMPID.txt`'
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b1-'length' > CMPID.txt'
     'run getenv CMPID '
                 CMPID.num = result
 
@@ -42,10 +76,6 @@ endwhile
          numfiles = result
 endif
 
-* Set TIME flag:  A => Common Times, B => All Times
-* -------------------------------------------------
-time = A
-
 
 '!/bin/rm -f LOCKFILE'
 'q files'
@@ -58,13 +88,17 @@ time = A
     'run setenv MASKFILE ' maskfile
     'run setenv NUMFILES ' numfiles
 
+say ''
 say 'Files:'
 'q files'
 say result
 say 'MASKFILE: 'maskfile
+say ''
 
 * Initialize BEGDATE and ENDATE for each Experiment
 * -------------------------------------------------
+say 'Initializing BEGDATE and ENDATE for each Experiment:'
+say '----------------------------------------------------'
 n = 1
 while( n<=numfiles )
    'set dfile 'n
@@ -81,12 +115,33 @@ while( n<=numfiles )
 say 'begdate.'n': 'begdate.n'  enddate.'n': 'enddate.n
 n = n + 1
 endwhile
+say ''
 
-'run setenv TIME A'
+* -------------------------------------------
+* Compute Seasonal Means for Common Times (A)
+* -------------------------------------------
+if( TFLAG = 'A' )
+'run setenv TIME 'TFLAG
 
 * Find time subset which includes all files
 * -----------------------------------------
 'set dfile 1'
+say 'Calling SETDATES for File1'
+say '--------------------------'
+'setdates'
+say 'Calling GETDATES for File1'
+say '--------------------------'
+'getdates'
+
+'run getenv BEGDATE'
+            BEGDATE = result
+'run getenv ENDDATE'
+            ENDDATE = result
+say ' '
+
+
+say 'Finding Common Times between Experiments'
+say '----------------------------------------'
 begtimeA = 1
 endtimeA = tdim.1
 
@@ -99,25 +154,45 @@ while( n<=numfiles )
              time = result
     if( time > begtimeA )
         say begdate.n' > 'begdateA
-            begdateA   =  begdate.n
-            begtimeA   = time
+            begdateA = begdate.n
+            begtimeA = time
     endif
     'set time 'enddate.n
     'getinfo time'
              time = result
     if( time < endtimeA )
         say enddate.n' < 'enddateA
-            enddateA   =  enddate.n
-            endtimeA   = time
+        pause
+            enddateA =  enddate.n
+            endtimeA = time
     endif
 n = n + 1
 endwhile
+pause
 
 * Hardwire Beginning and Ending Dates
 * -----------------------------------
 say ' '
-say 'begdateA = 'begdateA
-say 'enddateA = 'enddateA
+say 'Pre-Set Environment Variable BEGDATE: 'BEGDATE
+say 'Pre-Set Environment Variable ENDDATE: 'ENDDATE
+say '     Computed Common Dates  begdateA: 'begdateA
+say '     Computed Common Dates  enddateA: 'enddateA
+say ' '
+pause
+
+* Compare with Pre-Set Environment Variables
+* ------------------------------------------
+  'set time 'BEGDATE
+    'getinfo time'
+             begtime = result
+  'set time 'ENDDATE
+    'getinfo time'
+             endtime = result
+  
+  if( begtime >= begtimeA & endtime <= endtimeA )
+      begdateA = BEGDATE
+      enddateA = ENDDATE
+  endif
 
 * Compute Seasonal Means for Subset Times (A)
 * -------------------------------------------
@@ -136,6 +211,7 @@ say ' '
 say 'getdates'
     'getdates'
 say ' '
+     pause
 
 n = 1
 while( n<=numfiles )
@@ -168,7 +244,36 @@ while( n<=numfiles )
 * 'seasonal vstar  A'n
 n = n + 1
 endwhile
+endif
+* -------------------------------------------
 
+* -------------------------------------------------------------
+* Compute Seasonal Means for ALL Times (B)  (Not fully tested)
+* -------------------------------------------------------------
+if( TFLAG = 'B' )
+   'run setenv TIME 'TFLAG
+   '!remove BEGDATE.txt'
+   '!remove ENDDATE.txt'
+   n = 1
+   while( n<=numfiles )
+     'set dfile 'n
+     'set x 1'
+     'sety'
+     'setz'
+     'sett'
+     'define wstar'n' = wstar.'n
+     'seasonal wstar  B'n
+     'seasonal res    B'n
+*    'seasonal epfy   B'n
+*    'seasonal epfz   B'n
+*    'seasonal epfdiv B'n
+*    'seasonal wmean  B'n
+*    'seasonal weddy  B'n
+*    'seasonal vstar  B'n
+   n = n + 1
+   endwhile
+endif
+* ----------------------------------------
 
 
 'set display color white'
@@ -179,12 +284,94 @@ endwhile
 'run getenv "GEOSUTIL"'
              geosutil = result
 
+       k = 1
+while( k > 0 )
+        season = subwrd(seasons,k)
+    if( season != '' )
+             k = k+1
 
-'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
-'c'
+*  Plot turn-around-latitudes
+* ---------------------------
+   'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
+    pause
+   'c'
 
-'run 'geosutil'/plots/res/plot_season.gs avrg 'output
-'c'
-'run 'geosutil'/plots/res/plot_season.gs indv 'output
-'c'
+*  Plot wstar profiles for ALL experiments
+* ----------------------------------------
+   'run 'geosutil'/plots/res/plot_season.gs levl 'output
+    pause
+   'c'
+   'run 'geosutil'/plots/res/plot_season.gs avrg 'output
+    pause
+   'c'
+   'run 'geosutil'/plots/res/plot_season.gs indv 'output
+    pause
+   'c'
+
+*  Plot wstar profiles for Individual experiments
+* -----------------------------------------------
+    say ' '
+   'q files'
+    say result
+    say ' '
+
+    n = 1
+    while( n<=numfiles )
+           'set dfile 'n
+           'getinfo desc'
+                    desc = result
+            node = ''
+            m = 2
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            EXP.n = node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            while( node != 'ctl' & node != 'data' )
+            EXP.n = EXP.n'.'node
+            say 'EXP'n' = 'EXP.n
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            endwhile
+        if( EXP.n  = expid )
+            nexpid = n
+        endif
+        n = n + 1
+    endwhile
+
+    alfbet = 'abcdefghijklmnopqrstuvwxyz'
+    alfexp = substr(alfbet,nexpid,1)
+    say 'alfexp = 'alfexp
+    pause
+
+    n = 1
+    while( n<=numfiles )
+    if( n != nexpid )
+        string = substr(alfbet,n,1)
+       'run 'geosutil'/plots/res/plot_season.gs levl 'output' 'alfexp' 'string 
+        pause
+       'c'
+       'run 'geosutil'/plots/res/plot_season.gs avrg 'output' 'alfexp' 'string
+        pause
+       'c'
+       'run 'geosutil'/plots/res/plot_season.gs indv 'output' 'alfexp' 'string
+        pause
+       'c'
+    endif
+    n = n + 1
+    endwhile
+
+    else
+             k = -1
+    endif
+endwhile
 

@@ -45,6 +45,7 @@ endwhile
 'set dfile 'modfil1
 'sety'
 'setz'
+'setdates'
 'getdates'
 'run getenv "BEGDATE"'
              begdate  = result
@@ -122,7 +123,7 @@ else
 
 * Make LANDSCAPE Plots
 * --------------------
-   if( orientation = LANDSCAPE )
+  if( orientation  = LANDSCAPE )
               flag = ""
       while ( flag = "" )
              'run 'geosutil'/plots/res/res_1 'expid' 'season' 'output' 'obsid' 'obsdsc' 'nmod' 'nobs
@@ -135,16 +136,16 @@ else
           endif
          'c'
       endwhile
-   endif
+  endif
 
 * Make PORTRAIT Plots
 * -------------------
-   if( orientation = PORTRAIT )
+  if( orientation  = PORTRAIT )
               flag = ""
-   'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif '
-   'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif '
-*  'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif -ptop 1'
-*  'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif -ptop 1'
+*  'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif '
+*  'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif '
+   'makezdif -q1 str'season'mod -file1 'modfil1' -q2 str'season'obs -file2 'obsfil1' -name strdif -ptop 1'
+   'makezdif -q1 res'season'mod -file1 'modfil2' -q2 res'season'obs -file2 'obsfil2' -name resdif -ptop 1'
    'q define'
    say 'Defined Variables: 'result
 
@@ -173,7 +174,7 @@ else
               endif
              'c'
       endwhile
-   endif
+  endif
 
 * End SEASON to PLOT Test
 * -----------------------

@@ -3,11 +3,27 @@ function setup_epflx (args)
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
-season = subwrd(args,4)
 
-say 'Running:  setup_epflx 'source' 'expid' 'output' 'season
-say '-------------------------------------------------------'
+* Define Seasons to Process
+* -------------------------
+seasons  = ''
+       k = 4
+while( k > 0 )
+    season = subwrd(args,k)
+if( season = '' )
+    k = -1
+else
+    seasons = seasons % ' ' % season
+k = k+1
+endif
+endwhile
+'uppercase 'seasons
+            seasons = result
+
+say 'Running:  setup_epflx 'source' 'expid' 'output' 'seasons
+say '--------------------------------------------------------'
 say ' '
+
 
 'getinfo numfiles'
          numfiles = result
@@ -162,10 +178,20 @@ endwhile
 
 n = 1
 while( n<=numfiles )
-say 'Running: epflx.gs 'CMPID.n' 'season' A'n' 'output
-say '-------------------------------------------------'
-'run 'geosutil'/plots/res/epflx.gs 'CMPID.n' 'season' A'n' 'output
-'c'
+          k = 1
+   while( k > 0 )
+           season = subwrd(seasons,k)
+       if( season != '' )
+                k = k+1
+           say 'Running: epflx.gs 'CMPID.n' 'season' A'n' 'output
+           say '-------------------------------------------------'
+           'run 'geosutil'/plots/res/epflx.gs 'CMPID.n' 'season' A'n' 'output
+            pause
+           'c'
+       else
+                k = -1
+       endif
+   endwhile
 n = n + 1
 endwhile
 
@@ -173,28 +199,25 @@ endwhile
 n = 1
 while( n<=numfiles )
 if( CMPID.n != expid )
-
-*           flag = ""
-*   while ( flag = "" )
-    say 'Running:  epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
-    say '----------------------------------------------------'
-   'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
-*   say "Hit  ENTER  to repeat plot"
-*   say "Type 'next' for  next plot, 'done' for next field"
-*   pull flag
-*   endwhile
-   'c'
-*           flag = ""
-*   while ( flag = "" )
-    say 'Running: epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
-    say '----------------------------------------------------'
-   'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
-*   say "Hit  ENTER  to repeat plot"
-*   say "Type 'next' for  next plot, 'done' for next field"
-*   pull flag
-*   endwhile
-   'c'
-
+          k = 1
+   while( k > 0 )
+           season = subwrd(seasons,k)
+       if( season != '' )
+                k = k+1
+           say 'Running:  epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
+           say '----------------------------------------------------'
+          'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
+           pause
+          'c'
+           say 'Running: epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
+           say '----------------------------------------------------'
+          'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
+           pause
+          'c'
+       else
+                k = -1
+       endif
+   endwhile
 endif
 n = n + 1
 endwhile

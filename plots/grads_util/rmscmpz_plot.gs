@@ -4,7 +4,9 @@ function rmscmpz (args)
  numargs = result
 
 'run getenv SOURCE'
-        SOURCE = result
+            SOURCE = result
+'run getenv GEOSUTIL'
+            GEOSUTIL = result
 
 field = h
 desc  = ''
@@ -804,10 +806,11 @@ say 'EXP'm'  Field: 'name'  Region: 'region
     if( rms = 4 ) ; rms_label = '_PHASE'      ; endif
 
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
+pause
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
     pull flag
@@ -1249,10 +1252,11 @@ say 'EXP'm'  Field: 'name'  Region: 'region
     if( rms = 4 ) ; rms_label = '_PHASE'      ; endif
 
 if( nday = ndaymax )
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months' -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_rmscmp'rms_label'_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
+pause
 
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"

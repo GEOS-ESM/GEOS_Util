@@ -53,6 +53,9 @@ endwhile
 
 n = 0
 
+'run getenv GEOSUTIL'
+            GEOSUTIL = result
+
 'run getenv SOURCE'
         SOURCE = result
 
@@ -157,10 +160,10 @@ endwhile
 
 if( x <= xdim )
     if( rms = 0 )
-   'corcmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc'            -debug 'debug
-   'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
+   'run 'GEOSUTIL'/plots/grads_util/corcmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc'            -debug 'debug
+   'run 'GEOSUTIL'/plots/grads_util/rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
     else
-   'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
+   'run 'GEOSUTIL'/plots/grads_util/rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
     endif
 endif
 

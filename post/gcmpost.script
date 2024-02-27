@@ -70,76 +70,76 @@ endif
 @       n  = 1
 while( $n <= $nmax )
 
-       if( "$argv[$n]" == "-source" ) then 
-                  @  n  = $n + 1 
-            setenv SOURCE $argv[$n] 
+       if( "$argv[$n]" == "-source" ) then
+                  @  n  = $n + 1
+            setenv SOURCE $argv[$n]
        endif
 
        if( "$argv[$n]" == "-recover" ) then
                     @ n = $n + 1
-            set RECDATE = $argv[$n] 
+            set RECDATE = $argv[$n]
          set check_plot = FALSE
        endif
 
        if( "$argv[$n]" == "-rec_plt"  ) then
                     @ n = $n + 1
-            set RECDATE = $argv[$n] 
+            set RECDATE = $argv[$n]
          set check_plot = TRUE
        endif
 
-       if( "$argv[$n]" == "-ncpus" ) then 
-                  @  n  = $n + 1 
-            set   NCPUS = $argv[$n] 
+       if( "$argv[$n]" == "-ncpus" ) then
+                  @  n  = $n + 1
+            set   NCPUS = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-expid" ) then 
-                  @  n  = $n + 1 
-            set   EXPID = $argv[$n] 
+       if( "$argv[$n]" == "-expid" ) then
+                  @  n  = $n + 1
+            set   EXPID = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-clim" ) then 
+       if( "$argv[$n]" == "-clim" ) then
             set   CLIMO = 'TRUE'
        endif
 
-       if( "$argv[$n]" == "-movefiles" ) then 
+       if( "$argv[$n]" == "-movefiles" ) then
             set  MOVEFILES = 'TRUE'
        endif
 
-       if( "$argv[$n]" == "-nostrict" ) then 
+       if( "$argv[$n]" == "-nostrict" ) then
             set  STRICT = '-strict false'
        endif
 
-       if( "$argv[$n]" == "-ignore_nan" ) then 
+       if( "$argv[$n]" == "-ignore_nan" ) then
             set  IGNORE_NAN = '-ignore_nan'
        endif
 
-       if( "$argv[$n]" == "-ana" ) then 
+       if( "$argv[$n]" == "-ana" ) then
             set    ANA =  '-ana'
        endif
 
-       if( "$argv[$n]" == "-ddf" ) then 
-                  @  n  = $n + 1 
-            set     DDF = $argv[$n] 
+       if( "$argv[$n]" == "-ddf" ) then
+                  @  n  = $n + 1
+            set     DDF = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-history" ) then 
-                  @  n  = $n + 1 
-            set HISTORYRC = $argv[$n] 
+       if( "$argv[$n]" == "-history" ) then
+                  @  n  = $n + 1
+            set HISTORYRC = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-begdate" ) then 
-                  @  n  = $n + 1 
-            set BEGDATE = $argv[$n] 
+       if( "$argv[$n]" == "-begdate" ) then
+                  @  n  = $n + 1
+            set BEGDATE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-enddate" ) then 
-                  @  n  = $n + 1 
-            set ENDDATE = $argv[$n] 
+       if( "$argv[$n]" == "-enddate" ) then
+                  @  n  = $n + 1
+            set ENDDATE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-list" ) then 
-                  @  n  = $n + 1 
-               set LIST = $argv[$n] 
+       if( "$argv[$n]" == "-list" ) then
+                  @  n  = $n + 1
+               set LIST = $argv[$n]
        endif
 
        if( "$argv[$n]" == "-plots"  ) then
@@ -256,9 +256,9 @@ if( $ARCH == 'Linux'  ) then
                               setenv MASTOR lfe
                               setenv MASDIR /u/$LOGNAME/GEOS5.0/$expid
                               setenv BATCHQ normal
-                              set scpvar = "mcp -a"
-                              set cpvar  = "mcp -a"
-                              set mytar  = "mtar"
+                              set scpvar = "cp -a"
+                              set cpvar  = "cp -a"
+                              set mytar  = "tar"
                               set batch_cmd  = "qsub"
     endif
     if( $HOST == 'discover' ) then
@@ -408,7 +408,7 @@ if( $PLOTS[1] != "NULL"  ) then
          set PATH = ''
          set node = `echo $DSET | cut -d / -f$m `
          while( $node != $FILE )
-             set node = `echo $node | sed -e 's/%y4/\#/g' ` 
+             set node = `echo $node | sed -e 's/%y4/\#/g' `
              set node = `echo $node | sed -e "s/%m2/\#/g" `
              set node = `echo $node | sed -e "s/%d2/\#/g" `
              set node = `echo $node | sed -e "s/%h2/\#/g" `
@@ -508,7 +508,7 @@ end
 
             if( $numlocs[$nstream] != 0 ) then
 
-              # Extract Extension (last node) from Typical Local File 
+              # Extract Extension (last node) from Typical Local File
               # -----------------------------------------------------
               @ loc = 1
                 while( $loc != 0 )
@@ -575,14 +575,14 @@ foreach collection ( $collections )
       @ endloc = $begloc + $numdates[$m] - 1
         set streamdates = `echo $dates[${begloc}-${endloc}]`
 
-  if( $streamdates[1] != 0 ) then   
+  if( $streamdates[1] != 0 ) then
         foreach date ( $streamdates )
         echo " "
         echo $collection $streamdates Current Date: $date
 
         if( -e $SOURCE/holding/$collection/$date ) then
             cd $SOURCE/holding/$collection/$date
-         
+
             if( ${#monthly_attribute} == 0 ) then
                 set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep -v partial`
             else
@@ -721,7 +721,7 @@ set AGCM_JM = `grep  AGCM_JM: $HOMDIR/AGCM.rc | cut -d':' -f2`
 if (${RAT} == 6) set CUBE = TRUE
 
 set HIRES   = FALSE
-if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE 
+if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE
 
 
 # Move and Archive Monthly Means and Dailies
@@ -741,7 +741,7 @@ foreach collection ( $collections )
 
    set  streamdates = `echo $dates[${begloc}-${endloc}]`
 
-   if( $streamdates[1] != 0 ) then   
+   if( $streamdates[1] != 0 ) then
       foreach date ( $streamdates )
          if( -e            $SOURCE/holding/$collection/$date ) then
             set locdir  = $SOURCE/holding/$collection/$date
@@ -1056,7 +1056,7 @@ foreach collection ( $collections )
       # ---------------
       if( $num != 0 ) then
 
-         # Extract Extension (last node) from Monthly Mean File 
+         # Extract Extension (last node) from Monthly Mean File
          # ----------------------------------------------------
          @ m = 1
          while( $m != 0 )
@@ -1144,8 +1144,8 @@ end    # End ForEach Collection Loop
 endif  # End PLOTS Option
 
 #######################################################################
-#                        Submit Quickplot Job                  
-#                        --------------------                  
+#                        Submit Quickplot Job
+#                        --------------------
 #          Note: $num, $monthlies, and ${date_node}
 #                are from last output stream examined
 #######################################################################
@@ -1172,7 +1172,7 @@ cd  $SOURCE/plot
         @ m = $m + 1
         end
     endif
-       
+
 set    CMPEXP = `echo $CMPEXP`
 setenv CMPEXP "$CMPEXP"
 
@@ -1323,8 +1323,8 @@ endif
 
 # Create Plot Lists
 # ---------------------------------------------------------------------------------
-         if( -e  portrait.list ) /bin/rm -f  portrait.list 
-         if( -e landscape.list ) /bin/rm -f landscape.list 
+         if( -e  portrait.list ) /bin/rm -f  portrait.list
+         if( -e landscape.list ) /bin/rm -f landscape.list
          if( -e dummy          ) /bin/rm -f dummy
 
          echo ' '
@@ -1343,7 +1343,7 @@ endif
          $GEOSUTIL/plots/configure
          source $SOURCE/plot/.quickplotrc
 
-         set   ntypes = "L P"
+         set   ntypes = "P L"
 foreach type ($ntypes)
 
     if( $type == "L" ) then
@@ -1368,6 +1368,15 @@ foreach plot ($nplots)
          if( $type == "L" ) then
             foreach xyz (tseries qbo vortex)
             set   tseries = `grep "$plot " landscape.list | grep $xyz`
+            if( $#tseries > 0 ) then
+                 set begplt = $begdate
+                 set endplt = $enddate
+            endif
+            end
+         endif
+         if( $type == "P" ) then
+            foreach xyz (residual)
+            set   tseries = `grep "$plot " portrait.list | grep $xyz`
             if( $#tseries > 0 ) then
                  set begplt = $begdate
                  set endplt = $enddate
