@@ -73,20 +73,30 @@ nmax = numfiles
 'run getenv MASKFILE'
             maskfile = result
 say 'MASKFILE: 'maskfile
-*pause
 
 wstrlatmx = 0
 wstrlatmn = 0
  psilatmx = 0
  psilatmn = 0
+filecount = 0
 
 * Loop over Files
 * ---------------
+say 'Looping over files 'nbeg' to 'nmax' to find TA Lats'
        n =nbeg
 while( n<=nmax )
 'set dfile 'n
 'set x 1'
 'sety'
+
+'getinfo desc'
+         desc = result
+'getinfo label'
+         label = result
+
+say ' File: 'n
+say ' DESC: 'desc
+say ' '
 
 'set lev 'levmax
 'getinfo zpos'
@@ -97,8 +107,8 @@ while( n<=nmax )
 
 * Initialization
 * --------------
-z = zmin
-'set z 'z
+     z = zmin
+'set z ' z
 'define wstr'season''time''n' = lev-lev' 
 'define  psi'season''time''n' = lev-lev' 
 
@@ -107,19 +117,22 @@ z = zmin
 ptot = 0.0
 while( z<=zmax )
 
+'set z ' z
 'getinfo level'
          level = result
-zm1 = z-1
+
+        zm1 = z-1
 'set z 'zm1
 'getinfo level'
          levm1 = result
          delph = (levm1 - level)/2
-zp1 = z+1
+        zp1 = z+1
 'set z 'zp1
 'getinfo level'
          levp1 = result
          delp  = delph + (level - levp1)/2
 
+'set z ' z
 'run setenv TAABS 'taabs
 if( taabs = TRUE )
  'define wstr'season''time''n' = wstr'season''time''n' + ( wstar'season''time''n' + abs( wstar'season''time''n' ) )/2 *'delp
@@ -127,8 +140,6 @@ else
  'define wstr'season''time''n' = wstr'season''time''n' + wstar'season''time''n'*'delp
 endif
  'define  psi'season''time''n' =  psi'season''time''n' +   res'season''time''n'*'delp
-
-
 
          ptot  = ptot + delp
 say 'File: 'n'  levm1: 'levm1'  lev: 'level'  levp1: 'levp1'  delp = 'delp'  ptot = 'ptot
@@ -154,7 +165,6 @@ say ' '
     'define wstr'season''time''n' = wstrsmth '
     'define  psi'season''time''n' =  psismth '
  endif
-*'d wstr'season''time''n
 
 
 * Get Latitudes for Locations of Maximum and Minimum psi from each individual file
@@ -172,59 +182,70 @@ say ' '
 
 * Find Latitudes of Zero Line Crossings for wstr from each individual file
 * ------------------------------------------------------------------------
-latbegS = -30
-latendS = -60
-latbegN = 15
-latendN = 60
-
     dummy   = get_lats( 'wstr'season''time''n )
 wstrlatmn.n = subwrd(dummy,1)
 wstrlatmx.n = subwrd(dummy,2)
+   foundS.n = subwrd(dummy,3)
+   foundN.n = subwrd(dummy,4)
 
 * Compute Averaged LatMax and LatMin from Integrated wstr and psi
 * ---------------------------------------------------------------
-'set dfile 1'
-say 'wstrlatmx = 'wstrlatmx' + 'wstrlatmx.n
-wstrlatmx = wstrlatmx + wstrlatmx.n
-wstrlatmn = wstrlatmn + wstrlatmn.n
+if( foundS.n = TRUE & foundN.n = TRUE )
+   filecount = filecount + 1
+   wstrlatmx = wstrlatmx + wstrlatmx.n
+   wstrlatmn = wstrlatmn + wstrlatmn.n
+    psilatmx =  psilatmx +  psilatmx.n
+    psilatmn =  psilatmn +  psilatmn.n
+endif
 
- psilatmx =  psilatmx +  psilatmx.n
- psilatmn =  psilatmn +  psilatmn.n
-'set dfile 'n
+say 'File: 'n'  wstrlatmin: 'wstrlatmn.n'   wstrlatmax: 'wstrlatmx.n'   psilatmin: 'psilatmn.n'   psilatmax: 'psilatmx.n
+say ' '
+pause
 
 n = n + 1
 endwhile
 
-wstrlatmx = wstrlatmx / (nmax-nbeg+1)
-wstrlatmn = wstrlatmn / (nmax-nbeg+1)
-
- psilatmx =  psilatmx / (nmax-nbeg+1)
- psilatmn =  psilatmn / (nmax-nbeg+1)
-
+say 'File Count for Averaged Max & Min: 'filecount
+if( filecount != 0 )
+     wstrlatmx = wstrlatmx / filecount
+     wstrlatmn = wstrlatmn / filecount
+      psilatmx =  psilatmx / filecount
+      psilatmn =  psilatmn / filecount
+endif
 say ' '
-n = nbeg
+
+       n =nbeg
 while( n<=nmax )
 say 'File: 'n'    psi'season'latmn = '  psilatmn.n '    psi'season'latmx = '  psilatmx.n
 n = n + 1
 endwhile
 say 'Average    psi'season'latmn = '  psilatmn '    psi'season'latmx = '  psilatmx
 say ' '
+*pause
 
 
 say ' '
-n = nbeg
+       n =nbeg
 while( n<=nmax )
 say 'File: 'n'    wstr'season'latmn = '  wstrlatmn.n '    wstr'season'latmx = '  wstrlatmx.n
 
-'run setenv wstr'season'latmx'n' 'wstrlatmx.n
-'run setenv wstr'season'latmn'n' 'wstrlatmn.n
-'run setenv  psi'season'latmx'n' ' psilatmx.n
-'run setenv  psi'season'latmn'n' ' psilatmn.n
+if( foundS.n = TRUE & foundN.n = TRUE )
+   'run setenv wstr'season'latmx'n' 'wstrlatmx.n
+   'run setenv wstr'season'latmn'n' 'wstrlatmn.n
+   'run setenv  psi'season'latmx'n' ' psilatmx.n
+   'run setenv  psi'season'latmn'n' ' psilatmn.n
+else
+   'run setenv wstr'season'latmx'n' 'wstrlatmx
+   'run setenv wstr'season'latmn'n' 'wstrlatmn
+   'run setenv  psi'season'latmx'n' ' psilatmx
+   'run setenv  psi'season'latmn'n' ' psilatmn
+endif
 
 n = n + 1
 endwhile
 say 'Average    wstr'season'latmn = '  wstrlatmn '    wstr'season'latmx = '  wstrlatmx
 say ' '
+*pause
 
 * ----------------------------------------------------
 
@@ -246,10 +267,10 @@ bot   = 0.3
 
 'parea 1 1 1 2.5 -left 'left' -right 'right' -top 'top' -bot 'bot
 
-xmid_wstar   = subwrd(result,1)
-ymid_wstar   = subwrd(result,4)
-ytop_wstar   = subwrd(result,3)
-ybot_wstar   = subwrd(result,2)
+xmid_wstar = subwrd(result,1)
+ymid_wstar = subwrd(result,4)
+ytop_wstar = subwrd(result,3)
+ybot_wstar = subwrd(result,2)
 
 
 
@@ -264,14 +285,14 @@ ybot_wstar   = subwrd(result,2)
          dlat1 = result
 
 count = 0
-n = nbeg
+       n =nbeg
 while( n<=nmax )
 'set dfile 'n
 'getinfo dlat'
          dlat = result
 say 'File 'n'  dlat'n' = 'dlat
 'sety'
-if( dlat = dlat1 )
+if( dlat = dlat1 & foundS.n = TRUE & foundN.n = TRUE )
    'set dfile 1'
    'define wstrave = wstrave + 1000*wstr'season''time''n
     count = count + 1
@@ -328,7 +349,8 @@ endwhile
     dummy = get_lats( 'wstrave' )
 wstrlatmn = subwrd(dummy,1)
 wstrlatmx = subwrd(dummy,2)
-
+   foundS = subwrd(dummy,3)
+   foundN = subwrd(dummy,4)
 
 'set string 1 c 6'
 'set strsiz 0.14'
@@ -427,7 +449,7 @@ endwhile
 
 * Compute Turn-Around Lats based on psiave
 * -----------------------------------------
-'set lat -60'
+'set lat -70'
 'getinfo ypos'
          ybeg = result
 'set lat 0'
@@ -443,7 +465,7 @@ endwhile
 'set lat 0'
 'getinfo ypos'
          ybeg = result
-'set lat 60'
+'set lat 70'
 'getinfo ypos'
          yend = result
 'set y 'ybeg' 'yend
@@ -596,10 +618,17 @@ ymax = subwrd(result,6)
                    k = n - 3 * math_int(n/3) + 1
                    k = 1
 
+    if( foundS.n = TRUE & foundN.n = TRUE )
        'getint 'wstrlatmx.n*100
                 latmax = result/100
        'getint 'wstrlatmn.n*100
                 latmin = result/100
+    else
+       'getint 'wstrlatmx*100
+                latmax = result/100
+       'getint 'wstrlatmn*100
+                latmin = result/100
+    endif
 
            '!echo 'k' 6 'color.n' >> turn_around_'season'.stack'
     say    "!echo \("id.n"\) "EXP.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
@@ -633,8 +662,12 @@ function get_lats( wstr )
 say 'inside get_lats, wstr = 'wstr
 * Find Latitudes of Zero Line Crossings for wstr from each individual file
 * ------------------------------------------------------------------------
-latbegS = -30
-latendS = -60
+foundS  =  FALSE
+foundN  =  FALSE
+latbegS = -15
+latendS = -70
+latbegN =  15
+latendN =  70
 
 'set lat 'latbegS
 'getinfo ypos'
@@ -653,9 +686,10 @@ while( y>= yend )
             lat2 = result
    'd 'wstr
       val2 = subwrd(result,4)
-   say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
+*  say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
 *  pause
      if( val1*val2 <= 0 )
+           foundS = TRUE
            if( val1=val2 )
                wstrlatmin = lat1
            else
@@ -669,8 +703,10 @@ while( y>= yend )
    y = y - 1
 endwhile
 
-latbegN = 15
-latendN = 60
+latbegS = -15
+latendS = -70
+latbegN =  15
+latendN =  70
 
 'set lat 'latbegN
 'getinfo ypos'
@@ -682,7 +718,7 @@ lat1 = latbegN
 'set y 'ybeg
 'd 'wstr
    val1 = subwrd(result,4)
-say 'y = 'ybeg'  val = 'val1
+*say 'y = 'ybeg'  val = 'val1
        y = ybeg+1
 while( y<= yend )
    'set y 'y
@@ -690,9 +726,10 @@ while( y<= yend )
             lat2 = result
    'd 'wstr
       val2 = subwrd(result,4)
-   say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
+*  say 'lat1: 'lat1'  lat2: 'lat2'  val1: 'val1'  val2: 'val2'  val1*val2: 'val1*val2
 *  pause
      if( val1*val2 <= 0 )
+           foundN = TRUE
            if( val1=val2 )
                wstrlatmax = lat1
            else
@@ -706,4 +743,4 @@ while( y<= yend )
    y = y + 1
 endwhile
 
-return wstrlatmin' 'wstrlatmax
+return wstrlatmin' 'wstrlatmax' 'foundS' 'foundN

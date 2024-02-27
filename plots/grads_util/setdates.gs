@@ -1,7 +1,9 @@
 function setdates
 
-* Create Environment Variables for Seasonal Utility
-* -------------------------------------------------
+* Create Environment Variables for Seasonal and Seasonalf Utilities
+* Note:  TBEG    & TEND    are set from QUICKPLOT command line inputs.
+*        BEGDATE & ENDDATE are set from QUICKPLOT setdates utility.
+* -----------------------------------------------------------------
 
 'getinfo date'
          date = substr(result,1,5)
@@ -10,8 +12,8 @@ function setdates
 'run getenv "TEND" '
          TEND = result
 
-* Compute TIME Boundaries based on Input TBEG & TEND
-* --------------------------------------------------
+* Compute TIME Boundaries based on QUICKPLOT Input TBEG & TEND
+* ------------------------------------------------------------
 if( TBEG != NULL &  TEND != NULL ) 
 
      begyear  = substr(TBEG,1,4)
@@ -26,14 +28,8 @@ if( TBEG != NULL &  TEND != NULL )
 
 else
 
-'getinfo desc'
-         desc = result
-'!froot 'desc
-'run getenv FROOT'
-     basename = result
-
-* Compute TIME Boundaries based on CLIM tabl file
-* -----------------------------------------------
+*   Initialize TIME Boundaries to NULL unless plots are using ddf files which contain Climatology MetaCode
+*   ------------------------------------------------------------------------------------------------------
     begYYYYMM = 'NULL'
     endYYYYMM = 'NULL'
     'q ctlinfo'
@@ -41,56 +37,39 @@ else
     n = 1
     word = subwrd(title,n)
     while( word != '' )
-    n = n + 1
-    word = subwrd(title,n)
-    if(    word = "Climatology:" )
-        begYYYYMM = subwrd(title,n+1)
-        endYYYYMM = subwrd(title,n+3)
-    endif
+              n = n + 1
+           word = subwrd(title,n)
+       if( word = "Climatology:" )
+           begYYYYMM = subwrd(title,n+1)
+           endYYYYMM = subwrd(title,n+3)
+       endif
     endwhile
 
-*if(  basename = clim.tabl )
+*   Set TIME Boundaries based on ddf files Climatology MetaCode or Time Dimensions
+*   ------------------------------------------------------------------------------
+    if( begYYYYMM != 'NULL' & endYYYYMM != 'NULL' )
+        begyear  = substr(begYYYYMM,1,4)
+        begmonth = substr(begYYYYMM,5,2)
+           month = getmon(begmonth)
+        begdate  = date''month''begyear
 
-*    'q ctlinfo'
-*    title = sublin(result,2)
-*    n = 1
-*    word = subwrd(title,n)
-*    while( word != '' )
-*    n = n + 1
-*    word = subwrd(title,n)
-*    if(    word = "Climatology:" )
-*        begYYYYMM = subwrd(title,n+1)
-*        endYYYYMM = subwrd(title,n+3)
-*    endif
-*    endwhile
+        endyear  = substr(endYYYYMM,1,4)
+        endmonth = substr(endYYYYMM,5,2)
+           month = getmon(endmonth)
+        enddate  = date''month''endyear
+    else
+*      Compute TIME Boundaries based on ddf Time Dimensions
+*      ----------------------------------------------------
+       'getinfo tdim'
+        tdim = result
 
-if( begYYYYMM != 'NULL' & endYYYYMM != 'NULL' )
-
-     begyear  = substr(begYYYYMM,1,4)
-     begmonth = substr(begYYYYMM,5,2)
-        month = getmon(begmonth)
-     begdate  = date''month''begyear
-
-     endyear  = substr(endYYYYMM,1,4)
-     endmonth = substr(endYYYYMM,5,2)
-        month = getmon(endmonth)
-     enddate  = date''month''endyear
-
-else
-
-* Compute TIME Boundaries based on XDF tabl file
-* ----------------------------------------------
-'getinfo tdim'
-         tdim = result
-
-'set t  '1
-'getinfo date'
-      begdate = result
-'set t  'tdim
-'getinfo date'
-      enddate = result
-
-endif
+       'set t  '1
+       'getinfo date'
+             begdate = result
+       'set t  'tdim
+       'getinfo date'
+             enddate = result
+    endif
 
 endif
 

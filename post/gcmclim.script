@@ -24,6 +24,7 @@ USAGE:
       echo "                              [-month MM]"
       echo "                              [-diurnal]"
       echo "                              [-ncpus NCPUS]"
+      echo "                              [-nostrict]"
       echo " "
       echo "where:   SOURCE     is your location of your Experiment"
       echo "         COLLECTION is the  Collection Name from HISTORY.rc (Default: ALL)"
@@ -31,6 +32,7 @@ USAGE:
       echo "                    files affected by month MM"
       echo "         -diurnal   is an optional parameter to process"
       echo "                    monthly mean diurnal files"
+      echo "         -nostrict  is an optional parameter to Disable STRICT time processing"
       echo "         NCPUS      is an optional parameter to specify NCPUS to use"
       echo " "
       exit 1
@@ -45,6 +47,7 @@ endif
      set expid       = 'NULL'
      set filetype    = 'monthly'
      set diurnal     = ''
+@    nostrict        =   0
 @        MM          = -99
 @ nargs = $#argv
 @    n  = 1
@@ -68,6 +71,9 @@ while( $n <= $nargs )
        if( "$argv[$n]" == "-diurnal"    ) then
                                           set    filetype = 'diurnal'
                                           set     diurnal = ' -d '
+       endif
+       if( "$argv[$n]" == "-nostrict"   ) then
+                                          @      nostrict = 1
        endif
      @ n = $n + 1
 end
@@ -195,7 +201,7 @@ while( $n <= 12 )
            /bin/rm -f clim.tabl   # to ensure a complete, updated clim.tabl for plots
            set files = `/bin/ls -1 $fname.*$curmonth.$ext | grep -v clim`
            $GEOSUTIL/post/check_clim $fname ${begdate} $enddate $curmonth $ext
-           if( $status == 0 ) then
+           if( $status == 0 | $nostrict == 1 ) then
                $TIMEAVE_x -hdf $files -strict false -tag $fname.clim -noquad -ntmin 1 $diurnal
                if( "$diurnal" == "" ) then
                  /bin/mv        $fname.clim.${curdate}.$ext               $fname.clim.M$curmonth.$ext

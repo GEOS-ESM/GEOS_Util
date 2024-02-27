@@ -308,7 +308,7 @@ if( EXPORT = "T"     ) ; facm = 1     ; nplots = 4 ; ptops = "30 30:L 10:L 0.1:L
 if( EXPORT = "Q"     ) ; facm = 1000  ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "ZLE"   ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "RH2"   ) ; facm = 100   ; nplots = 2 ; ptops = "30 30:L"       ; endif
-if( EXPORT = "OMEGA" ) ; facm = 864   ; nplots = 1 ; ptops = "30"            ; endif
+if( EXPORT = "OMEGA" ) ; facm = 864   ; nplots = 3 ; ptops = "30 30:L  10:L" ; endif
 if( EXPORT = "O3"    ) ; facm = 1e6   ; nplots = 2 ; ptops = "30      0.1:L" ; endif
 if( EXPORT = "QLTOT" ) ; facm = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "QITOT" ) ; facm = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
@@ -418,7 +418,7 @@ say '----------------------------------------------------------'
 while( k <= numexp )
 say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
 
-            TAG   = k
+            TAG = k
 
             if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
 
@@ -503,11 +503,11 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
                                            zdifile3 = result
 
 
-*                              Make ZCLOSEPLT
-*                              --------------
-                                      nplot  = 1
-                               while( nplot <= nplots )
-                                      plttop = subwrd( ptops,nplot )
+*                                    Make ZCLOSEPLT
+*                                    --------------
+                                            nplot  = 1
+                                     while( nplot <= nplots )
+                                            plttop = subwrd( ptops,nplot )
 
                                         say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
                                                                nname = ctag.n
@@ -515,8 +515,8 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
                                         say 'climcmp: 'climcmp.nname
                                         say 'climobs: 'climcmp.kname
 
-                                         flag = ""
-                                 while ( flag = "" )
+                                                flag = ""
+                                        while ( flag = "" )
 
                                             'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid' -EXPORT 'EXPORT' -ALIAS 'mname' -QFILE 'zdifile1' -CFILE 'zdifile2' -OFILE 'zdifile3' -ONAME 'ctag.TAG' -CNAME 'ctag.n' -MBDATE 'begdate.expnam' -MEDATE 'enddate.expnam' -CBDATE 'begdate.nname' -CEDATE 'enddate.nname' -OBDATE 'begdate.kname' -OEDATE 'enddate.kname' -QDESC 'qdesc ' -ODESC 'cdesc.n' -OUTPUT 'output' -SEASON 'season' -PTOP 'plttop' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.nname' -CLIMOBS 'climcmp.kname
 *                                           'run 'geosutil'/plots/zcmp/zcloseplt -EXPID 'expid
@@ -542,17 +542,17 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
 *                                                                              ' -CLIMCMP 'climcmp.nname
 *                                                                              ' -CLIMOBS 'climcmp.kname
 
-                                      if( debug = "debug" )
-                                          say "Hit  ENTER  to repeat plot"
-                                          say "Type 'next' for  next plot, 'done' for next field"
-                                          pull flag
-                                      else
-                                          flag = "next"
-                                      endif
-                                     'c'
+                                             if( debug = "debug" )
+                                                 say "Hit  ENTER  to repeat plot"
+                                                 say "Type 'next' for  next plot, 'done' for next field"
+                                                 pull flag
+                                             else
+                                                 flag = "next"
+                                             endif
+                                            'c'
                                         endwhile ;* END While_FLAG Loop
 
-                              nplot = nplot + 1
+                                     nplot = nplot + 1
                                      endwhile ;* END While_NPLOT Loop
                            endif ;* END ctag.n Test
                     n  = n + 1
@@ -590,7 +590,7 @@ if( EXPORT = "T"     ) ; facm = 1     ; faco = 1     ; nplots = 4 ; ptops = "30 
 if( EXPORT = "Q"     ) ; facm = 1000  ; faco = 1000  ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "ZLE"   ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "RH2"   ) ; facm = 100   ; faco = 100   ; nplots = 2 ; ptops = "30 30:L"       ; endif
-if( EXPORT = "OMEGA" ) ; facm = 864   ; faco = 864   ; nplots = 1 ; ptops = "30"            ; endif
+if( EXPORT = "OMEGA" ) ; facm = 864   ; faco = 864   ; nplots = 3 ; ptops = "30 30:L  10:L" ; endif
 if( EXPORT = "O3"    ) ; facm = 1e6   ; faco = 1e6   ; nplots = 2 ; ptops = "30      0.1:L" ; endif
 if( EXPORT = "QLTOT" ) ; facm = 1e6   ; faco = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "QITOT" ) ; facm = 1e6   ; faco = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
