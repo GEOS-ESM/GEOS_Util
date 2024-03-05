@@ -235,9 +235,6 @@ limit stacksize unlimited
 cd {out_dir}/upper_data
 /bin/touch input.nml
 
-# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
-# HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
-
 if ($?I_MPI_ROOT) then
   # intel scaling suggestions
   #--------------------------
@@ -272,7 +269,14 @@ else
     set ioflag = ""
 endif
 
-set drymassFLG = {drymassFLG}
+set hydrostaticIN = {hydrostatic}
+if ( $hydrostaticIN == 'True' ) then
+    set hydrostaticflag = "-in_hydrostatic T"
+else
+    set hydrostaticflag = "-in_hydrostatic F"
+endif
+
+set drymassFLG = {drymass}
 if ($drymassFLG) then
     set dmflag = ""
 else
@@ -280,20 +284,20 @@ else
 endif
 
 {Bin}/esma_mpirun -np {NPE} $interp_restartsX -im {imout} -lm {nlevel} \\
-   -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
+   $hydrostaticflag {stretch_str} $dmflag -nwriter {nwrit} $ioflag 
 
 """
      account = config['slurm_pbs']['account']
-     drymassFLG  = config['input']['air']['drymass']
+     drymass     = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
      log_name = out_dir+'/remap_upper_log'
      job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, log_name = log_name, job_name= job_name, drymassFLG = drymassFLG, \
+             out_dir = out_dir, log_name = log_name, job_name= job_name, drymass = drymass, \
              imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
-             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
-             stretch_str = stretch_str)
+             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, \
+             hydrostatic = hydrostatic, stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
 

@@ -79,10 +79,7 @@ def parse_args(program_description):
     p_command.add_argument('-qos',        default="debug",    help="slurm_pbs quality-of-service", choices=['debug', 'allnccs', 'normal'])
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
-    if (BUILDT_ON_SLES15):
-      p_command.add_argument('-partition',  default='scutest',help="slurm_pbs partition")
-    else:
-      p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
+    p_command.add_argument('-partition',  default='',         help="slurm_pbs partition")
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
