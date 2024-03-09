@@ -67,6 +67,7 @@ def parse_args(program_description):
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
+    p_command.add_argument('-nonhydrostatic', action='store_true',     help=" non hydrostatic upper air")
     p_command.add_argument('-nobkg', action='store_true',     help="Do not remap bkg files")
     p_command.add_argument('-nolcv', action='store_true',     help="Do not write lcv file")
     p_command.add_argument('-np',    action='store_true',     help="No prompt. Overwrite config files without prompting questions")
@@ -76,7 +77,7 @@ def parse_args(program_description):
     p_command.add_argument('-out_bc_base',default="",         help="Boundary conditions base dir (w/o bc_version and resolution info) for new restarts")
     p_command.add_argument('-zoom',                           help= "Zoom parameter (search radius) for input surface restarts")
 
-    p_command.add_argument('-qos',        default="debug",    help="slurm_pbs quality-of-service", choices=['debug', 'allnccs', 'normal'])
+    p_command.add_argument('-qos',        default="",    help="slurm_pbs quality-of-service", choices=['', 'debug', 'allnccs', 'normal'])
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
     if (BUILT_ON_SLES15):
@@ -127,6 +128,7 @@ def get_answers_from_command_line(cml):
    answers["input:shared:stretch"]     = cml.in_stretch
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
+   answers["input:air:hydrostatic"]    = not cml.nonhydrostatic
    if cml.rs == '1':
      answers["output:air:remap"]            = True
      answers["output:surface:remap_water"]  = False
