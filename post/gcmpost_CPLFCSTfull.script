@@ -67,24 +67,24 @@ endif
 @       n  = 1
 while( $n <= $nmax )
 
-       if( "$argv[$n]" == "-source" ) then 
-                  @  n  = $n + 1 
-            setenv SOURCE $argv[$n] 
+       if( "$argv[$n]" == "-source" ) then
+                  @  n  = $n + 1
+            setenv SOURCE $argv[$n]
        endif
 
        if( "$argv[$n]" == "-recover"  ) then
                     @ n = $n + 1
-            set RECDATE = $argv[$n] 
+            set RECDATE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-ncpus" ) then 
-                  @  n  = $n + 1 
-            set   NCPUS = $argv[$n] 
+       if( "$argv[$n]" == "-ncpus" ) then
+                  @  n  = $n + 1
+            set   NCPUS = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-expid" ) then 
-                  @  n  = $n + 1 
-            set   EXPID = $argv[$n] 
+       if( "$argv[$n]" == "-expid" ) then
+                  @  n  = $n + 1
+            set   EXPID = $argv[$n]
        endif
 
        if( "$argv[$n]" == "-expiy" ) then
@@ -97,41 +97,41 @@ while( $n <= $nmax )
             set   EXPIE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-clim" ) then 
+       if( "$argv[$n]" == "-clim" ) then
             set   CLIMO = 'TRUE'
        endif
 
-       if( "$argv[$n]" == "-nostrict" ) then 
+       if( "$argv[$n]" == "-nostrict" ) then
             set  STRICT = '-strict false'
        endif
 
-       if( "$argv[$n]" == "-ana" ) then 
+       if( "$argv[$n]" == "-ana" ) then
             set    ANA =  '-ana'
        endif
 
-       if( "$argv[$n]" == "-ddf" ) then 
-                  @  n  = $n + 1 
-            set     DDF = $argv[$n] 
+       if( "$argv[$n]" == "-ddf" ) then
+                  @  n  = $n + 1
+            set     DDF = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-history" ) then 
-                  @  n  = $n + 1 
-            set HISTORYRC = $argv[$n] 
+       if( "$argv[$n]" == "-history" ) then
+                  @  n  = $n + 1
+            set HISTORYRC = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-begdate" ) then 
-                  @  n  = $n + 1 
-            set BEGDATE = $argv[$n] 
+       if( "$argv[$n]" == "-begdate" ) then
+                  @  n  = $n + 1
+            set BEGDATE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-enddate" ) then 
-                  @  n  = $n + 1 
-            set ENDDATE = $argv[$n] 
+       if( "$argv[$n]" == "-enddate" ) then
+                  @  n  = $n + 1
+            set ENDDATE = $argv[$n]
        endif
 
-       if( "$argv[$n]" == "-list" ) then 
-                  @  n  = $n + 1 
-               set LIST = $argv[$n] 
+       if( "$argv[$n]" == "-list" ) then
+                  @  n  = $n + 1
+               set LIST = $argv[$n]
        endif
 
        if( "$argv[$n]" == "-plots"  ) then
@@ -373,7 +373,7 @@ if( $PLOTS[1] != "NULL"  ) then
          set PATH = ''
          set node = `echo $DSET | cut -d / -f$m `
          while( $node != $FILE )
-             set node = `echo $node | sed -e 's/%y4/\#/g' ` 
+             set node = `echo $node | sed -e 's/%y4/\#/g' `
              set node = `echo $node | sed -e "s/%m2/\#/g" `
              set node = `echo $node | sed -e "s/%d2/\#/g" `
              set node = `echo $node | sed -e "s/%h2/\#/g" `
@@ -452,7 +452,7 @@ end
 
             if( $numlocs[$nstream] != 0 ) then
 
-              # Extract Extension (last node) from Typical Local File 
+              # Extract Extension (last node) from Typical Local File
               # -----------------------------------------------------
               @ loc = 1
                 while( $loc != 0 )
@@ -514,13 +514,13 @@ foreach collection ( $collections )
       @ endloc = $begloc + $numdates[$m] - 1
         set streamdates = `echo $dates[${begloc}-${endloc}]`
 
-  if( $streamdates[1] != 0 ) then   
+  if( $streamdates[1] != 0 ) then
         foreach date ( $streamdates )
         echo $collection $streamdates Current Date: $date
 
         if( -e $SOURCE/holding/$collection/$date ) then
             cd $SOURCE/holding/$collection/$date
-         
+
             set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
             set num    = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | wc -l`
 
@@ -583,11 +583,11 @@ foreach collection ( $collections )
                    echo "   Performing time average ..."
                    if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
                    if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
-                           $GEOSUTIL/post/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
-                                                           -tag $expid.$collection.monthly \
-                                                           -d   $expid.$collection.diurnal $STRICT
+                           $GEOSUTIL/post/time_ave_util.x -hdf $locals -rc time_ave.rc    \
+                                                          -tag $expid.$collection.monthly \
+                                                          -d   $expid.$collection.diurnal $STRICT
                    else
-                  $RUN_CMD $NCPUS $GEOSUTIL/post/time_ave.x -hdf $locals -rc time_ave.rc    \
+                  $RUN_CMD $NCPUS $GEOSUTIL/post/time_ave_util.x -hdf $locals -rc time_ave.rc    \
                                                             -tag $expid.$collection.monthly \
                                                             -d   $expid.$collection.diurnal $STRICT
                    endif
@@ -626,7 +626,7 @@ set AGCM_JM = `grep  AGCM_JM: $HOMDIR/AGCM.rc | cut -d':' -f2`
 if (${RAT} == 6) set CUBE = TRUE
 
 set HIRES   = FALSE
-if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE 
+if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE
 
 
 # Move and Archive Monthly Means and Dailies
@@ -647,7 +647,7 @@ foreach collection ( $collections )
 
       @ endloc = $begloc + $numdates[$m] - 1
         set  streamdates = `echo $dates[${begloc}-${endloc}]`
-        if( $streamdates[1] != 0 ) then   
+        if( $streamdates[1] != 0 ) then
         foreach date ( $streamdates )
         if( -e            $SOURCE/holding/$collection/$date ) then
             set locdir  = $SOURCE/holding/$collection/$date
@@ -677,7 +677,7 @@ foreach collection ( $collections )
                     set month = `echo $fdate | cut -c5-6`
                     set day   = `echo $fdate | cut -c7-8`
                     set hour  = `echo $fdate | cut -c10-11`
- 
+
                     #set archive = `echo $archives[$m] | sed -e "s/%c/$collection/ g" | \
                     #                                    sed -e "s/%y4/$expyear/      g" | \
                     #                                    sed -e "s/%m2/$month/     g" | \
@@ -902,7 +902,7 @@ if( $num != 0 ) then
 # ---------------
    /bin/rm -f xdf.tabl
 
-# Extract Extension (last node) from Monthly Mean File 
+# Extract Extension (last node) from Monthly Mean File
 # ----------------------------------------------------
 @ m = 1
 while( $m != 0 )
@@ -968,8 +968,8 @@ end    # End ForEach Output Stream Loop
 endif  # End PLOTS Option
 
 #######################################################################
-#                        Submit Quickplot Job                  
-#                        --------------------                  
+#                        Submit Quickplot Job
+#                        --------------------
 #          Note: $num, $monthlies, and ${date_node}
 #                are from last output stream examined
 #######################################################################
@@ -995,7 +995,7 @@ cd  $SOURCE/plot
         @ m = $m + 1
         end
     endif
-       
+
 set CMPEXP = `echo $CMPEXP`
 
 if( $PLOTS[1] != "NULL" ) set STATUS = ON
@@ -1105,8 +1105,8 @@ endif
 
 # Create Plot Lists
 # ---------------------------------------------------------------------------------
-         if( -e  portrait.list ) /bin/rm -f  portrait.list 
-         if( -e landscape.list ) /bin/rm -f landscape.list 
+         if( -e  portrait.list ) /bin/rm -f  portrait.list
+         if( -e landscape.list ) /bin/rm -f landscape.list
          if( -e dummy          ) /bin/rm -f dummy
 
          echo ' '
