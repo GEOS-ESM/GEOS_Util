@@ -95,7 +95,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "input:air:hydrostatic",
-            "message": "Is the upper air input hydrostatic?\n",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
             "default": True,
             "when": lambda x: not x['input:shared:MERRA-2'],
         },
