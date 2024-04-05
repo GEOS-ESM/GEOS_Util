@@ -19,6 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.0.8] - 2024-03-29
+
+### Fixed
+
+- Fixed threshold ice concentration (boundary condition), so it is bounded in [0, 1] for atmospheric forecasting with anomaly persistence.
+- Fix SLES15 detection in `remap_utils.py` to look for `TRUE` rather than the absence of `TRUE`. This will allow a fix in `ESMA_cmake`
+  for correcting other scripting
+
+## [2.0.7] - 2024-02-21
+
+### Changed
+
+- Update of transport plots.
+
+### Fixed
+
+- Fixed `q gxout` bug affecting the stats montage plots.
+
 ## [2.0.6] - 2024-02-21
 
 ### Added

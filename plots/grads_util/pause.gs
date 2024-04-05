@@ -10,7 +10,7 @@ while ( num <= numargs )
 endwhile
 say string
 endif
-say 'Hit n for Next, or c to Clear  ...'
+say 'Hit ENTER for next plot, or c to Clear  ...'
 pull flag
 if( flag = 'c' )
 'c'
