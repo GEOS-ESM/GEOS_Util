@@ -121,9 +121,9 @@ message_qos        = """SLURM or PBS quality-of-service (qos)?
      Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher;
      or leave it blank)\n"""
 
-message_account    = "Select/enter SLURM or PBS account:\n",
+message_account    = "Select/enter SLURM or PBS account:\n"
 
-message_partition  = "Enter SLURM or PBS partition: (If desired; can leave blank.)\n",
+message_partition  = "Enter SLURM or PBS partition: (If desired, can leave blank)\n"
 
 
 job_directive = {"SLURM": """#!/bin/csh -f
