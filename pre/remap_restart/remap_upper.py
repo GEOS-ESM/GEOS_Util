@@ -235,18 +235,63 @@ limit stacksize unlimited
 cd {out_dir}/upper_data
 /bin/touch input.nml
 
-if ($?I_MPI_ROOT) then
-  # intel scaling suggestions
-  #--------------------------
-  setenv I_MPI_ADJUST_ALLREDUCE 12
-  setenv I_MPI_ADJUST_GATHERV 3
-
-  setenv I_MPI_SHM_HEAP_VSIZE 512
-  setenv PSM2_MEMORY large
-  setenv I_MPI_EXTRA_FILESYSTEM 1
-  setenv I_MPI_EXTRA_FILESYSTEM_FORCE gpfs
-  setenv ROMIO_FSTYPE_FORCE "gpfs:"
+set mpi_type = "openmpi"
+if ($?I_MPI_ROOT ) then 
+  set mpi_type = "intel"
 endif
+
+
+if ($mpi_type =~ "openmpi") then
+setenv OMPI_MCA_shmem_mmap_enable_nfs_warning 0
+# pre-connect MPI procs on mpi_init
+setenv OMPI_MCA_mpi_preconnect_all 1
+# options fo bcast: 0|ignore, 1|basic_linear, 2|chain, 3|pipeline, 4|split_binary_tree, 5|binary_tree, 6|binomial, 7|knomial, 8|scatter_allgather, 9|scatter_allgather_ring
+setenv OMPI_MCA_coll_tuned_bcast_algorithm 7
+# options for scatter: 0|ignore, 1|basic_linear, 2|binomial, 3|linear_nb
+setenv OMPI_MCA_coll_tuned_scatter_algorithm 2
+# options for reduce_scatter: 0|ignore, 1|non-overlapping, 2|recursive_halving, 3|ring, 4|butterfly
+setenv OMPI_MCA_coll_tuned_reduce_scatter_algorithm 3
+# options for allreduce: 0|ignore, 1|basic_linear, 2|nonoverlapping, 3|recursive_doubling, 4|ring, 5|segmented_ring, 6|rabenseifner
+setenv OMPI_MCA_coll_tuned_allreduce_algorithm 3
+# options for allgather: 0|ignore, 1|linear, 2|bruck, 3|recursive_doubling, 4|ring, 5|neighbor, 6|two_proc, 7|sparbit
+setenv OMPI_MCA_coll_tuned_allgather_algorithm 4
+# options for allgatherv: 0|ignore, 1|default, 2|bruck, 3|ring, 4|neighbor, 5|two_proc, 6|sparbit
+setenv OMPI_MCA_coll_tuned_allgatherv_algorithm 3
+# options for gather: 0 ignore, 1 basic linear, 2 binomial, 3 linear with synchronization
+setenv OMPI_MCA_coll_tuned_gather_algorithm 1
+# options for barrier: 0|ignore, 1|linear, 2|double_ring, 3|recursive_doubling, 4|bruck, 5|two_proc, 6|tree
+setenv OMPI_MCA_coll_tuned_barrier_algorithm 0
+# required for a tuned flag to be effective
+setenv OMPI_MCA_coll_tuned_use_dynamic_rules 1
+# disable file locks
+setenv OMPI_MCA_sharedfp "^lockedfile,individual"
+## HDF5: disable slow locks (promise not to open half-written files)
+#setenv HDF5_USE_FILE_LOCKING FALSE
+else
+setenv I_MPI_FABRICS ofi
+setenv I_MPI_OFI_PROVIDER psm3
+setenv I_MPI_ADJUST_SCATTER 2
+setenv I_MPI_ADJUST_SCATTERV 2
+setenv I_MPI_ADJUST_GATHER 2
+setenv I_MPI_ADJUST_GATHERV 3
+setenv I_MPI_ADJUST_ALLGATHER 3
+setenv I_MPI_ADJUST_ALLGATHERV 3
+setenv I_MPI_ADJUST_ALLREDUCE 12
+setenv I_MPI_ADJUST_REDUCE 10
+setenv I_MPI_ADJUST_BCAST 11
+setenv I_MPI_ADJUST_REDUCE_SCATTER 4
+setenv I_MPI_ADJUST_BARRIER 9
+#setenv I_MPI_SHM_HEAP_VSIZE 512
+#setenv I_MPI_EXTRA_FILESYSTEM 1
+#setenv I_MPI_EXTRA_FILESYSTEM_FORCE "gpfs"
+#setenv ROMIO_FSTYPE_FORCE "gpfs:"
+#setenv I_MPI_TUNING_MODE auto
+#setenv I_MPI_TUNING_BIN_DUMP tuning-results.dat
+#setenv I_MPI_DEBUG 6
+#setenv MPS_STAT_LEVEL 4
+env | grep 'I_MPI\|FI_'
+endif
+
 set infiles = ()
 set outfils = ()
 foreach infile ( *_restart_in )

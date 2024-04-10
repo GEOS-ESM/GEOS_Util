@@ -128,7 +128,6 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name={job_name}
 #SBATCH --output={log_name}
-#SBATCH --qos={QOS}
 #SBATCH --time={TIME}
 #SBATCH --constraint={CONSTRAINT}
 {PARTITION}
@@ -137,7 +136,6 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #PBS -l walltime={TIME}
 #PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
 #PBS -N {job_name}
-#PBS -q {QOS}
 #PBS -W group_list={account}
 #PBS -o {log_name}
 #PBS -j oe
