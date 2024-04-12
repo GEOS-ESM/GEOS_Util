@@ -62,5 +62,5 @@ output:
     lcv: false
 slurm_pbs:
   account:
-  qos:
+  qos: ''
   partition: ''

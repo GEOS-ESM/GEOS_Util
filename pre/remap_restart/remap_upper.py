@@ -153,7 +153,8 @@ class upperair(remap_base):
        NPE = 5400; nwrit = 6
 
      PARTITION =''
-     QOS  = config['slurm_pbs']['qos']
+     QOS       =''
+     qos       = config['slurm_pbs']['qos']
      TIME = "1:00:00"
      if NPE > 532: 
         assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
@@ -164,11 +165,15 @@ class upperair(remap_base):
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
        job='PBS'
+       if (qos != ''):
+         QOS = "#PBS  -q "+qos
      else:
        job='SLURM'
        partition = config['slurm_pbs']['partition']
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
+       if (qos != ''):
+         QOS = "#SBATCH  --qos="+qos
 
        CONSTRAINT = '"[cas|sky]"'
        if BUILT_ON_SLES15:
