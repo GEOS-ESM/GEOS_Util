@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
+
 ### Fixed
 
 ### Removed
@@ -47,7 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
 - Update CMakeLists.txt so it is ready for sparse checkout
 - Update CI to v2 orb
 - Move to use `cp` and `tar` at NAS rather than the deprecated `mcp` and `mtar`
