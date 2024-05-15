@@ -5,9 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
+## [Updates for MAPL3]
 
 ### Changed
 
@@ -17,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `begin()` and `end()` become `ftn_begin()` and `ftn_end()` respectively.
   - `iter%next()` goes to top of loop instead of bottom.
   - any other `iter%next()` for a `cycle` statement should be deleted.
+
+## [Unreleased]
+
+### Added
+
+### Changed
+
+- Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
 
 ### Fixed
 
