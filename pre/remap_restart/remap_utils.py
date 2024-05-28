@@ -17,18 +17,18 @@ import netCDF4 as nc
 
 #During cmake step, the string will be changed according to the system
 
-BUILT_ON_SLES15 = "NO@BUILT_ON_SLES15@"
+BUILT_ON_SLES15 = "@BUILT_ON_SLES15@"
 GEOS_SITE       = "@GEOS_SITE@"
 
-if BUILT_ON_SLES15== "NO":
-  BUILT_ON_SLES15 = False
+if BUILT_ON_SLES15 == "TRUE":
+    BUILT_ON_SLES15 = True
 else:
-  BUILT_ON_SLES15 = True
+    BUILT_ON_SLES15 = False
 
 # top-level directory for BCs (machine-dependent)
 
 choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles",
-                    "NAS           : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles", 
+                    "NAS           : /nobackup/gmao_SIteam/ModelData/bcs_shared/fvInput/ExtData/esm/tiles",
                     "Custom "                                                                                 ]
 
 # define "choices", "message" strings, and "validate" lists that are used multiple times
@@ -53,7 +53,7 @@ choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
-message_stretch =  f'''\n 
+message_stretch =  f'''\n
  Select parameters of stretched cubed-sphere grid for new restarts:
 
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
@@ -85,7 +85,7 @@ message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
  GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
- ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18   
+ ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
  ----------------------------------------------------------------------------------
  Other: Additional choices used in model or DAS development.
@@ -105,7 +105,7 @@ message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_o
 message_agrid_list = f'''
  C12   C180    C1440
  C24   C360    C2880
- C48   C720    C5760 
+ C48   C720    C5760
  C90   C1000         \n'''
 
 message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
@@ -118,9 +118,9 @@ message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
 message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
 
-message_account    = "Select/enter SLURM or PBS account:\n",
+message_account    = "Select/enter SLURM or PBS account:\n"
 
-message_partition  = "Enter SLURM or PBS partition: (If desired; can leave blank.)\n",
+message_partition  = "Enter SLURM or PBS partition: (If desired, can leave blank)\n"
 
 
 job_directive = {"SLURM": """#!/bin/csh -f
@@ -200,7 +200,7 @@ def fvcore_info(x):
     files = glob.glob(rst_dir+'/*fvcore_internal*'+time+'*')
     fname = files[0]
 
-  if len(files) == 1: 
+  if len(files) == 1:
     fname = files[0]
 
   fvrst = nc.Dataset(fname)
@@ -262,7 +262,7 @@ def catch_model(x):
 
 def data_ocean_default(resolution):
    # the default string should match the choice in remapl_question.py
-   default_ = 'CS  (same as atmosphere OSTIA cubed-sphere grid)' 
+   default_ = 'CS  (same as atmosphere OSTIA cubed-sphere grid)'
    if resolution in ['C12','C24', 'C48'] : default_ = '360x180   (Reynolds)'
    return default_
 
@@ -274,7 +274,7 @@ def get_label(config):
      omodel    = config['output']['shared']['omodel']
      stretch   = config['output']['shared']['stretch']
      EASE_grid = config['output']['surface'].get('EASE_grid', None)
- 
+
      out_resolution = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
      agrid     = config['input']['shared']['agrid']
@@ -293,9 +293,9 @@ def get_label(config):
 
 # NOTE: "wemin" is a configurable parameter that can be set to anything, independent
 #       of the bcs version.  The default set here is simply the "wemin" value that is
-#       typically used with the bcs version.  The user needs to confirm the default 
-#       value or overwrite it with the "wemin" value used in the simulation that is 
-#       associated with the given set of restarts. 
+#       typically used with the bcs version.  The user needs to confirm the default
+#       value or overwrite it with the "wemin" value used in the simulation that is
+#       associated with the given set of restarts.
 def wemin_default(bc_version):
    default_ = '13'
    if bc_version =='GM4' or bc_version == 'ICA' : default_ = '26'
@@ -375,24 +375,24 @@ def print_config( config, indent = 0 ):
 
 def get_command_line_from_answers(answers):
 
-   merra2  = " -merra2 " if answers["input:shared:MERRA-2"] else ""    
-   ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"] 
-   rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]   
+   merra2  = " -merra2 " if answers["input:shared:MERRA-2"] else ""
+   ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"]
+   rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]
 
-   grout     = ' -grout '   + answers["output:shared:agrid"]   
-   levsout   = ' -levsout ' + answers["output:air:nlevel"]     
+   grout     = ' -grout '   + answers["output:shared:agrid"]
+   levsout   = ' -levsout ' + answers["output:air:nlevel"]
 
    out_dir   = ' -out_dir ' + answers["output:shared:out_dir"]
-   newid     = answers["output:shared:expid"]   
-   
+   newid     = answers["output:shared:expid"]
+
    out_newid=''
    if newid.strip():
      out_newid = " -newid " + newid
 
    bcvin = ''
    if answers.get("input:shared:bc_version"):
-     bcvin = " -bcvin " + answers["input:shared:bc_version"]        
-   bcvout = " -bcvout " + answers["output:shared:bc_version"]       
+     bcvin = " -bcvin " + answers["input:shared:bc_version"]
+   bcvout = " -bcvout " + answers["output:shared:bc_version"]
 
    ocnmdlin  = '-ocnmdlin data'
    if answers.get("input:shared:omodel"):
@@ -413,20 +413,20 @@ def get_command_line_from_answers(answers):
    if ogrid[0] == 'C':
       ogrid = "CS"
    oceanout = ' -oceanout ' + ogrid
-   
+
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
-  
+
    label  = ' -lbl ' if answers["output:shared:label"] else ""
-    
+
    in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")
    out_bc_base = ' -out_bc_base ' + answers.get("output:shared:bc_base")
 
    out_stretch = ''
-   if answers["output:shared:stretch"]:   
+   if answers["output:shared:stretch"]:
      out_stretch = ' -out_stretch ' + answers["output:shared:stretch"]
    in_stretch  = ''
-   if answers["input:shared:stretch"]:   
+   if answers["input:shared:stretch"]:
      in_stretch  = ' -in_stretch ' + answers["input:shared:stretch"]
 
    zoom   = " -zoom "      + answers["input:surface:zoom"]
@@ -436,7 +436,7 @@ def get_command_line_from_answers(answers):
    if answers.get("input:surface:catch_model"):
       catch_model = " -catch_model " + answers["input:surface:catch_model"]
 
-   out_rs = " -rs " 
+   out_rs = " -rs "
    rs = 3
    if answers['output:air:remap'] and not answers['output:surface:remap_catch']:
        rs = 1
@@ -482,7 +482,7 @@ def get_command_line_from_answers(answers):
                                           qos + \
                                           partition
 
-         
+
    return cmdl
 
 def flatten_nested(nested_dict, result=None, prefix=''):
@@ -509,7 +509,7 @@ def get_config_from_answers(answers, config_tpl = False):
    if config_tpl:
      remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
      config = get_config_from_file(remap_tpl)
-   else:  
+   else:
      config['input'] = {}
      config['input']['air'] = {}
      config['input']['shared'] = {}
@@ -542,7 +542,7 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
    if (agrid[0].upper() == 'C'):
       n = int(agrid[1:])
       aname ='CF{:04d}x6C'.format(n)
-   
+
    if (ogrid[0].upper() == 'C'):
       oname = aname
    else:
@@ -559,7 +559,7 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
       aname = aname + '-' + stretch
 
    resolutions = aname +'_' + oname
-   
+
    return resolutions
 
 def get_default_bc_base():

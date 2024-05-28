@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
+
 ### Fixed
 
 ### Removed
@@ -18,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 mask from read_reynolds.F90
 
 ### Deprecated
+
+## [2.0.8] - 2024-03-29
+
+### Fixed
+
+- Fixed threshold ice concentration (boundary condition), so it is bounded in [0, 1] for atmospheric forecasting with anomaly persistence.
+- Fix SLES15 detection in `remap_utils.py` to look for `TRUE` rather than the absence of `TRUE`. This will allow a fix in `ESMA_cmake`
+  for correcting other scripting
 
 ## [2.0.7] - 2024-02-21
 
