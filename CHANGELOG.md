@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added new BCS version v12
+
 ### Changed
 
 - Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
