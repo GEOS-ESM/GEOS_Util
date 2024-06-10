@@ -120,13 +120,13 @@ C **********************************************************************
       real, allocatable :: TEM_VARS(:,:,:,:)
 
       data TEM_NAMES / 'U','V','T','OMEGA','USVS','USWS','VSTS' /
-      data TEM_FOUND / '.F.' ,
-     .                 '.F.' ,
-     .                 '.F.' ,
-     .                 '.F.' ,
-     .                 '.F.' ,
-     .                 '.F.' ,
-     .                 '.F.' /
+      data TEM_FOUND / .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. /
 
       logical TEM_WRITE
       logical NO_TEM
@@ -215,7 +215,7 @@ c ---------------------------
              if( trim(arg(n)).eq.'-dv'.or. trim(arg(n)).eq.'-mdv') ldquad = .true.
 
              if( trim(arg(n)).eq.'-d' .or. trim(arg(n)).eq.'-dv' ) then
-                 diurnal = .TRUE. 
+                 diurnal = .TRUE.
                  if( n+1.le.nargs ) then
                      read(arg(n+1),fmt='(a1)') char
                      if( char.ne.'-' ) doutput = arg(n+1)
@@ -223,14 +223,14 @@ c ---------------------------
              endif
 
              if( trim(arg(n)).eq.'-md' .or. trim(arg(n)).eq.'-mdv' ) then
-                 mdiurnal = .TRUE. 
+                 mdiurnal = .TRUE.
                  if( n+1.le.nargs ) then
                      read(arg(n+1),fmt='(a1)') char
                      if( char.ne.'-' ) doutput = arg(n+1)
                  endif
              endif
 
-             if( trim(arg(n)).eq.'-eta'  .or. 
+             if( trim(arg(n)).eq.'-eta'  .or.
      .           trim(arg(n)).eq.'-hdf' ) then  ! Backward compatable for old interface
                  nfiles = 1
                  read(arg(n+nfiles),fmt='(a1)') char
@@ -525,7 +525,7 @@ c -----------------------------
                nstar = index( trim(quadratics(1,nv)),'star',back=.true. )
            if( nstar.ne.0 ) then
               lzstar(nv) = .TRUE.
-             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_" 
+             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_"
      .                   // trim(vname(qloc(1,nv))) // "_and_" // trim(vname(qloc(2,nv)))
            endif
 
@@ -650,12 +650,12 @@ C **********************************************************************
                   call tick (nymd,nhms,-86400)
               endif
 
-              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and. 
-     .            ( begdate.gt.nymd .or. 
+              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and.
+     .            ( begdate.gt.nymd .or.
      .            ( begdate.eq.nymd.and.begtime.gt.nhms ) ) ) cycle
 
-              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and. 
-     .            ( enddate.lt.nymd .or. 
+              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and.
+     .            ( enddate.lt.nymd .or.
      .            ( enddate.eq.nymd.and.endtime.lt.nhms ) ) ) cycle
 
                                k = k+1
@@ -955,10 +955,10 @@ c            ----------------------------------
 
       if( root ) then
           call gfio_close ( id,rc )
-          print * 
+          print *
           print *, 'Created: ',trim(hdfile)
           print *, '-------- '
-          print * 
+          print *
       endif
       call timeend(' Write_AVE')
 
@@ -1012,7 +1012,7 @@ C **********************************************************************
                   enddo
               endif
 
-              call TEM( TEM_VARS,imglobal,jmglobal,lm,TEM_NVARS,               
+              call TEM( TEM_VARS,imglobal,jmglobal,lm,TEM_NVARS,
      .                  EXPID,lon,lat,lev,levunits,nymd0,nhms0,timinc,undef )
           endif
       endif
@@ -1102,7 +1102,7 @@ c ----------
           call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
           print *, '-------- '
-          print * 
+          print *
       endif
       call tick (nymd0,nhms0,ndt)
       enddo
@@ -1111,9 +1111,9 @@ c ----------
           call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
           print *, '-------- '
-          print * 
+          print *
       endif
-      if( root ) print * 
+      if( root ) print *
 
       call timeend(' Write_Diurnal')
       endif
@@ -1336,45 +1336,45 @@ C***********************************************************************
       NSEC = NSEC - 86400
       NYMD = INCYMD (NYMD,1)
       ENDDO
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.EQ.86400)  THEN
       NSEC = 0
       NYMD = INCYMD (NYMD,1)
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.LT.00000)  THEN
       DO WHILE (NSEC.LT.0)
       NSEC = 86400 + NSEC
       NYMD = INCYMD (NYMD,-1)
       ENDDO
-      ENDIF   
-               
-      NHMS = NHMSF (NSEC)
-      ENDIF   
+      ENDIF
 
-      RETURN  
+      NHMS = NHMSF (NSEC)
+      ENDIF
+
+      RETURN
       end subroutine tick
 
       function incymd (NYMD,M)
-C***********************************************************************        
-C  PURPOSE                                                                      
-C     INCYMD:  NYMD CHANGED BY ONE DAY                                          
-C     MODYMD:  NYMD CONVERTED TO JULIAN DATE                                    
-C  DESCRIPTION OF PARAMETERS                                                    
-C     NYMD     CURRENT DATE IN YYMMDD FORMAT                                    
-C     M        +/- 1 (DAY ADJUSTMENT)                                           
-C                                                                               
-C***********************************************************************        
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
-C***********************************************************************        
+C***********************************************************************
+C  PURPOSE
+C     INCYMD:  NYMD CHANGED BY ONE DAY
+C     MODYMD:  NYMD CONVERTED TO JULIAN DATE
+C  DESCRIPTION OF PARAMETERS
+C     NYMD     CURRENT DATE IN YYMMDD FORMAT
+C     M        +/- 1 (DAY ADJUSTMENT)
+C
+C***********************************************************************
+C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+C***********************************************************************
 
       INTEGER NDPM(12)
       DATA    NDPM /31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
       LOGICAL LEAP
       LEAP(NY) = MOD(NY,4).EQ.0 .AND. (MOD(NY,100).NE.0 .OR. MOD(NY,400).EQ.0)
 
-C***********************************************************************        
+C***********************************************************************
 C
       NY = NYMD / 10000
       NM = MOD(NYMD,10000) / 100
@@ -1405,9 +1405,9 @@ C
       INCYMD = NY*10000 + NM*100 + ND
       RETURN
 
-C***********************************************************************        
-C                      E N T R Y    M O D Y M D                                 
-C***********************************************************************        
+C***********************************************************************
+C                      E N T R Y    M O D Y M D
+C***********************************************************************
 
       ENTRY MODYMD (NYMD)
       NY = NYMD / 10000
