@@ -1,4 +1,4 @@
-function  res_2 (args)
+function  res_3 (args)
 
  expid  = subwrd(args,1)
  season = subwrd(args,2)
@@ -11,6 +11,9 @@ function  res_2 (args)
  begdateo = subwrd(args,9)
  enddateo = subwrd(args,10)
 
+'getinfo file'
+        dfile = result
+
 * Get Dates for Plots
 * -------------------
 'run getenv "BEGDATE"'
@@ -20,6 +23,9 @@ function  res_2 (args)
 
 'run getenv "CINTDIFF"'
              CINTDIFF = result
+
+'run getenv "ZDIFILE" '
+             zdifile = result
 
 'run getenv "CLIMATE"'
              climate = result
@@ -42,12 +48,6 @@ endif
 'set rgb 85 137 137 137'
 
 ********************************************************
-
-if( CINTDIFF != NULL )
-* --------------------
-
-'getinfo file'
-        dfile = result
 
 * Get Bounding Values
 * -------------------
@@ -106,20 +106,20 @@ z1 = result
 z2 = result
 endif
 
-'run getenv "ZDIFILE" '
-             zdifile = result
-'set dfile ' zdifile
-'q file'
-say 'ZDIFILE: 'result
-'set x 1'
-'set t 1'
-'sety'
-'setz'
-
-'set lev 900 1' 
-'minmax resdifz'
-        dqmax = subwrd(result,1)
-        dqmin = subwrd(result,2)
+if( CINTDIFF != NULL )
+* --------------------
+  'run getenv "ZDIFILE" '
+               zdifile = result
+  'set dfile ' zdifile
+  'set x 1'
+  'set t 1'
+  'sety'
+  'setz'
+  'set lev 900 1' 
+  'minmax resdifz'
+          dqmax = subwrd(result,1)
+          dqmin = subwrd(result,2)
+endif
 
 * Reset initial space-time environment
 * ------------------------------------
@@ -128,8 +128,6 @@ say 'ZDIFILE: 'result
 'set y 'y1' 'y2
 'set z 'z1' 'z2
 'set t 1'
-
-endif
 
 ********************************************************
 *                   Residual Circulation
@@ -192,11 +190,13 @@ endif
 'set t 1'
 'd res'season'obs'
 
-'set dfile ' zdifile
+'set dfile 'zdifile
 'set x 1'
 'set t 1'
 'sety'
 'setz'
+'getinfo undef'
+         undef = result
 
 if( CINTDIFF != NULL )
 * --------------------
@@ -267,8 +267,19 @@ if( CINTDIFF != NULL )
 else
 
      dn = 0
-    'shades 1'
-    'd maskout( resdifz,abs(resdifz)-0.3 )'
+    'define test = maskout( resdifz,abs(resdifz)-0.3 )'
+    'minmax test'
+         testmax = subwrd(result,1)
+         testmin = subwrd(result,2)
+     if( testmax = undef & testmin = undef )
+       'shades resdifz 0'
+        cint = result
+       'shades 'cint
+       'd maskout( resdifz,abs(resdifz)-'cint' )'
+     else
+       'shades 0.3'
+       'd maskout( resdifz,abs(resdifz)-0.3 )'
+     endif
 
 endif
 
@@ -278,7 +289,7 @@ endif
 'set z 'z1' 'z2
 'set t 1'
 
-'cbarn -scale 0.9 -snum 0.5'
+'cbarn -scale 0.9 -snum 0.5 -ymid 0.40'
 'set gxout contour'
 'set clopts 1 3 0.06'
 'set ccolor 1'
@@ -292,11 +303,14 @@ endif
 'set parea off'
 'set vpage 0 8.5 0.0 11'
 
+'set string 1 l 4'
+'set strsiz 0.07'
+'draw string 0.05 0.10 ( EXPID: 'expid' )'
+
 'set string 1 c 6'
 'set strsiz .11'
 
-'draw string 4.25 10.85 EXPID: 'expid
-'draw string 4.25 10.6 'expdsc'  'season' ('nmod')'
+'draw string 4.25 10.75 'expdsc'  'season' ('nmod')'
 'draw string 4.25  7.23 'obsdsc'  'season' ('nobs') ('climate')'
 
 if( dn != 0 )

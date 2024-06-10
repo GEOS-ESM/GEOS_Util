@@ -143,8 +143,7 @@ if( scale = LOG )
 else
     zid = 'z'ptop
 endif
-
-dpct = 'NULL'
+   dpct = 0.1
 
 if( EXPORT = "U"   )
     oname = "/horiz_"cmpnam"_uwnd_"zid"_closeness_"obsnam
@@ -271,6 +270,11 @@ if( EXPORT = "O3"   )
    'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_FACTOR' ; fixpltfact = result
    'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
+
+if( dpct = 'NULL' )
+    dpct = 0.1
+endif
+
 say ' TITLE: 'title
 say ' CLEVS: 'clevs
 say ' DLEVS: 'dlevs
@@ -499,12 +503,8 @@ if( scale = LOG ) ; 'setlevs' ; endif
              dqrel = result/100
      say 'int dqrel = 'dqrel
 
-     if( dpct = 'NULL' )
-         dpct = 0.1
-     else
-        'd 'dpct
-         dpct = subwrd(result,4)
-     endif
+    'd 'dpct
+        dpct = subwrd(result,4)
 
      say 'DQMAX: 'qmax'  QMOD_MAX: 'amdifmax
      say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'

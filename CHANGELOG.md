@@ -20,19 +20,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added new BCS version v12
-
 ### Changed
-
-- Move to use `time_ave_util.x` from MAPL instead of `time_ave.x`
 
 ### Fixed
 
 ### Removed
 
-- mask from `read_reynolds.F90`
-
 ### Deprecated
+
+## [2.1.0] - 2024-06-10
+
+### Added
+
+- Added new BCS version v12
+- Updates for TEM diagnostics
+
+### Removed
+
+- Removed mask from `read_reynolds.F90`
 
 ## [2.0.8] - 2024-03-29
 

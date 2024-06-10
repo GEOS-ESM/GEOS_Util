@@ -306,7 +306,7 @@ if( Lbit = L ) ; 'setlevs' ; endif
 'set clevs 'clevs
 'set ccols 'ccols
  'd modz'
-'draw ylab Pressure (mb)'
+'draw ylab Pressure (hPa)'
 'set gxout contour'
 'set ccolor 1'
 'set clevs 'clevs
@@ -334,7 +334,7 @@ if( Lbit = L ) ; 'setlevs' ; endif
 'set clevs 'clevs
 'set ccols 'ccols
 'd obsz'
-'draw ylab Pressure (mb)'
+'draw ylab Pressure (hPa)'
 'set gxout contour'
 'set clevs 'clevs
 'set ccolor 1'
@@ -420,7 +420,7 @@ endif
 'set t 1'
 
 if( CINTDIFF = 'NULL' )
-   'draw ylab Pressure (mb)'
+   'draw ylab Pressure (hPa)'
 endif
 
 'set vpage off'
@@ -428,7 +428,7 @@ endif
 if( CINTDIFF != 'NULL' )
    'set string 1 l 6 90'
    'set strsiz .16'
-   'draw string 0.75 1.47 Pressure (mb)'
+   'draw string 0.75 1.47 Pressure (hPa)'
 endif
 
 'set string 1 l 4 0'

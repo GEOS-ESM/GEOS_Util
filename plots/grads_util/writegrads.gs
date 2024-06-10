@@ -1,11 +1,16 @@
 function writegrads(args)
 
 *****************************************************************************************
-* Note: To Write Data in Reverse Order
-*       run setenv ZFLIP ON
+*
 *       args:  -vars  list of variables to write (Default: all variables)  
 *              -levs  list of levels    to write (Default: all levels)  
+*              -time  all  (all times to single file, Default)  
+*                     one  (one time  per file)  
 *              -name  name of binary name.data and name.ctl file (Default: name = grads)
+*
+* Note: To Write Data in Reverse Order
+*       run setenv ZFLIP ON
+*
 *****************************************************************************************
 
 'numargs  'args
@@ -36,6 +41,7 @@ if( xdim = 1 ) ; dlon = 1 ; endif
 
 VARS = 'ALL'
 LEVS = 'ALL'
+TIME = 'ALL'
 NAME = 'grads'
 
         n   = 0
@@ -43,6 +49,7 @@ NAME = 'grads'
 while ( num < numargs )
         num = num + 1
         if( subwrd(args,num) = '-name' ) ; NAME = subwrd(args,num+1) ; endif
+        if( subwrd(args,num) = '-time' ) ; TIME = subwrd(args,num+1) ; endif
 
 * Read VARS
 * ---------
@@ -121,6 +128,9 @@ endif
 'numargs  'VARS
  numvars = result
 
+'run uppercase 'TIME
+                TIME = result
+
 *******************************************
 
 'q gxout'
@@ -139,14 +149,6 @@ endif
          lonbeg = result
 'getinfo lat'
          latbeg = result
-'setx'
-'sety'
-
-* --------------------------------
-
-'set t 1'
-'getinfo date'
-      begdate = result
 'getinfo tinc'
          tinc = result
 'getinfo tunit'
@@ -159,29 +161,53 @@ if( tunit = 'month' ) ; tunit = mo ; endif
 if( tunit = 'day'   ) ; tunit = dy ; endif
 if( tunit = 'hour'  ) ; tunit = hr ; endif
 
+'setx'
+'sety'
+
+* --------------------------------
+
+* --------------------------------------------------------------------
+
+t=1
+while(t<=tdim)
+
+  'set t 't
+
+'getinfo date'
+         date = result
+         year = substr( date,9,4 )
+         day  = substr( date,4,2 )
+        month = get_month()
+     yyyymmdd = year''month''day
+
+if( t = 1 | TIME = 'ONE' ) 
+
 * Write 'NAME'.ctl
 * ----------------
-'!remove 'NAME'.ctl'
-'!touch  'NAME'.ctl'
-'!echo dset ^'NAME'.data                          >> 'NAME'.ctl'
-'!echo title 'label'                              >> 'NAME'.ctl'
-'!echo undef 1e15                                 >> 'NAME'.ctl'
-'!echo xdef 'xdim' linear 'lonbeg' 'dlon'         >> 'NAME'.ctl'
-'!echo ydef 'ydim' linear 'latbeg' 'dlat'         >> 'NAME'.ctl'
-'!echo zdef 'zdim' levels 'LEVS'                  >> 'NAME'.ctl'
-'!echo tdef 'tdim' linear 'begdate' 'tinc''tunit' >> 'NAME'.ctl'
-'!echo vars 'numvars'                             >> 'NAME'.ctl'
+'!remove 'NAME'.'yyyymmdd'.ctl'
+'!touch  'NAME'.'yyyymmdd'.ctl'
+'!echo dset ^'NAME'.'yyyymmdd'.data            >> 'NAME'.'yyyymmdd'.ctl'
+'!echo title 'label'                           >> 'NAME'.'yyyymmdd'.ctl'
+'!echo undef 1e15                              >> 'NAME'.'yyyymmdd'.ctl'
+'!echo xdef 'xdim' linear 'lonbeg' 'dlon'      >> 'NAME'.'yyyymmdd'.ctl'
+'!echo ydef 'ydim' linear 'latbeg' 'dlat'      >> 'NAME'.'yyyymmdd'.ctl'
+'!echo zdef 'zdim' levels 'LEVS'               >> 'NAME'.'yyyymmdd'.ctl'
+if( TIME = 'ALL' )
+'!echo tdef 'tdim' linear 'date' 'tinc''tunit' >> 'NAME'.'yyyymmdd'.ctl'
+else
+'!echo tdef   1    linear 'date' 'tinc''tunit' >> 'NAME'.'yyyymmdd'.ctl'
+endif
+'!echo vars 'numvars'                          >> 'NAME'.'yyyymmdd'.ctl'
 
 * --------------------------------------------------------------------
 
 'set gxout fwrite'
-'set fwrite 'NAME'.data'
+'set fwrite 'NAME'.'yyyymmdd'.data'
+
+endif
+
 
 'set undef 1e15'
-
-t=1
-while(t<=tdim)
-  'set t 't
 
 n=1
 while(n<=nvars)
@@ -232,7 +258,7 @@ while(n<=nvars)
    if( name = slp ) ; zref = 0 ; endif
 
    if( zref = 0 )
-       if( t=1 ) ; '!echo "'desc'" >> 'NAME'.ctl' ; endif
+       if( ( t=1 & TIME = 'ALL' ) | TIME = 'ONE' ) ; '!echo "'desc'" >> 'NAME'.'yyyymmdd'.ctl' ; endif
 *      say 'Writing Variable: 'name
       'set z 1'
        e = 1
@@ -242,7 +268,7 @@ while(n<=nvars)
        e = e + 1
        endwhile
    else
-      if( t=1 ) ; '!echo "'desc'" >> 'NAME'.ctl' ; endif
+      if( ( t=1 & TIME = 'ALL' ) | TIME = 'ONE' ) ; '!echo "'desc'" >> 'NAME'.'yyyymmdd'.ctl' ; endif
 
       if(zflip != 'ON' )
          z=1
@@ -286,11 +312,32 @@ while(n<=nvars)
 
 n=n+1
 endwhile
-if( t=1 ) ; '!echo endvars >> 'NAME'.ctl' ; endif
+
+if( ( t=1 & TIME = 'ALL' ) | TIME = 'ONE' ) ; '!echo endvars >> 'NAME'.'yyyymmdd'.ctl' ; endif
+                         if( TIME = 'ONE' ) ; 'disable fwrite' ; 'set gxout 'gxout ; endif
+
 say ' '
 t=t+1
 endwhile
 
-'disable fwrite'
+if( TIME = 'ALL' ) ; 'disable fwrite' ; endif
 'set gxout 'gxout
 return
+
+function get_month(args)
+'getinfo month'
+         month = result
+      if(month="JAN") ; monthnum = 01 ; endif
+      if(month="FEB") ; monthnum = 02 ; endif
+      if(month="MAR") ; monthnum = 03 ; endif
+      if(month="APR") ; monthnum = 04 ; endif
+      if(month="MAY") ; monthnum = 05 ; endif
+      if(month="JUN") ; monthnum = 06 ; endif
+      if(month="JUL") ; monthnum = 07 ; endif
+      if(month="AUG") ; monthnum = 08 ; endif
+      if(month="SEP") ; monthnum = 09 ; endif
+      if(month="OCT") ; monthnum = 10 ; endif
+      if(month="NOV") ; monthnum = 11 ; endif
+      if(month="DEC") ; monthnum = 12 ; endif
+return monthnum
+

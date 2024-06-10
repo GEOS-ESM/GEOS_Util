@@ -17,6 +17,19 @@ grav = 9.80665
 
 * -----------------
 
+* Get Grads Config and Version
+* ----------------------------
+if (name="config") 
+   'query config'
+          config = sublin(result,1)
+endif
+
+if (name="version") 
+   'query config'
+          config = sublin(result,1)
+         version = subwrd(config,2)
+endif
+
 if( file = "" )
 'query file'
        file = sublin(result,1)
@@ -318,6 +331,9 @@ pagey = subwrd(pagey ,6)
 
 * Return Options
 * --------------
+ if (name="config"  ) ; return config     ; endif
+ if (name="version" ) ; return version    ; endif
+
  if (name="dset" ) ; return dset          ; endif
  if (name="file" ) ; return file          ; endif
  if (name="desc" ) ; return desc          ; endif

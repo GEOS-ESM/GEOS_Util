@@ -1,19 +1,32 @@
 function epflx (args)
-expid  = subwrd(args,1)
-season = subwrd(args,2)
-index  = subwrd(args,3)
-output = subwrd(args,4)
+        expid  = subwrd(args,1)
+TEM_Collection = subwrd(args,2)
+        season = subwrd(args,3)
+        index  = subwrd(args,4)
+        output = subwrd(args,5)
 
 time = substr(index,1,1)
 num  = substr(index,2,2)
 
+say 'Inside epflx, expid = 'expid
+say 'Inside epflx, season = 'season
+say 'Inside epflx, index = 'index
+say 'Inside epflx, output = 'output
+say 'Inside epflx, time = 'time
+say 'Inside epflx, dfile = 'num
+pause
 
 'set dfile 'num
-'setz '
+'q file'
+say result
+pause
+
+           'setz '
            'getinfo desc'
                     desc = result
+               say 'desc = 'desc
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -25,7 +38,11 @@ num  = substr(index,2,2)
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+
+            say 'NODE = 'node
+            say 'TEM_Collection = 'TEM_Collection
+
+            while( node != TEM_Collection )
             EXP = EXP'.'node
             say 'EXP = 'EXP
             m = m + 1
@@ -35,15 +52,19 @@ num  = substr(index,2,2)
                         node = result
             endwhile
             desc = EXP
+            say 'EXP: 'EXP
+            pause
 
    'run getenv MASKFILE'
                maskfile = result
 
 if( time = 'A' )
+   'setdates'
    'run getenv BEGDATE'
                begdate = result
    'run getenv ENDDATE'
                enddate = result
+   'set t 1'
 else
    'set t 1'
    'run getinfo date'
@@ -86,6 +107,9 @@ say 'ENDDATE = 'enddate
 ' set arrlab off '
 ' set ylopts 1 3 0.15 '
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
+
 ' vpage 1 1 2 2 -top 0.6 -bot -0.10'
 ' set ccolor rainbow'
 ' set csmooth on'
@@ -111,6 +135,8 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' vpage 2 1 2 2 -top 0.6 -bot -0.10'
 ' set ccolor rainbow'
@@ -136,6 +162,9 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
+
 ' vpage 1 2 2 2 -top 0.25 -bot 0.25'
 ' set ccolor rainbow'
 ' set csmooth on'
@@ -159,6 +188,9 @@ ybot = 0.6
 rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
+
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' vpage 2 2 2 2 -top 0.25 -bot 0.25'
 ' set csmooth on'
@@ -186,6 +218,8 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
 
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' set vpage off '
 

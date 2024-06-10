@@ -39,7 +39,6 @@ if( numfiles = 'NULL' )
 
 * Loop over Experiment Datasets
 * -----------------------------
-say ''
 'getpwd'
     pwd = result
 
@@ -67,7 +66,16 @@ while( num <= numrc )
 
    say '  CMPID #'num' = 'CMPID.num
    say 'CTLFILE #'num' = 'CTLFILE.num
-   'open 'CTLFILE.num
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+            pause
+
+   'xdfopen 'CTLFILE.num
    if( CMPID.num = expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
@@ -89,9 +97,6 @@ endif
     'run setenv NUMFILES ' numfiles
 
 say ''
-say 'Files:'
-'q files'
-say result
 say 'MASKFILE: 'maskfile
 say ''
 
@@ -223,6 +228,7 @@ while( n<=numfiles )
 
    if( maskfile != 'NULL' ) 
       'define wstar'n' = maskout( wstar.'n',abs(wstar.'maskfile') )'
+      'define res'n'   = maskout( res.'n'  ,abs(  res.'maskfile') )'
       'define wstar    = maskout( wstar.'n',abs(wstar.'maskfile') )'
       'define res      = maskout( res.'n'  ,abs(  res.'maskfile') )'
 *     'define epfy     = maskout( epfy.'n' ,abs( epfy.'maskfile') )'
@@ -232,10 +238,12 @@ while( n<=numfiles )
 *     'define vstar    = maskout( vstar.'n',abs(vstar.'maskfile') )'
    else
       'define wstar'n' = wstar.'n
+      'define   res'n' =   res.'n
    endif
 
   'seasonal wstar  A'n
   'seasonal res    A'n
+
 * 'seasonal epfy   A'n
 * 'seasonal epfz   A'n
 * 'seasonal epfdiv A'n
@@ -317,11 +325,14 @@ while( k > 0 )
 
     n = 1
     while( n<=numfiles )
+           CMPID = CMPID.n
+           TEM_Collection = TEM_NAME.n
+
            'set dfile 'n
            'getinfo desc'
                     desc = result
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -333,7 +344,7 @@ while( k > 0 )
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' & node != 'data' )
+            while( node != TEM_Collection )
             EXP.n = EXP.n'.'node
             say 'EXP'n' = 'EXP.n
             m = m + 1

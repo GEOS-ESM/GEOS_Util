@@ -353,14 +353,12 @@ source $plots_dir/$plot.$datetime.$type/.quickplotrc
 
 # Set Default OPS Comparison Experiments
 # --------------------------------------
-set cmpops = "$VERIFICATION/MERRA2_MEANS:A  \
-              $VERIFICATION/ERA5_Monthly:V "
+# set cmpops = "$VERIFICATION/MERRA2_MEANS:A "
+# set cmpops = "$VERIFICATION/ERA5_Monthly:V "
+  set cmpops = "$VERIFICATION/MERRA2_MEANS:A $VERIFICATION/ERA5_Monthly:V "
+# set cmpops = " "
 
-#              $VERIFICATION/MERRA_MEANS:A \
-#set cmpops = "$VERIFICATION/ERA5_Monthly:V "
-#set cmpops = " "
-
- set cmpops = `echo $cmpops`
+  set cmpops = `echo $cmpops`
 
 # Update CMPEXP
 # -------------
@@ -393,6 +391,7 @@ echo "    ANALYSIS = " $ANALYSIS
 echo "     STD_DEV = " $STD_DEV
 echo "        PLOT = " $plot
 echo "      CMPEXP = " $CMPEXP
+echo "      CMPOPS = " $cmpops
 echo " CMPEXP_ONLY = " $cmpexp_only
 echo " CMPOPS_ONLY = " $cmpops_only
 echo " "
