@@ -2,10 +2,8 @@
 
 setenv ARCH `uname`
 
-setenv SITE             NCCS
-setenv GEOSDIR          /discover/nobackup/ltakacs/TAGS/Jason-4_0_p2/GEOSagcm
-setenv GEOSBIN          /discover/nobackup/ltakacs/TAGS/Jason-4_0_p2/GEOSagcm/Linux/bin
-setenv GEOSUTIL         /discover/nobackup/ltakacs/TAGS/Jason-4_0_p2/GEOSagcm/src/GMAO_Shared/GEOS_Util
+# NOTE The script below requires GEOSBIN. Usually this should be set in scripts calling
+# this but if not, you should set it to the install/bin directory of your model
 
 source $GEOSBIN/g5_modules
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${BASEDIR}/${ARCH}/lib
