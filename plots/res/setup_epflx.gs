@@ -3,11 +3,12 @@ function setup_epflx (args)
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
+debug  = subwrd(args,4)
 
 * Define Seasons to Process
 * -------------------------
 seasons  = ''
-       k = 4
+       k = 5
 while( k > 0 )
     season = subwrd(args,k)
 if( season = '' )
@@ -23,7 +24,6 @@ endwhile
 say 'Running:  setup_epflx 'source' 'expid' 'output' 'seasons
 say '--------------------------------------------------------'
 say ' '
-
 
 'getinfo numfiles'
          numfiles = result
@@ -43,42 +43,117 @@ if( numfiles = 'NULL' )
 while( num <= numrc )
         loc = num + 1
      rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
    '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
     'run getenv CTLFILE '
                 CTLFILE.num = result
 
-    '!echo `basename 'rcfile' | cut -d. -f2- > CMPID.txt`'
-    '!cat CMPID.txt | awk "{print length}"   > LENID.txt'
-    'run getenv LENID'
-                lenid = result
-                lenid = lenid - 3
-    '!cat CMPID.txt | cut -b1-'lenid' > CMPID2.txt'
-    'run getenv CMPID2'
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b1-'length' > CMPID.txt'
+    'run getenv CMPID '
                 CMPID.num = result
 
    say '  CMPID #'num' = 'CMPID.num
    say 'CTLFILE #'num' = 'CTLFILE.num
-   'open 'CTLFILE.num
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+            pause
+
+   'xdfopen 'CTLFILE.num
    if( CMPID.num = expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
-say ' '
- 
+
 'getinfo numfiles'
          numfiles = result
 endif
 
-'run getenv MASKFILE ' maskfile
-            maskfile = result
+* Loop over Experiment Datasets
+* -----------------------------
+'getpwd'
+    pwd = result
 
+'getnumrc 'pwd
+     rcinfo = result
+     numrc  = subwrd( rcinfo,1 )
+       num  = 1
+       cnt  = 0
+while( num <= numrc )
+        loc = num + 1
+     rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
+   '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
+    'run getenv CTLFILE '
+                CTLFILE.num = result
+     say 'CTLFILE.'num' = 'CTLFILE.num
+
+   '!basename 'CTLFILE.num' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+
+           '!remove NODE.txt'
+           '!echo 'basename' | cut -d. -f1 >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            cmpid = node
+
+            say 'cmpid = 'cmpid
+            TEM_Collection = TEM_NAME.num
+            m = 2
+           '!remove NODE.txt'
+           '!echo 'basename' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            while( node != TEM_Collection )
+                   cmpid =  cmpid'.'node
+              say 'cmpid = 'cmpid
+            m = m + 1
+           '!remove NODE.txt'
+           '!echo 'basename' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            endwhile
+
+                          CMPID.num = cmpid
+   say '  CMPID #'num' = 'CMPID.num
+   say 'CTLFILE #'num' = 'CTLFILE.num
+   say ' '
+*  'xdfopen 'CTLFILE.num
+   if( CMPID.num = expid ) ; nexpid = num ; endif
+   num = num + 1
+endwhile
+
+'getinfo numfiles'
+         numfiles = result
+
+
+'!/bin/rm -f LOCKFILE'
+'q files'
+   check = subwrd(result,1)
+
+* Set MASKFILE to file which is not time-continuous (i.e., has UNDEF periods)
+* ---------------------------------------------------------------------------
+     maskfile = 'NULL'
+*    maskfile = 2
+    'run setenv MASKFILE ' maskfile
+    'run setenv NUMFILES ' numfiles
+
+say ''
+say 'Files:'
 'q files'
 say result
 
-'run getenv "GEOSUTIL"'
-             geosutil = result
-
-* Find time subset which includes all files
-* -----------------------------------------
+say 'Initializing BEGDATE and ENDATE for each Experiment:'
+say '----------------------------------------------------'
 n = 1
 while( n<=numfiles )
    'set dfile 'n
@@ -92,7 +167,7 @@ while( n<=numfiles )
    'getinfo date'
          enddate.n = result
    'run setenv ENDDATE'n' 'enddate.n
-say 'begdate.'n': 'begdate.n'  enddate.'n': 'enddate.n
+    say 'begdate.'n': 'begdate.n'  enddate.'n': 'enddate.n
 n = n + 1
 endwhile
 
@@ -123,6 +198,8 @@ while( n<=numfiles )
 n = n + 1
 endwhile
 
+* Hardwire begdate and enddate here
+* ---------------------------------
 *begdateA = 00z01jan2010
 *enddateA = 00z01dec2014
 
@@ -144,6 +221,8 @@ say 'set time 'begdateA' 'enddateA
     'set time 'begdateA' 'enddateA
 say ' '
 
+say 'setdates'
+    'setdates'
 say 'getdates'
     'getdates'
 say ' '
@@ -165,6 +244,7 @@ while( n<=numfiles )
   'seasonal epfy   A'n
   'seasonal epfz   A'n
   'seasonal epfdiv A'n
+
 n = n + 1
 endwhile
 
@@ -176,6 +256,9 @@ endwhile
 'set gxout shaded'
 'c'
 
+'run getenv "GEOSUTIL"'
+             geosutil = result
+
 n = 1
 while( n<=numfiles )
           k = 1
@@ -185,9 +268,22 @@ while( n<=numfiles )
                 k = k+1
            say 'Running: epflx.gs 'CMPID.n' 'season' A'n' 'output
            say '-------------------------------------------------'
-           'run 'geosutil'/plots/res/epflx.gs 'CMPID.n' 'season' A'n' 'output
-            pause
-           'c'
+           'set x 1'
+           'sety'
+           'setz'
+                    flag = ""
+            while ( flag = "" )
+                   'run 'geosutil'/plots/res/epflx.gs 'CMPID.n' 'TEM_NAME.n' 'season' A'n' 'output
+                    if( debug = "debug" )
+                        say "Hit  ENTER  to repeat plot"
+                        say "Type 'next' for  next plot, 'done' for next field"
+                             pull flag
+                    else
+                             flag = "next"
+                    endif
+                   'c'
+            endwhile
+
        else
                 k = -1
        endif
@@ -206,14 +302,35 @@ if( CMPID.n != expid )
                 k = k+1
            say 'Running:  epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
            say '----------------------------------------------------'
-          'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'season' A'nexpid' A'n' 'output
-           pause
-          'c'
-           say 'Running: epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
-           say '----------------------------------------------------'
-          'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'season' A'n' A'nexpid' 'output
-           pause
-          'c'
+
+               flag = ""
+       while ( flag = "" )
+          say 'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'TEM_NAME.nexpid' 'TEM_NAME.n' 'season' A'nexpid' A'n' 'output
+              'run 'geosutil'/plots/res/epflx_diff.gs 'expid' 'CMPID.n' 'TEM_NAME.nexpid' 'TEM_NAME.n' 'season' A'nexpid' A'n' 'output
+               if( debug = "debug" )
+                   say "Hit  ENTER  to repeat plot"
+                   say "Type 'next' for  next plot, 'done' for next field"
+                        pull flag
+               else
+                        flag = "next"
+               endif
+              'c'
+       endwhile
+
+               flag = ""
+       while ( flag = "" )
+          say 'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'TEM_NAME.n' 'TEM_NAME.nexpid' 'season' A'n' A'nexpid' 'output
+              'run 'geosutil'/plots/res/epflx_diff.gs 'CMPID.n' 'expid' 'TEM_NAME.n' 'TEM_NAME.nexpid' 'season' A'n' A'nexpid' 'output
+               if( debug = "debug" )
+                   say "Hit  ENTER  to repeat plot"
+                   say "Type 'next' for  next plot, 'done' for next field"
+                        pull flag
+               else
+                        flag = "next"
+               endif
+              'c'
+       endwhile
+
        else
                 k = -1
        endif
@@ -224,10 +341,10 @@ endwhile
 
 * Move DATA for Archive
 * ---------------------
-'!/bin/mv -f residual*ctl    ../'
-'!/bin/mv -f residual*data   ../'
-'!/bin/mv -f VERIFICATION*rc ../'
-'!/bin/cp -f ../residual.'expid'.* ../../'
+*'!/bin/mv -f residual*ctl    ../'
+*'!/bin/mv -f residual*data   ../'
+*'!/bin/mv -f VERIFICATION*rc ../'
+*'!/bin/cp -f ../residual.'expid'.* ../../'
 
 return
 

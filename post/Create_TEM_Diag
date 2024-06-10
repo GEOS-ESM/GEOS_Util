@@ -1,0 +1,102 @@
+#!/bin/csh -f
+
+if ( ! $?GEOSUTIL ) then
+      echo " "
+      echo Environment variable GEOSUTIL must be defined before use!
+      echo Set GEOSUTIL to the location of the \'install\' directory
+      echo " "
+      exit 1
+endif
+
+if( $#argv == 0 ) then
+    $GEOSUTIL/bin/Create_TEM_Diag.x
+    exit
+endif
+
+if( "$argv[1]" == "-h" ) then
+    $GEOSUTIL/bin/Create_TEM_Diag.x
+    exit
+else
+    $GEOSUTIL/bin/Create_TEM_Diag.x $argv
+
+    if( -e basename.output ) /bin/rm basename.output
+
+      # Create DDF File for TEM_Diags
+      # -----------------------------
+         set TEM_Diags = `/bin/ls -1 *.TEM_Diag.monthly.* | grep -v clim | grep -v partial | grep -v ddf`
+         set num = $#TEM_Diags
+
+         echo " "
+         echo "TEM_Diag files: $TEM_Diags"
+         echo "Number: $num"
+         echo " "
+
+         if( $num != 0 ) then
+
+            # Extract Extension (last node) from Monthly Mean File
+            # ----------------------------------------------------
+            @ m = 1
+            while( $m != 0 )
+               set   dum  = `echo $TEM_Diags[1] | cut -d "." -f$m`
+               if( .$dum != . ) then
+                  set ext = $dum
+                  @ m = $m + 1
+               else
+                  @ m = 0
+               endif
+            end
+            echo "Extension: $ext"
+
+            # Extract EXPID from Monthly Mean File
+            # ------------------------------------
+            set expid = `echo $TEM_Diags[1] | cut -d "." -f1` 
+            @ m = 2
+            while( $m != 0 )
+               set   dum  = `echo $TEM_Diags[1] | cut -d "." -f$m`
+               if( .$dum != .TEM_Diag ) then
+                  set expid = `echo ${expidr}.$dum`
+                  @ m = $m + 1
+               else
+                  @ date_node = $m + 2
+                  @ m = 0
+               endif
+            end
+            echo "EXPID: $expid"
+            echo " "
+
+            set edate  = `echo $TEM_Diags[$num] | cut -d "." -f${date_node}`
+            set eyear  = `echo $edate           | cut -c1-4`
+            set emonth = `echo $edate           | cut -c5-6`
+
+            set date  = `echo $TEM_Diags[1] | cut -d "." -f${date_node}`
+            set year  = `echo $date         | cut -c1-4`
+            set month = `echo $date         | cut -c5-6`
+
+            set expdsc = "TEM Diagnostics"
+            set timinc = "mo"
+
+            if( $month == "01" ) set MON = JAN
+            if( $month == "02" ) set MON = FEB
+            if( $month == "03" ) set MON = MAR
+            if( $month == "04" ) set MON = APR
+            if( $month == "05" ) set MON = MAY
+            if( $month == "06" ) set MON = JUN
+            if( $month == "07" ) set MON = JUL
+            if( $month == "08" ) set MON = AUG
+            if( $month == "09" ) set MON = SEP
+            if( $month == "10" ) set MON = OCT
+            if( $month == "11" ) set MON = NOV
+            if( $month == "12" ) set MON = DEC
+
+            @ nmonths = ( $eyear - $year ) * 12 + ( $emonth - $month ) + 1
+
+            /bin/rm -f                                                      ${expid}.TEM_Diag.monthly.ddf
+            echo DSET ^$expid.TEM_Diag.monthly.%y4%m2.$ext               >  ${expid}.TEM_Diag.monthly.ddf
+            echo TITLE $expdsc                                           >> ${expid}.TEM_Diag.monthly.ddf
+            echo OPTIONS template                                        >> ${expid}.TEM_Diag.monthly.ddf
+            echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc  >> ${expid}.TEM_Diag.monthly.ddf
+
+         endif
+
+endif
+

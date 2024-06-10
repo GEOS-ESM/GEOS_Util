@@ -42,6 +42,7 @@ endif
 if( file  = "NULL" )
 if( ftype = "BIN"  ) ; '   open 'fname ; endif
 if( ftype = "HDF"  ) ; 'xdfopen 'fname ; endif
+if( ftype = "CFIO" ) ; 'xdfopen 'fname ; endif
 if( ftype = "SDF"  ) ; 'sdfopen 'fname ; endif
 
 
