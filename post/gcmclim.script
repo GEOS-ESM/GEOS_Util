@@ -106,7 +106,7 @@ endif
 echo Use: NCPUS = $NCPUS
 
      if( $NCPUS == "NULL" | $NCPUS == 1 ) then
-          set TIMEAVE_x =                 "$GEOSUTIL/bin/time_ave_util.x"
+          set TIMEAVE_x =                 "$GEOSUTIL/bin/time_ave.x -NO_TEM true"
      else
           if ( ! $?RUN_CMD ) then
                 echo " "
@@ -114,7 +114,7 @@ echo Use: NCPUS = $NCPUS
                 echo " "
                 exit 1
           endif
-          set TIMEAVE_x = "$RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave_util.x"
+          set TIMEAVE_x = "$RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -NO_TEM true"
      endif
 
 

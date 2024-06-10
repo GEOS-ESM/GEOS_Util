@@ -583,12 +583,12 @@ foreach collection ( $collections )
                    echo "   Performing partial time average ..."
                    if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
                    if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
-                           $GEOSUTIL/post/time_ave_util.x -hdf $locals -rc time_ave.rc    \
+                           $GEOSUTIL/post/time_ave.x -hdf $locals -rc time_ave.rc    \
                                                           -tag $expid.$collection.monthly \
                                                           -ntmin 1 \
                                                           -d   $expid.$collection.diurnal $STRICT
                    else
-                  $RUN_CMD $NCPUS $GEOSUTIL/post/time_ave_util.x -hdf $locals -rc time_ave.rc    \
+                  $RUN_CMD $NCPUS $GEOSUTIL/post/time_ave.x -hdf $locals -rc time_ave.rc    \
                                                             -tag $expid.$collection.monthly \
                                                             -ntmin 1 \
                                                             -d   $expid.$collection.diurnal $STRICT

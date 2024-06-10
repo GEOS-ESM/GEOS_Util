@@ -279,7 +279,8 @@ endif
 
 
 # Residual Circulation
-# --------------------
+# Note: Always run MAKERES before running the Residual PORTRAIT and LANDSCAPE plots
+# ---------------------------------------------------------------------------------
 if( $plot == residual ) then
      $GEOSUTIL/plots/res/makeres $source
 
@@ -289,7 +290,7 @@ if( $plot == residual ) then
      setenv ORIENTATION LANDSCAPE
      $grads $batch -l -c "run $GEOSUTIL/plots/res/res  $expid $output $debug $seasons "
      $grads $batch -l -c "run $GEOSUTIL/plots/res/setup_wstar $source $expid $output $seasons "
-     $grads $batch -l -c "run $GEOSUTIL/plots/res/setup_epflx $source $expid $output $seasons "
+     $grads $batch -l -c "run $GEOSUTIL/plots/res/setup_epflx $source $expid $output $debug $seasons "
      $grads $batch -l -c "run $GEOSUTIL/plots/zcmp/zcmp $expid $output $seasons "
 endif
 
