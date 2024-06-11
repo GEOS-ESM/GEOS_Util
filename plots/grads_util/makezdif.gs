@@ -359,9 +359,9 @@ minval =  1e15
  endwhile
 *say ' '
 
-*'close 'newfile
 '!remove ZDIFILE.txt'
-'run setenv "ZDIFILE" 'newfile
+say 'run setenv "ZDIFILE" 'newfile
+    'run setenv "ZDIFILE" 'newfile
 
 * Reset Initial Environment Settings
 * ----------------------------------

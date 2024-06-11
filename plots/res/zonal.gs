@@ -22,15 +22,16 @@ function zonal (args)
 
 say ' EXPID: 'expid
 say 'EXPDSC: 'expdsc
+say ' '
 
 'run getenv "GEOSUTIL"'
-         geosutil = result
+             geosutil = result
 
 'run getenv "VERIFICATION"'
-         verification = result
+             verification = result
 
 'run getenv "ARCH"'
-         arch = result
+             arch = result
 
 'run getpwd'
         pwd = result
@@ -38,105 +39,110 @@ say 'EXPDSC: 'expdsc
 '!/bin/cp 'geosutil'/plots/res/VERIFICATION*rc .'
 
 * -------------------------------------------------------------------------------------------------
-* Note: Assume that we ALWAYS want to create an updated residual.EXPID.ctl and residual.EXPID.data
+*                Check for TEM_Collection Diagnostic Files under source home directory
 * -------------------------------------------------------------------------------------------------
 
-* Check for residual.EXPID.data under source home directory
-* ---------------------------------------------------------
 'run getenv "SOURCE"'
              source = result
-say 'Checking for 'source'/residual.'expid'.ctl'
+
+'run getenv "HISTORYRC"'
+             HISTORYRC = result
+
+'!remove     TEM_NAME'
+'!/bin/grep  TEM_Collection 'HISTORYRC' > TEM_NAME'
+             dummy  = read(TEM_NAME)
+             ioflag = sublin( dummy,1 )
+             record = sublin( dummy,2 )
+             say expid' ioflag: 'ioflag
+             say expid' record: 'record
+             if( ioflag = 0 )
+                 TEM_Collection = subwrd( record,2 )
+             else
+                 TEM_Collection = 'TEM_Diag'
+             endif
+             dummy = close(TEM_NAME)
+say ' '
+say 'EXPID Transformed Eulerian Mean (TEM) Diagnostic Collection: 'TEM_Collection
+say '----------------------------------------------------------- '
+say ' '
+say 'Checking for 'source'/'TEM_Collection'/'expid'.'TEM_Collection'.monthly.ddf'
 
 '!remove   CHECKFILE.txt'
-'!chckfile 'source'/residual.'expid'.ctl'
+'!chckfile 'source'/'TEM_Collection'/'expid'.'TEM_Collection'.monthly.ddf'
  'run getenv CHECKFILE'
-             expid.ctl = result
-'!remove   CHECKFILE.txt'
-'!chckfile 'source'/residual.'expid'.data'
- 'run getenv CHECKFILE'
-             expid.data = result
-             expid.ctl = NULL
-             pause EXPID.CTL = expid.ctl
+             expid.ddf = result
+        say 'expid.ddf: 'expid.ddf
+             pause
  
-* Check for residual.EXPID.data under plot Output directory
-* ---------------------------------------------------------
-if( expid.ctl = 'NULL' )
-    say 'Checking for 'pwd'/../residual.'expid'.ctl'
+if( expid.ddf = 'NULL' )
+*    Check for old format residual.EXPID.data under plot Output directory
+*    --------------------------------------------------------------------
+     say 'Checking for 'pwd'/../residual.'expid'.ctl'
 
     '!remove   CHECKFILE.txt'
     '!chckfile 'pwd'/../residual.'expid'.ctl'
      'run getenv CHECKFILE'
                  expid.ctl = result
+
     '!remove   CHECKFILE.txt'
     '!chckfile 'pwd'/../residual.'expid'.data'
      'run getenv CHECKFILE'
                  expid.data = result
-                 pause EXPID.DATA = expid.data
+
+     if( ( expid.ctl = 'NULL' & expid.data != 'NULL' ) | ( expid.ctl != 'NULL' & expid.data = 'NULL' ) )
+           say 'Inconsistent 'expid' ctl and data files:'
+           say 'expid.ctl : 'expid.ctl
+           say 'expid.data: 'expid.data
+           return
+     endif
+
+     if( expid.ctl != 'NULL' & expid.data != 'NULL' )
+        '!/bin/cp 'pwd'/../residual.'expid'.ctl  .'
+        '!/bin/cp 'pwd'/../residual.'expid'.data .'
+
+*         Create TEM_Collection Diagnostic data based on old format
+*         ---------------------------------------------------------
+        '!'geosutil'/plots/grads_util/Create_TEM_ddf.csh 'expid' 'TEM_Collection
+
+          say 'Create TEM_Collection Directory under SOURCE'
+*         -------------------------------------------------
+        '!/bin/mkdir -p 'source'/'TEM_Collection
+        '!/bin/cp 'expid'.'TEM_Collection'.monthly.* 'source'/'TEM_Collection
+
+          say 'Move TEM_Collection Diagnostic data to OUTPUT directory'
+*         ------------------------------------------------------------
+        '!/bin/mv 'expid'.'TEM_Collection'.monthly.* ../'
+
+        '!remove   CHECKFILE.txt'
+        '!chckfile ../'expid'.'TEM_Collection'.monthly.ddf'
+         'run getenv CHECKFILE'
+                     expid.ddf = result
+     endif
+     pause
 endif
  
-* Check EP_UPDATE to over-ride defaults
-* -------------------------------------
- 'run getenv EP_UPDATE'
-             EP_UPDATE = result
+* -------------------------------------------------------------------------------------------------
+*        Using existing EXPID.TEM_Collection data to create corresponding VERIFICATION rc file
+* -------------------------------------------------------------------------------------------------
 
-* Setting EP_UPDATE = TRUE to force re-calculation
-* ------------------------------------------------
-*            EP_UPDATE = TRUE
-
-if( expid.ctl = 'NULL' | EP_UPDATE != 'NULL' )
-
-*            Updated method to overwrite existing residual.EXPID.data
-*            --------------------------------------------------------
-         say '!/bin/mv -f 'source'/residual.'expid'.ctl  'source'/residual.'expid'.ctl.old  '
-         say '!/bin/mv -f 'source'/residual.'expid'.data 'source'/residual.'expid'.data.old '
-
-         '!remove   CHECKFILE.txt'
-         '!chckfile 'source'/residual.'expid'.ctl'
-         'run getenv CHECKFILE'
-             CHECKFILE  = result
-         if( CHECKFILE != 'NULL' )
-          '!/bin/mv -f 'source'/residual.'expid'.ctl  'source'/residual.'expid'.ctl.old  '
-         endif
-
-         '!remove   CHECKFILE.txt'
-         '!chckfile 'source'/residual.'expid'.data'
-         'run getenv CHECKFILE'
-             CHECKFILE  = result
-         if( CHECKFILE != 'NULL' )
-          '!/bin/mv -f 'source'/residual.'expid'.data 'source'/residual.'expid'.data.old  '
-         endif
-
-         expid.ctl = 'NULL'
-
-else
-*            Using existing residual.EXPID.data
-*            ----------------------------------
-         say 'Using existing residual.EXPID.data'
-*            '!/bin/cp 'source'/residual.'expid'.ctl  .'
-*            '!/bin/cp 'source'/residual.'expid'.data .'
-             '!/bin/cp 'expid.ctl'  .'
-             '!/bin/cp 'expid.data' .'
+if( expid.ddf != 'NULL' )
+         say 'Creating VERIFICATION.expid.rc associated with existing 'expid'.'TEM_Collection'.monthly.ddf'
              '!remove sedfile'
              '!touch  sedfile'
-             '!echo "s?@EXPID?"'expid'?g   >> sedfile'
-             '!echo "s?@EXPDSC?"'expdsc'?g >> sedfile'
-             '!echo "s?@pwd?"'pwd'?g       >> sedfile'
+             '!echo "s?@EXPID?"'expid'?g                                             >> sedfile'
+             '!echo "s?@EXPDSC?"'expdsc'?g                                           >> sedfile'
+             '!echo "s?@filename?"'expid.ddf'?g                                      >> sedfile'
              '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
              '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
              '!remove VERIFICATION.rc.tmpl'
-         endif
+              pause
+endif
 
-say  ' '
-say  'expid: 'expid
-say  'expid.ctl: 'expid.ctl
-say  'expid.data: 'expid.data
-say  ' '
-*pause
+* -------------------------------------------------------------------------------------------------
+*                        Compute EXPID TEM_Diagnostic calculations if needed
+                                   if( expid.ddf = 'NULL' )
+* -------------------------------------------------------------------------------------------------
 
-* Perform residual calculations
-* -----------------------------
-if( expid.ctl = 'NULL' )
- 
 * Initialize Environment using V-Wind File
 * ----------------------------------------
 'set dfile 'vfile
@@ -357,30 +363,52 @@ t=t+1
 endwhile
 'disable fwrite'
 
-* Run Fortran Code to Produce StreamFunction and Residual Circulation
-* -------------------------------------------------------------------
-say ' 'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
-'!    'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
+* Run Fortran Code to Produce Old Format residual.EXPID.ctl and residual.EXPID.data
+* ---------------------------------------------------------------------------------
+say ' 'geosutil'/plots/zonal_'arch'.x -tag 'expid' -desc 'descm
+'!    'geosutil'/plots/zonal_'arch'.x -tag 'expid' -desc 'descm
 
-'!remove sedfile'
-'!touch  sedfile'
 
-'!echo "s?@EXPID?"'expid'?g >> sedfile'
-'!echo "s?@EXPDSC?"'expdsc'?g >> sedfile'
-'!echo "s?@pwd?"'pwd'?g >> sedfile'
-'!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
-'!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
-'!remove VERIFICATION.rc.tmpl'
+* Create TEM_Collection Diagnostic data based on old format
+* ---------------------------------------------------------
+  '!'geosutil'/plots/grads_util/Create_TEM_ddf.csh 'expid' 'TEM_Collection
 
-* Copy DATA to plot Output and Source Directory
-* ---------------------------------------------
-'!/bin/cp -f residual.'expid'.ctl     ../'
-'!/bin/cp -f residual.'expid'.data    ../'
-'!/bin/cp -f VERIFICATION.'expid'.rc  ../'
-'!/bin/cp -f ../residual.'expid'.* ../../'
 
-endif
-* -----------------------------------------------------
+say 'Create TEM_Collection Directory under SOURCE'
+* -----------------------------------------------
+  '!/bin/mkdir -p 'source'/'TEM_Collection
+  '!/bin/cp 'expid'.'TEM_Collection'.monthly.* 'source'/'TEM_Collection
+
+say 'Move TEM_Collection Diagnostic data to OUTPUT directory'
+* ----------------------------------------------------------
+  '!/bin/mv 'expid'.'TEM_Collection'.monthly.* ../'
+
+  '!remove   CHECKFILE.txt'
+  '!chckfile ../'expid'.'TEM_Collection'.monthly.ddf'
+  'run getenv CHECKFILE'
+              expid.ddf = result
+
+say 'Creating VERIFICATION.expid.rc associated with 'expid'.'TEM_Collection'.monthly.ddf'
+    '!remove sedfile'
+    '!touch  sedfile'
+    '!echo "s?@EXPID?"'expid'?g                                                             >> sedfile'
+    '!echo "s?@EXPDSC?"'expdsc'?g                                                           >> sedfile'
+    '!echo "s?@filename?"'expid.ddf'?g                                                      >> sedfile'
+    '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
+    '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
+    '!remove VERIFICATION.rc.tmpl'
+      pause
+
+* -------------------------------------------------------------------------------------------------
+*                               End Computation of EXPID TEM_Diagnostics
+                                                endif
+* -------------------------------------------------------------------------------------------------
+
+
+
+* -------------------------------------------------------------------------------------------------
+*                        Loop over Possible Experiment Datasets for Comparison
+* -------------------------------------------------------------------------------------------------
 
 'run setdates'
 
@@ -400,6 +428,13 @@ say ' '
 say 'Comparing  with: 'exp
 say 'Comparison type: 'type
 
+           '!remove NODE.txt'
+           '!basename 'exp' >> NODE.txt'
+           'run getenv "NODE"'
+                        cmpid = result
+say '    CMPID: 'cmpid
+pause
+
 '!remove   CHECKFILE.txt'
 '!chckfile 'exp'/.HOMDIR'
  'run getenv CHECKFILE'
@@ -409,6 +444,25 @@ say 'Comparison type: 'type
          else
             '!/bin/cp 'exp'/HISTORY.rc .'
          endif
+
+'!remove     TEM_NAME'
+'!/bin/grep  TEM_Collection HISTORY.rc > TEM_NAME'
+             dummy  = read(TEM_NAME)
+             ioflag = sublin( dummy,1 )
+             record = sublin( dummy,2 )
+             say cmpid' ioflag: 'ioflag
+             say cmpid' record: 'record
+             if( ioflag = 0 )
+                 TEM_Collection = subwrd( record,2 )
+             else
+                 TEM_Collection = 'TEM_Diag'
+             endif
+             dummy = close(TEM_NAME)
+say ' '
+say 'CMPID Transformed Eulerian Mean (TEM) Diagnostic Collection: 'TEM_Collection
+say '----------------------------------------------------------- '
+say ' '
+pause
 
 '!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
@@ -434,59 +488,89 @@ say 'Comparison Desc: 'obsdsc
 pause
 
 
-* Check for residual.OBSID.data in comparison experiment directory
-* Note: if  residual.OBSID.data exists, then create an associated VERIFICATION.obsid.rc
-* -------------------------------------------------------------------------------------
-  say 'Checking for 'exp'/residual.'obsid'.ctl'
-'!remove   CHECKFILE.txt'
-'!chckfile 'exp'/residual.'obsid'.ctl'
- 'run getenv CHECKFILE'
-             obsid.ctl = result
-'!remove   CHECKFILE.txt'
-'!chckfile 'exp'/residual.'obsid'.data'
- 'run getenv CHECKFILE'
-             obsid.data = result
-             obsid.ctl = NULL
+* Check for Transport Diagnostic Files under comparison experiment directory
+* --------------------------------------------------------------------------
+  say 'Checking for 'exp'/'TEM_Collection'/'obsid'.'TEM_Collection'.monthly.ddf'
 
-* Check for residual.OBSID.data in plot Output directory
-* ------------------------------------------------------
-if( obsid.ctl = 'NULL' )
+'!remove   CHECKFILE.txt'
+'!chckfile 'exp'/'TEM_Collection'/'obsid'.'TEM_Collection'.monthly.ddf'
+ 'run getenv CHECKFILE'
+             obsid.ddf = result
+        say 'obsid.ddf: 'obsid.ddf
+pause
+
+* Check for old format residual.OBSID.data in plot Output directory
+* -----------------------------------------------------------------
+if( obsid.ddf = 'NULL' )
     say 'Checking for 'pwd'/../residual.'obsid'.ctl'
+
     '!remove   CHECKFILE.txt'
     '!chckfile 'pwd'/../residual.'obsid'.ctl'
      'run getenv CHECKFILE'
                  obsid.ctl = result
+
     '!remove   CHECKFILE.txt'
     '!chckfile 'pwd'/../residual.'obsid'.data'
      'run getenv CHECKFILE'
                  obsid.data = result
+
+     if( ( obsid.ctl = 'NULL' & obsid.data != 'NULL' ) | ( obsid.ctl != 'NULL' & obsid.data = 'NULL' ) )
+           say 'Inconsistent 'obsid' ctl and data files:'
+           say 'expid.ctl : 'expid.ctl
+           say 'expid.data: 'expid.data
+           return
+     endif
+
+     if( obsid.ctl != 'NULL' & obsid.data != 'NULL' )
+        '!/bin/cp 'pwd'/../residual.'obsid'.ctl  .'
+        '!/bin/cp 'pwd'/../residual.'obsid'.data .'
+
+        '!'geosutil'/plots/grads_util/Create_TEM_ddf.csh 'obsid' 'TEM_Collection
+
+        '!remove   CHECKFILE.txt'
+        '!chckfile 'obsid'.'TEM_Collection'.monthly.ddf'
+         'run getenv CHECKFILE'
+                     obsid.ddf = result
+          say 'obsid.ddf: 'obsid.ddf
+          pause
+     endif
 endif
  
-* Setting obsid.ctl = NULL to force re-calculation
-* ------------------------------------------------
-*            obsid.ctl  = 'NULL'
+* Check for new format 'obsid'.'TEM_Collection'.monthly.ddf in plot Output directory
+* ----------------------------------------------------------------------------------
+if( obsid.ddf = 'NULL' )
+    say 'Checking for 'pwd'/../'obsid'.'TEM_Collection'.monthly.ddf'
 
-         if( obsid.ctl != 'NULL' )
+        '!remove   CHECKFILE.txt'
+        '!chckfile 'pwd'/../'obsid'.'TEM_Collection'.monthly.ddf'
+         'run getenv CHECKFILE'
+                     obsid.ddf = result
+          say 'obsid.ddf: 'obsid.ddf
+          pause
+endif
 
-             say 'Creating VERIFICATION.'obsid'.rc for 'pwd'/../residual.'obsid'.data'
-*            '!/bin/cp 'pwd'/../residual.'obsid'.ctl  .'
-*            '!/bin/cp 'pwd'/../residual.'obsid'.data .'
-             '!/bin/cp 'obsid.ctl'  .'
-             '!/bin/cp 'obsid.data' .'
+* -------------------------------------------------------------------------------------
+*                  Create an associated VERIFICATION.obsid.rc
+* -------------------------------------------------------------------------------------
+
+     if( obsid.ddf != 'NULL' )
+         say 'Creating VERIFICATION.obsid.rc associated with 'obsid'.'TEM_Collection'.monthly.ddf'
              '!remove sedfile'
              '!touch  sedfile'
-             '!echo "s?@EXPID?"'obsid'?g   >> sedfile'
-             '!echo "s?@EXPDSC?"'obsdsc'?g >> sedfile'
-             '!echo "s?@pwd?"'pwd'?g       >> sedfile'
+             '!echo "s?@EXPID?"'obsid'?g                                                             >> sedfile'
+             '!echo "s?@EXPDSC?"'obsdsc'?g                                                           >> sedfile'
+             '!echo "s?@filename?"'obsid.ddf'?g                                                      >> sedfile'
              '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
              '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
              '!remove VERIFICATION.rc.tmpl'
- 
-         endif
+     endif
+
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 * Checking for VERIFICATION.obsid.rc
-* Note: if VERIFICATION.obsid.rc exists, then its contents should point to residual.'obsid'.ctl 
-* ---------------------------------------------------------------------------------------------
+* Note: if VERIFICATION.obsid.rc exists, then its contents should point to 'obsid'.'TEM_Collection'.monthly.ddf
+* ----------------------------------------------------------------------------------------------------------
 '!remove   CHECKFILE.txt'
 '!chckfile VERIFICATION.'obsid'.rc'
  'run getenv CHECKFILE'
@@ -497,21 +581,19 @@ endif
          endif
 
 
-* Setting obsid.rc = NULL to force re-calculation
-* -----------------------------------------------
-*            obsid.rc = 'NULL'
-
 say  ' '
 say  'obsid: 'obsid
-say  'obsid.ctl: 'obsid.ctl
-say  'obsid.data: 'obsid.data
 say  'obsid.rc: 'obsid.rc
 say  ' '
-*pause
+pause
+
+* -------------------------------------------------------------------------------------------------
+*                        Compute OBSID TEM_Diagnostic calculations if needed
+                             if( obsid != 'ERA5' & obsid.ddf = 'NULL' )
+* -------------------------------------------------------------------------------------------------
 
 * Perform residual calculations
 * -----------------------------
-         if( obsid != 'ERA5' & ( obsid.ctl = 'NULL' | obsid.rc = 'NULL' ) )
  
 'set dfile 'vfile
 'set y 1'
@@ -715,27 +797,45 @@ t=t+1
 endwhile
 'disable fwrite'
 
-* Run Fortran Code to Produce StreamFunction and Residual Circulation
+
+'!pwd'
+say 'Current Direcory: 'result
+pause
+
+* Run Fortran Code to Produce Old Format residual.OBSID.ctl and residual.OBSID.data
+* ---------------------------------------------------------------------------------
+say ' 'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
+'!    'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
+
+pause
+
+* Create TEM_Collection Diagnostic data based on old format
+* ---------------------------------------------------------
+  '!'geosutil'/plots/grads_util/Create_TEM_ddf.csh 'obsid' 'TEM_Collection
+
+  '!remove   CHECKFILE.txt'
+  '!chckfile 'obsid'.'TEM_Collection'.monthly.ddf'
+  'run getenv CHECKFILE'
+              obsid.ddf = result
+pause
+
+say 'Creating VERIFICATION.obsid.rc associated with 'obsid'.'TEM_Collection'.monthly.ddf'
+*    --------------------------------------------------------------------------------
+             '!remove sedfile'
+             '!touch  sedfile'
+             '!echo "s?@EXPID?"'obsid'?g                                                             >> sedfile'
+             '!echo "s?@EXPDSC?"'obsdsc'?g                                                           >> sedfile'
+             '!echo "s?@filename?"'obsid.ddf'?g                                                      >> sedfile'
+             '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
+             '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
+             '!remove VERIFICATION.rc.tmpl'
+pause
+
+say 'Copying 'obsid' TEM_Collection Diagnostic data to PLOT directory'
 * -------------------------------------------------------------------
-say ' 'geosutil'/bin/zonal_'arch'.x -tag 'obsid' -desc 'desco
-'!    'geosutil'/bin/zonal_'arch'.x -tag 'obsid' -desc 'desco
+  '!/bin/cp 'obsid'.'TEM_Collection'.monthly.* ../'
+pause
 
-'!remove sedfile'
-'!touch  sedfile'
-
-'!echo "s?@EXPID?"'obsid'?g >> sedfile'
-'!echo "s?@EXPDSC?"'obsdsc'?g >> sedfile'
-'!echo "s?@pwd?"'pwd'?g >> sedfile'
-'!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
-'!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
-'!remove VERIFICATION.rc.tmpl'
-'!cat sedfile'
-
-* Copy DATA to Output Directory
-* -----------------------------
-'!/bin/cp -f residual.'obsid'.ctl     ../'
-'!/bin/cp -f residual.'obsid'.data    ../'
-'!/bin/cp -f VERIFICATION.'obsid'.rc  ../'
 
 * End VERIFICATION.obsid.rc CHECKFILE Test
 * ----------------------------------------

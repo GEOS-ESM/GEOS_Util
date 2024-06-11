@@ -36,9 +36,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v06','v11']
+choices_bc_other   = ['v06','v11','v12']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -97,7 +97,8 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 message_bc_other   = f'''\n
 
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
-          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n\n'''\
+          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
+          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)

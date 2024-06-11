@@ -2,17 +2,22 @@ function epflx_diff (args)
 
 expid  = subwrd(args,1)
 cmpid  = subwrd(args,2)
-season = subwrd(args,3)
-index  = subwrd(args,4)
-index2 = subwrd(args,5)
-output = subwrd(args,6)
-detail = subwrd(args,7)
-
+TEM_expid = subwrd(args,3)
+TEM_cmpid = subwrd(args,4)
+season = subwrd(args,5)
+index  = subwrd(args,6)
+index2 = subwrd(args,7)
+output = subwrd(args,8)
+detail = subwrd(args,9)
+detail = d
 
 time = substr(index ,1,1)
 num  = substr(index ,2,2)
 num2 = substr(index2,2,2)
 
+*'run getenv "TEM_Collection"'
+*             TEM_Collection = result
+*say 'TEM_Collection = 'TEM_Collection
 
 'set dfile 'num2
 'setz '
@@ -20,7 +25,7 @@ num2 = substr(index2,2,2)
          desc = result
 
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -32,7 +37,7 @@ num2 = substr(index2,2,2)
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+            while( node != TEM_cmpid )
             EXP = EXP'.'node
             say 'EXP = 'EXP
             m = m + 1
@@ -50,7 +55,7 @@ num2 = substr(index2,2,2)
          desc = result
 
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -62,7 +67,7 @@ num2 = substr(index2,2,2)
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+            while( node != TEM_expid )
             EXP = EXP'.'node
             say 'EXP = 'EXP
             m = m + 1
@@ -77,10 +82,12 @@ num2 = substr(index2,2,2)
                maskfile = result
 
 if( time = 'A' )
+   'setdates'
    'run getenv BEGDATE'
                begdate = result
    'run getenv ENDDATE'
                enddate = result
+   'set t 1'
 else
    'set t 1'
    'run getinfo date'
@@ -134,6 +141,9 @@ say 'ENDDATE = 'enddate
 'set grads off '
 'set ylopts 1 3 0.15 '
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
+
 ' vpage 1 1 2 2 -top 0.6 -bot -0.10'
 ' set lev 1000 0.8'
 ' set lev  925 0.8'
@@ -143,30 +153,71 @@ say 'ENDDATE = 'enddate
 ' d epdiff'
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
-' set ccolor 1'
-if( detail != '' )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != '' )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 2 1 2 2 -top 0.6 -bot -0.10'
+' set gxout shaded'
 ' set csmooth on'
 ' set lev 1000 8'
 ' set lev  925 8'
@@ -176,29 +227,71 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != '' )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != '' )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
    
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 1 2 2 2 -top 0.25 -bot 0.25'
+' set gxout shaded'
 ' set csmooth on'
 ' set lev 1000 80'
 ' set lev  925 80'
@@ -208,29 +301,71 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != ''   )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != ''   )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 2 2 2 2 -top 0.25 -bot 0.25'
+' set gxout shaded'
 ' set csmooth on'
 ' set grads off '
 ' set lev 100 18'
@@ -249,30 +384,68 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 1'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != ''  )
-    arrlen = 1
-    arrscl = 5e6
-    arrfct = 500
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 500
-endif
 
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+*if( detail != ''  )
+*    arrlen = 1
+*    arrscl = 5e6
+*    arrfct = 500
+*    arrscl = 5e5
+*    arrfct = 300
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 500
+*endif
 
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
-
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' set vpage off '
 
