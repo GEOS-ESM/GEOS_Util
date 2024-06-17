@@ -37,7 +37,10 @@ def echo_bcs(x,opt):
 
 def default_partition(x):
    if x['slurm_pbs:qos'] == 'debug':
-      x['slurm_pbs:partition'] = 'compute'
+      if (BUILT_ON_SLES15):
+         x['slurm_pbs:partition'] = 'scutest'
+      else:
+         x['slurm_pbs:partition'] = 'compute'
       return False
    return True
 
@@ -88,6 +91,13 @@ def ask_questions():
             "message": (message_datetime + "; hour = 03, 09, 15, or 21 [z].)\n"),
             "validate": lambda text: validate_merra2_time(text) ,
             "when": lambda x: x['input:shared:MERRA-2'],
+        },
+        {
+            "type": "confirm",
+            "name": "input:air:hydrostatic",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
+            "default": True,
+            "when": lambda x: not x['input:shared:MERRA-2'],
         },
         {
             "type": "path",
@@ -412,6 +422,7 @@ def ask_questions():
             "name": "slurm_pbs:partition",
             "message": message_partition,
             "default": '',
+            "when": lambda x : default_partition(x),
         },
    ]
    answers = questionary.prompt(questions)
@@ -424,6 +435,7 @@ def ask_questions():
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
+   if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
  
    return answers
 
