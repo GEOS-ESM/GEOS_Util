@@ -17,6 +17,7 @@ public read_input
 public read_input_quart
 public write_bin
 public write_netcdf
+public read_bin_SST_ICE
 public check
 
 contains
@@ -974,7 +975,7 @@ contains
 !
 ! Write out a binary file with `HEADER` and data, see below for its format.
 !
-    SUBROUTINE write_bin( today_year, today_mon, today_day, &
+    SUBROUTINE write_bin( fileName_pref, today_year, today_mon, today_day, &
                           tomrw_year, tomrw_mon, tomrw_day, &
                           today, nlat, nlon, sst, ice)
 !---------------------------------------------------------------------------
@@ -983,6 +984,8 @@ contains
     INTEGER, INTENT(IN)     :: today_year, today_mon, today_day, &
                                tomrw_year, tomrw_mon, tomrw_day, &
                                nlat, nlon
+
+    CHARACTER (LEN=*),INTENT(IN) :: fileName_pref
     CHARACTER (LEN=*),INTENT(IN) :: today
 
     REAL, INTENT(IN)        :: sst(nlon, nlat), &
@@ -1001,8 +1004,8 @@ contains
 !---------------------------------------------------------------------------
 !   Write out SST and ICE concentration data
 !
-    fileName_sst = 'Ostia_sst_' // today //'.bin'
-    fileName_ice = 'Ostia_ice_' // today //'.bin'
+    fileName_sst = fileName_pref // '_sst_' // today //'.bin'
+    fileName_ice = fileName_pref // '_ice_' // today //'.bin'
 
     OPEN (UNIT = 991, FILE = fileName_sst, FORM = 'unformatted', STATUS = 'new')
     OPEN (UNIT = 992, FILE = fileName_ice, FORM = 'unformatted', STATUS = 'new')
@@ -1014,8 +1017,8 @@ contains
     CLOSE(991)
     CLOSE(992)
 
-    PRINT*, "Finished writing:"
-    PRINT*, fileName_sst, fileName_ice
+    !PRINT*, "Finished writing:"
+    !PRINT*, fileName_sst, fileName_ice
 !---------------------------------------------------------------------------
 
     END SUBROUTINE write_bin
@@ -1023,7 +1026,7 @@ contains
 !
 ! Write out a netcdf file, see below for its format.
 !
-    SUBROUTINE write_netcdf( today_year, today_mon, today_day, &
+    SUBROUTINE write_netcdf( fileName_pref, today_year, today_mon, today_day, &
                              today, nlat, nlon, sst, ice)
 !---------------------------------------------------------------------------
     IMPLICIT NONE
@@ -1035,7 +1038,8 @@ contains
     REAL, INTENT(IN)        :: sst(nlon, nlat), &
                                ice(nlon, nlat)
 
-    CHARACTER (LEN = 40)    :: fileName
+    CHARACTER (LEN=*),INTENT(IN)   :: fileName_pref
+    CHARACTER (LEN=60)             :: fileName
 
     integer                        :: ncid
     integer, parameter             :: ndims     = 3
@@ -1079,7 +1083,7 @@ contains
     file_hist = "File created on " // trim(date_creation) // trim(time_creation) // ". In yyyymmddHHMMSS.millisec"
 
     write(DTSTR,10) today_year, today_mon, today_day
- 10 FORMAT(I4,'-', I2, '-', I0.2)
+ 10 FORMAT(I0.4,'-', I0.2, '-', I0.2)
     TIME_UNITS = "days since " // trim(DTSTR) //" 12:00:00" 
 
     dlat = 180./real(nlat); dlon = 360./real(nlon)
@@ -1096,7 +1100,7 @@ contains
 
     sst_out(:,:, 1) = sst; fraci_out(:,:, 1) = ice
 
-    fileName = 'sst_fraci_' // today //'.nc4'
+    fileName = fileName_pref // '_' // today //'.nc'
 
     call check( nf90_create(fileName, nf90_clobber, ncid)) ! Create the file. 
 
@@ -1146,9 +1150,108 @@ contains
     call check( nf90_close(ncid) ) ! Close the file.
 !---------------------------------------------------------------------------
 
-    PRINT*, "Finished writing ... ", fileName
+    !PRINT*, "Finished writing ... ", fileName
 
     END SUBROUTINE write_netcdf
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Input:  
+!   - File name containing (binary formatted) SST or ICE at (1440, 2880) resolution.
+!   - Date (format): YYYYMMDD (4 digit year, 2 digit month, 2 digit day).
+!
+! Output: 
+!   - Date (= above input date).
+!   - Array of lat (1440), lon (2880), field (1440, 2880) for user input date; field = SST or ICE.
+!
+! .....................................................................
+   SUBROUTINE read_bin_SST_ICE( fileName, nymd_in, nymd_out, NLON, NLAT, LON, LAT, bcs_field)
+
+   IMPLICIT NONE
+
+   CHARACTER (LEN = *), INTENT(IN)  :: fileName
+   INTEGER,             INTENT(IN)  :: nymd_in
+
+   INTEGER,             INTENT(OUT) :: nymd_out
+   INTEGER,             INTENT(OUT) :: NLON
+   INTEGER,             INTENT(OUT) :: NLAT
+
+   REAL,                INTENT(OUT) :: LON(2880)
+   REAL,                INTENT(OUT) :: LAT(1440)
+   REAL,                INTENT(OUT) :: bcs_field(1440, 2880)
+
+! LOCAL VARS
+   real    year1,month1,day1,hour1,min1,sec1
+   real    year2,month2,day2,hour2,min2,sec2
+   real    dum1,dum2
+   real    dLat,dLon
+   real    field(2880,1440)
+
+   integer nymd1,nhms1
+   integer nymd2,nhms2
+   
+   integer rc, ix
+!  ....................................................................
+
+      !print *, 'Input date: ', nymd_in
+
+      open (10,file=fileName,form='unformatted',access='sequential', STATUS = 'old')
+!     ....................................................................
+      rc = 0
+      do while (rc.eq.0)
+         ! read header
+         read (10,iostat=rc)  year1,month1,day1,hour1,min1,sec1,                            &
+                              year2,month2,day2,hour2,min2,sec2,dum1,dum2
+         if( rc.eq.0 ) then
+           read (10,iostat=rc)  field
+
+           NLON  = nint(dum1)
+           NLAT  = nint(dum2)
+           IF( (NLON /= 2880) .or. (NLAT /= 1440)) THEN
+              PRINT *, 'ERROR in LAT/LON dimension in file: ', fileName, 'NLON=', NLON, 'NLAT=', NLAT
+              EXIT
+           END IF
+           dLat = 180./NLAT
+           dLon = 360./NLON
+
+           ! start date
+           nymd1 = nint( year1*10000 )  + nint (month1*100)  +  nint( day1 )
+           nhms1 = nint( hour1*10000 )  + nint (  min1*100)  +  nint( sec1 )
+
+           ! end date
+           nymd2 = nint( year2*10000 )  + nint (month2*100)  +  nint( day2 )
+           nhms2 = nint( hour2*10000 )  + nint (  min2*100)  +  nint( sec2 )
+         end if
+
+         !print *, nymd1, nymd2
+
+         if (nymd1 .eq. nymd_in) then ! Found the date for which data is requested.
+            nymd_out = nymd1
+
+!           print *, 'Yay! Found data for: ', nymd_out
+!!          print *, bcs_field
+
+            LAT(1) = -90. + dLat/2.
+            DO ix = 2, NLAT
+              LAT(ix) = LAT(ix-1) + dLat
+            END DO
+
+            LON(1) = -180. + dLon/2.
+            DO ix = 2, NLON
+              LON(ix) = LON(ix-1) + dLon
+            END DO
+
+            bcs_field = TRANSPOSE(field)
+            close(10)
+            RETURN 
+         else
+!           print *, "Date in sequential file: ", nymd1, "Continue looking: ", nymd_in
+         end if
+      end do 
+!     ....................................................................
+      close(10)
+!---------------------------------------------------------------------------
+
+    END SUBROUTINE read_bin_SST_ICE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module sst_ice_helpers
