@@ -11,9 +11,24 @@ output = subwrd(args,8)
 detail = subwrd(args,9)
 detail = d
 
-time = substr(index ,1,1)
-num  = substr(index ,2,2)
-num2 = substr(index2,2,2)
+time = substr(index ,2,1)
+num  = substr(index ,1,1)
+num2 = substr(index2,1,1)
+
+say 'inside epflx_diff:'
+say '-----------------'
+say 'expid: 'expid
+say 'cmpid: 'cmpid
+say 'TEM_expid: 'TEM_expid
+say 'TEM_cmpid: 'TEM_cmpid
+say 'season: 'season
+say 'index : 'index
+say 'index2: 'index2
+say 'output: 'output
+say 'time: 'time
+say 'num : 'num
+say 'num2: 'num2
+pause
 
 *'run getenv "TEM_Collection"'
 *             TEM_Collection = result
@@ -31,7 +46,6 @@ num2 = substr(index2,2,2)
            'run getenv "NODE"'
                         node = result
             EXP = node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
@@ -39,14 +53,14 @@ num2 = substr(index2,2,2)
                         node = result
             while( node != TEM_cmpid )
             EXP = EXP'.'node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             endwhile
-            desc2 = EXP
+            say 'EXP'num2' = 'EXP
+                     desc2 = EXP
 
 
 'set dfile 'num
@@ -61,7 +75,6 @@ num2 = substr(index2,2,2)
            'run getenv "NODE"'
                         node = result
             EXP = node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
@@ -69,17 +82,20 @@ num2 = substr(index2,2,2)
                         node = result
             while( node != TEM_expid )
             EXP = EXP'.'node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             endwhile
-            desc = EXP
+                     desc = EXP
+            say 'EXP'num' = 'EXP
 
    'run getenv MASKFILE'
                maskfile = result
+    say 'MASKFILE: 'maskfile
+
+
 
 if( time = 'A' )
    'setdates'
@@ -101,10 +117,23 @@ endif
 
 say 'BEGDATE = 'begdate
 say 'ENDDATE = 'enddate
+pause
 
-'makezdif -q1 epfdiv'season''index' -file1 'num' -q2 epfdiv'season'a'num2' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
-'makezdif -q1   epfy'season''index' -file1 'num' -q2   epfy'season'a'num2' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
-'makezdif -q1   epfz'season''index' -file1 'num' -q2   epfz'season'a'num2' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
+say 'makezdif -q1 epfdiv'num''season''time' -file1 'num' -q2 epfdiv'num2''season''time' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
+say 'Defined Variables:'
+say '------------------'
+'q define'
+say result
+pause
+    'makezdif -q1 epfdiv'num''season''time' -file1 'num' -q2 epfdiv'num2''season''time' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
+
+say 'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
+pause
+    'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
+
+say 'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
+pause
+    'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
  
 'set dfile 'epfile
 'set x 1'
@@ -450,6 +479,8 @@ say 'ENDDATE = 'enddate
 ' set vpage off '
 
 if( maskfile != 'NULL' )
+   'set dfile 'maskfile
+   'set x 1'
    'run count.gs "'season'" 'begdate' 'enddate' -field epfdiv.'maskfile
     nseasons = result
 else
@@ -471,7 +502,7 @@ endif
 ' set string 1 c 6 '
 
 ' set strsiz 0.10 '
-' draw string 5.60501 7.88 'season' ('nseasons') Climatology   ('begdate' - 'enddate')'
+' draw string 5.60501 7.88 'season' ('nseasons')   ('begdate' - 'enddate')'
 
 'myprint -name 'output'/EP_Flux_diff_'expid'-'cmpid'.'season
 

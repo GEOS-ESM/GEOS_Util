@@ -183,11 +183,11 @@ while( z<=zmax )
 'set z ' z
 'run setenv TAABS 'taabs
 if( taabs = TRUE )
- 'define wstr'season''time''n' = wstr'season''time''n' + ( wstar'season''time''n' + abs( wstar'season''time''n' ) )/2 *'delp
+ 'define wstr'season''time''n' = wstr'season''time''n' + ( wstar'n''season''time' + abs( wstar'n''season''time' ) )/2 *'delp
 else
- 'define wstr'season''time''n' = wstr'season''time''n' + wstar'season''time''n'*'delp
+ 'define wstr'season''time''n' = wstr'season''time''n' + wstar'n''season''time'*'delp
 endif
- 'define  psi'season''time''n' =  psi'season''time''n' +   res'season''time''n'*'delp
+ 'define  psi'season''time''n' =  psi'season''time''n' +   res'n''season''time'*'delp
 
          ptot  = ptot + delp
 say 'File: 'n'  levm1: 'levm1'  lev: 'level'  levp1: 'levp1'  delp = 'delp'  ptot = 'ptot
