@@ -13,11 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered
-
 ### Removed
 
 ### Deprecated
+
+## [2.1.1] - 2024-07-26
+
+### Fixed
+
+- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered by.
 
 ## [2.1.0] - 2024-06-10
 
