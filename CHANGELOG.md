@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.0.3] - 2024-07-26
+
+### Fixed
+
+- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered by.
+
 ## [1.0.2] - 2023-03-07
 
 ### Added
