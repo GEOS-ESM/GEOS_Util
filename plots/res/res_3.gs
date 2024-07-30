@@ -29,7 +29,7 @@ function  res_3 (args)
 
 'run getenv "CLIMATE"'
              climate = result
-if(begdate = begdateo & enddate = enddateo )
+if(begdate = begdateo & enddate = enddateo)
              climate = 'Actual'
 endif
 

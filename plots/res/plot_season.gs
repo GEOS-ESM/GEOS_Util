@@ -299,8 +299,8 @@ while( n<=numfiles )
                   latmin = result/100
        endif
 
- say  'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
-      'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
+ say  'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
+      'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
       'minmax dumdum'n
          dmax = subwrd(result,1)
          dmin = subwrd(result,2)
@@ -749,7 +749,7 @@ while( n<=numfiles )
 * Smooth possible noise
 * ---------------------
  if( nsmooth > 0 )
-    'define wstrsmth = smth9( w'type''season''time''n'*1000 )'
+    'define wstrsmth = smth9( w'type''n''season''time'*1000 )'
      countr = 1
      while( countr < nsmooth )
            'define wstrsmth = smth9( wstrsmth )'
@@ -757,7 +757,7 @@ while( n<=numfiles )
      endwhile
     'd wstrsmth '
  else
-        'd w'type''season''time''n'*1000'
+        'd w'type''n''season''time'*1000'
  endif
 
         'set strsiz 0.10'
