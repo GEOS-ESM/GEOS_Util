@@ -153,22 +153,27 @@ class upperair(remap_base):
        NPE = 5400; nwrit = 6
 
      PARTITION =''
-     QOS  = config['slurm_pbs']['qos']
+     QOS       =''
+     qos       = config['slurm_pbs']['qos']
      TIME = "1:00:00"
      if NPE > 532: 
         assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
-        TIME = "12:00:00"
+        TIME = "3:00:00"
      NNODE = ''
      job=''
      if GEOS_SITE == "NAS":
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
        job='PBS'
+       if (qos != ''):
+         QOS = "#PBS  -q "+qos
      else:
        job='SLURM'
        partition = config['slurm_pbs']['partition']
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
+       if (qos != ''):
+         QOS = "#SBATCH  --qos="+qos
 
        CONSTRAINT = '"[cas|sky]"'
        if BUILT_ON_SLES15:
@@ -179,7 +184,7 @@ class upperair(remap_base):
      # to interp_restarts.x. Per the code we use:
      #  -stretched_grid target_lon target_lat stretch_fac
      # If we are not running stretched grid, we should pass in a blank string
-     stretch = config['output']['shared']['stretch']
+     stretch = config['input']['shared']['stretch']
      stretch_str = ""
      if stretch:
         if stretch == 'SG001':
@@ -195,7 +200,24 @@ class upperair(remap_base):
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
 
-        stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
+        stretch_str = "-stretched_grid_in " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
+
+     stretch = config['output']['shared']['stretch']
+     if stretch:
+        if stretch == 'SG001':
+          stretch_fac = STRETCH_GRID['SG001'][0]
+          target_lat  = STRETCH_GRID['SG001'][1]
+          target_lon  = STRETCH_GRID['SG001'][2]
+        elif stretch == 'SG002':
+          stretch_fac = STRETCH_GRID['SG002'][0]
+          target_lat  = STRETCH_GRID['SG002'][1]
+          target_lon  = STRETCH_GRID['SG002'][2]
+        else:
+          exit("This stretched grid option is not supported " + str(stretch))
+     
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
+     
+        stretch_str = stretch_str+" -stretched_grid_out " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 
      # Now, let's create the input.nml file
      # We need to create a namelist for the upper air remapping
@@ -217,9 +239,6 @@ limit stacksize unlimited
 
 cd {out_dir}/upper_data
 /bin/touch input.nml
-
-# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
-# HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
 
 if ($?I_MPI_ROOT) then
   # intel scaling suggestions
@@ -255,7 +274,14 @@ else
     set ioflag = ""
 endif
 
-set drymassFLG = {drymassFLG}
+set hydrostaticIN = {hydrostatic}
+if ( $hydrostaticIN == 'True' ) then
+    set hydrostaticflag = "-in_hydrostatic T"
+else
+    set hydrostaticflag = "-in_hydrostatic F"
+endif
+
+set drymassFLG = {drymass}
 if ($drymassFLG) then
     set dmflag = ""
 else
@@ -263,20 +289,20 @@ else
 endif
 
 {Bin}/esma_mpirun -np {NPE} $interp_restartsX -im {imout} -lm {nlevel} \\
-   -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
+   $hydrostaticflag {stretch_str} $dmflag -nwriter {nwrit} $ioflag 
 
 """
      account = config['slurm_pbs']['account']
-     drymassFLG  = config['input']['air']['drymass']
+     drymass     = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
      log_name = out_dir+'/remap_upper_log'
      job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, log_name = log_name, job_name= job_name, drymassFLG = drymassFLG, \
+             out_dir = out_dir, log_name = log_name, job_name= job_name, drymass = drymass, \
              imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
-             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
-             stretch_str = stretch_str)
+             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, \
+             hydrostatic = hydrostatic, stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
 

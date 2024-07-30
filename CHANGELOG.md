@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added choice 'blank' for qos in remap_restart python package
+- Added hydrostatic question in remap_restart python package
+- Added function to remap from stretched restarts to stretched restarts
+
 ### Changed
 
 ### Fixed

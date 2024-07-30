@@ -117,7 +117,10 @@ validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C144
 
 message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
-message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+message_qos        = """SLURM or PBS quality-of-service (qos)?
+    (Use default 'debug' to get resource faster; or
+     Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher;
+     or leave it blank)\n"""
 
 message_account    = "Select/enter SLURM or PBS account:\n"
 
@@ -129,20 +132,20 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name={job_name}
 #SBATCH --output={log_name}
-#SBATCH --qos={QOS}
 #SBATCH --time={TIME}
 #SBATCH --constraint={CONSTRAINT}
 {PARTITION}
+{QOS}
 """,
 "PBS": """#!/bin/csh -f
 #PBS -l walltime={TIME}
 #PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
 #PBS -N {job_name}
-#PBS -q {QOS}
 #PBS -W group_list={account}
 #PBS -o {log_name}
 #PBS -j oe
 {PARTITION}
+{QOS}
 """
 }
 
@@ -417,7 +420,7 @@ def get_command_line_from_answers(answers):
 
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
-
+   nonhydrostatic = '' if answers["input:air:hydrostatic"] else " -nonhydrostatic " 
    label  = ' -lbl ' if answers["output:shared:label"] else ""
 
    in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")
@@ -448,7 +451,9 @@ def get_command_line_from_answers(answers):
    noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
 
    account = " -account " + answers["slurm_pbs:account"]
-   qos     = " -qos  " + answers["slurm_pbs:qos"]
+   qos = ''
+   if answers["slurm_pbs:qos"] != '':
+     qos     = " -qos  " + answers["slurm_pbs:qos"]
    partition = ''
    if answers["slurm_pbs:partition"] != '':
       partition  = " -partition  " + answers["slurm_pbs:partition"]
@@ -476,6 +481,7 @@ def get_command_line_from_answers(answers):
                                           wemout + \
                                           label + \
                                           nobkg + \
+                                          nonhydrostatic + \
                                           noagcm_import_rst + \
                                           nolcv + \
                                           out_rs + \
@@ -617,5 +623,5 @@ def remove_ogrid_comment(x, opt):
   return False
 
 if __name__ == '__main__' :
-   config = yaml_to_config('c24Toc12.yaml')
+   config = yaml_to_config('remap_params.tpl')
    print_config(config)

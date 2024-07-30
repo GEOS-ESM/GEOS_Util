@@ -121,9 +121,11 @@ class catchANDcn(remap_base):
         NPE = 160
 
      PARTITION =''
-     QOS  = config['slurm_pbs']['qos']
+     QOS       =''
+
+     qos  = config['slurm_pbs']['qos']
      TIME  = "1:00:00"
-     if QOS != "debug": TIME="12:00:00"
+     if qos != "debug": TIME="3:00:00"
 
      NNODE = ''
      job = ''
@@ -131,6 +133,8 @@ class catchANDcn(remap_base):
        job = "PBS"
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
+       if (qos != ''):
+         QOS = "#PBS  -q "+qos
      else:
        job = "SLURM"
        partition = config['slurm_pbs']['partition']
@@ -140,8 +144,11 @@ class catchANDcn(remap_base):
        CONSTRAINT = '"[cas|sky]"'
        if BUILT_ON_SLES15:
          CONSTRAINT = 'mil'
+       if (qos != ''):
+         QOS = "#SBATCH  --qos="+qos
 
      account    = config['slurm_pbs']['account']
+
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix
@@ -362,7 +369,7 @@ def ask_catch_questions():
             "type": "text",
             "name": "slurm_pbs:qos",
             "message": message_qos,
-            "default": "debug",
+            "default": "",
         },
 
         {
