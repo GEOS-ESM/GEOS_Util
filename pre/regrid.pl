@@ -2403,7 +2403,7 @@ sub copy_upperair_rsts {
 sub regrid_upperair_rsts_CS {
     my ($qcmdlog, $im, $NPE, $QOS, $QOSline, $PART, $PARTline, $MEMPERCPU, $nwrit);
     my ($type, $src, $dest, $input_nml, $FH);
-    my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
+    my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART, $GWD);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
     my ($HEMCO, $SSCHEM, $DUCHEM, $NICHEM, $SUCHEM, $CABRCHEM, $CABCCHEM, $CAOCCHEM);
     my ($moist, $newrst, $rst, $status);
@@ -2483,6 +2483,7 @@ sub regrid_upperair_rsts_CS {
     $AGCM      = rstname($expid, "agcm_import_rst",           $rstIN_template);
     $GMICHEM   = rstname($expid, "gmichem_internal_rst",      $rstIN_template);
     $GOCART    = rstname($expid, "gocart_internal_rst",       $rstIN_template);
+    $GWD       = rstname($expid, "gwd_internal_rst",          $rstIN_template);
     $MAM       = rstname($expid, "mam_internal_rst",          $rstIN_template);
     $MATRIX    = rstname($expid, "matrix_internal_rst",       $rstIN_template);
     $PCHEM     = rstname($expid, "pchem_internal_rst",        $rstIN_template);
@@ -2504,6 +2505,7 @@ sub regrid_upperair_rsts_CS {
     $AGCM      = "" unless -e $AGCM;
     $GMICHEM   = "" unless -e $GMICHEM;
     $GOCART    = "" unless -e $GOCART;
+    $GWD       = "" unless -e $GWD;
     $MAM       = "" unless -e $MAM;
     $MATRIX    = "" unless -e $MATRIX;
     $PCHEM     = "" unless -e $PCHEM;
@@ -2592,6 +2594,7 @@ if( ".$CARMA"     != . ) /bin/ln -s $CARMA  carma_internal_restart_in
 if( ".$AGCM"      != . ) /bin/ln -s $AGCM   agcm_import_restart_in
 if( ".$GMICHEM"   != . ) /bin/ln -s $GMICHEM gmichem_internal_restart_in
 if( ".$GOCART"    != . ) /bin/ln -s $GOCART gocart_internal_restart_in
+if( ".$GWD"       != . ) /bin/ln -s $GWD    gwd_internal_restart_in
 if( ".$MAM"       != . ) /bin/ln -s $MAM    mam_internal_restart_in
 if( ".$MATRIX"    != . ) /bin/ln -s $MATRIX matrix_internal_restart_in
 if( ".$PCHEM"     != . ) /bin/ln -s $PCHEM  pchem_internal_restart_in
