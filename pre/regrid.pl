@@ -155,6 +155,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
                  "geoschemchem_internal_rst" => 1,
                  "gmichem_internal_rst"      => 1,
                  "gocart_internal_rst"       => 1,
+                 "gwd_internal_rst"          => 1,
                  "hemco_internal_rst"        => 1,
                  "mam_internal_rst"          => 1,
                  "matrix_internal_rst"       => 1,
