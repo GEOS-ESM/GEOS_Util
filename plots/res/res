@@ -117,11 +117,11 @@ else
 
 
 'set dfile 'obsfil1
-'count "'season'" 'begdateo' 'enddateo
+'count "'season'" 'begdateo' 'enddateo' -field str'
  nobs = result
 
 'set dfile 'modfil1
-'count "'season'" 'begdate' 'enddate
+'count "'season'" 'begdate' 'enddate' -field str'
  nmod = result
 
 

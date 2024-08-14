@@ -21,6 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.2] - 2024-07-30
+
+### Changed
+
+- Added MASKFILE for time-discontinuous data in TEM diagnostics
+
+## [2.1.1] - 2024-07-30
+
+### Added
+
+- MOM6 C90 ogrid option to `remap_utils.py`
+
+### Fixed
+
+- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered by.
+
 ## [2.1.0] - 2024-06-10
 
 ### Added

@@ -46,7 +46,7 @@ choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
 
 choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
 
-choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
+choices_ogrid_cpld = ['72x36', '360x200', '540x458', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
