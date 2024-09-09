@@ -22,7 +22,10 @@ import netCDF4 as nc
 class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     self.copy_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.copy_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.copy_geosit()
 
   def remap(self):
      if not self.config['output']['air']['remap'] :
@@ -332,7 +335,10 @@ endif
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
-     self.remove_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.remove_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.remove_geosit()
 
   def find_rst(self):
      rst_dir = self.config['input']['shared']['rst_dir']
@@ -390,6 +396,48 @@ endif
        else:
          bin2nc(dest, ncdest, yaml_file)
        os.remove(dest)
+
+  def copy_geosit(self):
+    if not self.config['input']['shared']['GEOS-IT']:
+        return
+
+    expid = self.config['input']['shared']['expid']
+    yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+    yyyy_ = yyyymmddhh_[0:4]
+    mm_   = yyyymmddhh_[4:6]
+    day_  = yyyymmddhh_[6:8]  # Extract the day from yyyymmddhh_
+
+    time_suffix = '_21z.tar'
+
+    geos_it_rst_dir = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/' + expid + '/rs/Y' + yyyy_ + '/M' + mm_ + '/'
+    rst_dir = self.config['input']['shared']['rst_dir'] + '/'
+    os.makedirs(rst_dir, exist_ok=True)
+
+    print('Stage GEOS-IT restarts \n from \n    ' + geos_it_rst_dir + '\n to\n    ' + rst_dir + '\n')
+
+    # Only use the specific day from yyyymmddhh_
+    filename = f'{expid}.rst.{yyyy_}{mm_}{day_}{time_suffix}'
+    src_file = os.path.join(geos_it_rst_dir, filename)
+    dest_file = os.path.join(rst_dir, filename)
+
+    if os.path.exists(src_file):
+        print(f"Copying file {src_file} to {dest_file}")
+        shutil.copy(src_file, dest_file)
+
+        # Untar the .tar file using the tar command
+        if os.path.exists(dest_file):
+            print(f"Untarring {dest_file} to {rst_dir}")
+            try:
+                subprocess.run(['tar', '-xf', dest_file, '-C', rst_dir], check=True)
+                print(f"Untarred {dest_file} successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error untarring {dest_file}: {e}")
+
+        # Optionally remove the tar file after extraction
+        os.remove(dest_file)
+    else:
+        print(f"File {src_file} does not exist.")
+
 
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')

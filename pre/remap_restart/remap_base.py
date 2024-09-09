@@ -33,6 +33,10 @@ class remap_base(object):
     if self.config['input']['shared']['MERRA-2']:
       print(" remove temporary folder that contains MERRA-2 archived files ... \n")
       subprocess.call(['/bin/rm', '-rf', self.config['input']['shared']['rst_dir']])
+  def remove_geosit(self):
+    if self.config['input']['shared']['GEOS-IT']:
+      print(" remove temporary folder that contains GEOS-IT archived files ... \n")
+      subprocess.call(['/bin/rm', '-rf', self.config['input']['shared']['rst_dir']])
 
   def copy_without_remap(self, restarts_in, compared_file_in, compared_file_out, suffix, catch=False):
 #

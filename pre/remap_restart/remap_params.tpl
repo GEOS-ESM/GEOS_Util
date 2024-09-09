@@ -10,6 +10,7 @@ input:
     hydrostatic: 0
   shared:
     MERRA-2: false
+    GEOS-IT: false
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data

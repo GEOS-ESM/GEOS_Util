@@ -17,8 +17,8 @@ import netCDF4 as nc
 
 #During cmake step, the string will be changed according to the system
 
-BUILT_ON_SLES15 = "@BUILT_ON_SLES15@"
-GEOS_SITE       = "@GEOS_SITE@"
+BUILT_ON_SLES15 = "TRUE"
+GEOS_SITE       = "NCCS"
 
 if BUILT_ON_SLES15 == "TRUE":
     BUILT_ON_SLES15 = True
@@ -117,6 +117,8 @@ validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C144
 
 message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
+message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
+
 message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
 
 message_account    = "Select/enter SLURM or PBS account:\n"
@@ -180,6 +182,35 @@ def init_merra2(x):
   x['input:air:nlevel']          = 72
 
   return False
+
+def init_geosit(x):
+  if not x.get('input:shared:GEOS-IT') : return False
+
+  yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
+  if yyyymm < 199701 :
+     exit("Error. GEOS-IT data < 1997 not available\n")
+  elif (yyyymm < 199701):
+     expid = "d5294_geosit_jan98"
+  elif (yyyymm < 200701):
+     expid = "d5294_geosit_jan08"
+  elif (yyyymm < 201701):
+     expid = "d5294_geosit_jan18"
+  else:
+     expid = "d5294_geosit_jan18"
+  x['input:shared:expid']        = expid
+  x['input:shared:omodel']       = 'data'
+  x['input:shared:agrid']        = 'C180'
+  x['input:shared:ogrid']        = 'CS'
+  x['input:shared:omodel']       = 'data'
+  x['input:shared:bc_version']   = 'NL3'
+  x['input:shared:bc_base']     = '/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles'
+  x['input:surface:catch_model'] = 'catch'
+  x['input:shared:stretch']      = False
+  x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/geosit_tmp_'+x['input:shared:yyyymmddhh']+'/'
+  x['input:air:nlevel']          = 72
+
+  return False
+
 
 def fvcore_info(x):
   if 'input:shared:agrid' in x.keys():
@@ -303,11 +334,15 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if not x['input:shared:MERRA-2']:
-      return True
+   if x['input:shared:MERRA-2']:
+       x['input:surface:wemin'] = '26'
+       return False
+   elif x['input:shared:GEOS-IT']:
+       x['input:surface:wemin'] = '13'
+       return False
    else:
-      x['input:surface:wemin'] = '26'
-      return False
+       # If neither MERRA2 or GEOS-IT is selected option will be shown on screen
+       return True
 
 def zoom_default(x):
    zoom_ = '8'
@@ -318,7 +353,7 @@ def zoom_default(x):
       zoom_ = str(int(zoom))
       if zoom < 1 : zoom_ = '1'
       if zoom > 8 : zoom_ = '8'
-   if x['input:shared:MERRA-2'] :
+   if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
    return zoom_
 
@@ -376,7 +411,8 @@ def print_config( config, indent = 0 ):
 
 def get_command_line_from_answers(answers):
 
-   merra2  = " -merra2 " if answers["input:shared:MERRA-2"] else ""
+   merra2  = " -merra2 " if "input:shared:MERRA-2" in answers else ""
+   geosit  = " -geosit " if "input:shared:GEOS-IT" in answers else ""
    ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"]
    rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]
 
@@ -454,6 +490,7 @@ def get_command_line_from_answers(answers):
       partition  = " -partition  " + answers["slurm_pbs:partition"]
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
+                                          geosit + \
                                           ymdh  + \
                                           grout + \
                                           levsout  + \
