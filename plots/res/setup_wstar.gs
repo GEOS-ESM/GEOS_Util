@@ -3,7 +3,7 @@ function setup_wstar (args)
 say ' '
 say 'Inside setup_wstar'
 say ' '
-*pause
+pause
 
 * -------------------------------------------------
 * Set TIME flag:  A => Common Times, B => All Times
@@ -15,6 +15,10 @@ say ' '
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
+
+say 'source: 'source
+say ' expid: 'expid
+pause
 
 * Define Seasons to Process
 * -------------------------
@@ -39,7 +43,6 @@ if( numfiles = 'NULL' )
 
 * Loop over Experiment Datasets
 * -----------------------------
-say ''
 'getpwd'
     pwd = result
 
@@ -67,8 +70,17 @@ while( num <= numrc )
 
    say '  CMPID #'num' = 'CMPID.num
    say 'CTLFILE #'num' = 'CTLFILE.num
-   'open 'CTLFILE.num
-   if( CMPID.num = expid ) ; nexpid = num ; endif
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+            pause
+
+   'xdfopen 'CTLFILE.num
+   if( CMPID.num = 'VERIFICATION.'expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
 
@@ -79,20 +91,28 @@ endif
 
 '!/bin/rm -f LOCKFILE'
 'q files'
-   check = subwrd(result,1)
+say ' Files: 'result
+say 'nexpid: 'nexpid
+pause
 
-* Set MASKFILE to file which is not time-continuous (i.e., has UNDEF periods)
-* ---------------------------------------------------------------------------
-     maskfile = 'NULL'
-*    maskfile = 2
-    'run setenv MASKFILE ' maskfile
-    'run setenv NUMFILES ' numfiles
+'set dfile 'nexpid
+'getinfo dset'
+         dset = result
+'!fsource 'dset
+'run getenv FSOURCE'
+            fsource = result
+
+'!remove NFILES.txt'
+'!/bin/ls -1 'fsource'/'expid'.TEM_Diag.monthly.*.nc4 | wc -l > NFILES.txt'
+'run getenv NFILES'
+            nfiles = result
+
+'getinfo tdim'
+         tdim = result
 
 say ''
-say 'Files:'
-'q files'
-say result
-say 'MASKFILE: 'maskfile
+say '    TDIM: 'tdim
+say '  NFILES: 'nfiles
 say ''
 
 * Initialize BEGDATE and ENDATE for each Experiment
@@ -162,7 +182,6 @@ while( n<=numfiles )
              time = result
     if( time < endtimeA )
         say enddate.n' < 'enddateA
-        pause
             enddateA =  enddate.n
             endtimeA = time
     endif
@@ -208,10 +227,52 @@ say 'set time 'begdateA' 'enddateA
     'set time 'begdateA' 'enddateA
 say ' '
 
-say 'getdates'
-    'getdates'
+
+* Check to see if expid files are time-continuous (i.e., no UNDEF periods)
+* ---------------------------------------------------------------------------------
+'set dfile 'nexpid
+ say 'getdates'
+     'getdates'
+ say ' '
+'set z 1'
+
+maskfile = 'NULL'
+       k = 1
+  season = subwrd(seasons,k)
+while( k > 0 )
+       'run count.gs "'season'" 'begdateA' 'enddateA
+        countnomask = result
+       'run count.gs "'season'" 'begdateA' 'enddateA' -field str'
+        countmask = result
+        say 'COUNT 'season' without MASK: 'countnomask
+        say      '          with    MASK: 'countmask
+
+        if( countnomask != countmask )
+           maskfile = nexpid
+        endif
+
+             k = k+1
+        season = subwrd(seasons,k)
+    if( season = '' )
+             k = -1
+    endif
 say ' '
+endwhile
+
+     say       'MASKFILE: 'maskfile
+    'run setenv MASKFILE ' maskfile
+    'run setenv NUMFILES ' numfiles
+
      pause
+
+if( maskfile != 'NULL' ) 
+  'set dfile 'maskfile
+  'getdates'
+  'set x 1'
+  'sety'
+  'setz'
+  'define zeromask = wstar-wstar + lon-lon'
+endif
 
 n = 1
 while( n<=numfiles )
@@ -221,30 +282,64 @@ while( n<=numfiles )
   'sety'
   'setz'
 
-   if( maskfile != 'NULL' ) 
-      'define wstar'n' = maskout( wstar.'n',abs(wstar.'maskfile') )'
-      'define wstar    = maskout( wstar.'n',abs(wstar.'maskfile') )'
-      'define res      = maskout( res.'n'  ,abs(  res.'maskfile') )'
-*     'define epfy     = maskout( epfy.'n' ,abs( epfy.'maskfile') )'
-*     'define epfz     = maskout( epfz.'n' ,abs( epfz.'maskfile') )'
-*     'define wmean    = maskout( wmean.'n',abs(wmean.'maskfile') )'
-*     'define weddy    = maskout( weddy.'n',abs(weddy.'maskfile') )'
-*     'define vstar    = maskout( vstar.'n',abs(vstar.'maskfile') )'
+   if( maskfile != 'NULL' & maskfile != n ) 
+
+       say 'Computing zdiff and seasonal wstar and res using file: 'n' and maskfile: 'maskfile
+       say '-----------------------------------------------------'
+       pause
+       'makezdif4 -q1 wstar.'n' -q2 zeromask -file1 'n' -file2 'maskfile
+       'run getenv "ZDIFILE" '
+                    zdifile = result
+       'set dfile ' zdifile
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'define wstar'n' = qz'
+       'seasonal wstar'n' A'
+       'close 'zdifile
+       'set dfile 'n
+       'q files'
+        say 'FILES: 'result
+        pause
+
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'makezdif4 -q1 res.'n' -q2 zeromask -file1 'n' -file2 'maskfile
+       'run getenv "ZDIFILE" '
+                    zdifile = result
+       'set dfile ' zdifile
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'define res'n' = qz'
+       'seasonal res'n' A'
+       'close 'zdifile
+       'set dfile 'n
+       'q files'
+        say 'FILES: 'result
+        pause
+
    else
+
+       say 'Computing seasonal wstar and res using file: 'n' and maskfile: 'maskfile
+       say '-------------------------------------------'
+       pause
       'define wstar'n' = wstar.'n
+      'define   res'n' =   res.'n
+      'seasonal wstar'n' A'
+      'seasonal res'n'   A'
+       pause
+
    endif
 
-  'seasonal wstar  A'n
-  'seasonal res    A'n
-* 'seasonal epfy   A'n
-* 'seasonal epfz   A'n
-* 'seasonal epfdiv A'n
-* 'seasonal wmean  A'n
-* 'seasonal weddy  A'n
-* 'seasonal vstar  A'n
 n = n + 1
 endwhile
 endif
+
 * -------------------------------------------
 
 * -------------------------------------------------------------
@@ -264,14 +359,9 @@ if( TFLAG = 'B' )
      'define wstar'n' = wstar.'n
      'seasonal wstar  B'n
      'seasonal res    B'n
-*    'seasonal epfy   B'n
-*    'seasonal epfz   B'n
-*    'seasonal epfdiv B'n
-*    'seasonal wmean  B'n
-*    'seasonal weddy  B'n
-*    'seasonal vstar  B'n
    n = n + 1
    endwhile
+   pause
 endif
 * ----------------------------------------
 
@@ -317,11 +407,14 @@ while( k > 0 )
 
     n = 1
     while( n<=numfiles )
+           CMPID = CMPID.n
+           TEM_Collection = TEM_NAME.n
+
            'set dfile 'n
            'getinfo desc'
                     desc = result
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -333,7 +426,7 @@ while( k > 0 )
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' & node != 'data' )
+            while( node != TEM_Collection )
             EXP.n = EXP.n'.'node
             say 'EXP'n' = 'EXP.n
             m = m + 1

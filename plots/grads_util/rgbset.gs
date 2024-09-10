@@ -90,6 +90,13 @@
 'set rgb 93 234 234 234'
 'set rgb 94 252 252 252'
 
+* RGB Parameters for STATS Package using Latest Grads Version
+* -----------------------------------------------------------
+'getinfo version'
+         version = result
+
+if( version != 'v2.0.1.oga.1' )
+
 * black dots
 'set tile 200 2 10 10 2 0'
 'set rgb 200 tile 200'
@@ -180,4 +187,6 @@
 'set rgb 228 tile 228'
 'set tile 229 2 15 15 1 29'
 'set rgb 229 tile 229'
+
+endif
 

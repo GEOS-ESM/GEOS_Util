@@ -1,8 +1,8 @@
 OBSNAM: MERRA-2
 OBSDSC: MERRA-2_Reanalysis
 
-        filename:   'VERIFICATION/MERRA2_MEANS/residual.MERRA-2.ctl'
-        filetype:   'BIN'
+        filename:   'VERIFICATION/MERRA2_MEANS/inst3_3d_tem_Np/MERRA-2.inst3_3d_tem_Np.monthly.ddf'
+        filetype:   'CFIO'
         fields:     'STR'      , 'DYN'           , 'STR'  , 1
                     'RES'      , 'DYN'           , 'RES'  , 1
                     'DUM'      , 'DYN'           , 'DUM'  , 1

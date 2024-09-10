@@ -1,0 +1,10 @@
+dset   ^GRADSDATA
+undef  UNDEF
+title template for regrid data
+xdef  XDIM linear -180.0 DLON
+ydef  YDIM linear  -90.0 DLAT
+zdef ZDIM2 levels LEVS
+tdef TDIM  linear BEGDATE TINC
+vars 1
+q    ZDIM2 0 Arbitray data
+endvars

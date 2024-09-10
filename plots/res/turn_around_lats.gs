@@ -34,6 +34,51 @@ levmin = 20
 'run getenv TIME '
             time = result
 
+
+* Loop over Experiment Datasets to get Experiment IDs
+* ---------------------------------------------------
+say ''
+'getpwd'
+    pwd = result
+
+'getnumrc 'pwd
+     rcinfo = result
+     numrc  = subwrd( rcinfo,1 )
+       num  = 1
+       cnt  = 0
+while( num <= numrc )
+        loc = num + 1
+     rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
+
+   '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
+    'run getenv CTLFILE '
+                CTLFILE.num = result
+
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b1-'length' | cut -d. -f2 > CMPID.txt'
+    'run getenv CMPID '
+                CMPID.num = result
+
+   say '  CMPID #'num' = 'CMPID.num
+   say '  CTLFILE #'num' = 'CTLFILE.num
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+            pause
+
+   num = num + 1
+endwhile
+
+
 'getinfo numfiles'
          numfiles = result
 
@@ -63,6 +108,7 @@ levmin = 20
 
 'set datawarn off'
 nbeg = 1
+
 nmax = numfiles
 
 'run getenv BEGDATE'
@@ -82,6 +128,8 @@ filecount = 0
 
 * Loop over Files
 * ---------------
+'q files'
+say 'FILES: 'result
 say 'Looping over files 'nbeg' to 'nmax' to find TA Lats'
        n =nbeg
 while( n<=nmax )
@@ -135,11 +183,11 @@ while( z<=zmax )
 'set z ' z
 'run setenv TAABS 'taabs
 if( taabs = TRUE )
- 'define wstr'season''time''n' = wstr'season''time''n' + ( wstar'season''time''n' + abs( wstar'season''time''n' ) )/2 *'delp
+ 'define wstr'season''time''n' = wstr'season''time''n' + ( wstar'n''season''time' + abs( wstar'n''season''time' ) )/2 *'delp
 else
- 'define wstr'season''time''n' = wstr'season''time''n' + wstar'season''time''n'*'delp
+ 'define wstr'season''time''n' = wstr'season''time''n' + wstar'n''season''time'*'delp
 endif
- 'define  psi'season''time''n' =  psi'season''time''n' +   res'season''time''n'*'delp
+ 'define  psi'season''time''n' =  psi'season''time''n' +   res'n''season''time'*'delp
 
          ptot  = ptot + delp
 say 'File: 'n'  levm1: 'levm1'  lev: 'level'  levp1: 'levp1'  delp = 'delp'  ptot = 'ptot
@@ -245,7 +293,7 @@ n = n + 1
 endwhile
 say 'Average    wstr'season'latmn = '  wstrlatmn '    wstr'season'latmx = '  wstrlatmx
 say ' '
-*pause
+ pause
 
 * ----------------------------------------------------
 
@@ -284,6 +332,7 @@ ybot_wstar = subwrd(result,2)
 'getinfo dlat'
          dlat1 = result
 
+found = TRUE
 count = 0
        n =nbeg
 while( n<=nmax )
@@ -296,6 +345,8 @@ if( dlat = dlat1 & foundS.n = TRUE & foundN.n = TRUE )
    'set dfile 1'
    'define wstrave = wstrave + 1000*wstr'season''time''n
     count = count + 1
+else
+    found = FALSE
 endif
 n = n + 1
 endwhile
@@ -326,21 +377,29 @@ while( n<=nmax )
 'set cmark  0'
 'set cthick 1'
 'd 1000*wstr'season''time''n
+say 'Turn-Around Lats for File 'n'  Color: 'color.n
+pause
 n = n + 1
 endwhile
 'set dfile 1'
 
+if( found = TRUE )
 'set cstyle 1'
 'set cmark  0'
 'set cthick 8'
 'set ccolor 1'
 'd wstrave'
+say 'Turn-Around Lats for Average   Color: '1
+pause
+endif
 
 'set cmark 0'
 'set ccolor 1'
 'set cthick 1'
 'set z 1'
 'd lev-lev'
+say 'Zero Line   Color: '1
+pause
 
 * Compute Turn-Around Lats based on wstrave
 * -----------------------------------------
@@ -435,12 +494,14 @@ while( n<=nmax )
 n = n + 1
 endwhile
 
+if( found = TRUE )
 'set dfile 1'
 'set cstyle 1'
 'set cmark  0'
 'set cthick 8'
 'set ccolor 1'
 'd psiave'
+endif
 
 'set cmark 0'
 'set ccolor 1'
@@ -537,13 +598,19 @@ ymax = subwrd(result,6)
 '!remove DESC.txt'
 '!echo 'numfiles' > turn_around_'season'.stack'
 
+'q file'
+say 'FILES: 'result
+pause
     n = 1
     while( n<=numfiles )
+            CMPID = CMPID.n
+            TEM_Collection = TEM_NAME.n
+
            'set dfile 'n
            'getinfo desc'
                     desc = result
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -555,7 +622,11 @@ ymax = subwrd(result,6)
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' & node != 'data' )
+
+            say 'NODE = 'node
+            say 'TEM_Collection = 'TEM_Collection
+            
+            while( node != TEM_Collection )
             EXP.n = EXP.n'.'node
             say 'EXP'n' = 'EXP.n
             m = m + 1

@@ -35,6 +35,8 @@ PROGRAM forecast_SST_FRACI_eight
   integer :: today_year, today_mon, today_day
 
   integer :: fcst_nDays
+
+  real, parameter :: T_f = 271.35d0 ! 273.15-1.8d0 sea water freezing temperature in K
 !----
 
   print *, " "
@@ -158,6 +160,32 @@ PROGRAM forecast_SST_FRACI_eight
       if (i > 1) then
         sst = sst_daily_clim + anom_sst0
         ice = ice_daily_clim + anom_ice0
+
+        ! -- check bounds of sst and ice --
+        ! -- why? because above amounts to taking lagged differences in climatologies, which can lead to unphysical values.
+        ! -- easier to start with ice, since we dont't know "good" bounds for sst.
+        ! first ice
+        where (ice < 0.d0)
+          ice = 0.0d0
+          ! second sst
+          ! if sst < (273.15-1.8d0) ! 273.15-1.8d0 = T_f is sea water freezing temperature in K
+          !   sst = what temperature? ! don't know where to melt! So leave it as is (for now).
+          ! else
+          !   ok
+          ! endif
+        end where
+
+        where (ice > 1.d0)
+          ice = 1.0d0
+          ! second sst
+          where ( sst > T_f) 
+             sst = T_f
+          endwhere
+        end where
+        !
+        ! min and max sst for = ?? again, we dont't know "good" bounds!
+        ! -- alternatively, one could apply thresholds on anomalies, but that needs careful work -- later, if and when possible.
+        ! 
       else
         sst = sst0; ice = ice0 ! forecast day-1: just write out the same field(s).
        anom_sst0 = sst0 - sst_daily_clim

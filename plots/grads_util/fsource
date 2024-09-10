@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+set base = `/bin/basename $1`
+@ n = 1
+set source = ''
+set dummy  = `echo $1 | cut -d / -f$n`
+while( .$dummy != .$base )
+set source = ${source}/${dummy}
+@ n = $n + 1
+set dummy  = `echo $1 | cut -d / -f$n`
+end
+echo SOURCE: $source
+
+if(  -e FSOURCE.txt ) then
+/bin/rm FSOURCE.txt
+endif
+echo $source > FSOURCE.txt
+exit

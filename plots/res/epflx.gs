@@ -1,19 +1,34 @@
 function epflx (args)
-expid  = subwrd(args,1)
-season = subwrd(args,2)
-index  = subwrd(args,3)
-output = subwrd(args,4)
+        expid  = subwrd(args,1)
+TEM_Collection = subwrd(args,2)
+        season = subwrd(args,3)
+        index  = subwrd(args,4)
+        output = subwrd(args,5)
 
-time = substr(index,1,1)
-num  = substr(index,2,2)
+num  = substr(index,1,1)
+time = substr(index,2,1)
 
+say 'Inside epflx, expid = 'expid
+say 'Inside epflx, season = 'season
+say 'Inside epflx, index = 'index
+say 'Inside epflx, output = 'output
+say 'Inside epflx, time = 'time
+say 'Inside epflx, dfile = 'num
+pause
 
+'run getenv "MASKFILE"'
+             maskfile = result
 'set dfile 'num
-'setz '
+'q file'
+say result
+pause
+
+           'setz '
            'getinfo desc'
                     desc = result
+               say 'desc = 'desc
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -25,7 +40,11 @@ num  = substr(index,2,2)
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+
+            say 'NODE = 'node
+            say 'TEM_Collection = 'TEM_Collection
+
+            while( node != TEM_Collection )
             EXP = EXP'.'node
             say 'EXP = 'EXP
             m = m + 1
@@ -35,15 +54,19 @@ num  = substr(index,2,2)
                         node = result
             endwhile
             desc = EXP
+            say 'EXP: 'EXP
+            pause
 
    'run getenv MASKFILE'
                maskfile = result
 
 if( time = 'A' )
+   'setdates'
    'run getenv BEGDATE'
                begdate = result
    'run getenv ENDDATE'
                enddate = result
+   'set t 1'
 else
    'set t 1'
    'run getinfo date'
@@ -58,9 +81,37 @@ endif
 say 'BEGDATE = 'begdate
 say 'ENDDATE = 'enddate
 
-'define   epfy'season' =   epfy'season''index
-'define   epfz'season' =   epfz'season''index
-'define epfdiv'season' = epfdiv'season''index
+'q file'
+say 'FILE: 'result
+'q dims'
+say 'DIMS: 'result
+
+'set lon -180'
+'setx'
+'sety'
+'setz'
+'set t 1'
+'q dims'
+say 'DIMS: 'result
+pause
+
+   say 'run getenv DFILE.'num
+       'run getenv DFILE.'num
+                   DFILE = result
+        if( DFILE != num )
+           'set dfile 'DFILE
+           'set t 1'
+           'q dims'
+            say 'DFILE DIMS: 'result
+        endif
+        pause
+
+'define   epfy'season' =   epfy'num''season''time
+'define   epfz'season' =   epfz'num''season''time
+'define epfdiv'season' = epfdiv'num''season''time
+'q define'
+say 'DEFINED: 'result
+pause
 
 ' set lev 1000 1'
 ' define epfdiv = epfdiv'season'/1e2'
@@ -85,6 +136,9 @@ say 'ENDDATE = 'enddate
 ' set grads  off '
 ' set arrlab off '
 ' set ylopts 1 3 0.15 '
+
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' vpage 1 1 2 2 -top 0.6 -bot -0.10'
 ' set ccolor rainbow'
@@ -111,6 +165,8 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' vpage 2 1 2 2 -top 0.6 -bot -0.10'
 ' set ccolor rainbow'
@@ -136,6 +192,9 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
+
 ' vpage 1 2 2 2 -top 0.25 -bot 0.25'
 ' set ccolor rainbow'
 ' set csmooth on'
@@ -159,6 +218,9 @@ ybot = 0.6
 rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' set strsiz 0.10'
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
+
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' vpage 2 2 2 2 -top 0.25 -bot 0.25'
 ' set csmooth on'
@@ -186,10 +248,13 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' draw string 8.25 0.7 Ratio Z/Y: 'arrfct
 
 
+* -------------------------------------------------------------------------------------
+* -------------------------------------------------------------------------------------
 
 ' set vpage off '
 
 if( maskfile != 'NULL' )
+   'set dfile 'maskfile
    'run count.gs "'season'" 'begdate' 'enddate' -field epfdiv.'maskfile
     nseasons = result
 else
@@ -201,7 +266,7 @@ endif
 ' set strsiz 0.12 '
 ' draw string 5.60501 8.4 Eliassen-Palm Flux Divergence from 'desc
 ' set strsiz 0.12 '
-' draw string 5.60501 8.1 'season' ('nseasons') Climatology   ('begdate' - 'enddate')'
+' draw string 5.60501 8.1 'season' ('nseasons')   ('begdate' - 'enddate')'
 
 'myprint -name 'output'/EP_Flux_'expid'.'season
 

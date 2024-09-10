@@ -691,6 +691,8 @@ endwhile
                      'define qcmp'numexp''season' = sqrt(qcmp'numexp''season')'
                   endif
 
+                 'define zmod'season'         = regrid2( qmod'season'        ,0.625,0.5,bs_p1,0,-90 )'
+                 'define zcmp'numexp''season' = regrid2( qcmp'numexp''season',0.625,0.5,bs_p1,0,-90 )'
                  'run setenv "CLIMATE" 'climcmp.ananam
 
                        flag = ""
@@ -756,7 +758,9 @@ say 'Looping through Comparison Experiments for Closeness Plots'
 say '----------------------------------------------------------'
        k  = 1
 while( k <= numexp )
-say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
+  say 'k = 'k'  numexp = 'numexp
+  say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for Closeness to Verifications (MERRA-2 ... CMPEXP:V)'
+  pause
 
      TAG = k
 
@@ -785,7 +789,9 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
 *             --------------------------------------------------------------------
                      n  = 1
               while( n <= numexp )
-                     say 'Testing 'qtag' and 'ctag.n' for closeness with 'ctag.TAG
+                say 'n = 'n'  numexp = 'numexp
+                say 'Testing 'qtag' and 'ctag.n' for closeness with 'ctag.TAG
+                pause
                      if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != ctag.TAG & type.n != V & cname.n != 'NULL' )
 
                      say 'Closeness plot between  exp: 'qtag
@@ -800,12 +806,11 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
                      say ''
 
                     'define zcmp'TAG''season' = regrid2( qcmp'TAG''season',0.625,0.5,bs_p1,0,-90 )'
-                    'define zcmp'n''season'   = regrid2( qcmp'n''season'  ,0.625,0.5,bs_p1,0,-90 )'
-                    'define zmod'season'      = regrid2( qmod'season'     ,0.625,0.5,bs_p1,0,-90 )'
 
                                  flag = ""
                          while ( flag = "" )
                               say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
+                              pause
                              'closeness -CVAR 'zcmp''n' -MVAR 'zmod' -OVAR 'zcmp''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'cdesc.n' -MDESC 'qdesc' -ODESC 'cdesc.TAG' -MFILE 'qfile' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n' -OFILE 'cfile.TAG' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'expid' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'output' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.nname' -CLIMOBS 'climcmp.kname' -GC 'GC' -MATH 'NULL' -LEVEL 'level
 
 *                            'closeness -CVAR 'zcmp''n
@@ -863,6 +868,7 @@ say 'Checking Comparison Experiment k = 'k' CTAG = 'ctag.k' TYPE = 'type.k' for 
         say ' '
         say 'Closeness of 'cname.k' of type: 'type.k' to 'ctag.k' NOT Performed'
         say '------------------------------------------------------------------'
+        pause
         say ' '
      endif ;* END ctag.k Closeness If Test
 
@@ -1332,6 +1338,7 @@ say '                    climcmp: 'climcmp.cname
 say '                    climobs: 'climobs.ananam
 say '              Total  numexp: 'numexp
 say ''
+pause
         flag = ""
 while ( flag = "" )
 

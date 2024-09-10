@@ -129,13 +129,56 @@ endif
 * ------------------------------------------------------------------------
 * ------------------------------------------------------------------------
 
+* Loop over Experiment Datasets to get Experiment IDs
+* ---------------------------------------------------
+say ''
+'getpwd'
+    pwd = result
+
+'getnumrc 'pwd
+     rcinfo = result
+     numrc  = subwrd( rcinfo,1 )
+       num  = 1
+       cnt  = 0
+while( num <= numrc )
+        loc = num + 1
+     rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
+
+   '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
+    'run getenv CTLFILE '
+                CTLFILE.num = result
+
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b1-'length' | cut -d. -f2 > CMPID.txt'
+    'run getenv CMPID '
+                CMPID.num = result
+
+   say '    CMPID #'num' = 'CMPID.num
+   say '  CTLFILE #'num' = 'CTLFILE.num
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+*           pause
+
+   num = num + 1
+endwhile
+
     n = 1
     while( n<=numfiles )
            'set dfile 'n
            'getinfo desc'
                     desc = result
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -147,7 +190,13 @@ endif
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' & node != 'data' )
+
+                 TEM_Collection = TEM_NAME.n
+            say 'NODE = 'node
+            say 'TEM_Collection = 'TEM_Collection
+
+            while( node != TEM_Collection )
+
             EXP.n = EXP.n'.'node
             say 'EXP'n' = 'EXP.n
             m = m + 1
@@ -250,8 +299,8 @@ while( n<=numfiles )
                   latmin = result/100
        endif
 
- say  'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
-      'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
+ say  'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
+      'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
       'minmax dumdum'n
          dmax = subwrd(result,1)
          dmin = subwrd(result,2)
@@ -477,8 +526,8 @@ endwhile
 
   say 'Final   axmin: 'axmin'  axmax: 'axmax
   say ' '
-          axmin  = 0.21509
-          axmax  = 0.44501
+*         axmin  = 0.21509
+*         axmax  = 0.44501
  'set  axlim  'axmin' 'axmax
 
    id.1  = 'a'
@@ -700,7 +749,7 @@ while( n<=numfiles )
 * Smooth possible noise
 * ---------------------
  if( nsmooth > 0 )
-    'define wstrsmth = smth9( w'type''season''time''n'*1000 )'
+    'define wstrsmth = smth9( w'type''n''season''time'*1000 )'
      countr = 1
      while( countr < nsmooth )
            'define wstrsmth = smth9( wstrsmth )'
@@ -708,7 +757,7 @@ while( n<=numfiles )
      endwhile
     'd wstrsmth '
  else
-        'd w'type''season''time''n'*1000'
+        'd w'type''n''season''time'*1000'
  endif
 
         'set strsiz 0.10'
@@ -926,10 +975,10 @@ endif
 'set parea off'
 
 if( tags = '' )
-    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'season
+    filename = 'WSTAR_using_'talatsz'_TALATS.'season
 else
-*   filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'tags'.'season
-    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'exps'.'season
+*   filename = 'WSTAR_using_'talatsz'_TALATS.'tags'.'season
+    filename = 'WSTAR_using_'talatsz'_TALATS.'exps'.'season
 endif
 
 'myprint -name 'output'/'filename
