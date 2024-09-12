@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   remap_command_line.py parses and converts the command-line arguments and converts the information 
+#   remap_command_line.py parses and converts the command-line arguments and converts the information
 #   into matching "Answers" for the questionary (remap_questions.py)
 #
 import os
@@ -63,7 +63,7 @@ def parse_args(program_description):
     p_command.add_argument('-ocnmdlout',   default='data',    help='Ocean model for new restarts',          choices=choices_omodel)
     p_command.add_argument('-in_stretch',  default=False,     help='Stretched CS params of input restarts', choices=choices_stretch)
     p_command.add_argument('-out_stretch', default=False,     help='Stretched CS params for new restarts',  choices=choices_stretch)
-    
+
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
@@ -80,10 +80,7 @@ def parse_args(program_description):
     p_command.add_argument('-qos',        default="",    help="slurm_pbs quality-of-service", choices=['', 'debug', 'allnccs', 'normal'])
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
-    if (BUILT_ON_SLES15):
-      p_command.add_argument('-partition',  default='scutest',help="slurm_pbs partition")
-    else:
-      p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
+    p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
     # Parse using parse_known_args so we can pass the rest to the remap scripts
@@ -100,11 +97,11 @@ def get_answers_from_command_line(cml):
    answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
    if  cml.merra2:
       init_merra2(answers)
-   else:   
+   else:
       answers["input:shared:bc_version"]   = cml.bcvin
       answers["input:surface:catch_model"] = cml.catch_model
       answers["input:shared:rst_dir"]      = os.path.abspath(cml.rst_dir + '/')
-      fvcore_info(answers) 
+      fvcore_info(answers)
       ogrid                            = cml.oceanin
       if ogrid == "CS":
          ogrid = answers["input:shared:agrid"]
@@ -144,7 +141,7 @@ def get_answers_from_command_line(cml):
 
    answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 
-   if cml.zoom: 
+   if cml.zoom:
       answers["input:surface:zoom"]    = cml.zoom
    else:
       # zoom_default fills 'input:shared:agrid'
@@ -163,7 +160,7 @@ def get_answers_from_command_line(cml):
    answers["slurm_pbs:account"]    = cml.account
    answers["slurm_pbs:qos"]        = cml.qos
    answers["slurm_pbs:partition"]  = cml.partition
-  
+
    return answers
 
 if __name__ == "__main__":
@@ -176,7 +173,7 @@ if __name__ == "__main__":
    with open("raw_command.yaml", "w") as f:
      yaml.dump(config, f)
 
-   config = get_config_from_answers(answers, config_tpl= True) 
+   config = get_config_from_answers(answers, config_tpl= True)
    with open("params_from_command.yaml", "w") as f:
      yaml.dump(config, f)
 
