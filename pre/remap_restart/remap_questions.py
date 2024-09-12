@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   interactive questionary to create a yaml configuration file (remap_params.yaml) and 
+#   interactive questionary to create a yaml configuration file (remap_params.yaml) and
 #   a matching command line argument string (remap_restarts.CMD)
 #
 #
@@ -37,10 +37,7 @@ def echo_bcs(x,opt):
 
 def default_partition(x):
    if x['slurm_pbs:qos'] == 'debug':
-      if (BUILT_ON_SLES15):
-         x['slurm_pbs:partition'] = 'scutest'
-      else:
-         x['slurm_pbs:partition'] = 'compute'
+      x['slurm_pbs:partition'] = 'compute'
       return False
    return True
 
@@ -50,7 +47,7 @@ def validate_merra2_time(text):
       if hh in ['03','09','15','21']:
          return True
       else:
-         return False 
+         return False
    else:
      return False
 def SITE_MERRA2(x):
@@ -176,7 +173,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:stretch",
-            "message": message_stretch, 
+            "message": message_stretch,
             "choices": choices_stretch[1:3],
             "when": lambda x : x['output:shared:stretch'],
         },
@@ -185,7 +182,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG001 grid for new restarts: \n",
-            "choices": choices_res_SG001, 
+            "choices": choices_res_SG001,
             "when": lambda x : x.get('output:shared:stretch') == 'SG001',
         },
 
@@ -193,7 +190,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG002 grid for new restarts: \n",
-            "choices": choices_res_SG002, 
+            "choices": choices_res_SG002,
             "when": lambda x : x.get('output:shared:stretch') == 'SG002',
         },
 
@@ -344,8 +341,8 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? 
-                        (NOTE: Preferred method is to regenerate IAU file, 
+            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+                        (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,
             "when": lambda x: echo_level(x),
@@ -430,13 +427,13 @@ def ask_questions():
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:  
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
    if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
- 
+
    return answers
 
 if __name__ == "__main__":
