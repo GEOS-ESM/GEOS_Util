@@ -104,16 +104,16 @@ message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_o
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
 message_agrid_list = f'''
- C12   C180    C1440
- C24   C360    C2880
- C48   C720    C5760
- C90   C1000         \n'''
+ C12   C180    C1120
+ C24   C360    C1440
+ C48   C720    C2880
+ C90   C1000   C5760      \n'''
 
 message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
 
 message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
 
-validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
+validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1120','C1440','C2880','C5760']
 
 message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 

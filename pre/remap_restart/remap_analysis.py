@@ -143,6 +143,7 @@ class analysis(remap_base):
      hgrd['C540']  = 'd'
      hgrd['C720']  = 'e'
      hgrd['C1080'] = 'e'
+     hgrd['C1120'] = 'e'
      hgrd['C1440'] = 'e'
      hgrd['C1536'] = 'e'
      hgrd['C2160'] = 'e'
