@@ -53,7 +53,7 @@ class upperair(remap_base):
                     "su_internal_rst"          ,
                     "tr_internal_rst"]
 
-     cp_agcm_import_rst = self.config['output']['air']['agcm_import_rst']
+     cp_agcm_import_rst = self.config['output']['air'].get('agcm_import_rst', False)
      if ( not cp_agcm_import_rst) :
        self.air_restarts.remove("agcm_import_rst")
      restarts_in = self.find_rst()
