@@ -137,15 +137,17 @@ class remap_base(object):
         #os.remove(dest_file)
     else:
                 print(f"Tar file {src_file} does not exist.")
+    # Now handle the additional .nc4 file, only if the user has confirmed to remap agcm_import_rst
+    if self.config['output']['air'].get('agcm_import_rst', False):
+        nc4_filename = f'{expid}.agcm_import_rst.{yyyy_}{mm_}{day_}{time_suffix_nc4}.nc4'
+        src_nc4_file = os.path.join(geos_it_rst_dir, nc4_filename)
+        dest_nc4_file = os.path.join(rst_dir, nc4_filename)
 
-    # Now handle the additional .nc4 file
-    nc4_filename = f'{expid}.agcm_import_rst.{yyyy_}{mm_}{day_}{time_suffix_nc4}.nc4'
-    src_nc4_file = os.path.join(geos_it_rst_dir, nc4_filename)
-    dest_nc4_file = os.path.join(rst_dir, nc4_filename)
-
-    # Copy the .nc4 file if it exists
-    if os.path.exists(src_nc4_file):
-        print(f"Copying .nc4 file {src_nc4_file} to {dest_nc4_file}")
-        shutil.copy(src_nc4_file, dest_nc4_file)
+        # Copy the .nc4 file if it exists
+        if os.path.exists(src_nc4_file):
+            print(f"Copying .nc4 file {src_nc4_file} to {dest_nc4_file}")
+            shutil.copy(src_nc4_file, dest_nc4_file)
+        else:
+            print(f" agcm_import_rst file {src_nc4_file} does not exist.")
     else:
-        print(f" agcm_import_rst file {src_nc4_file} does not exist.")
+        print("Skipping agcm_import_rst file copy as the user did not confirm.")
