@@ -104,7 +104,8 @@ class remap_base(object):
     mm_   = yyyymmddhh_[4:6]
     day_  = yyyymmddhh_[6:8]  # Extract the day from yyyymmddhh_
           
-    time_suffix = '_21z.tar' 
+    time_suffix = '_21z' 
+    time_suffix_nc4 = '_2100z' 
         
     geos_it_rst_dir = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/' + expid + '/rs/Y' + yyyy_ + '/M' + mm_ + '/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
@@ -113,7 +114,7 @@ class remap_base(object):
     print('Stage GEOS-IT restarts \n from \n    ' + geos_it_rst_dir + '\n to\n    ' + rst_dir + '\n')
 
     # Only use the specific day from yyyymmddhh_
-    filename = f'{expid}.rst.{yyyy_}{mm_}{day_}{time_suffix}'
+    filename = f'{expid}.rst.{yyyy_}{mm_}{day_}{time_suffix}.tar'
     src_file = os.path.join(geos_it_rst_dir, filename)
     dest_file = os.path.join(rst_dir, filename)
     if os.path.exists(dest_file):
@@ -135,4 +136,16 @@ class remap_base(object):
         # Optionally remove the tar file after extraction
         #os.remove(dest_file)
     else:
-        print(f"File {src_file} does not exist.")
+                print(f"Tar file {src_file} does not exist.")
+
+    # Now handle the additional .nc4 file
+    nc4_filename = f'{expid}.agcm_import_rst.{yyyy_}{mm_}{day_}{time_suffix_nc4}.nc4'
+    src_nc4_file = os.path.join(geos_it_rst_dir, nc4_filename)
+    dest_nc4_file = os.path.join(rst_dir, nc4_filename)
+
+    # Copy the .nc4 file if it exists
+    if os.path.exists(src_nc4_file):
+        print(f"Copying .nc4 file {src_nc4_file} to {dest_nc4_file}")
+        shutil.copy(src_nc4_file, dest_nc4_file)
+    else:
+        print(f" agcm_import_rst file {src_nc4_file} does not exist.")
