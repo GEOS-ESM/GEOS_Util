@@ -121,31 +121,32 @@ class remap_base(object):
        print('tar file is copied and untar, no need to copy')
        return
     if os.path.exists(src_file):
-        print(f"Copying file {src_file} to {dest_file}")
-        shutil.copy(src_file, dest_file)
+       print(f"Copying file {src_file} to {dest_file}")
+       shutil.copy(src_file, dest_file)
 
-        # Untar the .tar file using the tar command
-        if os.path.exists(dest_file):
-            print(f"Untarring {dest_file} to {rst_dir}")
-            try:
-                subprocess.run(['tar', '-xf', dest_file, '-C', rst_dir], check=True)
-                print(f"Untarred {dest_file} successfully.")
-            except subprocess.CalledProcessError as e:
-                print(f"Error untarring {dest_file}: {e}")
+       # Untar the .tar file using the tar command
+       if os.path.exists(dest_file):
+           print(f"Untarring {dest_file} to {rst_dir}")
+           try:
+               subprocess.run(['tar', '-xf', dest_file, '-C', rst_dir], check=True)
+               print(f"Untarred {dest_file} successfully.")
+           except subprocess.CalledProcessError as e:
+               print(f"Error untarring {dest_file}: {e}")
 
         # Optionally remove the tar file after extraction
         #os.remove(dest_file)
     else:
-                print(f"Tar file {src_file} does not exist.")
+       print(f"Tar file {src_file} does not exist.")
 
     # Now handle the additional .nc4 file
-    nc4_filename = f'{expid}.agcm_import_rst.{yyyy_}{mm_}{day_}{time_suffix_nc4}.nc4'
-    src_nc4_file = os.path.join(geos_it_rst_dir, nc4_filename)
-    dest_nc4_file = os.path.join(rst_dir, nc4_filename)
-
-    # Copy the .nc4 file if it exists
-    if os.path.exists(src_nc4_file):
-        print(f"Copying .nc4 file {src_nc4_file} to {dest_nc4_file}")
-        shutil.copy(src_nc4_file, dest_nc4_file)
-    else:
-        print(f" agcm_import_rst file {src_nc4_file} does not exist.")
+    cp_agcm_import_rst = self.config['output']['air']['agcm_import_rst']
+    if (cp_agcm_import_rst) :
+       nc4_filename = f'{expid}.agcm_import_rst.{yyyy_}{mm_}{day_}{time_suffix_nc4}.nc4'
+       src_nc4_file = os.path.join(geos_it_rst_dir, nc4_filename)
+       dest_nc4_file = os.path.join(rst_dir, nc4_filename)
+       # Copy the .nc4 file if it exists
+       if os.path.exists(src_nc4_file):
+          print(f"Copying .nc4 file {src_nc4_file} to {dest_nc4_file}")
+          shutil.copy(src_nc4_file, dest_nc4_file)
+       else:
+          print(f" agcm_import_rst file {src_nc4_file} does not exist.")

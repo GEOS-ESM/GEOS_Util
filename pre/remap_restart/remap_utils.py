@@ -411,8 +411,8 @@ def print_config( config, indent = 0 ):
 
 def get_command_line_from_answers(answers):
 
-   merra2  = " -merra2 " if "input:shared:MERRA-2" in answers else ""
-   geosit  = " -geosit " if "input:shared:GEOS-IT" in answers else ""
+   merra2  = " -merra2 " if answers.get("input:shared:MERRA-2", False) else ""
+   geosit  = " -geosit " if answers.get("input:shared:GEOS-IT", False) else ""
    ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"]
    rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]
 
