@@ -17,8 +17,8 @@ import netCDF4 as nc
 
 #During cmake step, the string will be changed according to the system
 
-BUILT_ON_SLES15 = "@BUILT_ON_SLES15@"
-GEOS_SITE       = "@GEOS_SITE@"
+BUILT_ON_SLES15 = "TRUE"
+GEOS_SITE       = "NCCS"
 
 if BUILT_ON_SLES15 == "TRUE":
     BUILT_ON_SLES15 = True
@@ -187,16 +187,18 @@ def init_geosit(x):
   if not x.get('input:shared:GEOS-IT') : return False
 
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
-  if yyyymm < 199701 :
-     exit("Error. GEOS-IT data < 1997 not available\n")
-  elif (yyyymm < 199701):
-     expid = "d5294_geosit_jan98"
-  elif (yyyymm < 200701):
-     expid = "d5294_geosit_jan08"
-  elif (yyyymm < 201701):
-     expid = "d5294_geosit_jan18"
+
+  if yyyymm < 199701:
+      exit("Error. GEOS-IT data < 1997 not available\n")
+  elif 199612 <= yyyymm <= 200712:
+      expid = "d5294_geosit_jan98"
+  elif 200801 <= yyyymm < 201801:
+      expid = "d5294_geosit_jan08"
+  elif yyyymm >= 201801:
+      expid = "d5294_geosit_jan18"  # For any date starting from 201801 and beyond
   else:
-     expid = "d5294_geosit_jan18"
+      exit("Error. GEOS-IT data not available for this date\n")
+
   x['input:shared:expid']        = expid
   x['input:shared:omodel']       = 'data'
   x['input:shared:agrid']        = 'C180'
