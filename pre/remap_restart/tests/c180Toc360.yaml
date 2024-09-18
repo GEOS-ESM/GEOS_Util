@@ -42,6 +42,7 @@ output:
     # remap upper air or not
     remap: true
     nlevel: '91'
+    agcm_import_rst: false
   surface:
     split_saltwater: true
     surflay: 50.0

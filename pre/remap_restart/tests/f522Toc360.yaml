@@ -39,6 +39,7 @@ output:
     label: False
   air:
     nlevel: '72'
+    agcm_import_rst: false
     remap: true
   surface:
     split_saltwater: true
