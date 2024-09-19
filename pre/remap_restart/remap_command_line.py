@@ -94,21 +94,23 @@ def get_answers_from_command_line(cml):
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:GEOS-IT"]     = cml.geosit
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
-   answers["input:shared:omodel"]      = cml.ocnmdlin
    answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
    if  cml.merra2:
       init_merra2(answers)
-   if  cml.geosit:
+   elif  cml.geosit:
       init_geosit(answers)
    else:   
-      answers["input:shared:bc_version"]   = cml.bcvin
-      answers["input:surface:catch_model"] = cml.catch_model
-      answers["input:shared:rst_dir"]      = os.path.abspath(cml.rst_dir + '/')
+      answers["input:shared:bc_base"]     =  cml.in_bc_base
+      answers["input:shared:omodel"]      = cml.ocnmdlin
+      answers["input:shared:bc_version"]  = cml.bcvin
+      answers["input:surface:catch_model"]= cml.catch_model
+      answers["input:shared:stretch"]     = cml.in_stretch
+      answers["input:shared:rst_dir"]     = os.path.abspath(cml.rst_dir + '/')
       fvcore_info(answers) 
-      ogrid                            = cml.oceanin
+      ogrid                               = cml.oceanin
       if ogrid == "CS":
          ogrid = answers["input:shared:agrid"]
-      answers["input:shared:ogrid"]    = ogrid
+      answers["input:shared:ogrid"]       = ogrid
 
    answers["output:shared:agrid"]      = cml.grout
    answers["output:air:nlevel"]        = cml.levsout
@@ -121,11 +123,9 @@ def get_answers_from_command_line(cml):
       ogrid = answers["output:shared:agrid"]
    answers["output:shared:ogrid"]      = ogrid
 
-   answers["input:shared:bc_base"]  =  cml.in_bc_base
    answers["output:shared:bc_base"] =  cml.out_bc_base
 
    answers["output:shared:stretch"]    = cml.out_stretch
-   answers["input:shared:stretch"]     = cml.in_stretch
    answers["output:analysis:bkg"]      = not cml.nobkg
    answers["output:analysis:lcv"]      = not cml.nolcv
    if cml.rs == '1':
