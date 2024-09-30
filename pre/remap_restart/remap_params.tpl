@@ -10,6 +10,7 @@ input:
     hydrostatic: 0
   shared:
     MERRA-2: false
+    GEOS-IT: false
     stretch: false
     # (coupled) ocean model: data, MOM5, MOM6
     omodel: data
@@ -44,6 +45,7 @@ output:
     # remap upper air or not
     remap: true
     nlevel:
+    agcm_import_rst: false
   surface:
     split_saltwater: false
     surflay: 50.

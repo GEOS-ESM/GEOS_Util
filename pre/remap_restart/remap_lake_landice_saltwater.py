@@ -12,6 +12,7 @@
 import os
 import subprocess as sp
 import shutil
+import subprocess
 import glob
 import ruamel.yaml
 import shlex
@@ -23,7 +24,10 @@ from remap_bin2nc import bin2nc
 class lake_landice_saltwater(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     self.copy_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.copy_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.copy_geosit()
 
   def remap(self):
      if not self.config['output']['surface']['remap_water']:
@@ -170,7 +174,8 @@ class lake_landice_saltwater(remap_base):
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
-     self.remove_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.remove_merra2()
 
   def run_and_log(self, cmd, log_name):
      print('\n'+cmd)
@@ -247,3 +252,4 @@ class lake_landice_saltwater(remap_base):
 if __name__ == '__main__' :
    lls = lake_landice_saltwater(params_file='remap_params.yaml')
    lls.remap()
+   lls.remove_geosit()

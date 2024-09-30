@@ -23,7 +23,10 @@ from remap_utils import *
 class catchANDcn(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     self.copy_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.copy_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.copy_geosit()
 
   def remap(self):
      if not self.config['output']['surface']['remap_catch']:
@@ -222,7 +225,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      print( "cd " + cwdir)
      os.chdir(cwdir)
 
-     self.remove_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.remove_merra2()
 
   def copy_merra2(self):
     if not self.config['input']['shared']['MERRA-2']:
@@ -342,7 +346,7 @@ def ask_catch_questions():
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": message_ogrid_in,
+            "message": message_ogrid_new,
             "choices": choices_ogrid_data,
             "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x : x['output:surface:EASE_grid'] == 'Cubed-Sphere',
@@ -436,8 +440,7 @@ def remap_land_only():
 
    catch = catchANDcn(params_file=config_yaml)
    catch.remap()
-
-
+   catch.remove_geosit()
 
 if __name__ == '__main__' :
 
