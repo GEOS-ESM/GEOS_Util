@@ -23,7 +23,10 @@ import fnmatch
 class analysis(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     self.copy_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.copy_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.copy_geosit()
 
   def remap(self):
      config = self.config
@@ -125,7 +128,8 @@ class analysis(remap_base):
      print( "cd " + cwdir)
      os.chdir(cwdir)
 
-     self.remove_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.remove_merra2()
 
   def get_grid_kind(this, grid):
      hgrd = {}
@@ -139,6 +143,7 @@ class analysis(remap_base):
      hgrd['C540']  = 'd'
      hgrd['C720']  = 'e'
      hgrd['C1080'] = 'e'
+     hgrd['C1120'] = 'e'
      hgrd['C1440'] = 'e'
      hgrd['C1536'] = 'e'
      hgrd['C2160'] = 'e'
@@ -242,3 +247,4 @@ class analysis(remap_base):
 if __name__ == '__main__' :
    ana = analysis(params_file='remap_params.yaml')
    ana.remap()
+   ana.remove_geosit()

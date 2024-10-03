@@ -50,11 +50,29 @@ def validate_merra2_time(text):
          return False
    else:
      return False
+
+def validate_geosit_time(text):
+   if len(text) == 10 :
+      dd = text[6:8]
+      hh = text[8:]
+      if dd in ['14','28'] and hh in ['21']:
+         return True
+      else:
+         return False
+   else:
+     return False
+
 def SITE_MERRA2(x):
   if GEOS_SITE == "NAS":
      x['input:shared:MERRA-2']= False
      return False
   return True
+
+def SITE_GEOSIT(x):
+  if GEOS_SITE == "NAS":
+     x['input:shared:GEOS-IT']= False
+     return False
+  return True 
 
 def ask_questions():
 
@@ -70,37 +88,45 @@ def ask_questions():
             "when": lambda x: SITE_MERRA2(x),
         },
         {
+            "type": "confirm",
+            "name": "input:shared:GEOS-IT",
+            "message": "Remap archived GEOS-IT restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
+            "default": False,
+            "when": lambda x: SITE_GEOSIT(x) and not x.get("input:shared:MERRA-2", False),
+        },
+        {
             "type": "path",
             "name": "input:shared:rst_dir",
             "message": "Enter input directory with restart files to be remapped:\n",
-            "when": lambda x: not x['input:shared:MERRA-2'],
+            "when": lambda x: not x.get("input:shared:MERRA-2", False) and not x.get("input:shared:GEOS-IT", False),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": (message_datetime + ".)\n"),
-            "validate": lambda text: len(text)==10 ,
-            "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
+            "message": "Enter the restart date and hour (YYYYMMDDHH):\n",
+            "validate": lambda text: len(text) == 10,
+            "when": lambda x: not x.get('input:shared:MERRA-2', False) and not x.get('input:shared:GEOS-IT', False) and not fvcore_info(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
-            "message": (message_datetime + "; hour = 03, 09, 15, or 21 [z].)\n"),
-            "validate": lambda text: validate_merra2_time(text) ,
-            "when": lambda x: x['input:shared:MERRA-2'],
+            "message": "Enter the restart date and hour (YYYYMMDDHH, hour = 03, 09, 15, or 21 [z]):\n",
+            "validate": lambda text: validate_merra2_time(text),
+            "when": lambda x: x.get("input:shared:MERRA-2", False),
         },
         {
-            "type": "confirm",
-            "name": "input:air:hydrostatic",
-            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
-            "default": True,
-            "when": lambda x: not x['input:shared:MERRA-2'],
+            "type": "text",
+            "name": "input:shared:yyyymmddhh",
+            "message": "Enter the restart date and hour (YYYYMMDDHH, Only days available are 14th and 28th and only hour = 21 [z]):\n",
+            "validate": lambda text: validate_geosit_time(text),
+            "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
         },
         {
             "type": "path",
             "name": "output:shared:out_dir",
             "message": message_out_dir,
         },
+
 
         # dummy (invisible) question to run function that initializes MERRA-2 config
         {
@@ -110,33 +136,41 @@ def ask_questions():
             # always return false, so question never shows but changes x
             "when": lambda x: init_merra2(x),
         },
-
+        # dummy (invisible) question to run function that initializes GEOS-IT config
         {
-            "type": "text",
-            "name": "input:shared:agrid",
-            "message": message_agrid_in,
-            "validate": lambda text : text in validate_agrid,
-            # if it is merra-2 or has_fvcore, agrid is deduced
-            "when": lambda x: not x['input:shared:MERRA-2'] and not fvcore_info(x),
+            "type": "path",
+            "name": "output:shared:out_dir",
+            "message": "init GEOSIT\n",
+            # always return false, so question never shows but changes x
+            "when": lambda x: init_geosit(x),
         },
 
+        # for both MERRA2 and GEOS-IT
         {
-            "type": "select",
-            "name": "input:shared:omodel",
-            "message": "Select ocean model of input restarts:\n",
-            "choices": choices_omodel,
-            "default": "data",
-            "when": lambda x: not x['input:shared:MERRA-2']
+           "type": "text",
+           "name": "input:shared:agrid",
+           "message": message_agrid_in,
+           "validate": lambda text: text in validate_agrid,
+           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
         },
 
-        {
-            "type": "select",
-            "name": "input:shared:ogrid",
-            "message": message_ogrid_in,
-            "choices": choices_ogrid_data,
-            "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
-            "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'],
-        },
+        {        
+           "type": "select",
+           "name": "input:shared:omodel",
+           "message": "Select ocean model of input restarts:\n",
+           "choices": choices_omodel,
+           "default": "data",
+           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+       },
+
+       {   
+          "type": "select",
+          "name": "input:shared:ogrid",
+          "message": message_ogrid_in,
+          "choices": choices_ogrid_data,
+          "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
+          "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+       },
 
         # dummy (invisible) question to remove parenthetical comments from selected input:shared:ogrid
         {
@@ -239,7 +273,7 @@ def ask_questions():
             "name": "input:shared:bc_version",
             "message": message_bc_ops_in,
             "choices": choices_bc_ops,
-            "when": lambda x: not x["input:shared:MERRA-2"],
+            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
         },
 
         {
@@ -256,7 +290,7 @@ def ask_questions():
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: x["input:shared:MERRA-2"],
+            "when": lambda x: x["input:shared:MERRA-2"] or x["input:shared:GEOS-IT"],
         },
 
         {
@@ -265,7 +299,7 @@ def ask_questions():
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: not x["input:shared:MERRA-2"],
+            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
         },
 
         {
@@ -362,7 +396,6 @@ def ask_questions():
             "message": "Remap bkg files?  (Required by ADAS but not mapped onto ADAS grid; run one ADAS cycle to spin up.) ",
             "default": False,
         },
-
         {
             "type": "confirm",
             "name": "output:analysis:lcv",
@@ -427,12 +460,11 @@ def ask_questions():
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"]:
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
-   if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
 
    return answers
 
