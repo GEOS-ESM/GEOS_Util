@@ -264,7 +264,7 @@ endif
 
 ' set string 1 c 6 '
 ' set strsiz 0.12 '
-' draw string 5.60501 8.4 Eliassen-Palm Flux Divergence from 'desc
+' draw string 5.60501 8.4 Eliassen-Palm Flux Divergence from 'expid
 ' set strsiz 0.12 '
 ' draw string 5.60501 8.1 'season' ('nseasons')   ('begdate' - 'enddate')'
 

@@ -53,25 +53,47 @@ while( num <= numrc )
                 basename = result
      length   = strlen(basename) - 3
      say 'original length = 'length
-    '!echo 'basename' | cut -b1-'length' > CMPID.txt'
+    '!echo 'basename' | cut -b14-'length' > CMPID.txt'
     'run getenv CMPID '
                 CMPID.num = result
 
    say '  CMPID #'num' = 'CMPID.num
    say 'CTLFILE #'num' = 'CTLFILE.num
 
+*           Determine TEM Collection name
+*           -----------------------------
+           '!remove BASE.txt'
+           '!basename 'CTLFILE.num' >> BASE.txt'
+           'run getenv "BASE"'
+                        BASE = result
+
+            m = 1
+           '!remove NODE.txt'
+           '!basename 'CTLFILE.num' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            EXP = node
+            say 'M: 'm'  EXP = 'EXP
+
+            while( EXP != CMPID.num )
+            m = m + 1
+           '!remove NODE.txt'
+           '!basename 'CTLFILE.num' | cut -d. -f'm' >> NODE.txt'
+           'run getenv "NODE"'
+                        node = result
+            EXP = EXP'.'node
+            say 'M: 'm'  EXP = 'EXP
+            endwhile
+
+            say 'Final EXP: 'EXP
+            m = m + 1
+
            '!remove TEM_NAME.txt.'
-           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+           '!basename 'CTLFILE.num' | cut -d. -f'm' > TEM_NAME.txt'
        say 'run getenv "TEM_NAME"'
            'run getenv "TEM_NAME"'
                         TEM_NAME.num = result
             say 'TEM_Collection = 'TEM_NAME.num
-
-           '!remove EXPID.txt.'
-           '!echo 'CMPID.num' | cut -d. -f2 > EXPID.txt'
-       say 'run getenv "EXPID"'
-           'run getenv "EXPID"'
-                        expid.num = result
 
 
            'run setenv  DFILE DFILE.'num
@@ -80,12 +102,13 @@ while( num <= numrc )
            'run setenv 'DFILE' 'num
 
 
+                                expid.num = CMPID.num
             say 'EXPID.'num' = 'expid.num
             say 'DFILE.'num' = 'num
             pause
 
    'xdfopen 'CTLFILE.num
-   if( CMPID.num = 'VERIFICATION.'expid ) ; nexpid = num ; endif
+   if( CMPID.num = expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
 
@@ -362,8 +385,8 @@ while( k > 0 )
         season = subwrd(seasons,k)
     if( season != '' )
              k = k+1
-           say 'Running: epflx.gs 'expid.n' 'season' 'n'A 'output
-           say '-------------------------------------------------'
+           say 'Running epflx.gs: 'expid.n' 'TEM_NAME.n' 'season' 'n'A 'output
+           say '--------------------------------------------------------------'
            'set x 1'
            'sety'
            'setz'
@@ -390,7 +413,7 @@ while( k > 0 )
 
     n = 1
     while( n<=numfiles )
-if( CMPID.n != 'VERIFICATION.'expid )
+if( CMPID.n != expid )
           k = 1
    while( k > 0 )
            season = subwrd(seasons,k)

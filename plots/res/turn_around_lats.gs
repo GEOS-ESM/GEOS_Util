@@ -35,6 +35,11 @@ levmin = 20
             time = result
 
 
+* Test to see if Source Experiment is an ANALYSIS
+* -----------------------------------------------
+'run getenv "ANALYSIS"'
+             analysis = result
+
 * Loop over Experiment Datasets to get Experiment IDs
 * ---------------------------------------------------
 say ''
@@ -49,7 +54,8 @@ say ''
 while( num <= numrc )
         loc = num + 1
      rcfile = subwrd( rcinfo,loc )
-     say 'num = 'num'  rcfile = 'rcfile
+     say 'Experiment NUM = 'num'  rcfile = 'rcfile
+     pause
 
    '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
     'run getenv CTLFILE '
@@ -60,12 +66,13 @@ while( num <= numrc )
                 basename = result
      length   = strlen(basename) - 3
      say 'original length = 'length
-    '!echo 'basename' | cut -b1-'length' | cut -d. -f2 > CMPID.txt'
+    '!echo 'basename' | cut -b14-'length' > CMPID.txt'
     'run getenv CMPID '
                 CMPID.num = result
 
-   say '  CMPID #'num' = 'CMPID.num
+   say '    CMPID #'num' = 'CMPID.num
    say '  CTLFILE #'num' = 'CTLFILE.num
+   pause
 
            '!remove TEM_NAME.txt.'
            '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
@@ -125,6 +132,7 @@ wstrlatmn = 0
  psilatmx = 0
  psilatmn = 0
 filecount = 0
+stackfiles = 0
 
 * Loop over Files
 * ---------------
@@ -134,6 +142,11 @@ say 'Looping over files 'nbeg' to 'nmax' to find TA Lats'
        n =nbeg
 while( n<=nmax )
 'set dfile 'n
+
+say 'N: 'n'  ANALYSIS: 'analysis'  CMPID: 'CMPID.n
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
+stackfiles = stackfiles + 1
+
 'set x 1'
 'sety'
 
@@ -250,6 +263,10 @@ say 'File: 'n'  wstrlatmin: 'wstrlatmn.n'   wstrlatmax: 'wstrlatmx.n'   psilatmi
 say ' '
 pause
 
+* ENDIF Test for ANALYSIS
+* -----------------------
+endif
+
 n = n + 1
 endwhile
 
@@ -264,7 +281,10 @@ say ' '
 
        n =nbeg
 while( n<=nmax )
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
+say 'N: 'n'  ANALYSIS: 'analysis'  CMPID: 'CMPID.n
 say 'File: 'n'    psi'season'latmn = '  psilatmn.n '    psi'season'latmx = '  psilatmx.n
+endif
 n = n + 1
 endwhile
 say 'Average    psi'season'latmn = '  psilatmn '    psi'season'latmx = '  psilatmx
@@ -275,6 +295,7 @@ say ' '
 say ' '
        n =nbeg
 while( n<=nmax )
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 say 'File: 'n'    wstr'season'latmn = '  wstrlatmn.n '    wstr'season'latmx = '  wstrlatmx.n
 
 if( foundS.n = TRUE & foundN.n = TRUE )
@@ -289,6 +310,7 @@ else
    'run setenv  psi'season'latmn'n' ' psilatmn
 endif
 
+endif
 n = n + 1
 endwhile
 say 'Average    wstr'season'latmn = '  wstrlatmn '    wstr'season'latmx = '  wstrlatmx
@@ -337,6 +359,7 @@ count = 0
        n =nbeg
 while( n<=nmax )
 'set dfile 'n
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 'getinfo dlat'
          dlat = result
 say 'File 'n'  dlat'n' = 'dlat
@@ -347,6 +370,7 @@ if( dlat = dlat1 & foundS.n = TRUE & foundN.n = TRUE )
     count = count + 1
 else
     found = FALSE
+endif
 endif
 n = n + 1
 endwhile
@@ -369,6 +393,7 @@ count = 0
 n = nbeg
 while( n<=nmax )
 'set dfile 'n
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 'getinfo dlat'
          dlat = result
 'sety'
@@ -379,6 +404,7 @@ while( n<=nmax )
 'd 1000*wstr'season''time''n
 say 'Turn-Around Lats for File 'n'  Color: 'color.n
 pause
+endif
 n = n + 1
 endwhile
 'set dfile 1'
@@ -455,6 +481,7 @@ count = 0
 n = nbeg
 while( n<=nmax )
 'set dfile 'n
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 'getinfo dlat'
          dlat = result
 'sety'
@@ -462,6 +489,7 @@ if( dlat = dlat1 )
    'set dfile 1'
    'define psiave = psiave + psi'season''time''n
     count = count + 1
+endif
 endif
 n = n + 1
 endwhile
@@ -483,6 +511,7 @@ say 'set axlim 'axmin' 'axmax
 n = nbeg
 while( n<=nmax )
 'set dfile 'n
+if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 'getinfo dlat'
          dlat = result
 'sety'
@@ -491,6 +520,7 @@ while( n<=nmax )
 'set cmark  0'
 'set cthick 1'
 'd psi'season''time''n
+endif
 n = n + 1
 endwhile
 
@@ -596,7 +626,7 @@ ymax = subwrd(result,6)
 
 '!remove turn_around_'season'.stack'
 '!remove DESC.txt'
-'!echo 'numfiles' > turn_around_'season'.stack'
+'!echo 'stackfiles' > turn_around_'season'.stack'
 
 'q file'
 say 'FILES: 'result
@@ -605,6 +635,7 @@ pause
     while( n<=numfiles )
             CMPID = CMPID.n
             TEM_Collection = TEM_NAME.n
+            say 'NUM: 'n'  CMPID: 'CMPID.n'  TEM: 'TEM_Collection
 
            'set dfile 'n
            'getinfo desc'
@@ -646,6 +677,7 @@ pause
 
     n = 1
     while( n<=numfiles )
+    if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 
     if(n=1) ; id.1  = 'a' ; endif
     if(n=2) ; id.2  = 'b' ; endif
@@ -702,8 +734,9 @@ pause
     endif
 
            '!echo 'k' 6 'color.n' >> turn_around_'season'.stack'
-    say    "!echo \("id.n"\) "EXP.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
-           "!echo \("id.n"\) "EXP.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
+    say    "!echo \("id.n"\) "CMPID.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
+           "!echo \("id.n"\) "CMPID.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
+    endif
     n = n + 1
     endwhile
 
