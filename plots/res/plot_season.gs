@@ -18,6 +18,12 @@ function plot_season (args)
 'run getenv ENDDATE'
             enddate = result
 
+* Test to see if Source Experiment is an ANALYSIS
+* -----------------------------------------------
+'run getenv "ANALYSIS"'
+             analysis = result
+
+
 'q gxout'
    gxout = sublin(result,4)
    gxout = subwrd(gxout,6)
@@ -154,7 +160,7 @@ while( num <= numrc )
                 basename = result
      length   = strlen(basename) - 3
      say 'original length = 'length
-    '!echo 'basename' | cut -b1-'length' | cut -d. -f2 > CMPID.txt'
+    '!echo 'basename' | cut -b14-'length' > CMPID.txt'
     'run getenv CMPID '
                 CMPID.num = result
 
@@ -167,53 +173,15 @@ while( num <= numrc )
            'run getenv "TEM_NAME"'
                         TEM_NAME.num = result
             say 'TEM_Collection = 'TEM_NAME.num
-*           pause
-
-   num = num + 1
-endwhile
-
-    n = 1
-    while( n<=numfiles )
-           'set dfile 'n
-           'getinfo desc'
-                    desc = result
-            node = ''
-            m = 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            EXP.n = node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-
-                 TEM_Collection = TEM_NAME.n
-            say 'NODE = 'node
-            say 'TEM_Collection = 'TEM_Collection
-
-            while( node != TEM_Collection )
-
-            EXP.n = EXP.n'.'node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            endwhile
 
 *       Generate and Use WSTAR files stored in OUTPUT directory
 *       -------------------------------------------------------
-          FILE.n = 'WSTAR_'talats'.'EXP.n
-        LOCATION = '../'
-        LOCATION = ''
+          FILE.num = 'WSTAR_'talats'.'CMPID.num
+          LOCATION = '../'
+          LOCATION = ''
 
-        n = n + 1
-    endwhile
+   num = num + 1
+endwhile
 
     axmax = -1e15
     axmin =  1e15
@@ -228,6 +196,7 @@ n = 1
 while( n<=numfiles )
 
        'set dfile 'n
+        if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 
        'run getdates'
        'getinfo tmin'
@@ -476,6 +445,10 @@ while( n<=numfiles )
 * ------------------------------------------------------------------------
 * ------------------------------------------------------------------------
 
+*  End if( ANALYSIS ) test
+*  -----------------------
+   endif
+
 *  End File Loop
 *  -------------
    n = n + 1
@@ -613,6 +586,7 @@ while( n<=numfiles )
      if( pltfile.m = n )
 
        'set dfile 'n
+        if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
        'run getdates'
        'getinfo tmin'
                 tmin = result
@@ -666,6 +640,11 @@ while( n<=numfiles )
        endif
 
      endif
+
+* ENDIF for ANALYSIS Test
+* -----------------------
+   endif
+
    m = m + 1
    endwhile
 n = n + 1
@@ -696,6 +675,7 @@ while( n<=numfiles )
    while( m<=numfiles )
       if( pltfile.m = n )
         'set dfile 'n
+         if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 
         'set grid off'
         'set xlopts 1 3 0.06'
@@ -857,6 +837,11 @@ while( n<=numfiles )
          say 'ydif: 'ydif
 
       endif
+
+* ENDIF for ANALYSIS Test
+* -----------------------
+   endif
+
    m = m + 1
    endwhile
 n = n + 1
@@ -899,16 +884,17 @@ endif
        m = 1
        while( m<=numfiles )
           if( pltfile.m = n )
+              'set dfile 'n
+              if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
               if( numargs>2 ) 
                    index = id.n
                    tags = tags''index
                    if( exps = '' )
-                       exps = EXP.n
+                       exps = CMPID.n
                    else
-                       exps = exps'.'EXP.n
+                       exps = exps'.'CMPID.n
                    endif
               endif
-             'set dfile 'n
 
              'run getenv BEGDATE'
                          begdate = result
@@ -937,8 +923,13 @@ endif
                      k = 1
              '!echo 'k' 6 'color.n' >> plot_'season'.stack'
 
-             '!echo \('id.n'\) ' EXP.n' >> plot_'season'.stack'
+             '!echo \('id.n'\) ' CMPID.n' >> plot_'season'.stack'
           endif
+
+*     ENDIF for ANALYSIS Test
+*     -----------------------
+       endif
+
        m = m + 1
        endwhile
     n = n + 1
