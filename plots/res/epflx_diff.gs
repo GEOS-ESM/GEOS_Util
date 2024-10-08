@@ -494,11 +494,11 @@ endif
 
 ' set strsiz 0.10 '
 ' set string 4 c 6 '
-' draw string 2.85 8.2 'desc
+' draw string 2.85 8.2 'expid
 ' set string 1 c 6 '
 ' draw string 5.6 8.2 minus'
 ' set string 5 c 6 '
-' draw string 8.35 8.2 'desc2
+' draw string 8.35 8.2 'cmpid
 ' set string 1 c 6 '
 
 ' set strsiz 0.10 '
