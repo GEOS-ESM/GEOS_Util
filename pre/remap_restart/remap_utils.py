@@ -46,7 +46,7 @@ choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
 
 choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
 
-choices_ogrid_cpld = ['72x36', '360x200', '720x410', '1440x1080']
+choices_ogrid_cpld = ['72x36', '360x200', '540x458', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
@@ -104,18 +104,20 @@ message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_o
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
 message_agrid_list = f'''
- C12   C180    C1440
- C24   C360    C2880
- C48   C720    C5760
- C90   C1000         \n'''
+ C12   C180    C1120
+ C24   C360    C1440
+ C48   C720    C2880
+ C90   C1000   C5760      \n'''
 
 message_agrid_in   = ("Enter atmospheric grid of input restarts:\n" + message_agrid_list)
 
 message_agrid_new  = ("Enter atmospheric grid for new restarts:\n"  + message_agrid_list)
 
-validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1440','C2880','C5760']
+validate_agrid     = ['C12','C24','C48','C90','C180','C360','C720','C1000','C1120','C1440','C2880','C5760']
 
 message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
+
+message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
 
 message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
 
@@ -180,6 +182,37 @@ def init_merra2(x):
   x['input:air:nlevel']          = 72
 
   return False
+
+def init_geosit(x):
+  if not x.get('input:shared:GEOS-IT') : return False
+
+  yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
+
+  if yyyymm < 199701:
+      exit("Error. GEOS-IT data < 1997 not available\n")
+  elif 199612 <= yyyymm <= 200712:
+      expid = "d5294_geosit_jan98"
+  elif 200801 <= yyyymm < 201801:
+      expid = "d5294_geosit_jan08"
+  elif yyyymm >= 201801:
+      expid = "d5294_geosit_jan18"  # For any date starting from 201801 and beyond
+  else:
+      exit("Error. GEOS-IT data not available for this date\n")
+
+  x['input:shared:expid']        = expid
+  x['input:shared:omodel']       = 'data'
+  x['input:shared:agrid']        = 'C180'
+  x['input:shared:ogrid']        = 'CS'
+  x['input:shared:omodel']       = 'data'
+  x['input:shared:bc_version']   = 'NL3'
+  x['input:shared:bc_base']     = '/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles'
+  x['input:surface:catch_model'] = 'catch'
+  x['input:shared:stretch']      = False
+  x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/geosit_tmp_'+x['input:shared:yyyymmddhh']+'/'
+  x['input:air:nlevel']          = 72
+
+  return False
+
 
 def fvcore_info(x):
   if 'input:shared:agrid' in x.keys():
@@ -303,11 +336,15 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if not x['input:shared:MERRA-2']:
-      return True
+   if x['input:shared:MERRA-2']:
+       x['input:surface:wemin'] = '26'
+       return False
+   elif x['input:shared:GEOS-IT']:
+       x['input:surface:wemin'] = '13'
+       return False
    else:
-      x['input:surface:wemin'] = '26'
-      return False
+       # If neither MERRA2 or GEOS-IT is selected option will be shown on screen
+       return True
 
 def zoom_default(x):
    zoom_ = '8'
@@ -318,7 +355,7 @@ def zoom_default(x):
       zoom_ = str(int(zoom))
       if zoom < 1 : zoom_ = '1'
       if zoom > 8 : zoom_ = '8'
-   if x['input:shared:MERRA-2'] :
+   if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
    return zoom_
 
@@ -376,7 +413,8 @@ def print_config( config, indent = 0 ):
 
 def get_command_line_from_answers(answers):
 
-   merra2  = " -merra2 " if answers["input:shared:MERRA-2"] else ""
+   merra2  = " -merra2 " if answers.get("input:shared:MERRA-2", False) else ""
+   geosit  = " -geosit " if answers.get("input:shared:GEOS-IT", False) else ""
    ymdh    = " -ymdh    " + answers["input:shared:yyyymmddhh"]
    rst_dir = " -rst_dir " + answers["input:shared:rst_dir"]
 
@@ -454,6 +492,7 @@ def get_command_line_from_answers(answers):
       partition  = " -partition  " + answers["slurm_pbs:partition"]
 
    cmdl = "remap_restarts.py command_line " + merra2 + \
+                                          geosit + \
                                           ymdh  + \
                                           grout + \
                                           levsout  + \

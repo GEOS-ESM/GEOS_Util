@@ -9,13 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added remapping for GEOS-IT restarts 
+- Added new res C1120 
+- NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
+
 ### Changed
+
+- Update ESMF CMake target to `ESMF::ESMF`
 
 ### Fixed
 
 ### Removed
 
 ### Deprecated
+
+## [2.1.2] - 2024-07-30
+
+### Changed
+
+- Added MASKFILE for time-discontinuous data in TEM diagnostics
+
+## [2.1.1] - 2024-07-30
+
+### Added
+
+- MOM6 C90 ogrid option to `remap_utils.py`
+
+### Fixed
+
+- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered by.
 
 ## [2.1.0] - 2024-06-10
 
