@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [v1.0.4] - 2024-10-22
+
+### Changed
+
+- Updates quadratics list in `time_ave.rc` to avoid zonal mean trigger for cubed-sphere fields
+
 ## [1.0.3] - 2024-07-26
 
 ### Fixed
