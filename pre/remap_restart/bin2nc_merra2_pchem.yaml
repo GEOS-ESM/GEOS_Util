@@ -6,7 +6,7 @@ variables:
        - lev
        - lat
        - lon
-  - short_name: N20
+  - short_name: N2O
     long_name: nitrous_oxide_volume_mixing_ratio
     units: 'mol mol-1'
     dimension:
