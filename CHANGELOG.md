@@ -23,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.4] - 2024-12-05
+
+### Changed
+
+- Updates for TEM_Diag to include ALL Times
+
 ## [2.1.3] - 2024-10-08
 
 ### Fixed
