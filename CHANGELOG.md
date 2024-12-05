@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.1.4] - 2024-12-05
+
+### Added
+
 - Added remapping for GEOS-IT restarts
 - Added new res C1120
 - NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
@@ -20,10 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Correct bug in `remap_restarts.py` where `N2O` was added as `N20`
-
-### Removed
-
-### Deprecated
 
 ## [2.1.3] - 2024-10-08
 
