@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added remapping for GEOS-IT restarts 
-- Added new res C1120 
+- Added remapping for GEOS-IT restarts
+- Added new res C1120
 - NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
 
 ### Changed
@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update ESMF CMake target to `ESMF::ESMF`
 
 ### Fixed
+
+- Correct bug in `remap_restarts.py` where `N2O` was added as `N20`
 
 ### Removed
 
