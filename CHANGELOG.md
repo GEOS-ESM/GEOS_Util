@@ -17,7 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.5] - 2024-12-05
+
+### Changed
+
+- Updates for TEM_Diag to include ALL Times
+
 ## [2.1.4] - 2024-12-05
+
+### Changed
+
+- Update GitHub Actions
+
+### Fixed
+
+- Correct bug in `remap_restarts.py` where `N2O` was added as `N20`
+
+## [2.1.3] - 2024-10-08
 
 ### Added
 
@@ -28,12 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update ESMF CMake target to `ESMF::ESMF`
-
-### Fixed
-
-- Correct bug in `remap_restarts.py` where `N2O` was added as `N20`
-
-## [2.1.3] - 2024-10-08
 
 ### Fixed
 

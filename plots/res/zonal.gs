@@ -72,7 +72,7 @@ say 'Checking for 'source'/'TEM_Collection'/'expid'.'TEM_Collection'.monthly.ddf
  'run getenv CHECKFILE'
              expid.ddf = result
         say 'expid.ddf: 'expid.ddf
-             pause
+*            pause
  
 if( expid.ddf = 'NULL' )
 *    Check for old format residual.EXPID.data under plot Output directory
@@ -118,7 +118,7 @@ if( expid.ddf = 'NULL' )
          'run getenv CHECKFILE'
                      expid.ddf = result
      endif
-     pause
+*    pause
 endif
  
 * -------------------------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ if( expid.ddf != 'NULL' )
              '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
              '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
              '!remove VERIFICATION.rc.tmpl'
-              pause
+*             pause
 endif
 
 * -------------------------------------------------------------------------------------------------
@@ -397,7 +397,7 @@ say 'Creating VERIFICATION.expid.rc associated with 'expid'.'TEM_Collection'.mon
     '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
     '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
     '!remove VERIFICATION.rc.tmpl'
-      pause
+*     pause
 
 * -------------------------------------------------------------------------------------------------
 *                               End Computation of EXPID TEM_Diagnostics
@@ -433,7 +433,7 @@ say 'Comparison type: 'type
            'run getenv "NODE"'
                         cmpid = result
 say '    CMPID: 'cmpid
-pause
+*pause
 
 '!remove   CHECKFILE.txt'
 '!chckfile 'exp'/.HOMDIR'
@@ -462,7 +462,7 @@ say ' '
 say 'CMPID Transformed Eulerian Mean (TEM) Diagnostic Collection: 'TEM_Collection
 say '----------------------------------------------------------- '
 say ' '
-pause
+*pause
 
 '!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
@@ -485,7 +485,7 @@ say 'GETVAR output: 'result
 
 say 'Comparison   ID: 'obsid
 say 'Comparison Desc: 'obsdsc
-pause
+*pause
 
 
 * Check for Transport Diagnostic Files under comparison experiment directory
@@ -497,7 +497,7 @@ pause
  'run getenv CHECKFILE'
              obsid.ddf = result
         say 'obsid.ddf: 'obsid.ddf
-pause
+*pause
 
 * Check for old format residual.OBSID.data in plot Output directory
 * -----------------------------------------------------------------
@@ -532,7 +532,7 @@ if( obsid.ddf = 'NULL' )
          'run getenv CHECKFILE'
                      obsid.ddf = result
           say 'obsid.ddf: 'obsid.ddf
-          pause
+*         pause
      endif
 endif
  
@@ -546,7 +546,7 @@ if( obsid.ddf = 'NULL' )
          'run getenv CHECKFILE'
                      obsid.ddf = result
           say 'obsid.ddf: 'obsid.ddf
-          pause
+*         pause
 endif
 
 * -------------------------------------------------------------------------------------
@@ -585,7 +585,7 @@ say  ' '
 say  'obsid: 'obsid
 say  'obsid.rc: 'obsid.rc
 say  ' '
-pause
+*pause
 
 * -------------------------------------------------------------------------------------------------
 *                        Compute OBSID TEM_Diagnostic calculations if needed
@@ -800,14 +800,14 @@ endwhile
 
 '!pwd'
 say 'Current Direcory: 'result
-pause
+*pause
 
 * Run Fortran Code to Produce Old Format residual.OBSID.ctl and residual.OBSID.data
 * ---------------------------------------------------------------------------------
 say ' 'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
 '!    'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
 
-pause
+*pause
 
 * Create TEM_Collection Diagnostic data based on old format
 * ---------------------------------------------------------
@@ -817,7 +817,7 @@ pause
   '!chckfile 'obsid'.'TEM_Collection'.monthly.ddf'
   'run getenv CHECKFILE'
               obsid.ddf = result
-pause
+*pause
 
 say 'Creating VERIFICATION.obsid.rc associated with 'obsid'.'TEM_Collection'.monthly.ddf'
 *    --------------------------------------------------------------------------------
@@ -829,12 +829,12 @@ say 'Creating VERIFICATION.obsid.rc associated with 'obsid'.'TEM_Collection'.mon
              '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
              '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
              '!remove VERIFICATION.rc.tmpl'
-pause
+*pause
 
 say 'Copying 'obsid' TEM_Collection Diagnostic data to PLOT directory'
 * -------------------------------------------------------------------
   '!/bin/cp 'obsid'.'TEM_Collection'.monthly.* ../'
-pause
+*pause
 
 
 * End VERIFICATION.obsid.rc CHECKFILE Test
