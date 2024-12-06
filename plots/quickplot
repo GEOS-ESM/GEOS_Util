@@ -376,6 +376,7 @@ else
          setenv CMPEXP "$cmpops $cmpexp"
     endif
 endif
+         setenv DEBUG  "$debug"
 
 # ECHO Setup
 # ----------

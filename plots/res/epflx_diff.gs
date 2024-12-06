@@ -124,15 +124,15 @@ say 'Defined Variables:'
 say '------------------'
 'q define'
 say result
-pause
+*pause
     'makezdif -q1 epfdiv'num''season''time' -file1 'num' -q2 epfdiv'num2''season''time' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
 
 say 'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
-pause
+*pause
     'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
 
 say 'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
-pause
+*pause
     'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
  
 'set dfile 'epfile
