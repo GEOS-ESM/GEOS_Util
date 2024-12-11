@@ -55,7 +55,6 @@ while( num <= numrc )
         loc = num + 1
      rcfile = subwrd( rcinfo,loc )
      say 'Experiment NUM = 'num'  rcfile = 'rcfile
-     pause
 
    '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
     'run getenv CTLFILE '
@@ -72,7 +71,6 @@ while( num <= numrc )
 
    say '    CMPID #'num' = 'CMPID.num
    say '  CTLFILE #'num' = 'CTLFILE.num
-   pause
 
            '!remove TEM_NAME.txt.'
            '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
@@ -80,7 +78,6 @@ while( num <= numrc )
            'run getenv "TEM_NAME"'
                         TEM_NAME.num = result
             say 'TEM_Collection = 'TEM_NAME.num
-            pause
 
    num = num + 1
 endwhile
@@ -120,8 +117,10 @@ nmax = numfiles
 
 'run getenv BEGDATE'
             begdate = result
+            bdate   = substr(result,6,7)
 'run getenv ENDDATE'
             enddate = result
+            edate   = substr(result,6,7)
 
 'run getenv MASKFILE'
             maskfile = result
@@ -261,7 +260,6 @@ endif
 
 say 'File: 'n'  wstrlatmin: 'wstrlatmn.n'   wstrlatmax: 'wstrlatmx.n'   psilatmin: 'psilatmn.n'   psilatmax: 'psilatmx.n
 say ' '
-pause
 
 * ENDIF Test for ANALYSIS
 * -----------------------
@@ -289,7 +287,6 @@ n = n + 1
 endwhile
 say 'Average    psi'season'latmn = '  psilatmn '    psi'season'latmx = '  psilatmx
 say ' '
-*pause
 
 
 say ' '
@@ -315,10 +312,10 @@ n = n + 1
 endwhile
 say 'Average    wstr'season'latmn = '  wstrlatmn '    wstr'season'latmx = '  wstrlatmx
 say ' '
- pause
 
 * ----------------------------------------------------
 
+'c'
 'set vpage off'
 'set parea off'
 'set vpage 0.0 11 0 8.5'
@@ -403,7 +400,6 @@ if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 'set cthick 1'
 'd 1000*wstr'season''time''n
 say 'Turn-Around Lats for File 'n'  Color: 'color.n
-pause
 endif
 n = n + 1
 endwhile
@@ -416,7 +412,6 @@ if( found = TRUE )
 'set ccolor 1'
 'd wstrave'
 say 'Turn-Around Lats for Average   Color: '1
-pause
 endif
 
 'set cmark 0'
@@ -425,7 +420,6 @@ endif
 'set z 1'
 'd lev-lev'
 say 'Zero Line   Color: '1
-pause
 
 * Compute Turn-Around Lats based on wstrave
 * -----------------------------------------
@@ -448,10 +442,19 @@ wstrlatmx = subwrd(dummy,2)
                    nseasons = result
                endif
 
-if( taabs = TRUE )
-   'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. [WSTAR + ABS(WSTAR)]/2  'season'  'begdate'-'enddate'  Levels: 'levmax' 'levmin
-else
-   'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. WSTAR  'season' ('nseasons')  'begdate'-'enddate'  Levels: 'levmax' 'levmin
+if( time = A )
+    if( taabs = TRUE )
+       'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. [WSTAR + ABS(WSTAR)]/2  'season'  'bdate'-'edate'  Levels: 'levmax' 'levmin
+    else
+       'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. WSTAR  'season' ('nseasons')  'bdate'-'edate'  Levels: 'levmax' 'levmin
+    endif
+endif
+if( time = B )
+    if( taabs = TRUE )
+       'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. [WSTAR + ABS(WSTAR)]/2  'season'  Levels: 'levmax' 'levmin
+    else
+       'draw string 'xmid_wstar' 'ytop_wstar+0.1' Vert.Int. WSTAR  'season'  Levels: 'levmax' 'levmin
+    endif
 endif
 
 * ----------------------------------------------------
@@ -570,7 +573,7 @@ endif
 
 say ' '
 say 'Average    wstr'season'latmn = '  wstrlatmn '    wstr'season'latmx = '  wstrlatmx
-say 'Average    psi'season'latmn = '  psilatmn '    psi'season'latmx = '  psilatmx
+say 'Average     psi'season'latmn = '  psilatmn  '     psi'season'latmx = '  psilatmx
 say ' '
 
 'run setenv wstr'season'latmx 'wstrlatmx
@@ -630,7 +633,6 @@ ymax = subwrd(result,6)
 
 'q file'
 say 'FILES: 'result
-pause
     n = 1
     while( n<=numfiles )
             CMPID = CMPID.n
@@ -697,20 +699,24 @@ pause
 
            'set dfile 'n
 
-               'run getenv BEGDATE'
-                           begdate = result
-                             bdate = substr(result,6,7)
-               'run getenv ENDDATE'
-                           enddate = result
-                             edate = substr(result,6,7)
-
-               if( maskfile != 'NULL' )
-                  'run count.gs "'season'" 'begdate' 'enddate' -field wstar.'maskfile
-                   nseasons = result
-               else
-                  'run count.gs "'season'" 'begdate' 'enddate
-                   nseasons = result
-               endif
+              if( time = B )
+                 'sett'
+                 'run setdates'
+              endif
+             'run getdates'
+             'run getenv BEGDATE'
+                         begdate = result
+                         bdate.n = substr(result,6,7)
+             'run getenv ENDDATE'
+                         enddate = result
+                         edate.n = substr(result,6,7)
+              if( maskfile != 'NULL' )
+                 'run count.gs "'season'" 'begdate' 'enddate' -field wstar.'maskfile
+                  nseasons.n = result
+              else
+                 'run count.gs "'season'" 'begdate' 'enddate
+                  nseasons.n = result
+              endif
 
            'getinfo desc'
                     desc.n = result
@@ -733,9 +739,15 @@ pause
                 latmin = result/100
     endif
 
-           '!echo 'k' 6 'color.n' >> turn_around_'season'.stack'
-    say    "!echo \("id.n"\) "CMPID.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
+         if( time = A )
+           '!echo 'k' 6 'color.n'                              >> turn_around_'season'.stack'
            "!echo \("id.n"\) "CMPID.n" \("latmin" , "latmax"\) >> turn_around_"season".stack"
+         endif
+         if( time = B )
+           '!echo 'k' 6 'color.n'                                                                  >> turn_around_'season'.stack'
+           "!echo \("id.n"\) "CMPID.n" \("latmin" , "latmax"\) "bdate.n"-"edate.n" \: "nseasons.n" >> turn_around_"season".stack"
+         endif
+
     endif
     n = n + 1
     endwhile
@@ -750,9 +762,17 @@ pause
 'set string 1 c 6'
 'set strsiz 0.14'
 
-'draw string 'xmid_psi' 'ytop_psi+0.1' Vert.Int. PSI  'season' ('nseasons')  'begdate'-'enddate'  Levels: 'levmax' 'levmin
+
 if( print = TRUE )
-   'myprint -name 'output'/WSTAR_Turn_Around_Lats.'season
+    if( time = A )
+       'draw string 'xmid_psi' 'ytop_psi+0.1' Vert.Int. PSI  'season' ('nseasons')  'bdate'-'edate'  Levels: 'levmax' 'levmin
+        header = 'WSTAR'
+    endif
+    if( time = B )
+       'draw string 'xmid_psi' 'ytop_psi+0.1' Vert.Int. PSI  'season'  Levels: 'levmax' 'levmin
+        header = 'WSTAR_B'
+    endif
+   'myprint -name 'output'/'header'_Turn_Around_Lats.'season
 endif
 
 return

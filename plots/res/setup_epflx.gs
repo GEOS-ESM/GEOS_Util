@@ -105,7 +105,6 @@ while( num <= numrc )
                                 expid.num = CMPID.num
             say 'EXPID.'num' = 'expid.num
             say 'DFILE.'num' = 'num
-            pause
 
    'xdfopen 'CTLFILE.num
    if( CMPID.num = expid ) ; nexpid = num ; endif
@@ -123,7 +122,6 @@ say 'Files:'
 'q files'
 say  result
 say 'nexpid: 'nexpid
-pause
 
 say 'Initializing BEGDATE and ENDATE for each Experiment:'
 say '----------------------------------------------------'
@@ -190,7 +188,6 @@ while( n<=numfiles )
     endif
 n = n + 1
 endwhile
-pause
 
 * Hardwire Beginning and Ending Dates
 * -----------------------------------
@@ -200,7 +197,6 @@ say 'Pre-Set Environment Variable ENDDATE: 'ENDDATE
 say '     Computed Common Dates  begdateA: 'begdateA
 say '     Computed Common Dates  enddateA: 'enddateA
 say ' '
-pause
 
 * Compare with Pre-Set Environment Variables
 * ------------------------------------------
@@ -266,8 +262,6 @@ endwhile
     'run setenv MASKFILE ' maskfile
     'run setenv NUMFILES ' numfiles
 
-     pause
-
 if( maskfile != 'NULL' ) 
   'set dfile 'maskfile
   'getdates'
@@ -289,7 +283,6 @@ while( n<=numfiles )
 
        say 'Computing seasonal epfy, epfz, and epfdiv using file: 'n' and maskfile: 'maskfile
        say '-----------------------------------------------------'
-       pause
        'makezdif4 -q1 epfy.'n' -q2 zeromask -file1 'n' -file2 'maskfile
        'run getenv "ZDIFILE" '
                     zdifile = result
@@ -309,7 +302,6 @@ while( n<=numfiles )
        'set dfile 'n
        'q files'
         say 'FILES: 'result
-        pause
 
        'getdates'
        'set x 1'
@@ -328,7 +320,6 @@ while( n<=numfiles )
        'set dfile 'n
        'q files'
         say 'FILES: 'result
-        pause
 
        'getdates'
        'set x 1'
@@ -347,20 +338,17 @@ while( n<=numfiles )
        'set dfile 'n
        'q files'
         say 'FILES: 'result
-        pause
 
    else
 
        say 'Computing seasonal epfy, epfz, and epfdiv using file 'n' and NO maskfile'
        say '------------------------------------------------------------------------'
-       pause
       'define     epfy'n' =   epfy.'n
       'define     epfz'n' =   epfz.'n
       'define   epfdiv'n' = epfdiv.'n
       'seasonal   epfy'n' A'
       'seasonal   epfz'n' A'
       'seasonal epfdiv'n' A'
-       pause
 
    endif
 
