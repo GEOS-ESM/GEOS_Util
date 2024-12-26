@@ -400,8 +400,8 @@ sub init {
     # initial fcst hour and offset
     #-----------------------------
     unless ($ihh) {
-        if ($expid eq "a_flk_04") { $ihh =  0 }
-        else                      { $ihh = 21 }
+        if (defined($expid) and $expid eq "a_flk_04") { $ihh =  0 }
+        else                                          { $ihh = 21 }
     }
     if ($ihh == 0 or $ihh == 6 or $ihh == 12 or $ihh == 18) { $offset = 0 }
     if ($ihh == 3 or $ihh == 9 or $ihh == 15 or $ihh == 21) { $offset = 3 }
@@ -755,8 +755,8 @@ sub submit_calcjob {
       $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
       $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
     } else {
-      $mynodes = "hasw";
-      $ntspn   = 24;
+      $mynodes = "mil";
+      $ntspn   = 120;
       $qos     = "";
       $partition = "";
 #     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use HASW
@@ -855,7 +855,6 @@ sub submit_archivejob {
     my ($yyyy, $mm, $dd, $logdir, $logfile1, $logfile2, $pdir);
     my ($jobname, $jobdate, $jobfile_0, $jobfile, $jobtype);
     my ($cmd, $deps, $dependFLG, $jobIDline, $jobID);
-    my ($mynodes);
 
     # input arguments
     #----------------
@@ -1066,7 +1065,7 @@ OPTIONS [defaults in brackets]
     -nxonly            calculate stats of 2d Nx collection only (yes/no) 
                        [no by default] 
 
-    -nodes nodesname   specify nodes (e.g., sky, hasw, or cas)
+    -nodes nodesname   specify nodes (e.g., sky, cas, or mil)
     -das               check for DAS hidden files before attempting to fetch files
                        and set no prompt; requires \$FVHOME environment variable;
 
