@@ -423,7 +423,8 @@ endif
         if len(files) >0:
           restarts_in.append(files[0])
      if (len(restarts_in) == 0) :
-        print("\n try restart file names without time stamp\n")
+        print("\n Try restart file names without time stamp\n")
+        print("\n It expects restart file names as xx_internal_rst, e.g., fvcore_internal_rst \n")
         for f in self.air_restarts :
            fname = rst_dir+ '/'+f
            if os.path.exists(fname):
