@@ -37,12 +37,9 @@ def echo_bcs(x,opt):
 
 def default_partition(x):
     if x['slurm_pbs:qos'] == 'debug':
-        if BUILT_ON_SLES15:
-            x['slurm_pbs:partition'] = 'scutest'
-        else:
-            x['slurm_pbs:partition'] = 'compute'
-            return False
-        return True
+        x['slurm_pbs:partition'] = 'compute'
+        return False
+    return True
 
 def validate_merra2_time(text):
    if len(text) == 10 :
