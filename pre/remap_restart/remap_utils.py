@@ -17,8 +17,8 @@ import netCDF4 as nc
 
 #During cmake step, the string will be changed according to the system
 
-BUILT_ON_SLES15 = "TRUE"
-GEOS_SITE       = "NCCS"
+BUILT_ON_SLES15 = "@BUILT_ON_SLES15@"
+GEOS_SITE       = "@GEOS_SITE@"
 
 if BUILT_ON_SLES15 == "TRUE":
     BUILT_ON_SLES15 = True
