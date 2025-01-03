@@ -119,7 +119,8 @@ message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
 message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
 
-message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default 'debug' to get resource faster; or
+     Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher; or leave it blank)\n"
 
 message_account    = "Select/enter SLURM or PBS account:\n"
 
