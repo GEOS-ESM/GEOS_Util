@@ -17,8 +17,8 @@ import netCDF4 as nc
 
 #During cmake step, the string will be changed according to the system
 
-BUILT_ON_SLES15 = "@BUILT_ON_SLES15@"
-GEOS_SITE       = "@GEOS_SITE@"
+BUILT_ON_SLES15 = "TRUE"
+GEOS_SITE       = "NCCS"
 
 if BUILT_ON_SLES15 == "TRUE":
     BUILT_ON_SLES15 = True
@@ -119,8 +119,7 @@ message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
 message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
 
-message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default 'debug' to get resource faster; or
-     Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher; or leave it blank)\n"
+message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default 'debug' to get resource faster; or Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher; or leave it blank)\n"
 
 message_account    = "Select/enter SLURM or PBS account:\n"
 
