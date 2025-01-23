@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.6] - 2025-01-23
+
+### Fixed
+
+- Patch to fix EXPIDs containing underscores
+
 ## [2.1.5] - 2024-12-05
 
 ### Changed
