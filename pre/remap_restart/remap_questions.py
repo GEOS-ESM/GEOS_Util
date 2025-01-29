@@ -122,6 +122,13 @@ def ask_questions():
             "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
         },
         {
+            "type": "confirm",
+            "name": "input:air:hydrostatic",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
+            "default": True,
+            "when": lambda x: not x['input:shared:MERRA-2'],
+        },
+        {
             "type": "path",
             "name": "output:shared:out_dir",
             "message": message_out_dir,
@@ -465,6 +472,8 @@ def ask_questions():
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
+   if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
+   if answers["input:shared:GEOS-IT"] : answers["input:air:hydrostatic"] = True
 
    return answers
 
