@@ -473,6 +473,7 @@ def ask_questions():
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
    if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
+   if answers["input:shared:GEOS-IT"] : answers["input:air:hydrostatic"] = True
 
    return answers
 
