@@ -36,10 +36,10 @@ def echo_bcs(x,opt):
   return False
 
 def default_partition(x):
-   if x['slurm_pbs:qos'] == 'debug':
-      x['slurm_pbs:partition'] = 'compute'
-      return False
-   return True
+    if x['slurm_pbs:qos'] == 'debug':
+        x['slurm_pbs:partition'] = 'compute'
+        return False
+    return True
 
 def validate_merra2_time(text):
    if len(text) == 10 :
@@ -72,7 +72,7 @@ def SITE_GEOSIT(x):
   if GEOS_SITE == "NAS":
      x['input:shared:GEOS-IT']= False
      return False
-  return True 
+  return True
 
 def ask_questions():
 
@@ -122,6 +122,13 @@ def ask_questions():
             "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
         },
         {
+            "type": "confirm",
+            "name": "input:air:hydrostatic",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
+            "default": True,
+            "when": lambda x: not x['input:shared:MERRA-2'],
+        },
+        {
             "type": "path",
             "name": "output:shared:out_dir",
             "message": message_out_dir,
@@ -154,7 +161,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
         },
 
-        {        
+        {
            "type": "select",
            "name": "input:shared:omodel",
            "message": "Select ocean model of input restarts:\n",
@@ -163,7 +170,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
        },
 
-       {   
+       {
           "type": "select",
           "name": "input:shared:ogrid",
           "message": message_ogrid_in,
@@ -307,7 +314,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_other_new,
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12','v13'],
         },
 
         {
@@ -315,7 +322,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12','v13'],
         },
 
         {
@@ -460,11 +467,13 @@ def ask_questions():
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
+   if answers["input:shared:MERRA-2"] : answers["input:air:hydrostatic"] = True
+   if answers["input:shared:GEOS-IT"] : answers["input:air:hydrostatic"] = True
 
    return answers
 

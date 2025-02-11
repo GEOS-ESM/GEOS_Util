@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added remapping for GEOS-IT restarts
 - Added new res C1120
 - NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
+- Add support for v13 BCs
 
 ### Changed
 
@@ -27,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `regrid.pl`
 
 ### Deprecated
+
+## [2.1.6] - 2025-01-23
+
+### Fixed
+
+- Patch to fix EXPIDs containing underscores
 
 ## [2.1.5] - 2024-12-05
 

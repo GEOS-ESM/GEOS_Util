@@ -24,6 +24,9 @@ if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-STAT'   ) ; STAT   = subwrd(args,num+1) ; endif
 
+'run fixname 'EXPID
+              EXPIDa = result
+
 * Read PTOP
 * ---------
 if( subwrd(args,num) = '-PTOP' )
@@ -131,7 +134,6 @@ endwhile
 'set csmooth on'
 'set clab off'
 'c'
-'rgbset'
 
 'run uppercase 'seasons
                 seasons = result
@@ -243,9 +245,9 @@ endwhile
 'setdates'
 
 'run getenv "BEGDATE"'
-             begdate.EXPID = result
+             begdate.EXPIDa = result
 'run getenv "ENDDATE"'
-             enddate.EXPID = result
+             enddate.EXPIDa = result
 
 'setlons'
 'sety'
@@ -327,13 +329,13 @@ else
 endif
 
 'run getenv "CLIMATE"'
-             climate.EXPID = result
+             climate.EXPIDa = result
 
 say ''
 say '        EXPID = 'EXPID
-say 'begdate.EXPID => begdate.'EXPID' = 'begdate.EXPID
-say 'enddate.EXPID => enddate.'EXPID' = 'enddate.EXPID
-say 'climate.EXPID => climate.'EXPID' = 'climate.EXPID
+say 'begdate.EXPID => begdate.'EXPID' = 'begdate.EXPIDa
+say 'enddate.EXPID => enddate.'EXPID' = 'enddate.EXPIDa
+say 'climate.EXPID => climate.'EXPID' = 'climate.EXPIDa
 say ''
 
 *******************************************************************
@@ -426,6 +428,8 @@ if( STAT = "RMS" | STAT = "BIAS" )
     oexp = oexp + 1
 endif
 CMPID = obsnam.1
+'run fixname 'CMPID
+              CMPIDa = result
 
 
 * Continue if all EXPORT(s) are found
@@ -434,8 +438,8 @@ if( found = "TRUE" )
 
 'set dfile 'ofile.1
     'getdates'
-     begdate.CMPID = subwrd(result,1)
-     enddate.CMPID = subwrd(result,2)
+     begdate.CMPIDa = subwrd(result,1)
+     enddate.CMPIDa = subwrd(result,2)
 
 'set lon 'lonmin' 'lonmax
 'set lat 'latmin' 'latmax
@@ -514,15 +518,15 @@ endif
 say 'Processing Season: 'season
 
 'set dfile 'mfile.1
-'count "'season'" 'begdate.EXPID' 'enddate.EXPID
+'count "'season'" 'begdate.EXPIDa' 'enddate.EXPIDa
  nmod =  result
 
 'set dfile 'ofile.1
-'count "'season'" 'begdate.CMPID' 'enddate.CMPID
+'count "'season'" 'begdate.CMPIDa' 'enddate.CMPIDa
  nobs =  result
 
 'run getenv "CLIMATE"'
-             climate.CMPID = result
+             climate.CMPIDa = result
 
 * Set EXPORT Model and Observation Scaling Factors
 * ------------------------------------------------
@@ -565,6 +569,7 @@ endif
 
 * Make ZPLT
 * ---------
+'rgbset'
 n = 1
 while( n<=NPTOPS )
 
@@ -600,7 +605,7 @@ while( n<=NPTOPS )
                        flag = ""
                while ( flag = "" )
 
-'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.CMPID' -OEDATE 'enddate.CMPID' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate.EXPID' -CLIMCMP 'climate.CMPID' -MBDATE 'begdate.EXPID' -MEDATE 'enddate.EXPID
+'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.CMPIDa' -OEDATE 'enddate.CMPIDa' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate.EXPIDa' -CLIMCMP 'climate.CMPIDa' -MBDATE 'begdate.EXPIDa' -MEDATE 'enddate.EXPIDa
 
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
