@@ -36,9 +36,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v06','v11','v12']
+choices_bc_other   = ['v06','v11','v12','v13']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v13']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -98,7 +98,8 @@ message_bc_other   = f'''\n
 
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
-          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n\n'''\
+          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
+          v13:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix + mean land elevation fix \n\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
@@ -455,7 +456,7 @@ def get_command_line_from_answers(answers):
 
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
-   nonhydrostatic = '' if answers["input:air:hydrostatic"] else " -nonhydrostatic " 
+   nonhydrostatic = '' if answers["input:air:hydrostatic"] else " -nonhydrostatic "
    label  = ' -lbl ' if answers["output:shared:label"] else ""
 
    in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")

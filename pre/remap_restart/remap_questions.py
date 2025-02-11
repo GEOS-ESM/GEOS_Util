@@ -72,7 +72,7 @@ def SITE_GEOSIT(x):
   if GEOS_SITE == "NAS":
      x['input:shared:GEOS-IT']= False
      return False
-  return True 
+  return True
 
 def ask_questions():
 
@@ -161,7 +161,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
         },
 
-        {        
+        {
            "type": "select",
            "name": "input:shared:omodel",
            "message": "Select ocean model of input restarts:\n",
@@ -170,7 +170,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
        },
 
-       {   
+       {
           "type": "select",
           "name": "input:shared:ogrid",
           "message": message_ogrid_in,
@@ -314,7 +314,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_other_new,
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12','v13'],
         },
 
         {
@@ -322,7 +322,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12','v13'],
         },
 
         {
@@ -467,7 +467,7 @@ def ask_questions():
    answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
 
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
