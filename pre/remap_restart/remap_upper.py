@@ -22,7 +22,10 @@ import netCDF4 as nc
 class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     self.copy_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.copy_merra2()
+     if self.config['input']['shared']['GEOS-IT']:
+        self.copy_geosit()
 
   def remap(self):
      if not self.config['output']['air']['remap'] :
@@ -49,6 +52,10 @@ class upperair(remap_base):
                     "ni_internal_rst"          ,
                     "su_internal_rst"          ,
                     "tr_internal_rst"]
+
+     cp_agcm_import_rst = self.config['output']['air'].get('agcm_import_rst', False)
+     if ( not cp_agcm_import_rst) :
+       self.air_restarts.remove("agcm_import_rst")
      restarts_in = self.find_rst()
      if len(restarts_in) == 0:
        return
@@ -332,7 +339,8 @@ endif
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
-     self.remove_merra2()
+     if self.config['input']['shared']['MERRA-2']:
+        self.remove_merra2()
 
   def find_rst(self):
      rst_dir = self.config['input']['shared']['rst_dir']
@@ -394,3 +402,4 @@ endif
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')
    air.remap()
+   air.remove_geosit()

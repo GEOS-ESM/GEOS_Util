@@ -2,17 +2,37 @@ function epflx_diff (args)
 
 expid  = subwrd(args,1)
 cmpid  = subwrd(args,2)
-season = subwrd(args,3)
-index  = subwrd(args,4)
-index2 = subwrd(args,5)
-output = subwrd(args,6)
-detail = subwrd(args,7)
+TEM_expid = subwrd(args,3)
+TEM_cmpid = subwrd(args,4)
+season = subwrd(args,5)
+index  = subwrd(args,6)
+index2 = subwrd(args,7)
+output = subwrd(args,8)
+detail = subwrd(args,9)
+detail = d
 
+time = substr(index ,2,1)
+num  = substr(index ,1,1)
+num2 = substr(index2,1,1)
 
-time = substr(index ,1,1)
-num  = substr(index ,2,2)
-num2 = substr(index2,2,2)
+say 'inside epflx_diff:'
+say '-----------------'
+say 'expid: 'expid
+say 'cmpid: 'cmpid
+say 'TEM_expid: 'TEM_expid
+say 'TEM_cmpid: 'TEM_cmpid
+say 'season: 'season
+say 'index : 'index
+say 'index2: 'index2
+say 'output: 'output
+say 'time: 'time
+say 'num : 'num
+say 'num2: 'num2
+pause
 
+*'run getenv "TEM_Collection"'
+*             TEM_Collection = result
+*say 'TEM_Collection = 'TEM_Collection
 
 'set dfile 'num2
 'setz '
@@ -20,28 +40,27 @@ num2 = substr(index2,2,2)
          desc = result
 
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             EXP = node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+            while( node != TEM_cmpid )
             EXP = EXP'.'node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             endwhile
-            desc2 = EXP
+            say 'EXP'num2' = 'EXP
+                     desc2 = EXP
 
 
 'set dfile 'num
@@ -50,37 +69,41 @@ num2 = substr(index2,2,2)
          desc = result
 
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             EXP = node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' )
+            while( node != TEM_expid )
             EXP = EXP'.'node
-            say 'EXP = 'EXP
             m = m + 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
             endwhile
-            desc = EXP
+                     desc = EXP
+            say 'EXP'num' = 'EXP
 
    'run getenv MASKFILE'
                maskfile = result
+    say 'MASKFILE: 'maskfile
+
+
 
 if( time = 'A' )
+   'setdates'
    'run getenv BEGDATE'
                begdate = result
    'run getenv ENDDATE'
                enddate = result
+   'set t 1'
 else
    'set t 1'
    'run getinfo date'
@@ -94,10 +117,23 @@ endif
 
 say 'BEGDATE = 'begdate
 say 'ENDDATE = 'enddate
+pause
 
-'makezdif -q1 epfdiv'season''index' -file1 'num' -q2 epfdiv'season'a'num2' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
-'makezdif -q1   epfy'season''index' -file1 'num' -q2   epfy'season'a'num2' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
-'makezdif -q1   epfz'season''index' -file1 'num' -q2   epfz'season'a'num2' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
+say 'makezdif -q1 epfdiv'num''season''time' -file1 'num' -q2 epfdiv'num2''season''time' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
+say 'Defined Variables:'
+say '------------------'
+'q define'
+say result
+*pause
+    'makezdif -q1 epfdiv'num''season''time' -file1 'num' -q2 epfdiv'num2''season''time' -file2 'num2' -name epdiff  -ptop 1' ; 'run getenv ZDIFILE' ;  epfile = result
+
+say 'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
+*pause
+    'makezdif -q1   epfy'num''season''time' -file1 'num' -q2   epfy'num2''season''time' -file2 'num2' -name epydiff -ptop 1' ; 'run getenv ZDIFILE' ; epyfile = result
+
+say 'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
+*pause
+    'makezdif -q1   epfz'num''season''time' -file1 'num' -q2   epfz'num2''season''time' -file2 'num2' -name epzdiff -ptop 1' ; 'run getenv ZDIFILE' ; epzfile = result
  
 'set dfile 'epfile
 'set x 1'
@@ -134,6 +170,9 @@ say 'ENDDATE = 'enddate
 'set grads off '
 'set ylopts 1 3 0.15 '
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
+
 ' vpage 1 1 2 2 -top 0.6 -bot -0.10'
 ' set lev 1000 0.8'
 ' set lev  925 0.8'
@@ -143,30 +182,71 @@ say 'ENDDATE = 'enddate
 ' d epdiff'
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
-' set ccolor 1'
-if( detail != '' )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != '' )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 2 1 2 2 -top 0.6 -bot -0.10'
+' set gxout shaded'
 ' set csmooth on'
 ' set lev 1000 8'
 ' set lev  925 8'
@@ -176,29 +256,71 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != '' )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != '' )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
    
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 1 2 2 2 -top 0.25 -bot 0.25'
+' set gxout shaded'
 ' set csmooth on'
 ' set lev 1000 80'
 ' set lev  925 80'
@@ -208,29 +330,71 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 0'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != ''   )
-    arrlen = 1
-    arrscl = 1e7
-    arrfct = 5
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 50
-endif
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+
+*if( detail != ''   )
+*    arrlen = 1
+*    arrscl = 1e7
+*    arrfct = 5
+*    arrscl = 5e6
+*    arrfct = 10
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 50
+*endif
+
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' vpage 2 2 2 2 -top 0.25 -bot 0.25'
+' set gxout shaded'
 ' set csmooth on'
 ' set grads off '
 ' set lev 100 18'
@@ -249,34 +413,74 @@ rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
 ' cbarn -xmid 6 -ndot 1'
 ' draw ylab hPa '
 ' set ccolor 1'
-if( detail != ''  )
-    arrlen = 1
-    arrscl = 5e6
-    arrfct = 500
-else
-    arrlen = 1
-    arrscl = 1e8
-    arrfct = 500
-endif
 
-   'define arry    =  epydiffz'
-   'define arrz    = -epzdiffz*'arrfct
+*if( detail != ''  )
+*    arrlen = 1
+*    arrscl = 5e6
+*    arrfct = 500
+*    arrscl = 5e5
+*    arrfct = 300
+*else
+*    arrlen = 1
+*    arrscl = 1e8
+*    arrfct = 500
+*endif
 
+   'qminmax epydiffz/1e6'
+            epydiffmin = subwrd(result,1)
+            epydiffmax = subwrd(result,2)
+            epydiffmag = epydiffmax - epydiffmin
+    say 'epydiffmax = 'epydiffmax
+    say 'epydiffmin = 'epydiffmin
+    say 'epydiffmag = 'epydiffmag
+    say ' '
+
+   'qminmax epzdiffz/1e6'
+            epzdiffmin = subwrd(result,1)
+            epzdiffmax = subwrd(result,2)
+            epzdiffmag = epzdiffmax - epzdiffmin
+    say 'epzdiffmax = 'epzdiffmax
+    say 'epzdiffmin = 'epzdiffmin
+    say 'epzdiffmag = 'epzdiffmag
+    say ' '
+
+            epyzratio  = epydiffmag / epzdiffmag
+            epyzratio  = epyzratio  * 100
+           'getint 'epyzratio
+                    arrfct = result / 100
+    say 'epyzratio = 'arrfct
+    say ' '
+
+   'define arry    =  epydiffz/1e6'
+   'define arrz    = -epzdiffz/1e6*'arrfct
+   'define arrmag  = sqrt( arry*arry + arrz*arrz )'
+
+   'qminmax arrmag'
+            arrmag = subwrd(result,2)
+            
    'define arryskp = skip(arry,'skipval')'
+    arrlen = 1
+    arrscl = arrmag
    'set arrscl 'arrlen' 'arrscl
+   'set ccolor 1'
    'd arryskp;arrz'
-xrit = 4.0
-ybot = 0.6
-rc = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
+    xrit = 4.0
+    ybot = 0.6
+    rc   = arrow(xrit-0.25,ybot+0.2,arrlen,arrscl)
+
 ' set string 1 c 4 '
 ' set strsiz 0.09'
 ' draw string 8.25 0.7 Z/Y Ratio: 'arrfct
 
-
+* ----------------------------------------------------------------------
+* ----------------------------------------------------------------------
 
 ' set vpage off '
 
 if( maskfile != 'NULL' )
+   'set dfile 'maskfile
+   'set x 1'
    'run count.gs "'season'" 'begdate' 'enddate' -field epfdiv.'maskfile
     nseasons = result
 else
@@ -290,15 +494,15 @@ endif
 
 ' set strsiz 0.10 '
 ' set string 4 c 6 '
-' draw string 2.85 8.2 'desc
+' draw string 2.85 8.2 'expid
 ' set string 1 c 6 '
 ' draw string 5.6 8.2 minus'
 ' set string 5 c 6 '
-' draw string 8.35 8.2 'desc2
+' draw string 8.35 8.2 'cmpid
 ' set string 1 c 6 '
 
 ' set strsiz 0.10 '
-' draw string 5.60501 7.88 'season' ('nseasons') Climatology   ('begdate' - 'enddate')'
+' draw string 5.60501 7.88 'season' ('nseasons')   ('begdate' - 'enddate')'
 
 'myprint -name 'output'/EP_Flux_diff_'expid'-'cmpid'.'season
 

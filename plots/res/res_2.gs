@@ -11,6 +11,9 @@ function  res_2 (args)
  begdateo = subwrd(args,9)
  enddateo = subwrd(args,10)
 
+'getinfo file'
+        dfile = result
+
 * Get Dates for Plots
 * -------------------
 'run getenv "BEGDATE"'
@@ -21,9 +24,12 @@ function  res_2 (args)
 'run getenv "CINTDIFF"'
              CINTDIFF = result
 
+'run getenv "ZDIFILE" '
+             zdifile = result
+
 'run getenv "CLIMATE"'
              climate = result
-if(begdate = begdateo & enddate = enddateo )
+if(begdate = begdateo & enddate = enddateo)
              climate = 'Actual'
 endif
 
@@ -42,12 +48,6 @@ endif
 'set rgb 85 137 137 137'
 
 ********************************************************
-
-if( CINTDIFF != NULL )
-* --------------------
-
-'getinfo file'
-        dfile = result
 
 * Get Bounding Values
 * -------------------
@@ -106,19 +106,19 @@ z1 = result
 z2 = result
 endif
 
-'run getenv "ZDIFILE" '
-             zdifile = result
-'set dfile ' zdifile
-'q file'
-say 'ZDIFILE: 'result
-'set x 1'
-'set t 1'
-'sety'
-'setz'
-
-'minmax strdifz'
-        dqmax = subwrd(result,1)
-        dqmin = subwrd(result,2)
+if( CINTDIFF != NULL )
+* --------------------
+  'run getenv "ZDIFILE" '
+               zdifile = result
+  'set dfile ' zdifile
+  'set x 1'
+  'set t 1'
+  'sety'
+  'setz'
+  'minmax strdifz'
+          dqmax = subwrd(result,1)
+          dqmin = subwrd(result,2)
+endif
 
 * Reset initial space-time environment
 * ------------------------------------
@@ -127,8 +127,6 @@ say 'ZDIFILE: 'result
 'set y 'y1' 'y2
 'set z 'z1' 'z2
 'set t 1'
-
-endif
 
 ********************************************************
 *                   Streamfunction
@@ -192,11 +190,13 @@ endif
 'set t 1'
 'd str'season'obs'
 
-'set dfile ' zdifile
+'set dfile 'zdifile
 'set x 1'
 'set t 1'
 'sety'
 'setz'
+'getinfo undef'
+         undef = result
 
 if( CINTDIFF != NULL )
 * --------------------
@@ -267,8 +267,19 @@ if( CINTDIFF != NULL )
 else
 
      dn = 0
-    'shades 0.3'
-    'd maskout( strdifz,abs(strdifz)-0.3 )'
+    'define test = maskout( strdifz,abs(strdifz)-0.3 )'
+    'minmax test'
+         testmax = subwrd(result,1)
+         testmin = subwrd(result,2)
+     if( testmax = undef & testmin = undef )
+       'shades strdifz 0'
+        cint = result
+       'shades 'cint
+       'd maskout( strdifz,abs(strdifz)-'cint' )'
+     else
+       'shades 0.3'
+       'd maskout( strdifz,abs(strdifz)-0.3 )'
+     endif
 
 endif
 
@@ -287,7 +298,6 @@ endif
 'set cmin -40'
 'd str'season'obs'
  
-
 'set vpage off'
 'set parea off'
 'set vpage 0 8.5 0.0 11'

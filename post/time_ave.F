@@ -107,6 +107,39 @@ c **********************************************************************
       integer        nalias
       logical,       allocatable :: lzstar(:)
 
+C **********************************************************************
+C ****                   Variables for TEM Diagnostics              ****
+C **********************************************************************
+
+      integer, parameter ::     TEM_NVARS = 7
+      character*256   TEM_NAMES(TEM_NVARS)
+      logical         TEM_FOUND(TEM_NVARS)
+      integer         TEM_BEG  (TEM_NVARS)
+      integer         TEM_END  (TEM_NVARS)
+
+      real, allocatable :: TEM_VARS(:,:,:,:)
+
+      data TEM_NAMES / 'U','V','T','OMEGA','USVS','USWS','VSTS' /
+      data TEM_FOUND / .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. ,
+     .                 .FALSE. /
+
+      logical TEM_WRITE
+      logical NO_TEM
+
+      integer       mem_unit,loc,ios
+      logical       lopen
+      character*256 cbuff1
+      character*1   cbuff2(256)
+      equivalence ( cbuff1,cbuff2 )
+      character*256 expid
+
+C **********************************************************************
+
       integer NSECF, ntmin, ntcrit, nhmsf, nc
               NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
 
@@ -156,6 +189,8 @@ c ---------------------------
            diurnal   = .FALSE.
           mdiurnal   = .FALSE.
           ignore_nan = .FALSE.
+          NO_TEM     = .FALSE.
+          expid      = 'NULL'
           allocate ( arg(nargs) )
           do n=1,nargs
           call getarg(n,arg(n))
@@ -171,14 +206,16 @@ c ---------------------------
              if( trim(arg(n)).eq.'-ntmin'      )      read ( arg(n+1),* ) ntmin
              if( trim(arg(n)).eq.'-ntod'       )      read ( arg(n+1),* ) ntod
              if( trim(arg(n)).eq.'-ndt'        )      read ( arg(n+1),* ) ndt
+             if( trim(arg(n)).eq.'-expid'      )      read ( arg(n+1),* ) expid
              if( trim(arg(n)).eq.'-strict'     )      read ( arg(n+1),* ) strict
              if( trim(arg(n)).eq.'-noquad'     )      lquad = .FALSE.
+             if( trim(arg(n)).eq.'-NO_TEM'     )     NO_TEM = .TRUE.
              if( trim(arg(n)).eq.'-ignore_nan' ) ignore_nan = .TRUE.
 
              if( trim(arg(n)).eq.'-dv'.or. trim(arg(n)).eq.'-mdv') ldquad = .true.
 
              if( trim(arg(n)).eq.'-d' .or. trim(arg(n)).eq.'-dv' ) then
-                 diurnal = .TRUE. 
+                 diurnal = .TRUE.
                  if( n+1.le.nargs ) then
                      read(arg(n+1),fmt='(a1)') char
                      if( char.ne.'-' ) doutput = arg(n+1)
@@ -186,14 +223,14 @@ c ---------------------------
              endif
 
              if( trim(arg(n)).eq.'-md' .or. trim(arg(n)).eq.'-mdv' ) then
-                 mdiurnal = .TRUE. 
+                 mdiurnal = .TRUE.
                  if( n+1.le.nargs ) then
                      read(arg(n+1),fmt='(a1)') char
                      if( char.ne.'-' ) doutput = arg(n+1)
                  endif
              endif
 
-             if( trim(arg(n)).eq.'-eta'  .or. 
+             if( trim(arg(n)).eq.'-eta'  .or.
      .           trim(arg(n)).eq.'-hdf' ) then  ! Backward compatable for old interface
                  nfiles = 1
                  read(arg(n+nfiles),fmt='(a1)') char
@@ -494,7 +531,7 @@ c -----------------------------
                nstar = index( trim(quadratics(1,nv)),'star',back=.true. )
            if( nstar.ne.0 ) then
               lzstar(nv) = .TRUE.
-             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_" 
+             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_"
      .                   // trim(vname(qloc(1,nv))) // "_and_" // trim(vname(qloc(2,nv)))
            endif
 
@@ -539,7 +576,8 @@ c -----------------------------
       print *
       print *, 'Files: '
       do n=1,nfiles
-      print *, n,trim(fname(n))
+      write(6,7004) n,trim(fname(n))
+ 7004 format(1x,i4,3x,a)
       enddo
       print *
       if( ntod.eq.-999 ) then
@@ -568,10 +606,10 @@ C **********************************************************************
       k = 0
 
       do n=1,nfiles
-      if( root ) then
-      call gfio_open ( trim(fname(n)),1,ID,rc )
-      call gfio_diminquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc )
-      endif
+         if( root ) then
+         call gfio_open ( trim(fname(n)),1,ID,rc )
+         call gfio_diminquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc )
+         endif
 
 #ifdef mpi
       call mpi_bcast ( imglobal,1,mpi_integer,0,comm,ierror )
@@ -618,12 +656,12 @@ C **********************************************************************
                   call tick (nymd,nhms,-86400)
               endif
 
-              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and. 
-     .            ( begdate.gt.nymd .or. 
+              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and.
+     .            ( begdate.gt.nymd .or.
      .            ( begdate.eq.nymd.and.begtime.gt.nhms ) ) ) cycle
 
-              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and. 
-     .            ( enddate.lt.nymd .or. 
+              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and.
+     .            ( enddate.lt.nymd .or.
      .            ( enddate.eq.nymd.and.endtime.lt.nhms ) ) ) cycle
 
                                k = k+1
@@ -867,6 +905,17 @@ c --------------
  3001    format(1x,'Writing ',a,' at location ',i6,' into File: ',a)
          dum(:,:,1:kend) = q(:,:,nloc(n):nloc(n)+kend-1,0)
          call mpi_gfio_putVar ( id,trim(vname2(n)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
+
+c        Tests for TEM Diagnostic Variables
+c        ----------------------------------
+         do k=1,TEM_NVARS
+            if( trim(vname2(n)).eq.TEM_NAMES(k) ) then
+                TEM_FOUND(k) = .TRUE.
+                TEM_BEG  (k) = nloc(n)
+                TEM_END  (k) = nloc(n)+kend-1
+            endif
+         enddo
+
       enddo
 
 c Quadratics
@@ -894,18 +943,85 @@ c ----------
                  endwhere
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0)
-             endif 
+             endif
              call mpi_gfio_putVar ( id,trim(vname2(mv)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
+
+c            Tests for TEM Diagnostic Variables
+c            ----------------------------------
+             do k=1,TEM_NVARS
+                if( trim(vname2(mv)).eq.TEM_NAMES(k) ) then
+                    TEM_FOUND(k) = .TRUE.
+                    TEM_BEG  (k) = nloc(mv)
+                    TEM_END  (k) = nloc(mv)+kend-1
+                endif
+             enddo
+
          endif
       enddo
 
       if( root ) then
           call gfio_close ( id,rc )
-          print * 
+          print *
           print *, 'Created: ',trim(hdfile)
-          print * 
+          print *, '-------- '
+          print *
       endif
       call timeend(' Write_AVE')
+
+C **********************************************************************
+C ****                   Write TEM Diagnostics File                 ****
+C **********************************************************************
+
+             TEM_WRITE = .not.NO_TEM
+      do k=1,TEM_NVARS
+             TEM_WRITE = TEM_WRITE .and. TEM_FOUND(k)
+      enddo
+      if( TEM_WRITE ) then
+
+          allocate( TEM_VARS(imglobal,jmglobal,lm,TEM_NVARS) )
+            do k=1,TEM_NVARS
+              do L=TEM_BEG(k),TEM_END(k)
+                 dum(:,:,L-TEM_BEG(k)+1) = q(:,:,L,0)
+                 call gather_2d( TEM_VARS(1,1,L-TEM_BEG(k)+1,k),dum(1,1,L-TEM_BEG(k)+1),lattice )
+              enddo
+            enddo
+
+          if( root ) then
+
+              if( trim(expid).eq.'NULL' ) then
+                  cbuff1 = '/usr/bin/basename ' // trim(fname(1)) // ' > basename.output'
+                  call execute_command_line ( trim(cbuff1) )
+
+                         i = 1
+                  mem_unit = 0
+                  dowhile( mem_unit == 0 )
+                     if( i /= 5 .and. i /= 6 .and. i <= 99 ) then
+                         inquire( unit = i, opened = lopen, iostat = ios )
+                         if( ios == 0 ) then
+                           if( .not. lopen ) mem_unit = i
+                         endif
+                     endif
+                     i = i+1
+                  enddo
+
+                  open (mem_unit,file='basename.output',form='formatted',access='sequential')
+                  read (mem_unit,'(a)') cbuff1
+                  close(mem_unit)
+
+                  expid = ''
+                    loc = 1
+                   char = cbuff2(loc)
+                  dowhile (char.ne.'.')
+                   expid = trim(expid) // char
+                     loc = loc+1
+                    char = cbuff2(loc)
+                  enddo
+              endif
+
+              call TEM( TEM_VARS,imglobal,jmglobal,lm,TEM_NVARS,
+     .                  EXPID,lon,lat,lev,levunits,nymd0,nhms0,timinc,undef )
+          endif
+      endif
 
 C **********************************************************************
 C ****               Write HDF Monthly Diurnal Output File          ****
@@ -991,6 +1107,8 @@ c ----------
       if( root .and. mdiurnal ) then
           call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
+          print *, '-------- '
+          print *
       endif
       call tick (nymd0,nhms0,ndt)
       enddo
@@ -998,8 +1116,10 @@ c ----------
       if( root .and. diurnal ) then
           call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
+          print *, '-------- '
+          print *
       endif
-      if( root ) print * 
+      if( root ) print *
 
       call timeend(' Write_Diurnal')
       endif
@@ -1222,45 +1342,45 @@ C***********************************************************************
       NSEC = NSEC - 86400
       NYMD = INCYMD (NYMD,1)
       ENDDO
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.EQ.86400)  THEN
       NSEC = 0
       NYMD = INCYMD (NYMD,1)
-      ENDIF   
-               
+      ENDIF
+
       IF (NSEC.LT.00000)  THEN
       DO WHILE (NSEC.LT.0)
       NSEC = 86400 + NSEC
       NYMD = INCYMD (NYMD,-1)
       ENDDO
-      ENDIF   
-               
-      NHMS = NHMSF (NSEC)
-      ENDIF   
+      ENDIF
 
-      RETURN  
+      NHMS = NHMSF (NSEC)
+      ENDIF
+
+      RETURN
       end subroutine tick
 
       function incymd (NYMD,M)
-C***********************************************************************        
-C  PURPOSE                                                                      
-C     INCYMD:  NYMD CHANGED BY ONE DAY                                          
-C     MODYMD:  NYMD CONVERTED TO JULIAN DATE                                    
-C  DESCRIPTION OF PARAMETERS                                                    
-C     NYMD     CURRENT DATE IN YYMMDD FORMAT                                    
-C     M        +/- 1 (DAY ADJUSTMENT)                                           
-C                                                                               
-C***********************************************************************        
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
-C***********************************************************************        
+C***********************************************************************
+C  PURPOSE
+C     INCYMD:  NYMD CHANGED BY ONE DAY
+C     MODYMD:  NYMD CONVERTED TO JULIAN DATE
+C  DESCRIPTION OF PARAMETERS
+C     NYMD     CURRENT DATE IN YYMMDD FORMAT
+C     M        +/- 1 (DAY ADJUSTMENT)
+C
+C***********************************************************************
+C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+C***********************************************************************
 
       INTEGER NDPM(12)
       DATA    NDPM /31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
       LOGICAL LEAP
       LEAP(NY) = MOD(NY,4).EQ.0 .AND. (MOD(NY,100).NE.0 .OR. MOD(NY,400).EQ.0)
 
-C***********************************************************************        
+C***********************************************************************
 C
       NY = NYMD / 10000
       NM = MOD(NYMD,10000) / 100
@@ -1291,9 +1411,9 @@ C
       INCYMD = NY*10000 + NM*100 + ND
       RETURN
 
-C***********************************************************************        
-C                      E N T R Y    M O D Y M D                                 
-C***********************************************************************        
+C***********************************************************************
+C                      E N T R Y    M O D Y M D
+C***********************************************************************
 
       ENTRY MODYMD (NYMD)
       NY = NYMD / 10000

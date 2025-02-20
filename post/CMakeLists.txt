@@ -19,7 +19,7 @@ target_compile_definitions(post_nompi PRIVATE mpi)
 
 foreach (basename
     makeiau hdf2rs gg2fv eta2prs eta2rst rs_hinterp
-    time_ave convert_eta rs2hdf
+    convert_eta rs2hdf
     ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta
     merra2scm rsg3_vinterp era5_prs2eta)
  ecbuild_add_executable (TARGET ${basename}.x SOURCES ${basename}.F DEFINITIONS mpi)
@@ -28,6 +28,8 @@ ecbuild_add_executable (TARGET binarytile.x SOURCES binarytile.F90)
 ecbuild_add_executable (TARGET rs_numtiles.x SOURCES rs_numtiles.F90)
 ecbuild_add_executable (TARGET rs_vinterp.x SOURCES rs_vinterp.F90)
 ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
+ecbuild_add_executable (TARGET time_ave.x SOURCES time_ave.F TEM.F90 DEFINITIONS mpi)
+ecbuild_add_executable (TARGET Create_TEM_Diag.x SOURCES Create_TEM_Diag.F TEM.F90)
 
 ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
@@ -77,6 +79,7 @@ set_property(SOURCE merra2scm.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECL
 set_property(SOURCE rs2hdf.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE rs_hinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE time_ave.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
+set_property(SOURCE Create_TEM_Diag.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE convert_aerosols.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE PWSSSP.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE} ${BYTERECLEN}")
 set_property(SOURCE alias.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN}")
@@ -86,11 +89,12 @@ target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL GEOS_Shared)
 target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
-target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL esmf)
+target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL ESMF::ESMF)
 target_link_libraries (flat2hdf.x post_nompi GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
 target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL )
+target_link_libraries (Create_TEM_Diag.x ${this} GMAO_gfio_r4 )
 target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
 
 target_link_libraries (rsg3_vinterp.x ${this} GMAO_hermes)

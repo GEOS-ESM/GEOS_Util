@@ -17,6 +17,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.6] - 2025-01-23
+
+### Fixed
+
+- Patch to fix EXPIDs containing underscores
+
+## [2.1.5] - 2024-12-05
+
+### Changed
+
+- Updates for TEM_Diag to include ALL Times
+
+## [2.1.4] - 2024-12-05
+
+### Changed
+
+- Update GitHub Actions
+
+### Fixed
+
+- Correct bug in `remap_restarts.py` where `N2O` was added as `N20`
+
+## [2.1.3] - 2024-10-08
+
+### Added
+
+- Added remapping for GEOS-IT restarts
+- Added new res C1120
+- NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
+
+### Changed
+
+- Update ESMF CMake target to `ESMF::ESMF`
+
+### Fixed
+
+- Plots package bug fixes for EXPID names containing periods and TEM diagnostics
+
+## [2.1.2] - 2024-07-30
+
+### Changed
+
+- Added MASKFILE for time-discontinuous data in TEM diagnostics
+
+## [2.1.1] - 2024-07-30
+
+### Added
+
+- MOM6 C90 ogrid option to `remap_utils.py`
+
+### Fixed
+
+- Fix quote-v-comma issue in `time_ave.rc` that ESMF 8.6.1 was triggered by.
+
+## [2.1.0] - 2024-06-10
+
+### Added
+
+- Added new BCS version v12
+- Updates for TEM diagnostics
+
+### Removed
+
+- Removed mask from `read_reynolds.F90`
+
 ## [2.0.8] - 2024-03-29
 
 ### Fixed

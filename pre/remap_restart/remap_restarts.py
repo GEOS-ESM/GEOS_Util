@@ -133,6 +133,8 @@ def main():
   ana = analysis(params_file=config_yaml)
   ana.remap()
 
+  ana.remove_geosit()
+
 if __name__ == '__main__' :
   main()
   

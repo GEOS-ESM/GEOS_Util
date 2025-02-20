@@ -3,23 +3,33 @@ function setup_wstar (args)
 say ' '
 say 'Inside setup_wstar'
 say ' '
-*pause
 
 * -------------------------------------------------
 * Set TIME flag:  A => Common Times, B => All Times
 * -------------------------------------------------
-      TFLAG = A
+*     TFLAG = B
+*     TFLAG = A
 * -------------------------------------------------
 * -------------------------------------------------
 
 source = subwrd(args,1)
 expid  = subwrd(args,2)
 output = subwrd(args,3)
+TFLAG  = subwrd(args,4)
+
+say 'source: 'source
+say ' expid: 'expid
+
+'run getenv DEBUG'
+            DEBUG = result
+
+'run getenv "ANALYSIS"'
+             analysis = result
 
 * Define Seasons to Process
 * -------------------------
 seasons  = ''
-       k = 4
+       k = 5
 while( k > 0 )
     season = subwrd(args,k)
 if( season = '' )
@@ -39,7 +49,6 @@ if( numfiles = 'NULL' )
 
 * Loop over Experiment Datasets
 * -----------------------------
-say ''
 'getpwd'
     pwd = result
 
@@ -60,15 +69,25 @@ while( num <= numrc )
     'run getenv BASENAME'
                 basename = result
      length   = strlen(basename) - 3
-     say 'original length = 'length
-    '!echo 'basename' | cut -b1-'length' > CMPID.txt'
+    '!echo 'basename' | cut -b1-'length'  > CMPID.txt'
+    '!echo 'basename' | cut -b14-'length' > SHORTNAME.txt'
     'run getenv CMPID '
                 CMPID.num = result
+    'run getenv SHORTNAME '
+                SHORTNAME.num = result
 
    say '  CMPID #'num' = 'CMPID.num
    say 'CTLFILE #'num' = 'CTLFILE.num
-   'open 'CTLFILE.num
-   if( CMPID.num = expid ) ; nexpid = num ; endif
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
+
+   'xdfopen 'CTLFILE.num
+   if( CMPID.num = 'VERIFICATION.'expid ) ; nexpid = num ; endif
    num = num + 1
 endwhile
 
@@ -79,20 +98,28 @@ endif
 
 '!/bin/rm -f LOCKFILE'
 'q files'
-   check = subwrd(result,1)
+say ' Files: 'result
+say 'nexpid: 'nexpid
+*pause
 
-* Set MASKFILE to file which is not time-continuous (i.e., has UNDEF periods)
-* ---------------------------------------------------------------------------
-     maskfile = 'NULL'
-*    maskfile = 2
-    'run setenv MASKFILE ' maskfile
-    'run setenv NUMFILES ' numfiles
+'set dfile 'nexpid
+'getinfo dset'
+         dset = result
+'!fsource 'dset
+'run getenv FSOURCE'
+            fsource = result
+
+'!remove NFILES.txt'
+'!/bin/ls -1 'fsource'/'expid'.TEM_Diag.monthly.*.nc4 | wc -l > NFILES.txt'
+'run getenv NFILES'
+            nfiles = result
+
+'getinfo tdim'
+         tdim = result
 
 say ''
-say 'Files:'
-'q files'
-say result
-say 'MASKFILE: 'maskfile
+say '    TDIM: 'tdim
+say '  NFILES: 'nfiles
 say ''
 
 * Initialize BEGDATE and ENDATE for each Experiment
@@ -162,13 +189,11 @@ while( n<=numfiles )
              time = result
     if( time < endtimeA )
         say enddate.n' < 'enddateA
-        pause
             enddateA =  enddate.n
             endtimeA = time
     endif
 n = n + 1
 endwhile
-pause
 
 * Hardwire Beginning and Ending Dates
 * -----------------------------------
@@ -178,7 +203,7 @@ say 'Pre-Set Environment Variable ENDDATE: 'ENDDATE
 say '     Computed Common Dates  begdateA: 'begdateA
 say '     Computed Common Dates  enddateA: 'enddateA
 say ' '
-pause
+*pause
 
 * Compare with Pre-Set Environment Variables
 * ------------------------------------------
@@ -208,10 +233,50 @@ say 'set time 'begdateA' 'enddateA
     'set time 'begdateA' 'enddateA
 say ' '
 
-say 'getdates'
-    'getdates'
+
+* Check to see if expid files are time-continuous (i.e., no UNDEF periods)
+* ---------------------------------------------------------------------------------
+'set dfile 'nexpid
+ say 'getdates'
+     'getdates'
+ say ' '
+'set z 1'
+
+maskfile = 'NULL'
+       k = 1
+  season = subwrd(seasons,k)
+while( k > 0 )
+       'run count.gs "'season'" 'begdateA' 'enddateA
+        countnomask = result
+       'run count.gs "'season'" 'begdateA' 'enddateA' -field str'
+        countmask = result
+        say 'COUNT 'season' without MASK: 'countnomask
+        say      '          with    MASK: 'countmask
+
+        if( countnomask != countmask )
+           maskfile = nexpid
+        endif
+
+             k = k+1
+        season = subwrd(seasons,k)
+    if( season = '' )
+             k = -1
+    endif
 say ' '
-     pause
+endwhile
+
+     say       'MASKFILE: 'maskfile
+    'run setenv MASKFILE ' maskfile
+    'run setenv NUMFILES ' numfiles
+
+if( maskfile != 'NULL' ) 
+  'set dfile 'maskfile
+  'getdates'
+  'set x 1'
+  'sety'
+  'setz'
+  'define zeromask = wstar-wstar + lon-lon'
+endif
 
 n = 1
 while( n<=numfiles )
@@ -221,36 +286,101 @@ while( n<=numfiles )
   'sety'
   'setz'
 
-   if( maskfile != 'NULL' ) 
-      'define wstar'n' = maskout( wstar.'n',abs(wstar.'maskfile') )'
-      'define wstar    = maskout( wstar.'n',abs(wstar.'maskfile') )'
-      'define res      = maskout( res.'n'  ,abs(  res.'maskfile') )'
-*     'define epfy     = maskout( epfy.'n' ,abs( epfy.'maskfile') )'
-*     'define epfz     = maskout( epfz.'n' ,abs( epfz.'maskfile') )'
-*     'define wmean    = maskout( wmean.'n',abs(wmean.'maskfile') )'
-*     'define weddy    = maskout( weddy.'n',abs(weddy.'maskfile') )'
-*     'define vstar    = maskout( vstar.'n',abs(vstar.'maskfile') )'
+   if( maskfile != 'NULL' & maskfile != n ) 
+
+       say 'Computing zdiff and seasonal wstar and res using file: 'n' and maskfile: 'maskfile
+       say '-----------------------------------------------------'
+       'makezdif4 -q1 wstar.'n' -q2 zeromask -file1 'n' -file2 'maskfile
+       'run getenv "ZDIFILE" '
+                    zdifile = result
+       'set dfile ' zdifile
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'define wstar'n' = qz'
+       'seasonal wstar'n' A'
+       'close 'zdifile
+       'set dfile 'n
+       'q files'
+        say 'FILES: 'result
+*       pause
+
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'makezdif4 -q1 res.'n' -q2 zeromask -file1 'n' -file2 'maskfile
+       'run getenv "ZDIFILE" '
+                    zdifile = result
+       'set dfile ' zdifile
+       'getdates'
+       'set x 1'
+       'sety'
+       'setz'
+       'define res'n' = qz'
+       'seasonal res'n' A'
+       'close 'zdifile
+       'set dfile 'n
+       'q files'
+        say 'FILES: 'result
+*       pause
+
    else
+
+       say 'Computing seasonal wstar and res using file: 'n' and maskfile: 'maskfile
+       say '-------------------------------------------'
       'define wstar'n' = wstar.'n
+      'define   res'n' =   res.'n
+      'seasonal wstar'n' A'
+      'seasonal   res'n' A'
+*      pause
+
    endif
 
-  'seasonal wstar  A'n
-  'seasonal res    A'n
-* 'seasonal epfy   A'n
-* 'seasonal epfz   A'n
-* 'seasonal epfdiv A'n
-* 'seasonal wmean  A'n
-* 'seasonal weddy  A'n
-* 'seasonal vstar  A'n
 n = n + 1
 endwhile
 endif
+
 * -------------------------------------------
 
 * -------------------------------------------------------------
-* Compute Seasonal Means for ALL Times (B)  (Not fully tested)
+*       Compute Seasonal Means for ALL Experiment Times (B)
 * -------------------------------------------------------------
 if( TFLAG = 'B' )
+
+*   Only compute Analysis WSTAR profiles for Common Times (A)
+*   ---------------------------------------------------------
+    if( analysis = true )
+    return
+    endif
+
+say 'Determine if Experiment Dates Differ'
+say '------------------------------------'
+
+differ = FALSE
+n = 1
+while( n<=numfiles )
+   k = n+1
+   while( k<=numfiles )
+
+   say 'Checking 'SHORTNAME.n' and 'SHORTNAME.k
+   if( ( (SHORTNAME.n != 'MERRA-2') & (SHORTNAME.k != 'MERRA-2') )
+        if( begdate.n != begdate.k | enddate.n != enddate.k )
+            differ = TRUE
+        endif
+        say 'n: 'n'  k: 'k'  if( 'begdate.n' != 'begdate.k' | 'enddate.n' != 'enddate.k' )  DIFFER: 'differ
+   endif
+   k = k+1
+   endwhile
+n = n+1
+endwhile
+if( differ = FALSE ) ; return ; endif
+say ''
+
+               maskfile = 'NULL'
+    say       'MASKFILE: 'maskfile
+   'run setenv MASKFILE ' maskfile
    'run setenv TIME 'TFLAG
    '!remove BEGDATE.txt'
    '!remove ENDDATE.txt'
@@ -261,15 +391,19 @@ if( TFLAG = 'B' )
      'sety'
      'setz'
      'sett'
+
+     'setdates'
+     'getdates'
+
+     'run getenv BEGDATE'
+                 BEGDATE = result
+     'run getenv ENDDATE'
+                 ENDDATE = result
+
      'define wstar'n' = wstar.'n
-     'seasonal wstar  B'n
-     'seasonal res    B'n
-*    'seasonal epfy   B'n
-*    'seasonal epfz   B'n
-*    'seasonal epfdiv B'n
-*    'seasonal wmean  B'n
-*    'seasonal weddy  B'n
-*    'seasonal vstar  B'n
+     'define   res'n' =   res.'n
+     'seasonal wstar'n' B'
+     'seasonal   res'n' B'
    n = n + 1
    endwhile
 endif
@@ -292,24 +426,61 @@ while( k > 0 )
 
 *  Plot turn-around-latitudes
 * ---------------------------
+
+            flag = ""
+    while ( flag = "" )
    'run 'geosutil'/plots/res/turn_around_lats.gs 'season' 'output
-    pause
-   'c'
+    if( DEBUG = true )
+        say "Hit  ENTER  to repeat plot or any character for next plot"
+        pull flag
+    else
+        flag = NEXT
+    endif
+    endwhile
+    'c'
 
 *  Plot wstar profiles for ALL experiments
 * ----------------------------------------
+            flag = ""
+    while ( flag = "" )
    'run 'geosutil'/plots/res/plot_season.gs levl 'output
-    pause
-   'c'
-   'run 'geosutil'/plots/res/plot_season.gs avrg 'output
-    pause
-   'c'
-   'run 'geosutil'/plots/res/plot_season.gs indv 'output
-    pause
-   'c'
+    if( DEBUG = true )
+        say "Hit  ENTER  to repeat plot or any character for next plot"
+        pull flag
+    else
+        flag = NEXT
+    endif
+    endwhile
+    'c'
 
+            flag = ""
+    while ( flag = "" )
+   'run 'geosutil'/plots/res/plot_season.gs avrg 'output
+    if( DEBUG = true )
+        say "Hit  ENTER  to repeat plot or any character for next plot"
+        pull flag
+    else
+        flag = NEXT
+    endif
+    endwhile
+    'c'
+
+            flag = ""
+    while ( flag = "" )
+   'run 'geosutil'/plots/res/plot_season.gs indv 'output
+    if( DEBUG = true )
+        say "Hit  ENTER  to repeat plot or any character for next plot"
+        pull flag
+    else
+        flag = NEXT
+    endif
+    endwhile
+    'c'
+
+* -----------------------------------------------
 *  Plot wstar profiles for Individual experiments
 * -----------------------------------------------
+if( TFLAG = 'A' )
     say ' '
    'q files'
     say result
@@ -317,11 +488,14 @@ while( k > 0 )
 
     n = 1
     while( n<=numfiles )
+           CMPID = CMPID.n
+           TEM_Collection = TEM_NAME.n
+
            'set dfile 'n
            'getinfo desc'
                     desc = result
             node = ''
-            m = 2
+            m = 1
            '!remove NODE.txt'
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
@@ -333,7 +507,7 @@ while( k > 0 )
            '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
            'run getenv "NODE"'
                         node = result
-            while( node != 'ctl' & node != 'data' )
+            while( node != TEM_Collection )
             EXP.n = EXP.n'.'node
             say 'EXP'n' = 'EXP.n
             m = m + 1
@@ -351,24 +525,52 @@ while( k > 0 )
     alfbet = 'abcdefghijklmnopqrstuvwxyz'
     alfexp = substr(alfbet,nexpid,1)
     say 'alfexp = 'alfexp
-    pause
 
     n = 1
     while( n<=numfiles )
     if( n != nexpid )
         string = substr(alfbet,n,1)
+                flag = ""
+        while ( flag = "" )
        'run 'geosutil'/plots/res/plot_season.gs levl 'output' 'alfexp' 'string 
-        pause
+        if( DEBUG = true )
+            say "Hit  ENTER  to repeat plot or any character for next plot"
+            pull flag
+        else
+            flag = NEXT
+        endif
+        endwhile
        'c'
+
+                flag = ""
+        while ( flag = "" )
        'run 'geosutil'/plots/res/plot_season.gs avrg 'output' 'alfexp' 'string
-        pause
+        if( DEBUG = true )
+            say "Hit  ENTER  to repeat plot or any character for next plot"
+            pull flag
+        else
+            flag = NEXT
+        endif
+        endwhile
        'c'
+
+                flag = ""
+        while ( flag = "" )
        'run 'geosutil'/plots/res/plot_season.gs indv 'output' 'alfexp' 'string
-        pause
+        if( DEBUG = true )
+            say "Hit  ENTER  to repeat plot or any character for next plot"
+            pull flag
+        else
+            flag = NEXT
+        endif
+        endwhile
        'c'
+
     endif
     n = n + 1
     endwhile
+endif
+* -----------------------------------------------
 
     else
              k = -1

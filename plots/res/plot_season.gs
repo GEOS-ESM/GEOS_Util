@@ -18,6 +18,10 @@ function plot_season (args)
 'run getenv ENDDATE'
             enddate = result
 
+* Test to see if Source Experiment is an ANALYSIS
+* -----------------------------------------------
+'run getenv "ANALYSIS"'
+             analysis = result
 'q gxout'
    gxout = sublin(result,4)
    gxout = subwrd(gxout,6)
@@ -63,7 +67,6 @@ function plot_season (args)
 'getinfo ydim'
           RSLV = (result-1)/2
          CRSLV = C''RSLV
-
 
     tags = ''
     exps = ''
@@ -129,42 +132,53 @@ endif
 * ------------------------------------------------------------------------
 * ------------------------------------------------------------------------
 
-    n = 1
-    while( n<=numfiles )
-           'set dfile 'n
-           'getinfo desc'
-                    desc = result
-            node = ''
-            m = 2
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            EXP.n = node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            while( node != 'ctl' & node != 'data' )
-            EXP.n = EXP.n'.'node
-            say 'EXP'n' = 'EXP.n
-            m = m + 1
-           '!remove NODE.txt'
-           '!basename 'desc' | cut -d. -f'm' >> NODE.txt'
-           'run getenv "NODE"'
-                        node = result
-            endwhile
+* Loop over Experiment Datasets to get Experiment IDs
+* ---------------------------------------------------
+say ''
+'getpwd'
+    pwd = result
+
+'getnumrc 'pwd
+     rcinfo = result
+     numrc  = subwrd( rcinfo,1 )
+       num  = 1
+       cnt  = 0
+while( num <= numrc )
+        loc = num + 1
+     rcfile = subwrd( rcinfo,loc )
+     say 'num = 'num'  rcfile = 'rcfile
+
+   '!grep filename 'rcfile' | cut -d'"\' -f2 > CTLFILE.txt"
+    'run getenv CTLFILE '
+                CTLFILE.num = result
+
+   '!basename 'rcfile' > BASENAME.txt'
+    'run getenv BASENAME'
+                basename = result
+     length   = strlen(basename) - 3
+     say 'original length = 'length
+    '!echo 'basename' | cut -b14-'length' > CMPID.txt'
+    'run getenv CMPID '
+                CMPID.num = result
+
+   say '    CMPID #'num' = 'CMPID.num
+   say '  CTLFILE #'num' = 'CTLFILE.num
+
+           '!remove TEM_NAME.txt.'
+           '!basename 'CTLFILE.num' | cut -d. -f2 > TEM_NAME.txt'
+       say 'run getenv "TEM_NAME"'
+           'run getenv "TEM_NAME"'
+                        TEM_NAME.num = result
+            say 'TEM_Collection = 'TEM_NAME.num
 
 *       Generate and Use WSTAR files stored in OUTPUT directory
 *       -------------------------------------------------------
-          FILE.n = 'WSTAR_'talats'.'EXP.n
-        LOCATION = '../'
-        LOCATION = ''
+          FILE.num = 'WSTAR_'talats'.'CMPID.num
+          LOCATION = '../'
+          LOCATION = ''
 
-        n = n + 1
-    endwhile
+   num = num + 1
+endwhile
 
     axmax = -1e15
     axmin =  1e15
@@ -179,8 +193,18 @@ n = 1
 while( n<=numfiles )
 
        'set dfile 'n
+       'q file'
+        say 'File #'n'  'result
 
+        if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
+
+        if( time = B )
+           'sett' 
+           'run setdates'
+        endif
        'run getdates'
+       'run getenv BEGDATE'
+                   begdate = result
        'getinfo tmin'
                 tmin = result
        'getinfo tmax'
@@ -250,8 +274,8 @@ while( n<=numfiles )
                   latmin = result/100
        endif
 
- say  'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
-      'define dumdum'n' = ave(w'type''season''time''n',lat='latmin',lat='latmax')*1000'
+ say  'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
+      'define dumdum'n' = ave(w'type''n''season''time',lat='latmin',lat='latmax')*1000'
       'minmax dumdum'n
          dmax = subwrd(result,1)
          dmin = subwrd(result,2)
@@ -260,7 +284,6 @@ while( n<=numfiles )
        if(dmin < axmin ) ; axmin = dmin ; endif
       'q dims'
        say result
-*      pause
 
 *      End if( talats=indv | talats=avrg | talats=hard ) test
 *      ------------------------------------------------------
@@ -274,25 +297,25 @@ while( n<=numfiles )
 
 *      Create CTL File for Each Experiment
 *      -----------------------------------
-       ioflag = 1-sublin( read(LOCATION''FILE.n'.ctl'),1 )
-       say 'ioflag for 'LOCATION''FILE.n'.ctl: 'ioflag
-*      pause
+       ioflag = 1-sublin( read(LOCATION''FILE.n'.'time'.ctl'),1 )
+       say 'ioflag for 'LOCATION''FILE.n'.'time'.ctl: 'ioflag
+
        if(  ioflag = 0 )
 
-      '!remove 'LOCATION''FILE.n'.ctl'
-      '!touch  'LOCATION''FILE.n'.ctl'
-      '!echo dset ^'FILE.n'.data                        >> 'LOCATION''FILE.n'.ctl'
-      '!echo title WSTAR                                >> 'LOCATION''FILE.n'.ctl'
-      '!echo undef 1e15                                 >> 'LOCATION''FILE.n'.ctl'
-      '!echo xdef  1     linear -180 1                  >> 'LOCATION''FILE.n'.ctl'
-      '!echo ydef  1     linear  -90 1                  >> 'LOCATION''FILE.n'.ctl'
-      '!echo zdef 'zdim' levels 'levels'                >> 'LOCATION''FILE.n'.ctl'
-      '!echo tdef 'tdim' linear 'begdate'    1mo        >> 'LOCATION''FILE.n'.ctl'
-      '!echo vars  3                                    >> 'LOCATION''FILE.n'.ctl'
-      '!echo minlats  'zdim' 0 minlats                  >> 'LOCATION''FILE.n'.ctl'
-      '!echo maxlats  'zdim' 0 maxlats                  >> 'LOCATION''FILE.n'.ctl'
-      '!echo wstrlats 'zdim' 0 wstar                    >> 'LOCATION''FILE.n'.ctl'
-      '!echo endvars                                    >> 'LOCATION''FILE.n'.ctl'
+      '!remove 'LOCATION''FILE.n'.'time'.ctl'
+      '!touch  'LOCATION''FILE.n'.'time'.ctl'
+      '!echo dset ^'FILE.n'.'time'.data                 >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo title WSTAR                                >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo undef 1e15                                 >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo xdef  1     linear -180 1                  >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo ydef  1     linear  -90 1                  >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo zdef 'zdim' levels 'levels'                >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo tdef 'tdim' linear 'begdate'    1mo        >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo vars  3                                    >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo minlats  'zdim' 0 minlats                  >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo maxlats  'zdim' 0 maxlats                  >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo wstrlats 'zdim' 0 wstar                    >> 'LOCATION''FILE.n'.'time'.ctl'
+      '!echo endvars                                    >> 'LOCATION''FILE.n'.'time'.ctl'
 
 *    Loop over Time to create Time-Dependent Level Data
 *    --------------------------------------------------
@@ -334,10 +357,9 @@ while( n<=numfiles )
           if( a = 1e15 | b = 1e15 )
               dumw.t.z = 1e15
           else
-*         say 'd ave(wstar'n',lat='a',lat='b')*1000'
               'd ave(wstar'n',lat='a',lat='b')*1000'
-               result1  = sublin(result,2)
-               dumw.t.z = subwrd(result1,4)
+              result1  = sublin(result,2)
+              dumw.t.z = subwrd(result1,4)
           endif
 
          say '  Level: 'level'  Lats: 'latmin.t.z' 'latmax.t.z' wstar: 'dumw.t.z
@@ -357,7 +379,7 @@ while( n<=numfiles )
 * ------------------------------------------------------------------------
 
     'set gxout fwrite'
-    'set fwrite 'LOCATION''FILE.n'.data'
+    'set fwrite 'LOCATION''FILE.n'.'time'.data'
 
             t = tmin
      while( t<= tmax )
@@ -397,15 +419,28 @@ while( n<=numfiles )
 
 * Note: Scaling will be based on ALL experiments
 * ----------------------------------------------
-    'open 'LOCATION''FILE.n'.ctl'
+'!cat 'LOCATION''FILE.n'.'time'.ctl'
+say result
+
+say 'open 'LOCATION''FILE.n'.'time'.ctl'
+    'open 'LOCATION''FILE.n'.'time'.ctl'
     'getinfo numfiles'
              dumfile = result
     'set dfile 'dumfile
     'set x 1'
     'set y 1'
     'setz   '
+
+     if( time = B )
+        'sett' 
+        'run setdates'
+     endif
     'run getdates'
-*   'run setenv DO_STD TRUE'
+
+    'run setenv "DO_STD" 'FALSE
+    'run getenv "DO_STD" '
+                 DO_STD = result
+
     'seasonal wstrlats 'n
 
     'minmax wstrlats'season''n
@@ -427,6 +462,10 @@ while( n<=numfiles )
 * ------------------------------------------------------------------------
 * ------------------------------------------------------------------------
 
+*  End if( ANALYSIS ) test
+*  -----------------------
+   endif
+
 *  End File Loop
 *  -------------
    n = n + 1
@@ -439,11 +478,12 @@ endwhile
 * ------------------------------------------------------------------------
 * ------------------------------------------------------------------------
 
+'c'
 'set vpage off'
 'set parea off'
 
-'set xlopts 1 4 0.10'
-'set ylopts 1 4 0.10'
+'set xlopts 1 4 0.12'
+'set ylopts 1 4 0.12'
 'set string 1 c 5'
 'set strsiz 0.07'
 
@@ -475,10 +515,14 @@ endwhile
       endif
   endif
 
+* Set Hardwired Values
+* --------------------
+*     axmin  = 0.21509
+*     axmax  = 0.44501
+*     axmax  = -0.39901
+
   say 'Final   axmin: 'axmin'  axmax: 'axmax
   say ' '
-          axmin  = 0.21509
-          axmax  = 0.44501
  'set  axlim  'axmin' 'axmax
 
    id.1  = 'a'
@@ -547,9 +591,9 @@ color.15 = 68
     color.6  = 7
     color.7  = 12
 
-*   color.1  = 4
-*   color.2  = 5
-*   color.3  = 3
+*   color.1  = 2
+*   color.2  = 3
+*   color.3  = 4
 *   color.4  = 1  
 *   color.5  = 1
 *   color.6  = 3
@@ -564,6 +608,11 @@ while( n<=numfiles )
      if( pltfile.m = n )
 
        'set dfile 'n
+        if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
+        if( time = B )
+           'sett' 
+           'run setdates'
+        endif
        'run getdates'
        'getinfo tmin'
                 tmin = result
@@ -586,6 +635,9 @@ while( n<=numfiles )
                     k = n - 3 * math_int(n/3) + 1
        'set cstyle 'k
        'set cstyle '1
+
+*       if( color.n = 4 ) ; 'set cstyle 2' ; endif
+
        'set cmark  0'
 
 *      Plot wstar based on Level-Dependent Turn-Around Latitudes
@@ -595,16 +647,19 @@ while( n<=numfiles )
           'd wstrlats'season''n
 
 *         Add Standard Deviation to selected experiments
-*         ----------------------------------------------
-*         if( n=4 )
-*           'set cstyle 3'
-*           'set cthick 1'
-*           'set ccolor 1'
-*           'd wstrlats'season''n' + wstrlats'season'std'n
-*           'set cstyle 3'
-*           'set cthick 1'
-*           'set ccolor 1'
-*           'd wstrlats'season''n' - wstrlats'season'std'n
+*         Note:  Must use DO_STD TRUE when calculating seasonal
+*         -----------------------------------------------------
+*          if( DO_STD = TRUE )
+*              if( n=4 )
+*               'set cstyle 3'
+*               'set cthick 1'
+*               'set ccolor 1'
+*               'd wstrlats'season''n' + wstrlats'season'std'n
+*               'set cstyle 3'
+*               'set cthick 1'
+*               'set ccolor 1'
+*               'd wstrlats'season''n' - wstrlats'season'std'n
+*              endif
 *         endif
 
        else
@@ -617,6 +672,11 @@ while( n<=numfiles )
        endif
 
      endif
+
+* ENDIF for ANALYSIS Test
+* -----------------------
+   endif
+
    m = m + 1
    endwhile
 n = n + 1
@@ -647,6 +707,7 @@ while( n<=numfiles )
    while( m<=numfiles )
       if( pltfile.m = n )
         'set dfile 'n
+         if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 
         'set grid off'
         'set xlopts 1 3 0.06'
@@ -700,7 +761,7 @@ while( n<=numfiles )
 * Smooth possible noise
 * ---------------------
  if( nsmooth > 0 )
-    'define wstrsmth = smth9( w'type''season''time''n'*1000 )'
+    'define wstrsmth = smth9( w'type''n''season''time'*1000 )'
      countr = 1
      while( countr < nsmooth )
            'define wstrsmth = smth9( wstrsmth )'
@@ -708,7 +769,7 @@ while( n<=numfiles )
      endwhile
     'd wstrsmth '
  else
-        'd w'type''season''time''n'*1000'
+        'd w'type''n''season''time'*1000'
  endif
 
         'set strsiz 0.10'
@@ -779,7 +840,7 @@ while( n<=numfiles )
 
  else
 
-       'open 'LOCATION''FILE.n'.ctl'
+       'open 'LOCATION''FILE.n'.'time'.ctl'
        'getinfo numfiles'
                 newfile = result
        'set dfile 'newfile
@@ -808,6 +869,11 @@ while( n<=numfiles )
          say 'ydif: 'ydif
 
       endif
+
+* ENDIF for ANALYSIS Test
+* -----------------------
+   endif
+
    m = m + 1
    endwhile
 n = n + 1
@@ -850,33 +916,44 @@ endif
        m = 1
        while( m<=numfiles )
           if( pltfile.m = n )
+              'set dfile 'n
+              if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
               if( numargs>2 ) 
                    index = id.n
                    tags = tags''index
                    if( exps = '' )
-                       exps = EXP.n
+                       exps = CMPID.n
                    else
-                       exps = exps'.'EXP.n
+                       exps = exps'.'CMPID.n
                    endif
               endif
-             'set dfile 'n
 
+              if( time = B )
+                 'sett' 
+                 'run setdates'
+              endif
+             'run getdates'
              'run getenv BEGDATE'
                          begdate = result
-                           bdate = substr(result,6,7)
+                         bdate.n = substr(result,6,7)
              'run getenv ENDDATE'
                          enddate = result
-                           edate = substr(result,6,7)
+                         edate.n = substr(result,6,7)
               if( maskfile != 'NULL' )
                  'run count.gs "'season'" 'begdate' 'enddate' -field w'type'.'maskfile
-                  nseasons = result
+                  nseasons.n = result
               else
                  'run count.gs "'season'" 'begdate' 'enddate
-                  nseasons = result
+                  nseasons.n = result
               endif
 
              'set strsiz 0.12'
-             'draw string 3.94 8.15 'bdate' 'edate'  'season' ('nseasons')   'CRSLV
+              if( time = A )
+                 'draw string 3.94 8.15 'bdate.n' 'edate.n'  'season' ('nseasons.n')   'CRSLV
+              endif
+              if( time = B )
+                 'draw string 3.94 8.15 'season'  'CRSLV
+              endif
 
              'getinfo desc'
                       desc.n = result
@@ -888,8 +965,18 @@ endif
                      k = 1
              '!echo 'k' 6 'color.n' >> plot_'season'.stack'
 
-             '!echo \('id.n'\) ' EXP.n' >> plot_'season'.stack'
+              if( time = A )
+             '!echo \('id.n'\) ' CMPID.n' >> plot_'season'.stack'
+              endif
+              if( time = B )
+             '!echo \('id.n'\) ' CMPID.n' \('bdate.n' 'edate.n' \: 'nseasons.n' \) >> plot_'season'.stack'
+              endif
           endif
+
+*     ENDIF for ANALYSIS Test
+*     -----------------------
+       endif
+
        m = m + 1
        endwhile
     n = n + 1
@@ -925,11 +1012,18 @@ endif
 'set vpage off'
 'set parea off'
 
+if( time = A )
+    header = 'WSTAR'
+endif
+if( time = B )
+    header = 'WSTAR_B'
+endif
+
 if( tags = '' )
-    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'season
+    filename = header'_using_'talatsz'_TALATS.'season
 else
-*   filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'tags'.'season
-    filename = 'WSTAR_Profile_using_'talatsz'_TALATS.'exps'.'season
+*   filename = header'_using_'talatsz'_TALATS.'tags'.'season
+    filename = header'_using_'talatsz'_TALATS.'exps'.'season
 endif
 
 'myprint -name 'output'/'filename
