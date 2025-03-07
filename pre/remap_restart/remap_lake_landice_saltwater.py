@@ -197,7 +197,8 @@ class lake_landice_saltwater(remap_base):
                  "landice_internal_rst"     ,
                  "openwater_internal_rst"   ,
                  "saltwater_internal_rst"   ,
-                 "seaicethermo_internal_rst"]
+                 "seaicethermo_internal_rst",
+                 "seaicethermo_import_rst"]
 
      rst_dir = self.config['input']['shared']['rst_dir']
      yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
