@@ -96,8 +96,10 @@ class lake_landice_saltwater(remap_base):
      os.makedirs(OutData_dir)
 
 
-     saltwater = ''
-     seaice    = ''
+     saltwater_internal    = ''
+     saltwater_import      = ''
+     seaicethermo_internal = ''
+     seaicethermo_import   = ''
      landice   = ''
      lake      = ''
      route     = ''
@@ -108,12 +110,14 @@ class lake_landice_saltwater(remap_base):
         if os.path.exists(dest) : shutil.remove(dest)
         print('\nCopy ' + rst + ' to ' +dest)
         shutil.copy(rst,dest)
-        if 'saltwater' in f : saltwater = f
-        if 'seaice'    in f : seaice    = f
-        if 'landice'   in f : landice   = f
-        if 'lake'      in f : lake      = f
-        if 'roue'      in f : route     = f
-        if 'openwater' in f : openwater = f
+        if 'saltwater_internal'     in f : saltwater_internal    = f
+        if 'saltwater_import'       in f : saltwater_import      = f
+        if 'seaicethermo_internal'  in f : seaicethermo_internal = f
+        if 'seaicethermo_import'    in f : seaicethermo_import   = f
+        if 'landice'                in f : landice   = f
+        if 'lake'                   in f : lake      = f
+        if 'roue'                   in f : route     = f
+        if 'openwater'              in f : openwater = f
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
@@ -131,8 +135,8 @@ class lake_landice_saltwater(remap_base):
      if os.path.exists(log_name):
         os.remove(log_name)
 
-     if (saltwater):
-       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
+     if (saltwater_internal):
+       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_internal + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
   
        # split Saltwater
@@ -144,12 +148,21 @@ class lake_landice_saltwater(remap_base):
          seaice  = ''
          self.run_and_log(cmd, log_name)
 
+     if (saltwater_import):
+       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_import + ' 0 ' + str(zoom)
+       self.run_and_log(cmd, log_name)
+
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
 
-     if (seaice):
-       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaice + ' 0 ' + str(zoom)
+     if (seaicethermo_internal):
+       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaicethermo_internal + ' 0 ' + str(zoom)
+       print('\n'+cmd)
+       self.run_and_log(cmd, log_name)
+
+     if (seaicethermo_import):
+       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaicethermo_import + ' 0 ' + str(zoom)
        print('\n'+cmd)
        self.run_and_log(cmd, log_name)
 
@@ -197,6 +210,7 @@ class lake_landice_saltwater(remap_base):
                  "landice_internal_rst"     ,
                  "openwater_internal_rst"   ,
                  "saltwater_internal_rst"   ,
+                 "saltwater_import_rst"   ,
                  "seaicethermo_internal_rst",
                  "seaicethermo_import_rst"]
 
