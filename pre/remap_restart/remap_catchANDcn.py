@@ -44,8 +44,8 @@ class catchANDcn(remap_base):
         in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*')
      if len(in_rstfiles) == 0:
         return
-     in_rstfile = in_rstfiles[0]  
-             
+     in_rstfile = in_rstfiles[0]
+
 
      cwdir          = os.getcwd()
      bindir         = os.path.dirname(os.path.realpath(__file__))
@@ -60,8 +60,8 @@ class catchANDcn(remap_base):
      surflay        = config['output']['surface']['surflay']
      in_tilefile    = config['input']['surface']['catch_tilefile']
 
-     if "gmao_SIteam/ModelData" in out_bc_base: 
-        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
+     if "gmao_SIteam/ModelData" in out_bc_base:
+        assert  GEOS_SITE == "NAS", "wrong site to run the package"
 
      if not in_tilefile :
         agrid        = config['input']['shared']['agrid']
@@ -86,7 +86,7 @@ class catchANDcn(remap_base):
 
      out_bc_landdir = get_landdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
 
-     label = get_label(config) 
+     label = get_label(config)
 
      suffix     = time+'z.nc4' + label
 
@@ -100,7 +100,7 @@ class catchANDcn(remap_base):
 
      print("\nRemapping " + model + ".....\n")
  # determine NPE based on *approximate* number of input and output tile
-      
+
      in_Ntile  = 0
      mime = mimetypes.guess_type(in_rstfile)
      if mime[0] and 'stream' in mime[0]: # binary
@@ -108,14 +108,14 @@ class catchANDcn(remap_base):
      else : # nc4 file
        ds = nc.Dataset(in_rstfile)
        in_Ntile = ds.dimensions['tile'].size
-       
+
      out_Ntile = 0
      with open( out_bc_landdir+'/clsm/catchment.def') as f:
        out_Ntile = int(next(f))
      max_Ntile = max(in_Ntile, out_Ntile)
      NPE = 0
      if   (max_Ntile <=  112573) : # no more than EASEv2_M36
-        NPE = 40      
+        NPE = 40
      elif (max_Ntile <= 1684725) : # no more than EASEv2_M09
         NPE = 80
      elif (max_Ntile <= 2496756) : # no more than C720
@@ -140,9 +140,7 @@ class catchANDcn(remap_base):
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
 
-       CONSTRAINT = '"[cas|sky]"'
-       if BUILT_ON_SLES15:
-         CONSTRAINT = 'mil'
+       CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
@@ -156,7 +154,7 @@ class catchANDcn(remap_base):
      InData_dir = out_dir+'/InData/'
      print ("mkdir -p " + InData_dir)
      os.makedirs(InData_dir, exist_ok = True)
-    
+
      f = os.path.basename(in_rstfile)
      dest = InData_dir+'/'+f
      # file got copy because the computing node cannot access archive
@@ -176,8 +174,8 @@ set mk_catchANDcnRestarts_X   = ( {Bin}/mk_catchANDcnRestarts.x )
 
 set params = ( -model {model}  -time {time} -in_tilefile {in_tilefile} )
 set params = ( $params -out_bcs {out_bcs} -out_tilefile {out_tilefile} -out_dir {out_dir} )
-set params = ( $params -surflay {surflay} -in_wemin {in_wemin} -out_wemin {out_wemin} ) 
-set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} ) 
+set params = ( $params -surflay {surflay} -in_wemin {in_wemin} -out_wemin {out_wemin} )
+set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} )
 $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
@@ -256,7 +254,7 @@ def ask_catch_questions():
    catch_input_shared_rst_dir = ''
    def has_rs_rc_out(path):
      if os.path.exists(path):
-        dirs = os.listdir(path)   
+        dirs = os.listdir(path)
         if 'rs' in dirs and 'rc_out' in dirs:
            nonlocal catch_input_shared_rst_dir
            catch_input_shared_rst_dir = path
@@ -273,7 +271,7 @@ def ask_catch_questions():
      rst_dir   = catch_input_shared_rst_dir + '/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
      rst_files = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')
      if len(rst_files) !=1 :
-       return False 
+       return False
      return True
 
    questions =[
@@ -290,11 +288,11 @@ def ask_catch_questions():
             "message": (message_datetime + " and rst file must exist.)\n"),
             "validate": lambda text: has_catch_rst(text)
         },
-        
+
         {
             "type": "path",
             "name": "output:shared:out_dir",
-            "message": message_out_dir, 
+            "message": message_out_dir,
         },
 
         {
@@ -302,7 +300,7 @@ def ask_catch_questions():
             "name": "output:shared:expid",
             "message": message_expid,
             "default": "",
-        },  
+        },
 
         {
             "type": "select",
@@ -319,7 +317,7 @@ def ask_catch_questions():
             "choices": choices_bc_ops,
             "default": "NL3",
         },
-        {   
+        {
             "type": "select",
             "name": "output:shared:bc_version",
             "message": message_bc_other_new,
@@ -327,7 +325,7 @@ def ask_catch_questions():
             "when": lambda x:  x["output:shared:bc_version"] == 'Other',
         },
 
-        {   
+        {
             "type": "select",
             "name": "output:surface:EASE_grid",
             "message": "Select grid for new restart:\n",
@@ -380,29 +378,29 @@ def ask_catch_questions():
             "name": "slurm_pbs:partition",
             "message": message_partition,
             "default": '',
-        },  
+        },
 
    ]
 
-   answers = questionary.prompt(questions)   
+   answers = questionary.prompt(questions)
    yyyy = answers['input:shared:yyyymmddhh'][0:4]
    mm   = answers['input:shared:yyyymmddhh'][4:6]
    dd   = answers['input:shared:yyyymmddhh'][6:8]
    hh   = answers['input:shared:yyyymmddhh'][8:10]
-  
+
    rst_dir      = answers['input:shared:rst_dir']+'/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
    rst_file     = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')[0]
    idx1         = rst_file.find('catch')
    idx2         = rst_file.find('_internal_rst')
    catch_model  = rst_file[idx1:idx2]
-   
+
    tile_dir     = answers['input:shared:rst_dir']+'/rc_out/'
    in_tilefiles = glob.glob(tile_dir+'*.til')
    for file in in_tilefiles:
       answers['input:surface:catch_tilefile'] = file
       if 'MAPL_' in file:
          answers['input:surface:catch_tilefile'] = file
-       
+
    answers['input:shared:rst_dir'] = rst_dir
    answers['input:surface:catch_model'] =  catch_model
    answers['input:surface:wemin']  = "13"
