@@ -32,7 +32,7 @@ else  # Interactive Job
 # ------------------------------------
    if(! -e ~/.WEBSERVER ) then
 SERVER:
-     set server = NULL 
+     set server = NULL
      echo " "
      echo "Enter WEB Server to use:  train"
      echo "                          polar"
@@ -173,9 +173,7 @@ echo " "
          if( $season == 'NULL' ) then
            set files = `/bin/ls -1 *stats*gif`
            set fname = `echo $files[1] | cut -d. -f1`
-           set fsize = `echo $fname | awk '{print length($0)}'`
-             @ fsize = $fsize - 2
-          set season = `echo $fname | cut -b${fsize}-`
+           set season = `echo $fname | sed 's/.*_//g'`
          endif
          ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/corcmp
          echo Syncing ${season} Files from $pltdir/corcmp to $webid@${server}:${www}/${webdir}/${season}/corcmp
@@ -190,9 +188,7 @@ echo " "
              if( $season == 'NULL' ) then
                set files = `/bin/ls -1 *stats*gif`
                set fname = `echo $files[1] | cut -d. -f1`
-               set fsize = `echo $fname | awk '{print length($0)}'`
-                 @ fsize = $fsize - 2
-              set season = `echo $fname | cut -b${fsize}-`
+               set season = `echo $fname | sed 's/.*_//g'`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSC
              echo Syncing ${season} Files from $pltdir/$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSC
@@ -210,9 +206,7 @@ echo " "
              if( $season == 'NULL' ) then
                set files = `/bin/ls -1 *stats*gif`
                set fname = `echo $files[1] | cut -d. -f1`
-               set fsize = `echo $fname | awk '{print length($0)}'`
-                 @ fsize = $fsize - 2
-              set season = `echo $fname | cut -b${fsize}-`
+               set season = `echo $fname | sed 's/.*_//g'`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSCS[1].$DSC
 

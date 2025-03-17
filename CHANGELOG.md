@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed issue with `movestat` which only allowed single-month seasons
+
 ### Removed
 
 ### Deprecated
