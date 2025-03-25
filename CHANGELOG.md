@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed detection of OS at NCCS as it is all SLES15 now
+
 ### Deprecated
 
 ## [2.1.6] - 2025-01-23
