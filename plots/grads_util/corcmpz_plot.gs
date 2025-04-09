@@ -236,22 +236,67 @@ say 'Months Used in Forecasts: 'months
 
 * Define TOPLEV, NDAY and NDAYMAX across ALL Experiments
 * ------------------------------------------------------
- toplev  = 0
- ndaymax = 999
-       m = 0
+toplev  = 0
+ndaymax = 999
+
+say 'determine experiment with largest top level'
+mexp = 1
+while ( mexp <= mexps )
+    say 'mexp: 'mexp
+    n   = filebeg
+    n.mexp = n + mexp*numfiles
+'set dfile 'n.mexp
+'getinfo zdim'
+    zdim = result
+    'set z 'zdim
+    'getinfo level'
+        level = result
+            if( level > toplev )
+                 toplev = level
+            endif
+mexp = mexp + 1
+endwhile
+say 'exp with largest top level: 'mexp-1
+
+say 'find smallest common level between that experiment and control'
+    mexp = mexp-1
+    m    = 0
+    n    = filebeg
+    n.m  = n + m*numfiles
+'set dfile 'n.m
+'getinfo zdim'
+    zdim_ctl = result
+    i = zdim_ctl
+while( i > 0 )
+    'set z 'i
+    'getinfo level'
+        level_ctl = result
+    'set dfile 'n.mexp
+    'getinfo zdim'
+        zdim_exp = result
+        j = zdim_exp
+while( j > 0 )
+    'set z 'j
+    'getinfo level'
+         level_exp = result
+    if ( level_exp = level_ctl )
+        toplev = level_ctl
+        j = 0
+        i = 0
+    else
+        j = j-1
+    endif
+endwhile
+i = i-1
+'set dfile 'n.m
+endwhile
+say 'final top level: 'toplev
+
+m = 0
 while( m<=mexps )
             n   = filebeg
             n.m = n + m*numfiles
 'set dfile 'n.m
-
-'getinfo zdim'
-         zdim = result
-        'set z 'zdim
-        'getinfo level'
-                 level = result
-             if( level > toplev )
-                 toplev = level
-             endif
 
 'run getinfo tinc'
              tinc = result
@@ -347,7 +392,6 @@ say '  m: 'm'  dfile: 'd.m'  tbeg: 'tbeg.m'  tdim: 'tdim.m
 m = m+1
 endwhile
 
-
 say 'Initialize zaved and zvard ...'
    m = 0
 while( m<=mexps )
@@ -376,7 +420,7 @@ while ( n  <= fileend )
 'set lev 1000 'toplev
 'set t  'tbeg.m' 'tdim.m
  toffset = 1-toffset.n.m
-*say 'dfile 'd.m'  tbeg: 'tbeg.m'  tend: 'tdim.m'  toffset: 'toffset'  'field'cor'n.m' = 'field'cor.'n.m'(t+'toffset')'
+say 'dfile 'd.m'  tbeg: 'tbeg.m'  tend: 'tdim.m'  toffset: 'toffset'  'field'cor'n.m' = 'field'cor.'n.m'(t+'toffset')'
 
 'define 'field'cor'n.m' = 'field'cor.'n.m'(t+'toffset')'
 n = n + 1
@@ -398,7 +442,7 @@ while ( n  <= fileend )
 'set t  'tbeg.m' 'tdim.m
 'define     q'm' = 'field'cor'n.m
 'define z'n'e'm' = 0.5*log( (1+ q'm')/(1- q'm'+5.0e-6) )'
-*say '   DFILE: 'n.m'   Defined q'm' and z'n'e'm
+say '   DFILE: 'n.m'   Defined q'm' and z'n'e'm
 n = n + 1
 endwhile
 m = m + 1
@@ -414,7 +458,7 @@ while ( n  <= fileend )
 
 * Set Proper Time Domain
 * ----------------------
-'set dfile 'm
+'set dfile '1
 'sett -q'
 'getinfo tinc'
          tinc1  = result
@@ -430,7 +474,7 @@ while ( n  <= fileend )
     'getinfo date'
              datemax1 = result
 
-'set dfile 'n
+'set dfile 'd.m
 'sett -q'
 'getinfo tinc'
          tinc2  = result
@@ -447,9 +491,9 @@ while ( n  <= fileend )
              datemax2 = result
 
 if( tinc1 >= tinc2 )
-    timefile.m = m
+    timefile.m = 1
 else
-    timefile.m = n
+    timefile.m = d.m
 endif
 
 if( datemin1 <= datemin2 )
@@ -465,9 +509,9 @@ else
 endif
      tdim.m = tmax - tmin + 1
 
-*say 'm: 'm'  tmin1: 'tmin1'  tmin2: 'tmin2'  tmin.m: 'tmin.m
-*say 'm: 'm'  tmax1: 'tmax1'  tmax2: 'tmax2'  tmax.m: 'tmax.m
-*say 'm: 'm'  tdim.m: 'tdim.m
+say 'm: 'm'  tmin1: 'tmin1'  tmin2: 'tmin2'  tmin.m: 'tmin.m
+say 'm: 'm'  tmax1: 'tmax1'  tmax2: 'tmax2'  tmax.m: 'tmax.m
+say 'm: 'm'  tdim.m: 'tdim.m
 
 * ----------------------
 
@@ -477,15 +521,12 @@ endif
 'define ctl = 'field'cor'n
 *say '   DFILE: 'n'  CTL defined for TBEG = 'tbeg.0' to TEND: 'tdif.0
 
-'define dum  = 'field'cor'n.m
-*say   '   DFILE: 'n.m'  DUM defined for TBEG = 'tbeg.0' to TEND: 'tdif.0
-
 if( m = 0 )
-*   say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
-   'define dumdiff = dum'
+    say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
+   'define dumdiff = 'field'cor'n.m
 else
     say 'Computing DumDiff in makezdif2 for EXP: 'm'   File: 'n.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
-   'makezdif2 -q1 dum -file1 'd.m' -q2 zero    -file2   1 -ptop 'toplev' -name dum'
+   'makezdif2 -q1 'field'cor'n.m' -file1 'd.m' -q2 zero    -file2   1 -ptop 'toplev' -name dum'
 endif
 
 'set dfile 'timefile.m
@@ -507,7 +548,7 @@ while( m<=mexps )
 while ( n <= fileend )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'timefile.m
+'set dfile 'd.m
 'set t 'tmin.m' 'tmax.m
 'set lev 1000 'toplev
 'define  zave'm' =  zave'm' +  z'n'e'm
@@ -546,7 +587,7 @@ while( m<=mexps )
 while ( n <= fileend )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'timefile.m
+'set dfile 'd.m
 'set t 'tmin.m' 'tmax.m
 'set lev 1000 'toplev
 'define  zvar'm' =  zvar'm' + pow(  z'n'e'm'- zave'm',2 )'
@@ -575,7 +616,6 @@ m = m + 1
 endwhile
 *pull flag
 
-
 * Compute Fisher Mean
 * -------------------
 say ' Compute Fisher Mean rave ...'
@@ -584,14 +624,13 @@ while( m<=mexps )
         n  = filebeg
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'timefile.m
+'set dfile 'd.m
 'set t 'tmin.m' 'tmax.m
 'set lev 1000 'toplev
 'define rave'm' = (exp(2*zave'm')-1) / (exp(2*zave'm')+1)'
 m = m + 1
 endwhile
 *pull flag
-
 
 * Copmute Confidence Intervals for Two-Tailed Students T-Test Distribution
 * ------------------------------------------------------------------------
@@ -650,12 +689,12 @@ while( m<=mexps )
 m = m + 1
 endwhile
 
-
 ************************************************************************
 * if (1 = 0)
 * Plot Fisher Mean for Experiments
 * --------------------------------
 say '  Plot Fisher Mean for Experiments'
+
 'getinfo year'
          year = result
 'getinfo date'
@@ -667,8 +706,8 @@ while( m<=mexps )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
 'set dfile 'timefile.m
-*'set t 'tmin.m' 'tmax.m
-'set t 'tbeg.m' 'tdif.m
+'set t 'tmin.m' 'tmax.m
+*'set t 'tbeg.m' 'tdif.m
 'set lev 1000 'toplev
 
 'set vpage off'
@@ -706,11 +745,11 @@ endif
 say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
-if( nday = ndaymax )
+*if( nday = ndaymax )
    'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
-else
-   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
-endif
+*else
+*   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+*endif
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
     pull flag
@@ -722,7 +761,6 @@ endwhile
 *endif
 
 ************************************************************************
-
 
 * Plot Difference plus Significance
 * ---------------------------------
@@ -782,7 +820,22 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 
 * Define New Variables for Montage Plots
 * -------------------------------------
+
+'set dfile 'mfile
+'getinfo zdim'
+zdim_m = result
+
 'set dfile 'timefile.m
+'getinfo zdim'
+zdim_0 = result
+
+if( zdim_0 > zdim_m )
+    smallfile = mfile
+else
+    smallfile = timefile.m
+endif
+
+'set dfile 'smallfile
 'set t 'tmin.m' 'tmax.m
 'set lev 1000 'toplev
 
@@ -815,7 +868,6 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 'define sigdiff99 = maskm99 + maskp99'
 'define sigdiff99p99 = maskm99p99 + maskp99p99'
 
-
 * Find maximum value of critical sigdiff across all levels and times
 * ------------------------------------------------------------------
 if( toplev <= 1 )
@@ -837,7 +889,7 @@ while( loop <= loopdim )
            if( loop = 2 ) ; levmin = 10  ; loopflag = "2" ; endif
            if( loop = 3 ) ; levmin = 1   ; loopflag = "3" ; endif
 
-'set dfile 'timefile.m
+'set dfile 'smallfile
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 'levmin
 
@@ -1100,11 +1152,11 @@ dcintx = dcint * 100
 say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
-if( nday = ndaymax )
+*if( nday = ndaymax )
    'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
-else
-   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
-endif
+*else
+*   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+*endif
 
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"

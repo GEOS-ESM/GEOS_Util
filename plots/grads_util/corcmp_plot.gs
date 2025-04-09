@@ -1033,11 +1033,11 @@ endwhile
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 
-if( nday = ndaymax )
+*if( nday = ndaymax )
    'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months' -rotate 90 -density 100x100'
-else
-   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
-endif
+*else
+*   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
+*endif
 
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
