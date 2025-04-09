@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
+
 ### Removed
 
 ### Deprecated
