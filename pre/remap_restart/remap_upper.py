@@ -78,9 +78,9 @@ class upperair(remap_base):
      label = get_label(config)
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
-     in_bc_base     = config['input']['shared']['bc_base'] 
+     in_bc_base     = config['input']['shared']['bc_base']
      if "gmao_SIteam/ModelData" in in_bc_base:
-        assert  GEOS_SITE == "NAS", "wrong site to run the package" 
+        assert  GEOS_SITE == "NAS", "wrong site to run the package"
 
      in_bc_version  = config['input']['shared']['bc_version']
      agrid       = config['input']['shared']['agrid']
@@ -90,7 +90,7 @@ class upperair(remap_base):
      topo_bcsdir = get_topodir(in_bc_base, in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
      topoin = glob.glob(topo_bcsdir+'/topo_DYN_ave*.data')[0]
 
-     out_bc_base    = config['output']['shared']['bc_base'] 
+     out_bc_base    = config['output']['shared']['bc_base']
      out_bc_version = config['output']['shared']['bc_version']
      agrid       = config['output']['shared']['agrid']
      ogrid       = config['output']['shared']['ogrid']
@@ -125,7 +125,7 @@ class upperair(remap_base):
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
- 
+
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
@@ -163,7 +163,7 @@ class upperair(remap_base):
      QOS       =''
      qos       = config['slurm_pbs']['qos']
      TIME = "1:00:00"
-     if NPE > 532: 
+     if NPE > 532:
         assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
         TIME = "3:00:00"
      NNODE = ''
@@ -182,9 +182,7 @@ class upperair(remap_base):
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
 
-       CONSTRAINT = '"[cas|sky]"'
-       if BUILT_ON_SLES15:
-         CONSTRAINT = 'mil'
+       CONSTRAINT = '"[cas|mil]"'
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
@@ -205,7 +203,7 @@ class upperair(remap_base):
         else:
           exit("This stretched grid option is not supported " + str(stretch))
 
-        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
         stretch_str = "-stretched_grid_in " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 
@@ -221,9 +219,9 @@ class upperair(remap_base):
           target_lon  = STRETCH_GRID['SG002'][2]
         else:
           exit("This stretched grid option is not supported " + str(stretch))
-     
-        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)  
-     
+
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
+
         stretch_str = stretch_str+" -stretched_grid_out " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 
      # Now, let's create the input.nml file
@@ -248,7 +246,7 @@ cd {out_dir}/upper_data
 /bin/touch input.nml
 
 set mpi_type = "openmpi"
-if ($?I_MPI_ROOT ) then 
+if ($?I_MPI_ROOT ) then
   set mpi_type = "intel"
 endif
 
@@ -341,7 +339,7 @@ else
 endif
 
 {Bin}/esma_mpirun -np {NPE} $interp_restartsX -im {imout} -lm {nlevel} \\
-   $hydrostaticflag {stretch_str} $dmflag -nwriter {nwrit} $ioflag 
+   $hydrostaticflag {stretch_str} $dmflag -nwriter {nwrit} $ioflag
 
 """
      account = config['slurm_pbs']['account']
