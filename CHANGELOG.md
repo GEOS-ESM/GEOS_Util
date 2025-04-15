@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed issue with `movestat` which only allowed single-month seasons
+
 ### Removed
 
 - Removed detection of OS at NCCS as it is all SLES15 now
