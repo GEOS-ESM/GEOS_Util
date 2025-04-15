@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Remapping seaicetherom_import_rst and saltwater_import_rst if they are in the restart directory
+
 ### Fixed
 
 ### Removed
