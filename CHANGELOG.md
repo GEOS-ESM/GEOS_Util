@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.1.7] - 2025-04-23
+
+### Changed
+
 - Remapping seaicetherom_import_rst and saltwater_import_rst if they are in the restart directory
 
 ### Fixed
@@ -21,8 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed detection of OS at NCCS as it is all SLES15 now
-
-### Deprecated
 
 ## [2.1.6] - 2025-01-23
 
