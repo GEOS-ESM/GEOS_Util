@@ -1082,24 +1082,37 @@ endif
  clevm = -1 * dcint + min_thickness
  clevp = min_thickness
 
-* Fill 95% confidence
+* Fill difference
 * -------------------------------
+'define plotdif = 1000 * ravediff'
  'set gxout grfill'
  'set clevs 'clevs
 *'set ccols 159 157 155 147 144 137 136 134 132 130 -1 120 121 122 123 124 125 126 127 128 129'
  'set ccols 59 57 55 47 44 37 36 34 32 30 -1 20 21 22 23 24 25 26 27 28 29'
- ' d sigdiff95 '
+ ' d plotdif'
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
-* Fill 99% dotted
+* Fill 95% dotted
 * -------------------------------
  'set csmooth on'
  'set gxout shade2'
  'set clevs 'clevm
  'set ccols 200 -1'
+ ' d sigdiff95 '
+ 'set clevs 'clevp
+ 'set ccols -1 200'
+ ' d sigdiff95 '
+ ' set csmooth off'
+
+* Fill 99% diag down
+* -------------------------------
+ 'set csmooth on'
+ 'set gxout shade2'
+ 'set clevs 'clevm
+ 'set ccols 150 -1'
  ' d sigdiff99 '
  'set clevs 'clevp
- 'set ccols -1 200' 
+ 'set ccols -1 150' 
  ' d sigdiff99 '
  ' set csmooth off'
 
@@ -1131,7 +1144,7 @@ dcintx = dcint * 100
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
-'draw string 6.0 7.90 ACORR Difference (x10`a-3`n) >95% (Filled) >99% (Dotted) >99.99% (Hatched)'
+'draw string 6.0 7.90 ACORR Difference (x10`a-3`n) >95% (Dotted) >99% (Diag) >99.99% (Hatched)'
 'set  strsiz .125'
 'draw string 6.0 7.65 'name' 'region
 'set  strsiz .12'
