@@ -1191,11 +1191,11 @@ endwhile
     if( rms = 3 ) ; rms_label = '_AMPLITUDE'  ; endif
     if( rms = 4 ) ; rms_label = '_PHASE'      ; endif
 
-if( nday = ndaymax )
+*if( nday = ndaymax )
    'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months' -rotate 90 -density 100x100'
-else
-   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
-endif
+*else
+*   'run 'GEOSUTIL'/plots/grads_util/myprint2 -name 'SOURCE'/corcmp/stats_'label'_rmscmp'rms_label'_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
+*endif
 
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
