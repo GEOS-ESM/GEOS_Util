@@ -51,15 +51,19 @@ class lake_landice_saltwater(remap_base):
      ogrid         = config['input']['shared']['ogrid']
      omodel        = config['input']['shared']['omodel']
      stretch       = config['input']['shared']['stretch']
-     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+     in_tile_file  = config['input']['surface']['catch_tilefile']
+     if not in_tile_file :
+       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
 
      agrid         = config['output']['shared']['agrid']
      ogrid         = config['output']['shared']['ogrid']
      omodel        = config['output']['shared']['omodel']
      stretch       = config['output']['shared']['stretch']
-     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+     out_tile_file = config['output']['surface']['catch_tilefile']
+     if not out_tile_file :
+       out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      types = '.bin'
      type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
