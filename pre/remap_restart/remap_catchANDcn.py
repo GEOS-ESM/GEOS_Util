@@ -41,8 +41,11 @@ class catchANDcn(remap_base):
      in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*'+time+'*')
      if len(in_rstfiles) == 0:
         print('\n try catch[cn] restart file without time stamp')
-        in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*')
+        in_rstfiles = glob.glob(rst_dir+'/*'+model+'_internal_rst')
      if len(in_rstfiles) == 0:
+        print("Can not find restart file in " + rst_dir)
+        print("Please use the name format as *"  + model+'_*'+time+'*')
+        print(" Or *"+model+"_internal_rst")
         return
      in_rstfile = in_rstfiles[0]
 
