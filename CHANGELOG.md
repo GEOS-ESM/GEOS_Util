@@ -11,13 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- remap_restarts package: bug fix and minor change to accommodate GEOSldas requirements (#137)
-
 ### Fixed
 
 ### Removed
 
 ### Deprecated
+
+## [2.1.8] - 2025-05-15
+
+### Changed
+
+- remap_restarts package: bug fix and minor change to accommodate GEOSldas requirements (#137)
 
 ## [2.1.7] - 2025-04-23
 
