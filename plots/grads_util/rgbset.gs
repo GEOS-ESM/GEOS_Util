@@ -100,6 +100,9 @@ if( version != 'v2.0.1.oga.1' )
 * black dots
 'set tile 200 2 10 10 2 0'
 'set rgb 200 tile 200'
+* darker grey diag down
+'set tile 150 3 20 20 2 84'
+'set rgb 150 tile 150'
 * dark grey hatched
 'set tile 100 5 20 20 2 87'
 'set rgb 100 tile 100'
