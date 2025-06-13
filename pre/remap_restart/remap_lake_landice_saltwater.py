@@ -139,10 +139,12 @@ class lake_landice_saltwater(remap_base):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_internal + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
   
-       # split Saltwater
-       if  config['output']['surface']['split_saltwater']:
-         print("\nSplitting Saltwater...\n")
-         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
+       # split Saltwater Internal
+       # NOTE: split_saltwater==True means that the input restarts are already split.
+       #       So we do not split them again.
+       if not config['output']['surface']['split_saltwater']:
+         print("\nSplitting Saltwater Internal...\n")
+         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_internal
 #         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
@@ -151,6 +153,17 @@ class lake_landice_saltwater(remap_base):
      if (saltwater_import):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_import + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
+
+       # split Saltwater Import
+       # NOTE: split_saltwater==True means that the input restarts are already split.
+       #       So we do not split them again.
+       if not config['output']['surface']['split_saltwater']:
+         print("\nSplitting Saltwater Import...\n")
+         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_import
+#         subprocess.call(shlex.split(cmd))
+         openwater = ''
+         seaice  = ''
+         self.run_and_log(cmd, log_name)
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
