@@ -702,14 +702,23 @@ say 'FILES: 'result
               if( time = B )
                  'sett'
                  'run setdates'
+                 'run getenv BEGDATE.'n
+                             BEGDATE = result
+                 'run getenv ENDDATE.'n
+                             ENDDATE = result
+                  begdate  = BEGDATE
+                  bdate.n  = substr(begdate,6,7)
+                  enddate  = ENDDATE
+                  edate.n  = substr(enddate,6,7)
+              else
+                 'run getdates'
+                 'run getenv BEGDATE'
+                             begdate = result
+                             bdate.n = substr(result,6,7)
+                 'run getenv ENDDATE'
+                             enddate = result
+                             edate.n = substr(result,6,7)
               endif
-             'run getdates'
-             'run getenv BEGDATE'
-                         begdate = result
-                         bdate.n = substr(result,6,7)
-             'run getenv ENDDATE'
-                         enddate = result
-                         edate.n = substr(result,6,7)
               if( maskfile != 'NULL' )
                  'run count.gs "'season'" 'begdate' 'enddate' -field wstar.'maskfile
                   nseasons.n = result
