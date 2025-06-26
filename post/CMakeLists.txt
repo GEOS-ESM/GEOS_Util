@@ -20,7 +20,7 @@ target_compile_definitions(post_nompi PRIVATE mpi)
 foreach (basename
     makeiau hdf2rs gg2fv eta2prs eta2rst rs_hinterp
     convert_eta rs2hdf
-    ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta
+    AI_prs2eta ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta
     merra2scm rsg3_vinterp era5_prs2eta)
  ecbuild_add_executable (TARGET ${basename}.x SOURCES ${basename}.F DEFINITIONS mpi)
 endforeach ()
@@ -64,6 +64,7 @@ set_property(SOURCE timer.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} 
 set_property(SOURCE gmap.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE fft.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE convert_eta.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
+set_property(SOURCE AI_prs2eta.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE ec_prs2eta.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE era5_prs2eta.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE ec_prs2fv.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
@@ -86,6 +87,7 @@ set_property(SOURCE alias.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN}"
 
 target_link_libraries (convert_eta.x ${this} GMAO_hermes MAPL)
 target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL GEOS_Shared)
+target_link_libraries (AI_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
