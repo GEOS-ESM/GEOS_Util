@@ -17,6 +17,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.9] - 2025-06-25
+
+### Fixed
+
+- Fixed issue with saltwater splitting
+
+## [2.1.8] - 2025-05-15
+
+### Changed
+
+- remap_restarts package: bug fix and minor change to accommodate GEOSldas requirements (#137)
+
+## [2.1.7] - 2025-04-23
+
+### Changed
+
+- Remapping seaicetherom_import_rst and saltwater_import_rst if they are in the restart directory
+
+### Fixed
+
+- Fixed issue with `movestat` which only allowed single-month seasons
+
+### Removed
+
+- Removed detection of OS at NCCS as it is all SLES15 now
+
+## [2.1.6] - 2025-01-23
+
+### Fixed
+
+- Patch to fix EXPIDs containing underscores
+
 ## [2.1.5] - 2024-12-05
 
 ### Changed
