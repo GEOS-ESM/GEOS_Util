@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts 
+#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts
 #   using config inputs from `remap_params.yaml`
 #
 # to run, must first load modules (incl. python3) as follows:
@@ -40,7 +40,7 @@ class lake_landice_saltwater(remap_base):
      print("\nRemapping land, landice, saltwater.....\n")
      config = self.config
      cwdir  = os.getcwd()
-     bindir  = os.path.dirname(os.path.realpath(__file__)) 
+     bindir  = os.path.dirname(os.path.realpath(__file__))
 
      in_bc_base    = config['input']['shared']['bc_base']
      in_bc_version = config['input']['shared']['bc_version']
@@ -51,15 +51,19 @@ class lake_landice_saltwater(remap_base):
      ogrid         = config['input']['shared']['ogrid']
      omodel        = config['input']['shared']['omodel']
      stretch       = config['input']['shared']['stretch']
-     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+     in_tile_file  = config['input']['surface']['catch_tilefile']
+     if not in_tile_file :
+       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
 
      agrid         = config['output']['shared']['agrid']
      ogrid         = config['output']['shared']['ogrid']
      omodel        = config['output']['shared']['omodel']
      stretch       = config['output']['shared']['stretch']
-     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+     out_tile_file = config['output']['surface']['catch_tilefile']
+     if not out_tile_file :
+       out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      types = '.bin'
      type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
@@ -68,7 +72,7 @@ class lake_landice_saltwater(remap_base):
         types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
 
-     label = get_label(config) 
+     label = get_label(config)
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
      out_dir    = config['output']['shared']['out_dir']
