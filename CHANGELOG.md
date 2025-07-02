@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue with SLES15 in remapping
 - Fix for All-Times Transport Diagnostics
+- Update `movestat` to extract seasons in files with dots in the name
 
 ### Removed
 
