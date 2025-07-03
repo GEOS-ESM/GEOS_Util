@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed issue with SLES15 in remapping
+- Fix for All-Times Transport Diagnostics
+- Update `movestat` to extract seasons in files with dots in the name
 
 ### Removed
 
@@ -29,6 +31,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed detection of OS at NCCS as it is all SLES15 now
 
 ### Deprecated
+
+## [2.1.9] - 2025-06-25
+
+### Fixed
+
+- Fixed issue with saltwater splitting
+
+## [2.1.8] - 2025-05-15
+
+### Changed
+
+- remap_restarts package: bug fix and minor change to accommodate GEOSldas requirements (#137)
+
+## [2.1.7] - 2025-04-23
+
+### Changed
+
+- Remapping seaicetherom_import_rst and saltwater_import_rst if they are in the restart directory
+
+### Fixed
+
+- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
+- Fixed issue with `movestat` which only allowed single-month seasons
+
+### Removed
+
+- Removed detection of OS at NCCS as it is all SLES15 now
 
 ## [2.1.6] - 2025-01-23
 

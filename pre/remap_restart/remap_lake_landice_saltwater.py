@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts 
+#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts
 #   using config inputs from `remap_params.yaml`
 #
 # to run, must first load modules (incl. python3) as follows:
@@ -40,7 +40,7 @@ class lake_landice_saltwater(remap_base):
      print("\nRemapping land, landice, saltwater.....\n")
      config = self.config
      cwdir  = os.getcwd()
-     bindir  = os.path.dirname(os.path.realpath(__file__)) 
+     bindir  = os.path.dirname(os.path.realpath(__file__))
 
      in_bc_base    = config['input']['shared']['bc_base']
      in_bc_version = config['input']['shared']['bc_version']
@@ -51,15 +51,19 @@ class lake_landice_saltwater(remap_base):
      ogrid         = config['input']['shared']['ogrid']
      omodel        = config['input']['shared']['omodel']
      stretch       = config['input']['shared']['stretch']
-     in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+     in_tile_file  = config['input']['surface']['catch_tilefile']
+     if not in_tile_file :
+       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
 
      agrid         = config['output']['shared']['agrid']
      ogrid         = config['output']['shared']['ogrid']
      omodel        = config['output']['shared']['omodel']
      stretch       = config['output']['shared']['stretch']
-     out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-     out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+     out_tile_file = config['output']['surface']['catch_tilefile']
+     if not out_tile_file :
+       out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+       out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
 
      types = '.bin'
      type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
@@ -68,7 +72,7 @@ class lake_landice_saltwater(remap_base):
         types = '.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
 
-     label = get_label(config) 
+     label = get_label(config)
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10] +'z' + types + label
 
      out_dir    = config['output']['shared']['out_dir']
@@ -96,8 +100,10 @@ class lake_landice_saltwater(remap_base):
      os.makedirs(OutData_dir)
 
 
-     saltwater = ''
-     seaice    = ''
+     saltwater_internal    = ''
+     saltwater_import      = ''
+     seaicethermo_internal = ''
+     seaicethermo_import   = ''
      landice   = ''
      lake      = ''
      route     = ''
@@ -108,12 +114,14 @@ class lake_landice_saltwater(remap_base):
         if os.path.exists(dest) : shutil.remove(dest)
         print('\nCopy ' + rst + ' to ' +dest)
         shutil.copy(rst,dest)
-        if 'saltwater' in f : saltwater = f
-        if 'seaice'    in f : seaice    = f
-        if 'landice'   in f : landice   = f
-        if 'lake'      in f : lake      = f
-        if 'roue'      in f : route     = f
-        if 'openwater' in f : openwater = f
+        if 'saltwater_internal'     in f : saltwater_internal    = f
+        if 'saltwater_import'       in f : saltwater_import      = f
+        if 'seaicethermo_internal'  in f : seaicethermo_internal = f
+        if 'seaicethermo_import'    in f : seaicethermo_import   = f
+        if 'landice'                in f : landice   = f
+        if 'lake'                   in f : lake      = f
+        if 'roue'                   in f : route     = f
+        if 'openwater'              in f : openwater = f
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
@@ -131,14 +139,31 @@ class lake_landice_saltwater(remap_base):
      if os.path.exists(log_name):
         os.remove(log_name)
 
-     if (saltwater):
-       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
+     if (saltwater_internal):
+       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_internal + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
   
-       # split Saltwater
-       if  config['output']['surface']['split_saltwater']:
-         print("\nSplitting Saltwater...\n")
-         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
+       # split Saltwater Internal
+       # NOTE: split_saltwater==True means that the input restarts are already split.
+       #       So we do not split them again.
+       if not config['output']['surface']['split_saltwater']:
+         print("\nSplitting Saltwater Internal...\n")
+         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_internal
+#         subprocess.call(shlex.split(cmd))
+         openwater = ''
+         seaice  = ''
+         self.run_and_log(cmd, log_name)
+
+     if (saltwater_import):
+       cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_import + ' 0 ' + str(zoom)
+       self.run_and_log(cmd, log_name)
+
+       # split Saltwater Import
+       # NOTE: split_saltwater==True means that the input restarts are already split.
+       #       So we do not split them again.
+       if not config['output']['surface']['split_saltwater']:
+         print("\nSplitting Saltwater Import...\n")
+         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_import
 #         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
@@ -148,8 +173,13 @@ class lake_landice_saltwater(remap_base):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
 
-     if (seaice):
-       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaice + ' 0 ' + str(zoom)
+     if (seaicethermo_internal):
+       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaicethermo_internal + ' 0 ' + str(zoom)
+       print('\n'+cmd)
+       self.run_and_log(cmd, log_name)
+
+     if (seaicethermo_import):
+       cmd = exe + out_til + ' ' + in_til + ' InData/' + seaicethermo_import + ' 0 ' + str(zoom)
        print('\n'+cmd)
        self.run_and_log(cmd, log_name)
 
@@ -197,7 +227,9 @@ class lake_landice_saltwater(remap_base):
                  "landice_internal_rst"     ,
                  "openwater_internal_rst"   ,
                  "saltwater_internal_rst"   ,
-                 "seaicethermo_internal_rst"]
+                 "saltwater_import_rst"   ,
+                 "seaicethermo_internal_rst",
+                 "seaicethermo_import_rst"]
 
      rst_dir = self.config['input']['shared']['rst_dir']
      yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
