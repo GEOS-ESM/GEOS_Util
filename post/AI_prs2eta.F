@@ -144,11 +144,11 @@ C **********************************************************************
           call getarg(n,arg(n))
           enddo
           do n=1,nargs
-             if( trim(arg(n)).eq.'-AI' ) prsdata = trim(arg(n+1))
-             if( trim(arg(n)).eq.'-tag'   )     tag = trim(arg(n+1))
-             if( trim(arg(n)).eq.'-im'    ) read(arg(n+1), * ) im
-             if( trim(arg(n)).eq.'-jm'    ) read(arg(n+1), * ) jm
-             if( trim(arg(n)).eq.'-lm'    ) read(arg(n+1), * ) lm
+             if( trim(arg(n)).eq.'-AI'     ) prsdata = trim(arg(n+1))
+             if( trim(arg(n)).eq.'-tag'    )     tag = trim(arg(n+1))
+             if( trim(arg(n)).eq.'-im'     ) read(arg(n+1), * ) im
+             if( trim(arg(n)).eq.'-jm'     ) read(arg(n+1), * ) jm
+             if( trim(arg(n)).eq.'-lm'     ) read(arg(n+1), * ) lm
              if( trim(arg(n)).eq.'-norecon') norecon =.true.
           enddo
       endif
