@@ -36,7 +36,7 @@ choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
-choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
+choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45', 'catchcnclm51']
 
 choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
 
@@ -286,6 +286,8 @@ def catch_model(x):
     model = 'catchcnclm40'
   if 'cnclm45' in fname.lower():
     model = 'catchcnclm45'
+  if 'cnclm51' in fname.lower():
+    model = 'catchcnclm51'
   return model
 
 def data_ocean_default(resolution):
