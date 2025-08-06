@@ -65,7 +65,7 @@ def parse_args(program_description):
     p_command.add_argument('-in_stretch',  default=False,     help='Stretched CS params of input restarts', choices=choices_stretch)
     p_command.add_argument('-out_stretch', default=False,     help='Stretched CS params for new restarts',  choices=choices_stretch)
     
-    # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
+    # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,51] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
     p_command.add_argument('-nobkg', action='store_true',     help="Do not remap bkg files")
