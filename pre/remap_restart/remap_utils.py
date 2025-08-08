@@ -12,6 +12,7 @@ import questionary
 import glob
 import shlex
 import netCDF4 as nc
+import linecache
 
 # shared global variables
 
@@ -352,6 +353,33 @@ def zoom_default(x):
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
    return zoom_
+
+def get_zoom(gridname):
+   # W.J notes: no idea how zoom is calculated in EASE grid.
+   zoom_ = '8'
+   if '-CF' in gridname:
+     j = gridname.find('x')
+     lat = int(gridname[2:j]) # gridname PEiiiixjjjj-CF
+     zoom = lat /90.0
+     zoom_ = str(int(zoom))
+     if zoom < 1 : zoom_ = '1'
+     if zoom > 8 : zoom_ = '8'
+   return zoom_
+
+def get_gridname(tilefile):
+   gridname_ =''
+   tmptile   = os.path.realpath(tilefile)
+   extension = os.path.splitext(tmptile)[1]
+   if extension == '.domain':
+      extension = os.path.splitext(tmptile)[0]
+   if extension == '.til':
+      gridname_ = linecache.getline(tmptile, 3).strip()
+   else:
+      nc_file = netCDF4.Dataset(tmptile,'r')
+      gridname_ = nc_file.getncattr('Grid_Name')
+    # in case it is an old name: SMAP-EASEvx-Mxx
+   gridname_ = gridname_.replace('SMAP-','').replace('-M','_M')
+   return gridname_
 
 def get_account():
    cmd = 'id -gn'

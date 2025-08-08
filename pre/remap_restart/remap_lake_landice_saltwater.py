@@ -17,8 +17,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base import remap_base
-from remap_utils import get_label
-from remap_utils import get_geomdir
+from remap_utils import *
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -53,8 +52,9 @@ class lake_landice_saltwater(remap_base):
      stretch       = config['input']['shared']['stretch']
      in_tile_file  = config['input']['surface']['catch_tilefile']
      if not in_tile_file :
-       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-       in_tile_file  = glob.glob(in_geomdir+ '/*-Pfafstetter.til')[0]
+       EASE_grid    = config['input']['surface'].get('EASE_grid', None)
+       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
+       in_tile_file  = glob.glob(in_geomdir+ '/*.til')[0]
 
      agrid         = config['output']['shared']['agrid']
      ogrid         = config['output']['shared']['ogrid']
@@ -62,8 +62,9 @@ class lake_landice_saltwater(remap_base):
      stretch       = config['output']['shared']['stretch']
      out_tile_file = config['output']['surface']['catch_tilefile']
      if not out_tile_file :
-       out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
-       out_tile_file = glob.glob(out_geomdir+ '/*-Pfafstetter.til')[0]
+       EASE_grid    = config['output']['surface'].get('EASE_grid', None)
+       out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
+       out_tile_file = glob.glob(out_geomdir+ '/*.til')[0]
 
      types = '.bin'
      type_str = sp.check_output(['file','-b', os.path.realpath(restarts_in[0])])
@@ -135,6 +136,9 @@ class lake_landice_saltwater(remap_base):
 
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
      zoom = config['input']['surface']['zoom']
+     if zoom is None :
+        gridname = get_gridname(in_til)
+        zoom     = get_zoom(gridname) 
      log_name = out_dir+'/remap_lake_landice_saltwater_log'
      if os.path.exists(log_name):
         os.remove(log_name)
