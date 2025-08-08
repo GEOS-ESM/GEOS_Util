@@ -16,8 +16,8 @@ import subprocess
 import glob
 import ruamel.yaml
 import shlex
-from remap_base import remap_base
-from remap_utils import *
+from remap_base   import remap_base
+from remap_utils  import get_label, get_geomdir, get_zoom, get_gridname
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -52,8 +52,8 @@ class lake_landice_saltwater(remap_base):
      stretch       = config['input']['shared']['stretch']
      in_tile_file  = config['input']['surface']['catch_tilefile']
      if not in_tile_file :
-       EASE_grid    = config['input']['surface'].get('EASE_grid', None)
-       in_geomdir    = get_geomdir(in_bc_base, in_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
+       EASE_grid     = config['input']['surface'].get('EASE_grid', None)
+       in_geomdir    = get_geomdir(in_bc_base,  in_bc_version,  agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
        in_tile_file  = glob.glob(in_geomdir+ '/*.til')[0]
 
      agrid         = config['output']['shared']['agrid']
@@ -62,7 +62,7 @@ class lake_landice_saltwater(remap_base):
      stretch       = config['output']['shared']['stretch']
      out_tile_file = config['output']['surface']['catch_tilefile']
      if not out_tile_file :
-       EASE_grid    = config['output']['surface'].get('EASE_grid', None)
+       EASE_grid     = config['output']['surface'].get('EASE_grid', None)
        out_geomdir   = get_geomdir(out_bc_base, out_bc_version, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch, grid=EASE_grid)
        out_tile_file = glob.glob(out_geomdir+ '/*.til')[0]
 
@@ -119,17 +119,17 @@ class lake_landice_saltwater(remap_base):
         if 'saltwater_import'       in f : saltwater_import      = f
         if 'seaicethermo_internal'  in f : seaicethermo_internal = f
         if 'seaicethermo_import'    in f : seaicethermo_import   = f
-        if 'landice'                in f : landice   = f
-        if 'lake'                   in f : lake      = f
-        if 'roue'                   in f : route     = f
-        if 'openwater'              in f : openwater = f
+        if 'landice'                in f : landice               = f
+        if 'lake'                   in f : lake                  = f
+        if 'roue'                   in f : route                 = f
+        if 'openwater'              in f : openwater             = f
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
 
      if os.path.exists(in_til)  : shutil.remove(in_til)
      if os.path.exists(out_til) : shutil.remove(out_til)
-     print('\n Copy ' + in_tile_file + ' to ' + in_til)
+     print('\n Copy ' + in_tile_file  + ' to ' + in_til)
      shutil.copy(in_tile_file, in_til)
      print('\n Copy ' + out_tile_file + ' to ' + out_til)
      shutil.copy(out_tile_file, out_til)
@@ -231,7 +231,7 @@ class lake_landice_saltwater(remap_base):
                  "landice_internal_rst"     ,
                  "openwater_internal_rst"   ,
                  "saltwater_internal_rst"   ,
-                 "saltwater_import_rst"   ,
+                 "saltwater_import_rst"     ,
                  "seaicethermo_internal_rst",
                  "seaicethermo_import_rst"]
 
@@ -258,9 +258,9 @@ class lake_landice_saltwater(remap_base):
 
     expid = self.config['input']['shared']['expid']
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
-    yyyy_ = yyyymmddhh_[0:4]
-    mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
+    yyyy_ = yyyymmddhh_[0: 4]
+    mm_   = yyyymmddhh_[4: 6]
+    dd_   = yyyymmddhh_[6: 8]
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
