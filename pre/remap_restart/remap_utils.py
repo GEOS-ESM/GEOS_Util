@@ -354,11 +354,12 @@ def zoom_default(x):
    return zoom_
 
 def get_zoom(gridname):
-   # W.J notes: no idea how zoom is calculated in EASE grid.
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
    if '-CF' in gridname:
      j = gridname.find('x')
-     lat  = int(gridname[2:j]) # gridname PEiiiixjjjj-CF
+     lat  = int(gridname[2:j])   # gridname PE["lat"]x["lon"]-CF
      zoom = lat /90.0
      if zoom < 1 : zoom = 1
      if zoom > 8 : zoom = 8
