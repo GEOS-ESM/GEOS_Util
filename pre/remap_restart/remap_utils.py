@@ -343,28 +343,20 @@ def show_wemin_default(x):
 
 def zoom_default(x):
    zoom_ = '8'
-   cxx = x.get('input:shared:agrid')
-   if cxx :
-      lat = int(cxx[1:])
-      lon = lat*6
-      gridname = 'PE'+str(lat)+'x'+str(lon)+'-CF'
-      zoom_ = get_zoom(gridname)
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
-   return zoom_
-
-def get_zoom(gridname):
-   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
-   # for EASEv2 grid and lat/lon grid, always use the default value of 8.
-   zoom_ = '8'
-   if '-CF' in gridname:
-     j = gridname.find('x')
-     lat  = int(gridname[2:j])   # gridname PE["lat"]x["lon"]-CF
-     zoom = lat /90.0
-     if zoom < 1 : zoom = 1
-     if zoom > 8 : zoom = 8
-     zoom_= str(int(zoom))
-     
+      return zoom_
+   cxx = None
+   if 'input:shared:agrid' in x.keys():
+      cxx = x.get('input:shared:agrid')
+   elif 'input' in x.keys():
+      cxx = x['input']['shared']['agrid']
+   if cxx :
+      lat = int(cxx[1:])
+      zoom = lat /90.0
+      if zoom < 1 : zoom = 1
+      if zoom > 8 : zoom = 8
+      zoom_= str(int(zoom))
    return zoom_
 
 def get_gridname(tilefile):

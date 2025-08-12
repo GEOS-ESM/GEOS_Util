@@ -17,7 +17,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base   import remap_base
-from remap_utils  import get_label, get_geomdir, get_zoom, get_gridname
+from remap_utils  import get_label, get_geomdir, zoom_default, get_gridname
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -137,8 +137,8 @@ class lake_landice_saltwater(remap_base):
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
      zoom = config['input']['surface']['zoom']
      if zoom is None :
-        gridname = get_gridname(in_til)
-        zoom     = get_zoom(gridname) 
+        zoom = zoom_default(config)
+ 
      log_name = out_dir+'/remap_lake_landice_saltwater_log'
      if os.path.exists(log_name):
         os.remove(log_name)
