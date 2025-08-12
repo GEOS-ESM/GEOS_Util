@@ -346,10 +346,9 @@ def zoom_default(x):
    cxx = x.get('input:shared:agrid')
    if cxx :
       lat = int(cxx[1:])
-      zoom = lat /90.0
-      zoom_ = str(int(zoom))
-      if zoom < 1 : zoom_ = '1'
-      if zoom > 8 : zoom_ = '8'
+      lon = lat*6
+      gridname = 'PE'+str(lat)+'x'+str(lon)+'-CF'
+      zoom_ = get_zoom(gridname)
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
    return zoom_
@@ -359,11 +358,12 @@ def get_zoom(gridname):
    zoom_ = '8'
    if '-CF' in gridname:
      j = gridname.find('x')
-     lat = int(gridname[2:j]) # gridname PEiiiixjjjj-CF
+     lat  = int(gridname[2:j]) # gridname PEiiiixjjjj-CF
      zoom = lat /90.0
-     zoom_ = str(int(zoom))
-     if zoom < 1 : zoom_ = '1'
-     if zoom > 8 : zoom_ = '8'
+     if zoom < 1 : zoom = 1
+     if zoom > 8 : zoom = 8
+     zoom_= str(int(zoom))
+     
    return zoom_
 
 def get_gridname(tilefile):
