@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+!/usr/bin/env python3
 #
 # remap_restarts package:
 #   remap_utils.py contains utility functions and definitions
@@ -342,37 +342,41 @@ def show_wemin_default(x):
        return True
 
 def zoom_default(x):
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
       return zoom_
-   cxx = None
+   agrid = None
    if 'input:shared:agrid' in x.keys():
-      cxx = x.get('input:shared:agrid')
+      agrid = x.get('input:shared:agrid')
    elif 'input' in x.keys():
-      cxx = x['input']['shared']['agrid']
-   if cxx :
-      lat = int(cxx[1:])
+      agrid = x['input']['shared']['agrid']
+   if agrid and (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
+      lat = int(agrid[1:])
       zoom = lat /90.0
       if zoom < 1 : zoom = 1
       if zoom > 8 : zoom = 8
       zoom_= str(int(zoom))
    return zoom_
 
-def get_gridname(tilefile):
-   gridname_ =''
-   tmptile   = os.path.realpath(tilefile)
-   extension = os.path.splitext(tmptile)[1]
-   if extension == '.domain':
-      extension = os.path.splitext(tmptile)[0]
-   if extension == '.til':
-      gridname_ = linecache.getline(tmptile, 3).strip()
-   else:
-      nc_file = netCDF4.Dataset(tmptile,'r')
-      gridname_ = nc_file.getncattr('Grid_Name')
-    # in case it is an old name: SMAP-EASEvx-Mxx
-   gridname_ = gridname_.replace('SMAP-','').replace('-M','_M')
-   return gridname_
+# get_gridname() extracts the atm grid name from the header of the *.til file
+#
+#def get_gridname(tilefile):
+#   gridname_ =''
+#   tmptile   = os.path.realpath(tilefile)
+#   extension = os.path.splitext(tmptile)[1]
+#   if extension == '.domain':
+#      extension = os.path.splitext(tmptile)[0]
+#   if extension == '.til':
+#      gridname_ = linecache.getline(tmptile, 3).strip()
+#   else:
+#      nc_file = netCDF4.Dataset(tmptile,'r')
+#      gridname_ = nc_file.getncattr('Grid_Name')
+#    # in case it is an old name: SMAP-EASEvx-Mxx
+#   gridname_ = gridname_.replace('SMAP-','').replace('-M','_M')
+#   return gridname_
 
 def get_account():
    cmd = 'id -gn'

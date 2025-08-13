@@ -17,7 +17,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base   import remap_base
-from remap_utils  import get_label, get_geomdir, zoom_default, get_gridname
+from remap_utils  import get_label, get_geomdir, zoom_default
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
