@@ -146,7 +146,7 @@ def get_answers_from_command_line(cml):
    if cml.zoom: 
       answers["input:surface:zoom"]    = cml.zoom
    else:
-      # zoom_default fills 'input:shared:agrid'
+      # zoom_default fills 'input:shared:agrid' 
       answers["input:surface:zoom"]    = zoom_default(answers)
 
    if cml.in_wemin :
