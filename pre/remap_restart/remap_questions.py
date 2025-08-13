@@ -420,7 +420,7 @@ def ask_questions():
             "type": "text",
             "name": "input:surface:zoom",
             "message": "Enter value of zoom parameter for surface restarts [1-8]?  (Search radius, smaller value means larger radius.)\n",
-            "default": lambda x: zoom_default(x)
+            "default": lambda x: get_zoom(x)
         },
         {
             "type": "text",
