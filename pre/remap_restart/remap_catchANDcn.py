@@ -126,10 +126,14 @@ class catchANDcn(remap_base):
      else:
         NPE = 160
 
+     RESERVATION =''
      PARTITION =''
      QOS       =''
 
+     reservation = config['slurm_pbs']['reservation']
+     partition = config['slurm_pbs']['partition']
      qos  = config['slurm_pbs']['qos']
+
      TIME  = "1:00:00"
      if qos != "debug": TIME="3:00:00"
 
@@ -143,13 +147,14 @@ class catchANDcn(remap_base):
          QOS = "#PBS  -q "+qos
      else:
        job = "SLURM"
-       partition = config['slurm_pbs']['partition']
+       if (reservation != ''):
+         RESERVATION = "#SBATCH --reservation=" + reservation
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
-
-       CONSTRAINT = '"[cas|mil]"'
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
+
+       CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
 

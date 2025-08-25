@@ -82,6 +82,7 @@ def parse_args(program_description):
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
     p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
+    p_command.add_argument('-reservation',  default='',       help="slurm_pbs reservation")
 
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
@@ -165,6 +166,7 @@ def get_answers_from_command_line(cml):
    answers["slurm_pbs:account"]    = cml.account
    answers["slurm_pbs:qos"]        = cml.qos
    answers["slurm_pbs:partition"]  = cml.partition
+   answers["slurm_pbs:reservation"]  = cml.reservation
 
    return answers
 

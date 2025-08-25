@@ -116,6 +116,8 @@ message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default '
 
 message_account    = "Select/enter SLURM or PBS account:\n"
 
+message_reservation  = "Enter SLURM or PBS reservation: (If desired, can leave blank)\n"
+
 message_partition  = "Enter SLURM or PBS partition: (If desired, can leave blank)\n"
 
 
@@ -126,6 +128,7 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --output={log_name}
 #SBATCH --time={TIME}
 #SBATCH --constraint={CONSTRAINT}
+{RESERVATION}
 {PARTITION}
 {QOS}
 """,
@@ -136,6 +139,7 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #PBS -W group_list={account}
 #PBS -o {log_name}
 #PBS -j oe
+{RESERVATION}
 {PARTITION}
 {QOS}
 """
@@ -482,6 +486,9 @@ def get_command_line_from_answers(answers):
    qos = ''
    if answers["slurm_pbs:qos"] != '':
      qos     = " -qos  " + answers["slurm_pbs:qos"]
+   reservation = ''
+   if answers["slurm_pbs:reservation"] != '':
+      reservation  = " -reservation  " + answers["slurm_pbs:reservation"]
    partition = ''
    if answers["slurm_pbs:partition"] != '':
       partition  = " -partition  " + answers["slurm_pbs:partition"]
@@ -516,6 +523,7 @@ def get_command_line_from_answers(answers):
                                           out_rs + \
                                           account + \
                                           qos + \
+                                          reservation + \
                                           partition
 
 

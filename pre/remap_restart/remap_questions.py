@@ -436,20 +436,24 @@ def ask_questions():
             "message": "Add labels for BCs version and atm/ocean resolutions to restart file names?",
             "default": False,
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:qos",
             "message": message_qos,
             "default": "debug",
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:account",
             "message": message_account,
             "default": get_account(),
         },
+        {
+            "type": "text",
+            "name": "slurm_pbs:reservation",
+            "message": message_reservation,
+            "default": "",
+        },  
         {
             "type": "text",
             "name": "slurm_pbs:partition",
