@@ -28,11 +28,11 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v13', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v13-beta', 'NL3', 'ICA', 'Other']
 
 choices_bc_other   = ['v06','v11','v12','GM4']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v13']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v13-beta']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -78,7 +78,7 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v13: v13         | future               | 12.0             ... present
+ v13-beta: v13    | future               | 12.0             ... present
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -615,6 +615,10 @@ def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretc
   gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
   agrid_name = gridStr.split('_')[0]
   bc_topo = ''
+  # v13 is currently beta, but the topo directory is still named v13
+  if 'v13-beta' == bc_version:
+     bc_version = 'v13'
+
   if 'GM4' == bc_version:
      bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name
   else:
