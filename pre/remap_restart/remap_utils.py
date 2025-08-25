@@ -90,7 +90,7 @@ message_bc_other   = f'''\n
           v06:      NL3 + JPL veg height + PEATMAP + MODIS snow alb
           v11:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
           v12:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
-          v14_BETA: v12 + updated topography
+          v14_BETA: v12 + updated topography + fixes for coupled model
           GM4:      Ganymed-4_0\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
