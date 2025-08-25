@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Expand user home path '~' in remap python scripts
+
 ### Fixed
 
 ### Removed
