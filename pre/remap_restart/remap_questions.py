@@ -456,8 +456,8 @@ def ask_questions():
         },
    ]
    answers = questionary.prompt(questions)
-   answers['input:shared:rst_dir']  = os.path.abspath(answers['input:shared:rst_dir'])
-   answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
+   answers['input:shared:rst_dir']  = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
+   answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
    if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  

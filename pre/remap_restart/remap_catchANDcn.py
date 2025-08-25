@@ -256,6 +256,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 def ask_catch_questions():
    catch_input_shared_rst_dir = ''
    def has_rs_rc_out(path):
+     path = os.path.abspath(os.path.expanduser(path))
      if os.path.exists(path):
         dirs = os.listdir(path)
         if 'rs' in dirs and 'rc_out' in dirs:
@@ -391,6 +392,7 @@ def ask_catch_questions():
    dd   = answers['input:shared:yyyymmddhh'][6:8]
    hh   = answers['input:shared:yyyymmddhh'][8:10]
 
+   answers['input:shared:rst_dir'] = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
    rst_dir      = answers['input:shared:rst_dir']+'/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
    rst_file     = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')[0]
    idx1         = rst_file.find('catch')
@@ -411,7 +413,7 @@ def ask_catch_questions():
    answers['output:surface:remap_catch'] = True
    bc_base= answers['output:shared:bc_base'].split(": ")[-1]
    answers['output:shared:bc_base'] = bc_base
-   answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
+   answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
    if answers['output:surface:EASE_grid'] == 'Cubed-Sphere' :
       remove_ogrid_comment(answers, 'OUT')

@@ -94,7 +94,7 @@ def get_answers_from_command_line(cml):
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:GEOS-IT"]     = cml.geosit
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
-   answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
+   answers["output:shared:out_dir"]    = os.path.abspath(os.path.expanduser(cml.out_dir))
    if  cml.merra2:
       init_merra2(answers)
    elif  cml.geosit:
@@ -105,7 +105,7 @@ def get_answers_from_command_line(cml):
       answers["input:shared:bc_version"]  = cml.bcvin
       answers["input:surface:catch_model"]= cml.catch_model
       answers["input:shared:stretch"]     = cml.in_stretch
-      answers["input:shared:rst_dir"]     = os.path.abspath(cml.rst_dir + '/')
+      answers["input:shared:rst_dir"]     = os.path.abspath(os.path.expanduser(cml.rst_dir))
       fvcore_info(answers) 
       ogrid                               = cml.oceanin
       if ogrid == "CS":
