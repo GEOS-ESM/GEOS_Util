@@ -28,11 +28,11 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v14-beta', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['NL3', 'ICA', 'Other']
 
 choices_bc_other   = ['v06','v11','v12','GM4']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v14-beta']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11', 'v12', 'v14_BETA']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -78,7 +78,6 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v12-beta: v14    | future               | 12.0             ... present
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -88,10 +87,11 @@ message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restart
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
 message_bc_other   = f'''\n
-          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb
-          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
-          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
-          GM4:     Ganymed-4_0\n'''\
+          v06:      NL3 + JPL veg height + PEATMAP + MODIS snow alb
+          v11:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
+          v12:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+          v14_BETA: v12 + updated topography
+          GM4:      Ganymed-4_0\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
