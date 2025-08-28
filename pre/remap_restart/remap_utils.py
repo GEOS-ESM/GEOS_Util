@@ -12,6 +12,7 @@ import questionary
 import glob
 import shlex
 import netCDF4 as nc
+import linecache
 
 # shared global variables
 
@@ -36,7 +37,7 @@ choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v13']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
-choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm45']
+choices_catchmodel = ['catch', 'catchcnclm40', 'catchcnclm51']
 
 choices_ogrid_data = ['360x180   (Reynolds)','1440x720  (MERRA-2)','2880x1440 (OSTIA)','CS  (same as atmosphere OSTIA cubed-sphere grid)']
 
@@ -287,8 +288,8 @@ def catch_model(x):
   model = 'catch'
   if 'cnclm40' in fname.lower():
     model = 'catchcnclm40'
-  if 'cnclm45' in fname.lower():
-    model = 'catchcnclm45'
+  if 'cnclm51' in fname.lower():
+    model = 'catchcnclm51'
   return model
 
 def data_ocean_default(resolution):
@@ -343,17 +344,25 @@ def show_wemin_default(x):
        # If neither MERRA2 or GEOS-IT is selected option will be shown on screen
        return True
 
-def zoom_default(x):
+def get_zoom(x):
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
-   cxx = x.get('input:shared:agrid')
-   if cxx :
-      lat = int(cxx[1:])
-      zoom = lat /90.0
-      zoom_ = str(int(zoom))
-      if zoom < 1 : zoom_ = '1'
-      if zoom > 8 : zoom_ = '8'
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
       zoom_ = '2'
+      return zoom_
+   agrid = None
+   if 'input:shared:agrid' in x.keys():
+      agrid = x.get('input:shared:agrid')
+   elif 'input' in x.keys():
+      agrid = x['input']['shared']['agrid']
+   if agrid:
+      if (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
+         lat = int(agrid[1:])
+         zoom = lat /90.0
+         if zoom < 1 : zoom = 1
+         if zoom > 8 : zoom = 8
+         zoom_= str(int(zoom))
    return zoom_
 
 def get_account():
