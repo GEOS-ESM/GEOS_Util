@@ -33,7 +33,7 @@ choices_bc_ops     = ['NL3', 'ICA', 'Other']
 
 choices_bc_other   = ['v06','v11','v12','GM4']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11', 'v12', 'v14_BETA']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11', 'v12', 'v14']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -88,11 +88,12 @@ message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restart
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
 message_bc_other   = f'''\n
-          v06:      NL3 + JPL veg height + PEATMAP + MODIS snow alb
-          v11:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
-          v12:      NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
-          v14_BETA: v12 + updated topography + fixes for coupled model
-          GM4:      Ganymed-4_0\n'''\
+          v06: NL3 + JPL veg height + PEATMAP + MODIS snow alb
+          v11: NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
+          v12: NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+          v14: NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+                   + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry
+          GM4: Ganymed-4_0\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
@@ -341,7 +342,7 @@ def show_wemin_default(x):
        return True
 
 def get_zoom(x):
-   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8);
    # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
