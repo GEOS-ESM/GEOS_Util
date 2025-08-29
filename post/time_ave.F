@@ -295,6 +295,9 @@ c ------------------
                           quadratics = quadtmp
            endif
            deallocate (quadtmp)
+           if (rc/=0) then ! this should not be needed but it is
+              tend=.true.
+           endif
        enddo
        nquad = m
 
@@ -325,6 +328,9 @@ c ---------------
                           aliases = aliastmp
            endif
            deallocate (aliastmp)
+           if (rc/=0) then ! this should not be needed but it is
+            tend=.true.
+         endif
        enddo
        nalias = m
        endif
