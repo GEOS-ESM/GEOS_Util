@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
+
+## [2.1.10] - 2025-08-29
+
+### Added
+
 - Added cnclm51 remapping
 
 ### Changed
@@ -20,9 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Provide default "zoom" value for remap_restarts yaml file
 
-### Removed
-
-### Deprecated
 
 ## [2.1.9] - 2025-06-25
 
