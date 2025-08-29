@@ -256,6 +256,7 @@ say 'Opening Files for EXP: 'k
 * ------------------------------------------------------------
      if( ctdim < mtdim )
          mtdim = ctdim
+      tdimfile = cfile
      endif
 
 * Find Master Time Frequency (largest) among Experiment Files
@@ -271,7 +272,16 @@ say '  Current ZDIM: 'czdim'  Master ZDIM: 'mzdim
 say '  Current TDIM: 'ctdim'  Master TDIM: 'mtdim
 say '  Current TINC: 'ctinc'  Master TINC: 'mtinc
 say '  Current FILE: 'cfile'  Master TINCFILE: 'tincfile
+say '  Current FILE: 'cfile'  Master TDIMFILE: 'tdimfile
 say '  Current FILE: 'cfile'  Master ZMINFILE: 'zminfile
+
+if ( k = 0 )
+   'run setenv "FILE_CTL"    'cfile
+else
+   'run setenv "FILE_EXP"    'cfile
+endif
+
+say 'file 'k' : 'cfile
 
 say ' '
 say 'Closing files for Exp: 'k
@@ -306,6 +316,7 @@ say ' '
 'run setenv "SYSCMP_TDIM" 'mtdim
 'run setenv "SYSCMP_TINC" 'mtinc
 'run setenv "TINCFILE"    'tincfile
+'run setenv "TDIMFILE"    'tdimfile
 'run setenv "ZMINFILE"    'zminfile
 
 *******************************************************
