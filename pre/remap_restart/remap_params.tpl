@@ -24,7 +24,7 @@ input:
   surface:
     zoom:
     wemin:
-    # it supports three models: catch, catchcnclm40, catchcnclm45
+    # it supports three models: catch, catchcnclm40, catchcnclm51
     catch_model: null
     # if catch_tilefile is null, it searches bc_dir
     catch_tilefile: null
