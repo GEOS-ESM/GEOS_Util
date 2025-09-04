@@ -196,7 +196,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, job_name = job_name, \
-                   NPE = NPE, NNODE=NNODE, \
+                   NPE = NPE, NNODE=NNODE, RESERVATION=RESERVATION, \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, QOS=QOS, CONSTRAINT=CONSTRAINT, PARTITION=PARTITION )
 
