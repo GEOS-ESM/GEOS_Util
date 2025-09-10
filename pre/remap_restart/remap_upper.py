@@ -159,7 +159,10 @@ class upperair(remap_base):
      elif (imout>=2880):
        NPE = 5400; nwrit = 6
 
+     RESERVATION =''
+     reservation = config['slurm_pbs']['reservation']
      PARTITION =''
+     partition = config['slurm_pbs']['partition']
      QOS       =''
      qos       = config['slurm_pbs']['qos']
      TIME = "1:00:00"
@@ -176,9 +179,10 @@ class upperair(remap_base):
          QOS = "#PBS  -q "+qos
      else:
        job='SLURM'
-       partition = config['slurm_pbs']['partition']
+       if (reservation != ''):
+         RESERVATION = "#SBATCH --reservation="+reservation
        if (partition != ''):
-         PARTITION = "#SBATCH --partition=" + partition
+         PARTITION = "#SBATCH --partition="+partition
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
 
@@ -350,7 +354,7 @@ endif
      job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, job_name= job_name, drymass = drymass, \
-             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
+             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, RESERVATION = RESERVATION, \
              QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, \
              hydrostatic = hydrostatic, stretch_str = stretch_str)
 

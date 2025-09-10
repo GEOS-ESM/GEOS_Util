@@ -65,7 +65,7 @@ def parse_args(program_description):
     p_command.add_argument('-in_stretch',  default=False,     help='Stretched CS params of input restarts', choices=choices_stretch)
     p_command.add_argument('-out_stretch', default=False,     help='Stretched CS params for new restarts',  choices=choices_stretch)
 
-    # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,45] for simplicity, thus requires input argument
+    # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,51] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
     p_command.add_argument('-nonhydrostatic', action='store_true',     help=" non hydrostatic upper air")
@@ -82,6 +82,7 @@ def parse_args(program_description):
     account = get_account()
     p_command.add_argument('-account',    default=account,    help="slurm_pbs account")
     p_command.add_argument('-partition',  default='',       help="slurm_pbs partition")
+    p_command.add_argument('-reservation',  default='',       help="slurm_pbs reservation")
 
     p_command.add_argument('-rs',         default='3',        help="Flag indicating which restarts to regrid: 1 (upper air); 2 (surface); 3 (both)", choices=['1','2','3'])
 
@@ -96,7 +97,7 @@ def get_answers_from_command_line(cml):
    answers["input:shared:MERRA-2"]     = cml.merra2
    answers["input:shared:GEOS-IT"]     = cml.geosit
    answers["input:shared:yyyymmddhh"]  = cml.ymdh
-   answers["output:shared:out_dir"]    = os.path.abspath(cml.out_dir + '/')
+   answers["output:shared:out_dir"]    = os.path.abspath(os.path.expanduser(cml.out_dir))
    if  cml.merra2:
       init_merra2(answers)
    elif  cml.geosit:
@@ -107,7 +108,7 @@ def get_answers_from_command_line(cml):
       answers["input:shared:bc_version"]  = cml.bcvin
       answers["input:surface:catch_model"]= cml.catch_model
       answers["input:shared:stretch"]     = cml.in_stretch
-      answers["input:shared:rst_dir"]     = os.path.abspath(cml.rst_dir + '/')
+      answers["input:shared:rst_dir"]     = os.path.abspath(os.path.expanduser(cml.rst_dir))
       fvcore_info(answers) 
       ogrid                               = cml.oceanin
       if ogrid == "CS":
@@ -149,8 +150,7 @@ def get_answers_from_command_line(cml):
    if cml.zoom:
       answers["input:surface:zoom"]    = cml.zoom
    else:
-      # zoom_default fills 'input:shared:agrid'
-      answers["input:surface:zoom"]    = zoom_default(answers)
+      answers["input:surface:zoom"]    = get_zoom(answers)
 
    if cml.in_wemin :
      answers["input:surface:wemin"]    = cml.in_wemin
@@ -165,6 +165,7 @@ def get_answers_from_command_line(cml):
    answers["slurm_pbs:account"]    = cml.account
    answers["slurm_pbs:qos"]        = cml.qos
    answers["slurm_pbs:partition"]  = cml.partition
+   answers["slurm_pbs:reservation"]  = cml.reservation
 
    return answers
 

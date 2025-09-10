@@ -39,9 +39,9 @@ ecbuild_add_executable (
 set_target_properties(gen_forecast_bcs.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 if (USE_F2PY)
-   find_package(F2PY2)
-   if (F2PY2_FOUND)
-      esma_add_f2py2_module(read_sst_ice_bcs
+   find_package(F2PY3)
+   if (F2PY3_FOUND)
+      esma_add_f2py3_module(read_sst_ice_bcs
          SOURCES read_sst_ice_bin.f90
          DESTINATION bin
          INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}

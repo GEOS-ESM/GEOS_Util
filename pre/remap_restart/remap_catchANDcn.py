@@ -126,10 +126,14 @@ class catchANDcn(remap_base):
      else:
         NPE = 160
 
+     RESERVATION =''
      PARTITION =''
      QOS       =''
 
+     reservation = config['slurm_pbs']['reservation']
+     partition = config['slurm_pbs']['partition']
      qos  = config['slurm_pbs']['qos']
+
      TIME  = "1:00:00"
      if qos != "debug": TIME="3:00:00"
 
@@ -143,13 +147,14 @@ class catchANDcn(remap_base):
          QOS = "#PBS  -q "+qos
      else:
        job = "SLURM"
-       partition = config['slurm_pbs']['partition']
+       if (reservation != ''):
+         RESERVATION = "#SBATCH --reservation=" + reservation
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
-
-       CONSTRAINT = '"[cas|mil]"'
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
+
+       CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
 
@@ -191,7 +196,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, job_name = job_name, \
-                   NPE = NPE, NNODE=NNODE, \
+                   NPE = NPE, NNODE=NNODE, RESERVATION=RESERVATION, \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, QOS=QOS, CONSTRAINT=CONSTRAINT, PARTITION=PARTITION )
 
@@ -263,6 +268,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 def ask_catch_questions():
    catch_input_shared_rst_dir = ''
    def has_rs_rc_out(path):
+     path = os.path.abspath(os.path.expanduser(path))
      if os.path.exists(path):
         dirs = os.listdir(path)
         if 'rs' in dirs and 'rc_out' in dirs:
@@ -398,6 +404,7 @@ def ask_catch_questions():
    dd   = answers['input:shared:yyyymmddhh'][6:8]
    hh   = answers['input:shared:yyyymmddhh'][8:10]
 
+   answers['input:shared:rst_dir'] = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
    rst_dir      = answers['input:shared:rst_dir']+'/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
    rst_file     = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')[0]
    idx1         = rst_file.find('catch')
@@ -418,7 +425,7 @@ def ask_catch_questions():
    answers['output:surface:remap_catch'] = True
    bc_base= answers['output:shared:bc_base'].split(": ")[-1]
    answers['output:shared:bc_base'] = bc_base
-   answers['output:shared:out_dir'] = os.path.abspath(answers['output:shared:out_dir'])
+   answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
    if answers['output:surface:EASE_grid'] == 'Cubed-Sphere' :
       remove_ogrid_comment(answers, 'OUT')
