@@ -9,6 +9,8 @@
 # 09Jun2017 Akella General version, but preset resolutions 
 #                   (input: 2880x1440; output: c360 or c720) for DAO OPS usage only
 # 30Jun2017 Stassi Converted to perl
+# 25Mar2025 Lucchesi Added -w flag to allow capture of errors from the slurm job.
+#                    Pass error flag back to calling program.
 #=======================================================================
 use strict;
 use warnings;
@@ -22,7 +24,7 @@ use getsponsor qw(get_spcode);
 
 # global variables
 #-----------------
-my ($outdir, $gid, $workarea, $noprompt);
+my ($outdir, $gid, $workarea, $noprompt, $wait);
 my ($yyyy, %oResVals, %varVals, $workdir);
 my ($tiledir, $bcsdir, %variables, %resolutions);
 
@@ -64,6 +66,7 @@ sub init {
                 "gid=s" => \$gid,
                 "wa=s"  => \$workarea,
                 "np"    => \$noprompt,
+                "w"     => \$wait,
                 "h"     => \$help);
     usage() if $help;
 
@@ -156,6 +159,7 @@ sub write_and_submit_jobfile {
     unlink $jobfile if -e $logfile;
 
     my $npn = `facter processorcount`; chomp($npn);
+    print "npn=$npn\n";
     if ( $npn == 40 ) {
       $mynodes = "sky";
     } else {
@@ -172,7 +176,8 @@ sub write_and_submit_jobfile {
 #SBATCH --job-name=$base
 #SBATCH --output=$logfile.RUNNING
 #SBATCH --ntasks=24
-#SBATCH --constraint=$mynodes
+##SBATCH --constraint=$mynodes
+#SBATCH --partition=gmaodev
 #SBATCH --time=1:00:00
 
 set echo
@@ -263,6 +268,7 @@ end
 if (\$errcnt) then
    set logfileF = \$logfile.FAILED
    qalter -o \$logfileF \$SLURM_JOBID
+   exit (-1)
 else
    qalter -o \$logfile \$SLURM_JOBID
    foreach file ( \$output_list )
@@ -277,16 +283,26 @@ else
    cd \$outdir
    \\rm -r \$workdir
 endif
+exit 0
 EOF
 ;
     close JF;
     select $FH;
 
     chdir($outdir);
-    $cmd = "sbatch $jobfile";
+    if ($wait) {
+       $cmd = "sbatch -W $jobfile";
+    }
+    else {
+       $cmd = "sbatch $jobfile";
+    }
     print "$cmd\n";
-    system($cmd);        
-}
+    my $rc=system($cmd);        
+    print "RETURN CODE=$rc\n";
+    if ($rc != 0) {
+       die "error returned from SLURM job: $cmd.";
+    }
+}     
 
 #================================================================================
 # name - usage
