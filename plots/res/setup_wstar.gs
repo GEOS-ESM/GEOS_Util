@@ -121,6 +121,7 @@ say ''
 say '    TDIM: 'tdim
 say '  NFILES: 'nfiles
 say ''
+pause
 
 * Initialize BEGDATE and ENDATE for each Experiment
 * -------------------------------------------------
@@ -143,6 +144,7 @@ say 'begdate.'n': 'begdate.n'  enddate.'n': 'enddate.n
 n = n + 1
 endwhile
 say ''
+pause
 
 * -------------------------------------------
 * Compute Seasonal Means for Common Times (A)
@@ -365,7 +367,7 @@ while( n<=numfiles )
    while( k<=numfiles )
 
    say 'Checking 'SHORTNAME.n' and 'SHORTNAME.k
-   if( ( (SHORTNAME.n != 'MERRA-2') & (SHORTNAME.k != 'MERRA-2') )
+   if( (SHORTNAME.n != 'MERRA-2') & (SHORTNAME.k != 'MERRA-2') )
         if( begdate.n != begdate.k | enddate.n != enddate.k )
             differ = TRUE
         endif
@@ -376,7 +378,15 @@ while( n<=numfiles )
 n = n+1
 endwhile
 if( differ = FALSE ) ; return ; endif
+pause
 say ''
+
+   'run getenv "TBEG" '
+                TBEG = result
+   'run getenv "TEND" '
+                TEND = result
+    say 'INPUT TBEG & TEND: 'TBEG' 'TEND
+    pause
 
                maskfile = 'NULL'
     say       'MASKFILE: 'maskfile
@@ -394,11 +404,23 @@ say ''
 
      'setdates'
      'getdates'
+      pause
 
-     'run getenv BEGDATE'
+ say 'run setenv BEGDATE.'n' 'begdate.n
+ say 'run setenv ENDDATE.'n' 'enddate.n
+     'run setenv BEGDATE.'n' 'begdate.n
+     'run setenv ENDDATE.'n' 'enddate.n
+ pause
+
+     'run getenv BEGDATE.'n
                  BEGDATE = result
-     'run getenv ENDDATE'
+     'run getenv ENDDATE.'n
                  ENDDATE = result
+
+     'run setenv BEGDATE 'BEGDATE
+     'run setenv ENDDATE 'ENDDATE
+
+     say 'Computing Seasonal WSTAR and RES for file 'n', BEGDATE: 'BEGDATE'  ENDDATE: 'ENDDATE
 
      'define wstar'n' = wstar.'n
      'define   res'n' =   res.'n
@@ -407,6 +429,7 @@ say ''
    n = n + 1
    endwhile
 endif
+pause
 * ----------------------------------------
 
 
@@ -444,6 +467,7 @@ while( k > 0 )
             flag = ""
     while ( flag = "" )
    'run 'geosutil'/plots/res/plot_season.gs levl 'output
+pause
     if( DEBUG = true )
         say "Hit  ENTER  to repeat plot or any character for next plot"
         pull flag
