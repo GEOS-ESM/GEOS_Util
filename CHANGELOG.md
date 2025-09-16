@@ -17,6 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+
+## [2.1.10] - 2025-08-29
+
+### Added
+
+- Added cnclm51 remapping
+
+### Changed
+
+- Expand user home path '~' in remap python scripts
+- Moved from `f2py2` to `f2py3` to enable removal of Python 2 support
+
+### Fixed
+
+- Provide default "zoom" value for remap_restarts yaml file
+
+
 ## [2.1.9] - 2025-06-25
 
 ### Fixed
