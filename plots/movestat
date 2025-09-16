@@ -172,8 +172,7 @@ echo " "
          cd $pltdir/corcmp
          if( $season == 'NULL' ) then
            set files = `/bin/ls -1 *stats*gif`
-           set fname = `echo $files[1] | cut -d. -f1`
-           set season = `echo $fname | sed 's/.*_//g'`
+           set season = `echo $files[1] | sed 's/.*_\([^_][^_]*\)\.[^.][^.]*$/\1/'`
          endif
          ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/corcmp
          echo Syncing ${season} Files from $pltdir/corcmp to $webid@${server}:${www}/${webdir}/${season}/corcmp
@@ -187,8 +186,7 @@ echo " "
              cd $pltdir/$DSC
              if( $season == 'NULL' ) then
                set files = `/bin/ls -1 *stats*gif`
-               set fname = `echo $files[1] | cut -d. -f1`
-               set season = `echo $fname | sed 's/.*_//g'`
+               set season = `echo $files[1] | sed 's/.*_\([^_][^_]*\)\.[^.][^.]*$/\1/'`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSC
              echo Syncing ${season} Files from $pltdir/$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSC
@@ -205,8 +203,7 @@ echo " "
              cd $pltdir/$DSCS[1].$DSC
              if( $season == 'NULL' ) then
                set files = `/bin/ls -1 *stats*gif`
-               set fname = `echo $files[1] | cut -d. -f1`
-               set season = `echo $fname | sed 's/.*_//g'`
+               set season = `echo $files[1] | sed 's/.*_\([^_][^_]*\)\.[^.][^.]*$/\1/'`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSCS[1].$DSC
 

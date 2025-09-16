@@ -119,8 +119,18 @@ endif
 
 if( datemax1 >= datemax2 )
     tmax = tmax2
+    if ( timefile = file1 )
+       if ( tinc1 = 2*tinc2 )
+           tmax = (tmax - 1)/2 + 1
+       endif
+    endif
 else
     tmax = tmax1
+    if ( timefile = file2 )
+       if ( tinc2 = 2*tinc1 )
+           tmax = (tmax - 1)/2 + 1
+       endif
+    endif
 endif
      tdim = tmax - tmin + 1
 

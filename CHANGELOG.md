@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix for All-Times Transport Diagnostics
-
 ### Removed
 
 ### Deprecated
+
+## [2.1.11] - 2025-09-16
+
+### Fixed
+
+- Fix for All-Times Transport Diagnostics
+- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
+- Update `movestat` to extract seasons in files with dots in the name
 
 
 ## [2.1.10] - 2025-08-29

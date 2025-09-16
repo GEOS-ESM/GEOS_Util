@@ -61,10 +61,29 @@ if( zfreq = 'varying' )
   'set z ' zmax
   'getinfo level'
            levmax = result
+  n = 1
+  c.n = levmax
+  while ( levmax < 100 )
+          newz = zmax - n
+          'set z ' newz
+          n = n + 1
+          'getinfo level'
+          levmax = result
+          c.n = levmax
+  endwhile
 endif
 
 * Get Proper File for TINC or ZMIN
 * --------------------------------
+'run getenv "TDIMFILE" '
+             tdimfile = result
+'open '      tdimfile
+'getinfo     tdim'
+             TDIM = result
+'getinfo numfiles'
+             newfile = result
+'close '     newfile
+
 'run getenv "TINCFILE" '
              tincfile = result
 'open '      tincfile
@@ -78,24 +97,60 @@ endif
 
 if( zfreq = 'varying' )
    'close 'newfile
-   'run getenv "ZMINFILE" '
-                zminfile = result
-   'open '      zminfile
+   if ( tag = 'CTL' )
+      'run getenv "FILE_EXP" '
+   else
+      'run getenv "FILE_CTL" '
+   endif
+   testfile = result
+   'open '      testfile
    'getinfo     numfiles'
                 newfile = result
    'set dfile ' newfile
-   'set z ' zmin
+   'getinfo zdim'
+            zdim = result
+   'set z 'zdim   
    'getinfo level'
-            levmin = result
-   'set z ' zmax
-   'getinfo level'
-            levmax = result
-    if( levmax < levmin )
-        levmin = levmax
-    endif
-   'set lev 1000 'levmin
+            ztop = result
+
+      n = 1
+      levtest = c.n
+      k = 0
+      while ( ztop != levtest )
+         while ( ztop < levtest )
+            k = k + 1
+            'set z 'zdim-k
+            'getinfo level'
+            ztop = result
+            if k > zdim
+               say 'no toplev found'
+               'quit'
+            endif
+         endwhile
+         if ( ztop != levtest )
+            n = n+1
+            levtest = c.n
+         endif
+         if n > zdim
+            say 'no toplev found'
+            'quit'
+         endif
+      endwhile
+   say 'toplev: 'ztop
 endif
 
+'getinfo numfiles'
+             newfile = result
+'close '     newfile
+
+'run getenv "ZMINFILE" '
+             zminfile = result
+'open '      zminfile
+'getinfo     numfiles'
+             newfile = result
+'set dfile ' newfile
+'set lev 'levmin' 'ztop
+'set t 1 'TDIM
 
 * Define Number of Forecast Days and Time Interval (hrs)
 * ------------------------------------------------------
@@ -211,9 +266,9 @@ say 'Processing Field: 'field' for File: 'n'  Tag: 'tag
        'define 'field'mse'tag' = 'field'mse'tag' + pow('field'fs-'field'as,2)'
        'define 'field'mse'tag''n' = pow('field'fs-'field'as,2)'
    endif
-
 n = n + 1
 endwhile
+
 
 'define 'field'fm'tag'  = 'field'fm'tag' /'numfiles
 'define 'field'am'tag'  = 'field'am'tag' /'numfiles
@@ -361,13 +416,13 @@ endif
 * End CTL Test
 * ------------
 endif
+
 'close 'newfile
 
-
 'set dfile 1'
-'set t 'tbeg' 'tdim
+'set 'tbeg' 'tdim
 'setlons'
 'sety'
-'set lev 'levmin' 'levmax
+'set lev 'levmin' 'ztop
 
 return
