@@ -126,10 +126,16 @@ class catchANDcn(remap_base):
      else:
         NPE = 160
 
+     RESERVATION =''
      PARTITION =''
-     QOS  = config['slurm_pbs']['qos']
+     QOS       =''
+
+     reservation = config['slurm_pbs']['reservation']
+     partition = config['slurm_pbs']['partition']
+     qos  = config['slurm_pbs']['qos']
+
      TIME  = "1:00:00"
-     if QOS != "debug": TIME="12:00:00"
+     if qos != "debug": TIME="3:00:00"
 
      NNODE = ''
      job = ''
@@ -137,15 +143,21 @@ class catchANDcn(remap_base):
        job = "PBS"
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
+       if (qos != ''):
+         QOS = "#PBS  -q "+qos
      else:
        job = "SLURM"
-       partition = config['slurm_pbs']['partition']
+       if (reservation != ''):
+         RESERVATION = "#SBATCH --reservation=" + reservation
        if (partition != ''):
          PARTITION = "#SBATCH --partition=" + partition
+       if (qos != ''):
+         QOS = "#SBATCH  --qos="+qos
 
        CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
+
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix
@@ -184,7 +196,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bc_landdir, \
                   model = model, out_dir = out_dir, surflay = surflay, log_name = log_name, job_name = job_name, \
-                   NPE = NPE, NNODE=NNODE, \
+                   NPE = NPE, NNODE=NNODE, RESERVATION=RESERVATION, \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_, TIME = TIME, QOS=QOS, CONSTRAINT=CONSTRAINT, PARTITION=PARTITION )
 
@@ -368,7 +380,7 @@ def ask_catch_questions():
             "type": "text",
             "name": "slurm_pbs:qos",
             "message": message_qos,
-            "default": "debug",
+            "default": "",
         },
 
         {

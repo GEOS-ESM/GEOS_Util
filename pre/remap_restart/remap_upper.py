@@ -159,23 +159,32 @@ class upperair(remap_base):
      elif (imout>=2880):
        NPE = 5400; nwrit = 6
 
+     RESERVATION =''
+     reservation = config['slurm_pbs']['reservation']
      PARTITION =''
-     QOS  = config['slurm_pbs']['qos']
+     partition = config['slurm_pbs']['partition']
+     QOS       =''
+     qos       = config['slurm_pbs']['qos']
      TIME = "1:00:00"
      if NPE > 532:
         assert config['slurm_pbs']['qos'] != 'debug', "qos should be 'allnccs' for NCCS or 'normal' for NAS"
-        TIME = "12:00:00"
+        TIME = "3:00:00"
      NNODE = ''
      job=''
      if GEOS_SITE == "NAS":
        CONSTRAINT = 'cas_ait'
        NNODE = (NPE-1)//40 + 1
        job='PBS'
+       if (qos != ''):
+         QOS = "#PBS  -q "+qos
      else:
        job='SLURM'
-       partition = config['slurm_pbs']['partition']
+       if (reservation != ''):
+         RESERVATION = "#SBATCH --reservation="+reservation
        if (partition != ''):
-         PARTITION = "#SBATCH --partition=" + partition
+         PARTITION = "#SBATCH --partition="+partition
+       if (qos != ''):
+         QOS = "#SBATCH  --qos="+qos
 
        CONSTRAINT = '"[cas|mil]"'
 
@@ -184,7 +193,7 @@ class upperair(remap_base):
      # to interp_restarts.x. Per the code we use:
      #  -stretched_grid target_lon target_lat stretch_fac
      # If we are not running stretched grid, we should pass in a blank string
-     stretch = config['output']['shared']['stretch']
+     stretch = config['input']['shared']['stretch']
      stretch_str = ""
      if stretch:
         if stretch == 'SG001':
@@ -200,7 +209,24 @@ class upperair(remap_base):
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
-        stretch_str = "-stretched_grid " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
+        stretch_str = "-stretched_grid_in " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
+
+     stretch = config['output']['shared']['stretch']
+     if stretch:
+        if stretch == 'SG001':
+          stretch_fac = STRETCH_GRID['SG001'][0]
+          target_lat  = STRETCH_GRID['SG001'][1]
+          target_lon  = STRETCH_GRID['SG001'][2]
+        elif stretch == 'SG002':
+          stretch_fac = STRETCH_GRID['SG002'][0]
+          target_lat  = STRETCH_GRID['SG002'][1]
+          target_lon  = STRETCH_GRID['SG002'][2]
+        else:
+          exit("This stretched grid option is not supported " + str(stretch))
+
+        # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
+
+        stretch_str = stretch_str+" -stretched_grid_out " + str(target_lon) + " " + str(target_lat) + " " + str(stretch_fac)
 
      # Now, let's create the input.nml file
      # We need to create a namelist for the upper air remapping
@@ -223,21 +249,63 @@ limit stacksize unlimited
 cd {out_dir}/upper_data
 /bin/touch input.nml
 
-# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
-# HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
-
-if ($?I_MPI_ROOT) then
-  # intel scaling suggestions
-  #--------------------------
-  setenv I_MPI_ADJUST_ALLREDUCE 12
-  setenv I_MPI_ADJUST_GATHERV 3
-
-  setenv I_MPI_SHM_HEAP_VSIZE 512
-  setenv PSM2_MEMORY large
-  setenv I_MPI_EXTRA_FILESYSTEM 1
-  setenv I_MPI_EXTRA_FILESYSTEM_FORCE gpfs
-  setenv ROMIO_FSTYPE_FORCE "gpfs:"
+set mpi_type = "openmpi"
+if ($?I_MPI_ROOT ) then
+  set mpi_type = "intel"
 endif
+
+
+if ($mpi_type =~ "openmpi") then
+setenv OMPI_MCA_shmem_mmap_enable_nfs_warning 0
+# pre-connect MPI procs on mpi_init
+setenv OMPI_MCA_mpi_preconnect_all 1
+# options fo bcast: 0|ignore, 1|basic_linear, 2|chain, 3|pipeline, 4|split_binary_tree, 5|binary_tree, 6|binomial, 7|knomial, 8|scatter_allgather, 9|scatter_allgather_ring
+setenv OMPI_MCA_coll_tuned_bcast_algorithm 7
+# options for scatter: 0|ignore, 1|basic_linear, 2|binomial, 3|linear_nb
+setenv OMPI_MCA_coll_tuned_scatter_algorithm 2
+# options for reduce_scatter: 0|ignore, 1|non-overlapping, 2|recursive_halving, 3|ring, 4|butterfly
+setenv OMPI_MCA_coll_tuned_reduce_scatter_algorithm 3
+# options for allreduce: 0|ignore, 1|basic_linear, 2|nonoverlapping, 3|recursive_doubling, 4|ring, 5|segmented_ring, 6|rabenseifner
+setenv OMPI_MCA_coll_tuned_allreduce_algorithm 3
+# options for allgather: 0|ignore, 1|linear, 2|bruck, 3|recursive_doubling, 4|ring, 5|neighbor, 6|two_proc, 7|sparbit
+setenv OMPI_MCA_coll_tuned_allgather_algorithm 4
+# options for allgatherv: 0|ignore, 1|default, 2|bruck, 3|ring, 4|neighbor, 5|two_proc, 6|sparbit
+setenv OMPI_MCA_coll_tuned_allgatherv_algorithm 3
+# options for gather: 0 ignore, 1 basic linear, 2 binomial, 3 linear with synchronization
+setenv OMPI_MCA_coll_tuned_gather_algorithm 1
+# options for barrier: 0|ignore, 1|linear, 2|double_ring, 3|recursive_doubling, 4|bruck, 5|two_proc, 6|tree
+setenv OMPI_MCA_coll_tuned_barrier_algorithm 0
+# required for a tuned flag to be effective
+setenv OMPI_MCA_coll_tuned_use_dynamic_rules 1
+# disable file locks
+setenv OMPI_MCA_sharedfp "^lockedfile,individual"
+## HDF5: disable slow locks (promise not to open half-written files)
+#setenv HDF5_USE_FILE_LOCKING FALSE
+else
+setenv I_MPI_FABRICS ofi
+setenv I_MPI_OFI_PROVIDER psm3
+setenv I_MPI_ADJUST_SCATTER 2
+setenv I_MPI_ADJUST_SCATTERV 2
+setenv I_MPI_ADJUST_GATHER 2
+setenv I_MPI_ADJUST_GATHERV 3
+setenv I_MPI_ADJUST_ALLGATHER 3
+setenv I_MPI_ADJUST_ALLGATHERV 3
+setenv I_MPI_ADJUST_ALLREDUCE 12
+setenv I_MPI_ADJUST_REDUCE 10
+setenv I_MPI_ADJUST_BCAST 11
+setenv I_MPI_ADJUST_REDUCE_SCATTER 4
+setenv I_MPI_ADJUST_BARRIER 9
+#setenv I_MPI_SHM_HEAP_VSIZE 512
+#setenv I_MPI_EXTRA_FILESYSTEM 1
+#setenv I_MPI_EXTRA_FILESYSTEM_FORCE "gpfs"
+#setenv ROMIO_FSTYPE_FORCE "gpfs:"
+#setenv I_MPI_TUNING_MODE auto
+#setenv I_MPI_TUNING_BIN_DUMP tuning-results.dat
+#setenv I_MPI_DEBUG 6
+#setenv MPS_STAT_LEVEL 4
+env | grep 'I_MPI\|FI_'
+endif
+
 set infiles = ()
 set outfils = ()
 foreach infile ( *_restart_in )
@@ -260,7 +328,14 @@ else
     set ioflag = ""
 endif
 
-set drymassFLG = {drymassFLG}
+set hydrostaticIN = {hydrostatic}
+if ( $hydrostaticIN == 'True' ) then
+    set hydrostaticflag = "-in_hydrostatic T"
+else
+    set hydrostaticflag = "-in_hydrostatic F"
+endif
+
+set drymassFLG = {drymass}
 if ($drymassFLG) then
     set dmflag = ""
 else
@@ -268,20 +343,20 @@ else
 endif
 
 {Bin}/esma_mpirun -np {NPE} $interp_restartsX -im {imout} -lm {nlevel} \\
-   -do_hydro {hydrostatic} $ioflag $dmflag -nwriter {nwrit} {stretch_str}
+   $hydrostaticflag {stretch_str} $dmflag -nwriter {nwrit} $ioflag
 
 """
      account = config['slurm_pbs']['account']
-     drymassFLG  = config['input']['air']['drymass']
+     drymass     = config['input']['air']['drymass']
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
      log_name = out_dir+'/remap_upper_log'
      job_name = 'remap_upper'
      remap_upper_script = remap_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, log_name = log_name, job_name= job_name, drymassFLG = drymassFLG, \
-             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, \
-             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, hydrostatic = hydrostatic,
-             stretch_str = stretch_str)
+             out_dir = out_dir, log_name = log_name, job_name= job_name, drymass = drymass, \
+             imout = imout, nwrit = nwrit, NPE = NPE, NNODE = NNODE, RESERVATION = RESERVATION, \
+             QOS = QOS, TIME = TIME, CONSTRAINT = CONSTRAINT, PARTITION = PARTITION, nlevel = nlevel, \
+             hydrostatic = hydrostatic, stretch_str = stretch_str)
 
      script_name = './remap_upper.j'
 
@@ -350,7 +425,8 @@ endif
         if len(files) >0:
           restarts_in.append(files[0])
      if (len(restarts_in) == 0) :
-        print("\n try restart file names without time stamp\n")
+        print("\n Try restart file names without time stamp or suffix (e.g., .nc4)\n")
+        print("\n It expects restart file names as xx_internal_rst, e.g., fvcore_internal_rst \n")
         for f in self.air_restarts :
            fname = rst_dir+ '/'+f
            if os.path.exists(fname):

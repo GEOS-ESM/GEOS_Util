@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   interactive questionary to create a yaml configuration file (remap_params.yaml) and 
+#   interactive questionary to create a yaml configuration file (remap_params.yaml) and
 #   a matching command line argument string (remap_restarts.CMD)
 #
 #
 import os
-import subprocess
-import shlex
 import ruamel.yaml
-import shutil
 import questionary
-import glob
 from remap_utils import *
 
 def echo_level(x):
@@ -36,10 +32,10 @@ def echo_bcs(x,opt):
   return False
 
 def default_partition(x):
-   if x['slurm_pbs:qos'] == 'debug':
-      x['slurm_pbs:partition'] = 'compute'
-      return False
-   return True
+    if x['slurm_pbs:qos'] == 'debug':
+        x['slurm_pbs:partition'] = 'compute'
+        return False
+    return True
 
 def validate_merra2_time(text):
    if len(text) == 10 :
@@ -47,7 +43,7 @@ def validate_merra2_time(text):
       if hh in ['03','09','15','21']:
          return True
       else:
-         return False 
+         return False
    else:
      return False
 
@@ -72,7 +68,7 @@ def SITE_GEOSIT(x):
   if GEOS_SITE == "NAS":
      x['input:shared:GEOS-IT']= False
      return False
-  return True 
+  return True
 
 def ask_questions():
 
@@ -121,7 +117,13 @@ def ask_questions():
             "validate": lambda text: validate_geosit_time(text),
             "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
         },
-
+        {
+            "type": "confirm",
+            "name": "input:air:hydrostatic",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
+            "default": True,
+            "when": lambda x: not x['input:shared:MERRA-2'],
+        },
         {
             "type": "path",
             "name": "output:shared:out_dir",
@@ -155,7 +157,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
         },
 
-        {        
+        {
            "type": "select",
            "name": "input:shared:omodel",
            "message": "Select ocean model of input restarts:\n",
@@ -164,7 +166,7 @@ def ask_questions():
            "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
        },
 
-       {   
+       {
           "type": "select",
           "name": "input:shared:ogrid",
           "message": message_ogrid_in,
@@ -208,7 +210,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:stretch",
-            "message": message_stretch, 
+            "message": message_stretch,
             "choices": choices_stretch[1:3],
             "when": lambda x : x['output:shared:stretch'],
         },
@@ -217,7 +219,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG001 grid for new restarts: \n",
-            "choices": choices_res_SG001, 
+            "choices": choices_res_SG001,
             "when": lambda x : x.get('output:shared:stretch') == 'SG001',
         },
 
@@ -225,7 +227,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG002 grid for new restarts: \n",
-            "choices": choices_res_SG002, 
+            "choices": choices_res_SG002,
             "when": lambda x : x.get('output:shared:stretch') == 'SG002',
         },
 
@@ -265,7 +267,7 @@ def ask_questions():
             "type": "text",
             "name": "output:air:nlevel",
             "message": "Enter number of atmospheric levels for new restarts: (71 72 91 127 132 137 144 181)\n",
-            "default": "72",
+            "default": "181",
         },
 
         # to show the message, we ask output first
@@ -290,7 +292,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
-            "default": "NL3",
+            "default": "v13",
             "when": lambda x: x["input:shared:MERRA-2"] or x["input:shared:GEOS-IT"],
         },
 
@@ -299,7 +301,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
-            "default": "NL3",
+            "default": "v13",
             "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
         },
 
@@ -308,7 +310,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_other_new,
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12','GM4'],
         },
 
         {
@@ -316,7 +318,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12','GM4'],
         },
 
         {
@@ -376,8 +378,8 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? 
-                        (NOTE: Preferred method is to regenerate IAU file, 
+            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+                        (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,
             "when": lambda x: echo_level(x),
@@ -434,14 +436,12 @@ def ask_questions():
             "message": "Add labels for BCs version and atm/ocean resolutions to restart file names?",
             "default": False,
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:qos",
             "message": message_qos,
             "default": "debug",
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:account",
@@ -450,23 +450,38 @@ def ask_questions():
         },
         {
             "type": "text",
+            "name": "slurm_pbs:reservation",
+            "message": message_reservation,
+            "default": "",
+        },  
+        {
+            "type": "text",
             "name": "slurm_pbs:partition",
             "message": message_partition,
             "default": '',
+            "when": lambda x : default_partition(x),
         },
    ]
    answers = questionary.prompt(questions)
    answers['input:shared:rst_dir']  = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
    answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
-   if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  
+   if answers.get('input:air:nlevel'):
+       del answers['input:air:nlevel']
+   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
+   if answers["input:shared:MERRA-2"]:
+       answers["input:air:hydrostatic"] = True
+       # Due to the order of questions above, if a user asks
+       # for MERRA2, they will not be asked for GEOS-IT so
+       # we set to false so the next if-block doesn't run
+       answers["input:shared:GEOS-IT"] = False
+   if answers["input:shared:GEOS-IT"]:
+       answers["input:air:hydrostatic"] = True
 
- 
    return answers
 
 if __name__ == "__main__":

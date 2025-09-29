@@ -29,11 +29,11 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
+choices_bc_ops     = ['v13', 'NL3', 'ICA', 'Other']
 
-choices_bc_other   = ['v06','v11','v12']
+choices_bc_other   = ['v06','v11','v12','GM4']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v13']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -79,21 +79,20 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
+ v13: v13         | future               | 12.0             ... present
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
- NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
  ----------------------------------------------------------------------------------
- Other: Additional choices used in model or DAS development.
-           \n\n '''
+ Other: Additional choices used in model or DAS development.\n\n'''
 
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
 message_bc_other   = f'''\n
-
-          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
-          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
-          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n\n'''\
+          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb
+          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
+          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+          GM4:     Ganymed-4_0\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
@@ -114,9 +113,11 @@ message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
 message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
 
-message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default 'debug' to get resource faster; or Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher; or leave it blank)\n"
 
 message_account    = "Select/enter SLURM or PBS account:\n"
+
+message_reservation  = "Enter SLURM or PBS reservation: (If desired, can leave blank)\n"
 
 message_partition  = "Enter SLURM or PBS partition: (If desired, can leave blank)\n"
 
@@ -126,20 +127,22 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name={job_name}
 #SBATCH --output={log_name}
-#SBATCH --qos={QOS}
 #SBATCH --time={TIME}
 #SBATCH --constraint={CONSTRAINT}
+{RESERVATION}
 {PARTITION}
+{QOS}
 """,
 "PBS": """#!/bin/csh -f
 #PBS -l walltime={TIME}
 #PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
 #PBS -N {job_name}
-#PBS -q {QOS}
 #PBS -W group_list={account}
 #PBS -o {log_name}
 #PBS -j oe
+{RESERVATION}
 {PARTITION}
+{QOS}
 """
 }
 
@@ -458,7 +461,7 @@ def get_command_line_from_answers(answers):
 
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
-
+   nonhydrostatic = '' if answers["input:air:hydrostatic"] else " -nonhydrostatic "
    label  = ' -lbl ' if answers["output:shared:label"] else ""
 
    in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")
@@ -489,7 +492,12 @@ def get_command_line_from_answers(answers):
    noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
 
    account = " -account " + answers["slurm_pbs:account"]
-   qos     = " -qos  " + answers["slurm_pbs:qos"]
+   qos = ''
+   if answers["slurm_pbs:qos"] != '':
+     qos     = " -qos  " + answers["slurm_pbs:qos"]
+   reservation = ''
+   if answers["slurm_pbs:reservation"] != '':
+      reservation  = " -reservation  " + answers["slurm_pbs:reservation"]
    partition = ''
    if answers["slurm_pbs:partition"] != '':
       partition  = " -partition  " + answers["slurm_pbs:partition"]
@@ -518,11 +526,13 @@ def get_command_line_from_answers(answers):
                                           wemout + \
                                           label + \
                                           nobkg + \
+                                          nonhydrostatic + \
                                           noagcm_import_rst + \
                                           nolcv + \
                                           out_rs + \
                                           account + \
                                           qos + \
+                                          reservation + \
                                           partition
 
 
@@ -659,5 +669,5 @@ def remove_ogrid_comment(x, opt):
   return False
 
 if __name__ == '__main__' :
-   config = yaml_to_config('c24Toc12.yaml')
+   config = yaml_to_config('remap_params.tpl')
    print_config(config)

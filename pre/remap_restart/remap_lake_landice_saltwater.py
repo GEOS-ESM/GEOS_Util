@@ -146,7 +146,7 @@ class lake_landice_saltwater(remap_base):
      if (saltwater_internal):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_internal + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
-
+  
        # split Saltwater Internal
        # NOTE: split_saltwater==True means that the input restarts are already split.
        #       So we do not split them again.

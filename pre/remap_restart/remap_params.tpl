@@ -7,7 +7,7 @@
 input:
   air:
     drymass: 1
-    hydrostatic: 0
+    hydrostatic: true
   shared:
     MERRA-2: false
     GEOS-IT: false
@@ -64,5 +64,5 @@ output:
     lcv: false
 slurm_pbs:
   account:
-  qos:
+  qos: ''
   partition: ''

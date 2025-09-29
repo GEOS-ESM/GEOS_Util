@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added choice 'blank' for qos in remap_restart python pacakage
+- Added hydrostatic question in remap_restart python pacakage
+- Added function to remap from stretched restarts to stretched restarts
+- Added remapping for GEOS-IT restarts
+- Added new res C1120
+- NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
+- Add support for v13 BCs
+
 ### Changed
 
 ### Fixed
@@ -50,7 +58,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed issue with SLES15 in remapping
+- Fix for All-Times Transport Diagnostics
+- Update `movestat` to extract seasons in files with dots in the name
 - Provide default "zoom" value for remap_restarts yaml file
+
+### Removed
+
+- Removed detection of OS at NCCS as it is all SLES15 now
 
 
 ## [2.1.9] - 2025-06-25
