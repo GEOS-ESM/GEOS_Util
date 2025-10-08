@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Compile `TEM.F90` into an `OBJECT` library to avoid race condition when building
+
 ### Removed
 
 ### Deprecated
@@ -24,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix for All-Times Transport Diagnostics
 - Fixed issues keeping zonal mean plots from working when experiments had different levels/times
 - Update `movestat` to extract seasons in files with dots in the name
-
 
 ## [2.1.10] - 2025-08-29
 

@@ -28,8 +28,20 @@ ecbuild_add_executable (TARGET binarytile.x SOURCES binarytile.F90)
 ecbuild_add_executable (TARGET rs_numtiles.x SOURCES rs_numtiles.F90)
 ecbuild_add_executable (TARGET rs_vinterp.x SOURCES rs_vinterp.F90)
 ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
-ecbuild_add_executable (TARGET time_ave.x SOURCES time_ave.F TEM.F90 DEFINITIONS mpi)
-ecbuild_add_executable (TARGET Create_TEM_Diag.x SOURCES Create_TEM_Diag.F TEM.F90)
+
+# Because TEM is a bare subroutine (not in a module), we occasionally
+# hit a race condition. So we will compile it into an OBJECT library
+ecbuild_add_library(TARGET tem_lib SOURCES TEM.F90 TYPE OBJECT)
+
+# Link both executables against it
+ecbuild_add_executable(TARGET time_ave.x
+                       SOURCES time_ave.F
+                       LIBS tem_lib
+                       DEFINITIONS mpi)
+
+ecbuild_add_executable(TARGET Create_TEM_Diag.x
+                       SOURCES Create_TEM_Diag.F
+                       LIBS tem_lib)
 
 ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
