@@ -3,6 +3,7 @@
       use ESMF
 
       use dynamics_lattice_module
+      use tem_mod, only: TEM
       implicit none
       type ( dynamics_lattice_type ) lattice
 

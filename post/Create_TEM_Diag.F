@@ -1,4 +1,5 @@
       program  main
+      use tem_mod, only: TEM
       implicit none
 
 ! **********************************************************************
@@ -33,7 +34,7 @@
       character*256, allocatable ::  vname(:)
       character*256, allocatable :: vtitle(:)
       character*256, allocatable :: vunits(:)
-                                                                                                                     
+
       real,    allocatable :: TEM_VARS(:,:,:,:)
       real,    allocatable ::      lat(:)
       real,    allocatable ::      lon(:)
@@ -43,7 +44,7 @@
       integer, allocatable ::   yymmdd(:)
       integer, allocatable ::   hhmmss(:)
       integer, allocatable ::    kmvar(:)
-                                                                                                                     
+
       integer nargs, iargc
       character*256, allocatable ::   arg(:)
       character*256, allocatable :: fname(:)
@@ -132,7 +133,7 @@
 
       call gfio_open       ( trim(filename),1,id,rc )
       call gfio_diminquire ( id,im,jm,lm,ntime,nvars,ngatts,rc )
-                                                                                                                     
+
       TEM_NVARS = 7
 
       allocate ( lon(im) )
@@ -146,7 +147,7 @@
       allocate (  kmvar(nvars) )
       allocate ( vrange(2,nvars) )
       allocate ( prange(2,nvars) )
-                                                                                                                     
+
       call gfio_inquire ( id,im,jm,lm,ntime,nvars,
      .                    title,source,contact,undef,
      .                    lon,lat,lev,levunits,
@@ -187,7 +188,7 @@
       deallocate ( vrange )
       deallocate ( prange )
       deallocate ( TEM_VARS )
-                                                                                                                     
+
       enddo
 
 ! **********************************************************************
