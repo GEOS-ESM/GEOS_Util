@@ -106,11 +106,6 @@ def get_answers_from_command_line(cml):
       answers["input:shared:bc_base"]     =  cml.in_bc_base
       answers["input:shared:omodel"]      = cml.ocnmdlin
       answers["input:shared:bc_version"]  = cml.bcvin
-      # If inputs are GM4, set split_saltwater to False which means split the saltwater restart
-      # as split_saltwater = True means the inputs are already split
-      answers["output:surface:split_saltwater"] = True
-      if 'GM4' in answers["input:shared:bc_version"]:
-         answers['output:surface:split_saltwater'] = False
       answers["input:surface:catch_model"]= cml.catch_model
       answers["input:shared:stretch"]     = cml.in_stretch
       answers["input:shared:rst_dir"]     = os.path.abspath(os.path.expanduser(cml.rst_dir))

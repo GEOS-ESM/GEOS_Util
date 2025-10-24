@@ -586,7 +586,7 @@ def get_config_from_answers(answers, config_tpl = False):
 
    bc_version = config['output']['shared'].get('bc_version')
    config['output']['surface']['split_saltwater'] = True
-   if 'Ganymed' in bc_version :
+   if 'Ganymed' in bc_version or 'GM4' in bc_version:
      config['output']['surface']['split_saltwater'] = False
 
    return config
