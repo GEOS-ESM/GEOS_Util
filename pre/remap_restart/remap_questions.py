@@ -310,7 +310,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_other_new,
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12','GM4'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v06','v11','v12','v14'],
         },
 
         {
@@ -318,7 +318,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12','GM4'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v06','v11','v12','v14'],
         },
 
         {
@@ -453,7 +453,7 @@ def ask_questions():
             "name": "slurm_pbs:reservation",
             "message": message_reservation,
             "default": "",
-        },  
+        },
         {
             "type": "text",
             "name": "slurm_pbs:partition",
