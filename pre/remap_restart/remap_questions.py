@@ -292,7 +292,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
-            "default": "v13",
+            "default": "v12",
             "when": lambda x: x["input:shared:MERRA-2"] or x["input:shared:GEOS-IT"],
         },
 
@@ -301,7 +301,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
-            "default": "v13",
+            "default": "v12",
             "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
         },
 

@@ -30,9 +30,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v13', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v12', 'NL3', 'ICA', 'Other']
 
-choices_bc_other   = ['v06','v11','v12','v14','GM4']
+choices_bc_other   = ['v06','v11','v14','GM4']
 
 choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v14']
 
@@ -80,7 +80,7 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v13: v13         | future               | 12.0             ... present
+ v12: v12         | future               | 12.0             ... present
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -89,11 +89,14 @@ message_bc_ops     = f'''\n
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
+# v12 used to be in the "other" section but is now the default, but we preserve this information
+# in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
+#v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
+
 message_bc_other   = f'''\n
 
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
-          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
           v14:     v12 + Coupled MOM6/v2 ocean bathymetry (OM4) and v2 topography for atmosphere \n
           GM4:     Ganymed-4_0\n\n'''\
 
