@@ -180,12 +180,6 @@ class lake_landice_saltwater(remap_base):
          seaice  = ''
          self.run_and_log(cmd, log_name)
 
-         # We can now *remove* the unsplit saltwater import restart to avoid confusion
-         unsplit_file = 'OutData/' + saltwater_import
-         if os.path.exists(unsplit_file):
-            print('\n Removing unsplit saltwater import restart: ' + unsplit_file + '\n')
-            os.remove(unsplit_file)
-
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)
