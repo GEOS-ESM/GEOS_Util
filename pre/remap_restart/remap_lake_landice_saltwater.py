@@ -138,7 +138,7 @@ class lake_landice_saltwater(remap_base):
      zoom = config['input']['surface']['zoom']
      if zoom is None :
         zoom = get_zoom(config)
- 
+
      log_name = out_dir+'/remap_lake_landice_saltwater_log'
      if os.path.exists(log_name):
         os.remove(log_name)
@@ -146,17 +146,24 @@ class lake_landice_saltwater(remap_base):
      if (saltwater_internal):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_internal + ' 0 ' + str(zoom)
        self.run_and_log(cmd, log_name)
-  
+
        # split Saltwater Internal
        # NOTE: split_saltwater==True means that the input restarts are already split.
        #       So we do not split them again.
-       if not config['output']['surface']['split_saltwater']:
+       if not config['input']['surface']['split_saltwater']:
          print("\nSplitting Saltwater Internal...\n")
          cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_internal
 #         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
          self.run_and_log(cmd, log_name)
+
+         # We can now *remove* the unsplit saltwater internal restart to avoid confusion
+         unsplit_file = 'OutData/' + saltwater_internal
+         if os.path.exists(unsplit_file):
+            print('\n Removing unsplit saltwater internal restart: ' + unsplit_file + '\n')
+            os.remove(unsplit_file)
+
 
      if (saltwater_import):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater_import + ' 0 ' + str(zoom)
@@ -165,13 +172,20 @@ class lake_landice_saltwater(remap_base):
        # split Saltwater Import
        # NOTE: split_saltwater==True means that the input restarts are already split.
        #       So we do not split them again.
-       if not config['output']['surface']['split_saltwater']:
+       if not config['input']['surface']['split_saltwater']:
          print("\nSplitting Saltwater Import...\n")
          cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater_import
 #         subprocess.call(shlex.split(cmd))
          openwater = ''
          seaice  = ''
          self.run_and_log(cmd, log_name)
+
+         # We can now *remove* the unsplit saltwater import restart to avoid confusion
+         unsplit_file = 'OutData/' + saltwater_import
+         if os.path.exists(unsplit_file):
+            print('\n Removing unsplit saltwater import restart: ' + unsplit_file + '\n')
+            os.remove(unsplit_file)
+
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)

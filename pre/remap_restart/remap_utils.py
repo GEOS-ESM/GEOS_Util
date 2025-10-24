@@ -584,9 +584,16 @@ def get_config_from_answers(answers, config_tpl = False):
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
 
-   bc_version = config['output']['shared'].get('bc_version')
+   # Do the inputs have a split saltwater?
+   input_bc_version = config['input']['shared'].get('bc_version')
+   config['input']['surface']['split_saltwater'] = True
+   if 'Ganymed' in input_bc_version or 'GM4' in input_bc_version:
+     config['input']['surface']['split_saltwater'] = False
+
+   # Do the outputs need a split saltwater?
+   output_bc_version = config['output']['shared'].get('bc_version')
    config['output']['surface']['split_saltwater'] = True
-   if 'Ganymed' in bc_version or 'GM4' in bc_version:
+   if 'Ganymed' in output_bc_version or 'GM4' in output_bc_version:
      config['output']['surface']['split_saltwater'] = False
 
    return config
