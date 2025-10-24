@@ -96,7 +96,6 @@ message_bc_other   = f'''\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
           v14:     v12 + Coupled MOM6/v2 ocean bathymetry (OM4) and v2 topography for atmosphere \n
           GM4:     Ganymed-4_0\n\n'''\
-'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
