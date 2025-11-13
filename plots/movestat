@@ -231,7 +231,7 @@ echo " "
               touch                                                  awk_command.$datetime
               echo "#! /bin/csh -f"                               >> awk_command.$datetime
               echo lockfile -3 LOCKFILE                           >> awk_command.$datetime
-              echo "if( -e add_years.csh ) ./add_years.csh $year" >> awk_command.$datetime
+              echo "if( -e add_stats_years.csh ) ./add_stats_years.csh $year" >> awk_command.$datetime
               echo /bin/rm -f  LOCKFILE                           >> awk_command.$datetime
               chmod +x awk_command.$datetime
               scp awk_command.$datetime $webid@${server}:${www}/${expid}/buttons
