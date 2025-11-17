@@ -181,7 +181,7 @@ if( "$season" == "" ) then
     # Check corcmp directory
     if( -e $pltdir/corcmp & ( $plots == NULL | $plots == corcmp ) ) then
         cd $pltdir/corcmp
-        set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage\..*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
+        set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
         set all_seasons = "$all_seasons $found_seasons"
     endif
     
@@ -189,7 +189,7 @@ if( "$season" == "" ) then
     foreach DSC ($DSCS)
         if( -e $pltdir/$DSC & ( $plots == NULL | $plots == sys ) ) then
             cd $pltdir/$DSC
-            set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage\..*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
+            set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
             set all_seasons = "$all_seasons $found_seasons"
         endif
     end
@@ -199,7 +199,7 @@ if( "$season" == "" ) then
         if( $DSC != $DSCS[1] ) then
             if( -e $pltdir/$DSCS[1].$DSC & ( $plots == NULL | $plots == syscmp ) ) then
                 cd $pltdir/$DSCS[1].$DSC
-                set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage\..*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
+                set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
                 set all_seasons = "$all_seasons $found_seasons"
             endif
         endif
