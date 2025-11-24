@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Remove `regrid.pl`
 - Removed detection of OS at NCCS as it is all SLES15 now
 
 
