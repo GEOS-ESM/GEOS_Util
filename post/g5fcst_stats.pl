@@ -754,6 +754,11 @@ sub submit_calcjob {
       $ntspn   = 42;
       $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
       $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
+    } elsif ( $npn == 128 ) {
+      $mynodes = "mil";
+      $ntspn   = 42;
+      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use MIL
+      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use MIL
     } else {
       $mynodes = "hasw";
       $ntspn   = 24;
