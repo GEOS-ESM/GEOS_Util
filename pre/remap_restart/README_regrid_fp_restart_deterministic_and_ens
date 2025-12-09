@@ -1,0 +1,154 @@
+To regrid restart files (for GEOSadas-5.42.11?), "remap_restart.py" should be used rather than "regrid.pl".
+
+According to Scott, using “regrid.pl” is not recommended anymore. The “remap_restarts.py” tool is the recommended and supported tool. There are bugs in the old perl script, and no development has happened there in quite a while. Furthermore, it will be removed altogether with the upcoming release of GCM v12. So now is a good time to switch to the new python utility.
+
+-------------------------------------
+1. For deterministic restart files,
+-------------------------------------
+
+source /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/g5_modules.sh
+
+python3 /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/remap_restarts.py
+
+-------------------------------------
+2. For ens restarts, 
+-------------------------------------
+
+cd /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens/mem001
+
+source /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/g5_modules.sh 
+
+
+python3 /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/remap_restarts_ens.py
+(remap_restarts_ens.py, which was edited for different ens restart file name by Eun-Gyeong, should be used.)
+
+(Ensemble related python scripts (remap*ens.py) can be found in /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/src/Shared/@GMAO_Shared/@GEOS_Util/pre/remap_restart/)
+
+======================================================================
+Options for remap_restarts_ens.py
+===================================
+? Remap archived MERRA-2 restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires n
+ No
+? Remap archived GEOS-IT restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires n
+ No
+? Enter input directory with restart files to be remapped:
+ /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens/mem001/
+? Enter output directory for new restarts:
+ /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens_reg/mem001/
+? Select ocean model of input restarts:
+ data
+? Select data ocean grid/resolution of input restarts:
+ CS  (same as atmosphere OSTIA cubed-sphere grid)
+? Remap to a stretched cubed-sphere grid? No
+? Enter atmospheric grid for new restarts:
+ C90
+? Select ocean model for new restarts:
+ data
+? Select data ocean grid/resolution for new restarts:
+ CS  (same as atmosphere OSTIA cubed-sphere grid)
+? Enter number of atmospheric levels for new restarts: (71 72 91 127 132 137 144 181)
+ 72
+? Select boundary conditions (BCs) version of input restarts:
+ NL3
+? Select BCs version for new restarts:
+ NL3
+? Select BCs base directory for input restarts:
+ NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+ Land BCs for input restarts: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/land/CF0180x6C_CF0180x6C
+? Select BCs base directory for new restarts:
+ NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+ Land BCs for output restarts: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/land/CF0090x6C_CF0090x6C
+
+? Remap upper air restarts? Yes
+? Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+                        (NOTE: Preferred method is to regenerate IAU file,
+                               but IF requested, remapping will be performed.) Yes
+? Remap surface restarts? Yes
+? Remap bkg files?  (Required by ADAS but not mapped onto ADAS grid; run one ADAS cycle to spin up.)  Yes
+? Write lcv file?  (Required by ADAS.)  Yes
+? Enter value of WEMIN (min. snow water equivalent parameter) used in simulation that produced input restarts.
+ 13
+? Enter value of WEMIN (min. snow water equivalent parameter) to be used in simulation with new restarts.
+ 13
+? Enter value of zoom parameter for surface restarts [1-8]?  (Search radius, smaller value means larger radius.)
+ 2
+? Enter experiment ID for new restarts:  (Added as prefix to new restart file names; can leave blank.)
+ pblhl
+? Add labels for BCs version and atm/ocean resolutions to restart file names? No
+? SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal'
+ debug
+? Select/enter SLURM or PBS account:
+ s0818
+? Enter SLURM or PBS partition: (If desired, can leave blank)
+
+ input:
+    air:
+       drymass: 1
+       hydrostatic: 0
+    shared:
+       MERRA-2: False
+       GEOS-IT: False
+       stretch: False
+       omodel: data
+       agrid: C180
+       bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+       bc_version: NL3
+       expid: f5295_fp
+       ogrid: C180
+       rst_dir: /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens/mem001
+       yyyymmddhh: 2024071421
+    surface:
+       zoom: 2
+       wemin: 13
+       catch_model: catch
+       catch_tilefile: None
+ output:
+    shared:
+       label: False
+       stretch: False
+       omodel: data
+       agrid: C90
+       bc_base: /discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles
+       bc_version: NL3
+       expid: pblhl
+       ogrid: C90
+       out_dir: /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens_reg/mem001
+    air:
+       remap: True
+       nlevel: 72
+       agcm_import_rst: True
+    surface:
+       split_saltwater: True
+       surflay: 50.0
+       wemin: 13
+       remap_water: True
+       remap_catch: True
+       catch_tilefile: None
+       EASE_grid: None
+    analysis:
+       bkg: True
+       aqua: True
+       lcv: True
+ slurm_pbs:
+    account: s0818
+    qos: debug
+    partition:
+? Above is the YAML config file, would you like to continue? Yes
+? Above is the YAML config file, would you like to continue? Yes
+? Submit the jobs now ? Yes
+======================================================================
+
+Use regrid_ens.sh to do regridding for each member directory (e.g., MEM002, MEM003, ...).
+
+Use remap_restarts_ens.py to do regridding for ensmean directory.
+
+cp mem001/f5295_fp.fvcore_internal_rst.20240714_21z.nc4 ensmean/ 
+(fvcore_internal file is required to read grid info correctly.)
+
+cd ensmean
+
+python3 /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/remap_restarts_ens.py
+(only Remap bkg files) in ensmean directory. 
+
+Overwrite the regirdded files in each member and ensmean directories to atmens (from atmens_reg) using cp_mem_files.atmens.sh.
+
