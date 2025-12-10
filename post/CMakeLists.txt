@@ -32,14 +32,15 @@ ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
 # There is a possible race condition with both of these using the module in TEM.F90
 # So we use an OBJECT library to avoid this
 
-add_library (tem_lib OBJECT TEM.F90)
+add_library(tem_lib OBJECT TEM.F90)
+target_link_libraries(tem_lib MAPL.constants)
 
-add_executable (time_ave.x time_ave.F)
-target_link_libraries (time_ave.x tem_lib)
-target_compile_definitions (time_ave.x PRIVATE mpi)
+add_executable(time_ave.x time_ave.F)
+target_link_libraries(time_ave.x tem_lib)
+target_compile_definitions(time_ave.x PRIVATE mpi)
 
-add_executable (Create_TEM_Diag.x Create_TEM_Diag.F)
-target_link_libraries (Create_TEM_Diag.x tem_lib)
+add_executable(Create_TEM_Diag.x Create_TEM_Diag.F)
+target_link_libraries(Create_TEM_Diag.x tem_lib)
 
 ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
