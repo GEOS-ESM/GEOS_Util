@@ -102,14 +102,14 @@ def get_answers_from_command_line(cml):
       init_merra2(answers)
    elif  cml.geosit:
       init_geosit(answers)
-   else:   
+   else:
       answers["input:shared:bc_base"]     =  cml.in_bc_base
       answers["input:shared:omodel"]      = cml.ocnmdlin
       answers["input:shared:bc_version"]  = cml.bcvin
       answers["input:surface:catch_model"]= cml.catch_model
       answers["input:shared:stretch"]     = cml.in_stretch
       answers["input:shared:rst_dir"]     = os.path.abspath(os.path.expanduser(cml.rst_dir))
-      fvcore_info(answers) 
+      fvcore_info(answers)
       ogrid                               = cml.oceanin
       if ogrid == "CS":
          ogrid = answers["input:shared:agrid"]
