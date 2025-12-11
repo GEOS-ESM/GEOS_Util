@@ -1318,13 +1318,13 @@ cd  $SOURCE/plot
     set CMPEXP    = `grep    PLOT_CMPEXP: plot.rc | grep -v '#' | cut -d':' -f2- `
     set MISCTMP   = `grep      PLOT_MISC: plot.rc | grep -v '#' | tr "[:lower:]" "[:upper:]"`
     set NJOBS     = `grep      PLOT_JOBS: plot.rc | grep -v '#' | cut -d':' -f2- `
-    set MISC      = ''
+    set MISCVARS  = ''
 
     set   miscnum  = $#MISCTMP
     if( $#miscnum != 0 ) then
         @ m = 2
         while( $m <= $miscnum )
-        set MISC = `echo $MISC $MISCTMP[$m]`
+        set MISCVARS = `echo $MISCVARS $MISCVARS[$m]`
         @ m = $m + 1
         end
     endif

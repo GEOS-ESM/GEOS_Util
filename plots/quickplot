@@ -35,12 +35,45 @@ if( $nmax == 0 ) then
       echo "         [-rc       HISTORY.rc]"
       echo "         [-ddf      DDF_FILE]"
       echo "         [-clim     CLIM]"
-      echo "         [-taylor   TAYLOR]"
       echo "         [-ana      ANALYSIS]"
-      echo "         [-std      STD_DEV ]"
       echo "         [-gradsx   GRADSX]"
       echo "         [-cmpexp_only  CMPEXP_ONLY]"
       echo "         [-cmpops_only  CMPOPS_ONLY]"
+      echo "         [-taylor   TAYLOR]"
+      echo "         [-progz    PROGZ]"
+      echo "         [-progh    PROGH]"
+      echo "         [-moisth   MOISTH]"
+      echo "         [-moistz   MOISTZ]"
+      echo "         [-moistv   MOISTV]"
+      echo "         [-o3       O3]"
+      echo "         [-progv    PROGV]"
+      echo "         [-progcv   PROGCV]"
+      echo "         [-wstar    WSTAR]"
+      echo "         [-surf     SURF]"
+      echo "         [-rad      RAD]"
+      echo "         [-gocart   GOCART]"
+      echo "         [-tendz    TENDZ]"
+      echo "         [-tendh    TENDH]"
+      echo "         [-turbz    TURBZ]"
+      echo "         [-turbh    TURBH]"
+      echo "         [-gwdz     GWDZ]"
+      echo "         [-gwdh     GWDH]"
+      echo "         [-radz     RADZ]"
+      echo "         [-radh     RADH]"
+      echo "         [-anaz     ANAZ]"
+      echo "         [-anaz_std ANAZ_STD]"
+      echo "         [-anaz_rms ANAZ_RMS]"
+      echo "         [-anaz_bias ANAZ_BIAS]"
+      echo "         [-anaz_con ANAZ_CON]"
+      echo "         [-anah     ANAH]"
+      echo "         [-anah_std ANAH_STD]"
+      echo "         [-anah_rms ANAH_RMS]"
+      echo "         [-anah_bias ANAH_BIAS]"
+      echo "         [-tseries  TSERIES]"
+      echo "         [-quads    QUADS]"
+      echo "         [-energy   ENERGY]"
+      echo "         [-chemh    CHEMH]"
+      echo "         [-misc     MISC]"
       echo " "
       echo "where:    SOURCE_DIRECTORY: is the source directory for experiment"
       echo "                    SEASON: is the season to plot (eg. DJF, JAN)"
@@ -62,12 +95,45 @@ if( $nmax == 0 ) then
       echo "                            of the desired rc file to use                   (Default: SOURCE_DIRECTORY/HISTORY.rc)"
       echo "                  DDF_FILE: is the ddf filename (including full path) to use"
       echo "                      CLIM: Logical for using Climatology or Actual Dates   (Default: CLIM     = TRUE)"
-      echo "                    TAYLOR: Logical for producing Taylor Plots              (Default: TAYLOR   = TRUE)"
       echo "                  ANALYSIS: Logical for producing Analysis Contour Levels   (Default: ANALYSIS = FALSE)"
-      echo "                   STD_DEV: Logical for producing Standard Deviation Plots  (Default: STD_DEV  = FALSE)"
       echo "                    GRADSX: GrADS executable to use for processing          (Default: GRADSX   = gradsnc4)"
       echo "               CMPEXP_ONLY: Logical for producing ONLY CMPEXP plots         (Default: CMPEXP_ONLY = FALSE)"
       echo "               CMPOPS_ONLY: Logical for producing ONLY CMPOPS plots         (Default: CMPOPS_ONLY = FALSE)"
+      echo "                    TAYLOR: Logical for producing Taylor Plots              (Default: TAYLOR   = FALSE)"
+      echo "                    PROGZ: Logical for producing PROGZ plots                (Default: PROGZ    = FALSE)"
+      echo "                    PROGH: Logical for producing PROGH plots                (Default: PROGH    = FALSE)"
+      echo "                    MOISTH: Logical for producing MOISTH plots              (Default: MOISTH   = FALSE)"
+      echo "                    MOISTZ: Logical for producing MOISTZ plots              (Default: MOISTZ   = FALSE)"
+      echo "                    MOISTV: Logical for producing MOISTV plots              (Default: MOISTV   = FALSE)"
+      echo "                    O3: Logical for producing O3 plots                      (Default: O3       = FALSE)"
+      echo "                    PROGV: Logical for producing PROGV plots                (Default: PROGV    = FALSE)"
+      echo "                    PROGCV: Logical for producing PROGCV plots              (Default: PROGCV   = FALSE)"
+      echo "                    WSTAR: Logical for producing WSTAR plots                (Default: WSTAR    = FALSE)"
+      echo "                    SURF: Logical for producing SURF plots                  (Default: SURF     = FALSE)"
+      echo "                    RAD: Logical for producing RAD plots                    (Default: RAD      = FALSE)"
+      echo "                    GOCART: Logical for producing GOCART plots              (Default: GOCART   = FALSE)"
+      echo "                    TENDZ: Logical for producing TENDZ plots                (Default: TENDZ    = FALSE)"
+      echo "                    TENDH: Logical for producing TENDH plots                (Default: TENDH    = FALSE)"
+      echo "                    TURBZ: Logical for producing TURBZ plots                (Default: TURBZ    = FALSE)"
+      echo "                    TURBH: Logical for producing TURBH plots                (Default: TURBH    = FALSE)"
+      echo "                    GWDZ: Logical for producing GWDZ plots                  (Default: GWDZ     = FALSE)"
+      echo "                    GWDH: Logical for producing GWDH plots                  (Default: GWDH     = FALSE)"
+      echo "                    RADZ: Logical for producing RADZ plots                  (Default: RADZ     = FALSE)"
+      echo "                    RADH: Logical for producing RADH plots                  (Default: RADH     = FALSE)"
+      echo "                    ANAZ: Logical for producing ANAZ plots                  (Default: ANAZ     = FALSE)"
+      echo "                    ANAZ_STD: Logical for producing ANAZ_STD plots          (Default: ANAZ_STD = FALSE)"
+      echo "                    ANAZ_RMS: Logical for producing ANAZ_RMS plots          (Default: ANAZ_RMS = FALSE)"
+      echo "                    ANAZ_BIAS: Logical for producing ANAZ_BIAS plots        (Default: ANAZ_BIAS = FALSE)"
+      echo "                    ANAZ_CON: Logical for producing ANAZ_CON plots          (Default: ANAZ_CON = FALSE)"
+      echo "                    ANAH: Logical for producing ANAH plots                  (Default: ANAH     = FALSE)"
+      echo "                    ANAH_STD: Logical for producing ANAH_STD plots          (Default: ANAH_STD = FALSE)"
+      echo "                    ANAH_RMS: Logical for producing ANAH_RMS plots          (Default: ANAH_RMS = FALSE)"
+      echo "                    ANAH_BIAS: Logical for producing ANAH_BIAS plots        (Default: ANAH_BIAS = FALSE)"
+      echo "                    TSERIES: Logical for producing TSERIES plots            (Default: TSERIES  = FALSE)"
+      echo "                    QUADS: Logical for producing QUADS plots                (Default: QUADS    = FALSE)"
+      echo "                    ENERGY: Logical for producing ENERGY plots              (Default: ENERGY   = FALSE)"
+      echo "                    CHEMH: Logical for producing CHEMH plots                (Default: CHEMH    = FALSE)"
+      echo "                    MISC: Logical for producing MISC plots                  (Default: MISC     = FALSE)"
       echo " "
       exit 1
 endif
@@ -83,9 +149,7 @@ set expid    = NULL
 set hist     = xxx
 set rc       = HISTORY.rc
 set clim     = true
-set taylor   = true
 set analysis = false
-set std_dev  = false
 set zlog     = OFF
 set begdate  = NULL
 set enddate  = NULL
@@ -172,10 +236,6 @@ while( $n <= $nmax )
              if($type  == "1" ) set type = L
              if($type  == "2" ) set type = P
        endif
-       if( "$argv[$n]" == "-taylor"   ) then
-                    @ n = $n + 1
-             set taylor = $argv[$n]
-       endif
        if( "$argv[$n]" == "-ddf"   ) then
                     @ n = $n + 1
              set ddffile = $argv[$n]
@@ -184,7 +244,43 @@ while( $n <= $nmax )
                     @ n = $n + 1
              set gradsx = $argv[$n]
        endif
-       if( "$argv[$n]" == "-std"    ) set std_dev  = true
+
+       if( "$argv[$n]" == "-taylor"    ) setenv DO_TAYLOR true
+       if( "$argv[$n]" == "-progz"     ) setenv DO_PROGZ true
+       if( "$argv[$n]" == "-progh"     ) setenv DO_PROGH true
+       if( "$argv[$n]" == "-moisth"    ) setenv DO_MOISTH true
+       if( "$argv[$n]" == "-moistz"    ) setenv DO_MOISTZ true
+       if( "$argv[$n]" == "-moistv"    ) setenv DO_MOISTV true
+       if( "$argv[$n]" == "-o3"        ) setenv DO_O3 true
+       if( "$argv[$n]" == "-progv"     ) setenv DO_PROGV true
+       if( "$argv[$n]" == "-progcv"    ) setenv DO_PROGCV true
+       if( "$argv[$n]" == "-wstar"     ) setenv DO_WSTAR true
+       if( "$argv[$n]" == "-surf"      ) setenv DO_SURF true
+       if( "$argv[$n]" == "-rad"       ) setenv DO_RAD true
+       if( "$argv[$n]" == "-gocart"    ) setenv DO_GOCART true
+       if( "$argv[$n]" == "-tendz"     ) setenv DO_TENDZ true
+       if( "$argv[$n]" == "-tendh"     ) setenv DO_TENDH true
+       if( "$argv[$n]" == "-turbz"     ) setenv DO_TURBZ true
+       if( "$argv[$n]" == "-turbh"     ) setenv DO_TURBH true
+       if( "$argv[$n]" == "-gwdz"      ) setenv DO_GWDZ true
+       if( "$argv[$n]" == "-gwdh"      ) setenv DO_GWDH true
+       if( "$argv[$n]" == "-radz"      ) setenv DO_RADZ true
+       if( "$argv[$n]" == "-radh"      ) setenv DO_RADH true
+       if( "$argv[$n]" == "-anaz"      ) setenv DO_ANAZ true
+       if( "$argv[$n]" == "-anaz_std"  ) setenv DO_ANAZ_STD true
+       if( "$argv[$n]" == "-anaz_rms"  ) setenv DO_ANAZ_RMS true
+       if( "$argv[$n]" == "-anaz_bias" ) setenv DO_ANAZ_BIAS true
+       if( "$argv[$n]" == "-anaz_con"  ) setenv DO_ANAZ_CON true
+       if( "$argv[$n]" == "-anah"      ) setenv DO_ANAH true
+       if( "$argv[$n]" == "-anah_std"  ) setenv DO_ANAH_STD true
+       if( "$argv[$n]" == "-anah_rms"  ) setenv DO_ANAH_RMS true
+       if( "$argv[$n]" == "-anah_bias" ) setenv DO_ANAH_BIAS true
+       if( "$argv[$n]" == "-tseries"   ) setenv DO_TSERIES true
+       if( "$argv[$n]" == "-quads"     ) setenv DO_QUADS true
+       if( "$argv[$n]" == "-energy"    ) setenv DO_ENERGY true
+       if( "$argv[$n]" == "-chemh"     ) setenv DO_CHEMH true
+       if( "$argv[$n]" == "-misc"      ) setenv DO_MISC true
+
        if( "$argv[$n]" == "-ana"    ) set analysis = true
        if( "$argv[$n]" == "-debug"  ) set debug    = true
        if( "$argv[$n]" == "-move"   ) set move     = true
@@ -272,9 +368,7 @@ if( $#seasons > 1    ) set clim = false
 
 setenv SOURCE         $source
 setenv CLIM           $clim
-setenv TAYLOR         $taylor
 setenv ANALYSIS       $analysis
-setenv STD_DEV        $std_dev
 setenv TBEG           $begdate
 setenv TEND           $enddate
 setenv GRADSX         $gradsx 
@@ -387,14 +481,48 @@ echo "    GEOSUTIL = " $GEOSUTIL
 echo "      SOURCE = " $SOURCE
 echo "VERIFICATION = " $VERIFICATION
 echo "        CLIM = " $CLIM
-echo "      TAYLOR = " $TAYLOR
 echo "    ANALYSIS = " $ANALYSIS
-echo "     STD_DEV = " $STD_DEV
 echo "        PLOT = " $plot
 echo "      CMPEXP = " $CMPEXP
 echo "      CMPOPS = " $cmpops
 echo " CMPEXP_ONLY = " $cmpexp_only
 echo " CMPOPS_ONLY = " $cmpops_only
+echo " "
+echo "      TAYLOR = " $?DO_TAYLOR
+echo "      PROGZ = " $?DO_PROGZ
+echo "      PROGH = " $?DO_PROGH
+echo "      MOISTH = " $?DO_MOISTH
+echo "      MOISTZ = " $?DO_MOISTZ
+echo "      MOISTV = " $?DO_MOISTV
+echo "      O3 = " $?DO_O3
+echo "      PROGV = " $?DO_PROGV
+echo "      PROGCV = " $?DO_PROGCV
+echo "      WSTAR = " $?DO_WSTAR
+echo "      SURF = " $?DO_SURF
+echo "      RAD = " $?DO_RAD
+echo "      GOCART = " $?DO_GOCART
+echo "      TENDZ = " $?DO_TENDZ
+echo "      TENDH = " $?DO_TENDH
+echo "      TURBZ = " $?DO_TURBZ
+echo "      TURBH = " $?DO_TURBH
+echo "      GWDZ = " $?DO_GWDZ
+echo "      GWDH = " $?DO_GWDH
+echo "      RADZ = " $?DO_RADZ
+echo "      RADH = " $?DO_RADH
+echo "      ANAZ = " $?DO_ANAZ
+echo "      ANAZ_STD = " $?DO_ANAZ_STD
+echo "      ANAZ_RMS = " $?DO_ANAZ_RMS
+echo "      ANAZ_BIAS = " $?DO_ANAZ_BIAS
+echo "      ANAZ_CON = " $?DO_ANAZ_CON
+echo "      ANAH = " $?DO_ANAH
+echo "      ANAH_STD = " $?DO_ANAH_STD
+echo "      ANAH_RMS = " $?DO_ANAH_RMS
+echo "      ANAH_BIAS = " $?DO_ANAH_BIAS
+echo "      TSERIES = " $?DO_TSERIES
+echo "      QUADS = " $?DO_QUADS
+echo "      ENERGY = " $?DO_ENERGY
+echo "      CHEMH = " $?DO_CHEMH
+echo "      MISC = " $?DO_MISC
 echo " "
 
 set DUMMY = `echo $CMPEXP`
