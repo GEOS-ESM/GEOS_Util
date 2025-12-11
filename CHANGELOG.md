@@ -15,15 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added remapping for GEOS-IT restarts
 - Added new res C1120
 - NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
-- Add support for v13 BCs
+- Add support for v14 BCs
 
 ### Changed
 
+- Update `movestat` to allow for multiple seasons
+
 ### Fixed
+
+- Make `TEM.F90` a module to try and avoid build race conditions
 
 ### Removed
 
 ### Deprecated
+
+## [2.1.11] - 2025-09-16
+
+### Fixed
+
+- Fix for All-Times Transport Diagnostics
+- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
+- Update `movestat` to extract seasons in files with dots in the name
 
 
 ## [2.1.10] - 2025-08-29
@@ -70,7 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
 - Fixed issue with `movestat` which only allowed single-month seasons
 
 ### Removed
