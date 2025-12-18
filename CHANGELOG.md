@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Make `TEM.F90` a module to try and avoid build race conditions
+- Make `TEM.F90` a module to try and avoid build race conditions and build as object library in CMake to avoid Intel parallel build issues.
 
 ### Removed
 
