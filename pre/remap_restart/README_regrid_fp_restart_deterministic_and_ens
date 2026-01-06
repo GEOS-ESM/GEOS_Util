@@ -138,7 +138,12 @@ Options for remap_restarts_ens.py
 ? Submit the jobs now ? Yes
 ======================================================================
 
+cp atmens_reg/mem001/remap_param.yaml atmens_reg/
+
 Use regrid_ens.sh to do regridding for each member directory (e.g., MEM002, MEM003, ...).
+(Ensemble related scripts are saved in /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/src/Shared/@GMAO_Shared/@GEOS_Util/pre/remap_restart/ens_scripts/)
+
+cp /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/src/Shared/@GMAO_Shared/@GEOS_Util/pre/remap_restart/ens_scripts/regrid_ens.sh atmens_reg/
 
 Use remap_restarts_ens.py to do regridding for ensmean directory.
 
@@ -152,3 +157,6 @@ python3 /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas
 
 Overwrite the regirdded files in each member and ensmean directories to atmens (from atmens_reg) using cp_mem_files.atmens.sh.
 
+rm atmens/ensmean/pblhl.fvcore_internal_rst.20240714_21z.nc4 <-- is it needed?
+
+mv original resol files to a subdirectory 'orig_resol' due to MAPL_Generic.F90 error
