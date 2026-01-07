@@ -34,11 +34,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Make `TEM.F90` a module to try and avoid build race conditions and build as object library in CMake to avoid Intel parallel build issues.
-
 ### Removed
 
 ### Deprecated
+
+## [2.1.12] - 2026-01-07
+
+### Fixed
+
+- Add a message to `remap_restarts` indicating the removal of MERRA-2 restarts from `/archive`
+- Update `TEM` to be an object library in `CMake`.
+- Make `TEM.F90` a module to try and avoid build race conditions and build as object library in CMake to avoid Intel parallel build issues.
 
 ## [2.1.11] - 2025-09-16
 
