@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   remap_lake_landice_saltwater.py remaps lake, landice, and (data) ocean restarts
+#   remap_other_restarts.py remaps lake, landice, and (data) ocean restarts
 #   using config inputs from `remap_params.yaml`
 #
 # to run, must first load modules (incl. python3) as follows:
@@ -20,7 +20,7 @@ from remap_base   import remap_base
 from remap_utils  import get_label, get_geomdir, get_zoom
 from remap_bin2nc import bin2nc
 
-class lake_landice_saltwater(remap_base):
+class other_restarts(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
      if self.config['input']['shared']['MERRA-2']:
@@ -139,7 +139,7 @@ class lake_landice_saltwater(remap_base):
      if zoom is None :
         zoom = get_zoom(config)
  
-     log_name = out_dir+'/remap_lake_landice_saltwater_log'
+     log_name = out_dir+'/remap_other_restarts_log'
      if os.path.exists(log_name):
         os.remove(log_name)
 
@@ -196,9 +196,9 @@ class lake_landice_saltwater(remap_base):
        self.run_and_log(cmd, log_name)
 
      if (route):
-       route = bindir + '/mk_RouteRestarts.x '
-       cmd = route + out_til + ' ' + yyyymmddhh_[0:6]
-       self.run_and_log(cmd, log_name)
+       # WY note: the param file will be settled soon
+       param_file = '/discover/nobackup/yzeng3/data/river_input_weiyuan/route_restart_package/route_parameters.nc'
+       assemble_route_rst(route, param_file, log_name)
 
      suffix = '_rst.' + suffix
      for out_rst in glob.glob("OutData/*_rst*"):
@@ -285,7 +285,31 @@ class lake_landice_saltwater(remap_base):
        bin2nc(dest, ncdest, yaml_file)
        os.remove(dest)
 
+  def assemble_route_rst(route_rst_file, route_param_file, log_name):
+    """
+    Replace  variables in route_rst_file with matching variables from route_param_file.
+    In the future, the state variables may be changed too.
+    """
+    # make a copy first
+    fname = os.path.basename(route_rst_file)
+    shutil.copy(route_rst_file, 'OutData/'+fname)
+    #
+    # WY Note: we may compare the in and out BC version to decide if return here
+    #
+    # Open source file for reading
+    with open(log_name, "a") as log_:
+       log_.write("assemble_route_rst...." + fname + " with" + route_param_file)
+       with nc.Dataset(route_param_file, 'r') as src:
+         with nc.Dataset('OutData/'+fname, 'r+') as tgt:
+           for var_name in src.variables:
+             if var_name in tgt.variables:
+               # Replace data
+               tgt.variables[var_name][:] = src.variables[var_name][:]
+               log_.write(f"Replaced: {var_name}")
+             else:
+               log_.write(f"Skipped for now, may change later on (not in target): {var_name}")
+
 if __name__ == '__main__' :
-   lls = lake_landice_saltwater(params_file='remap_params.yaml')
+   lls = other_restarts(params_file='remap_params.yaml')
    lls.remap()
    lls.remove_geosit()
