@@ -88,7 +88,7 @@ def ask_questions():
             "name": "input:shared:MERRA-2",
             "message": "Remap from archived MERRA-2 restarts?\n",
             "default": False,
-            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT", False) and os.path.isdir('/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'),
+            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT", False) and os.path.isdir(MERRA2_RST_BASE),
         },
         {
             "type": "path",

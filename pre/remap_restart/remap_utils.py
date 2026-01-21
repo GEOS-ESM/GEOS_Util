@@ -46,6 +46,10 @@ choices_ogrid_cpld = ['72x36', '360x200', '540x458', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
+# Base locations of MERRA2 and GEOS-IT Restarts
+MERRA2_RST_BASE = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'
+GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
+
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
