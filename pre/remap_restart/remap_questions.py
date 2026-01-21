@@ -78,17 +78,17 @@ def ask_questions():
    questions = [
         {
             "type": "confirm",
-            "name": "input:shared:MERRA-2",
-            "message": "Remap archived MERRA-2 restarts? (Only if NCCS/Discover directory /archive is available; else, select 'N' and complete full config; requires nc4 restarts.)\n",
+            "name": "input:shared:GEOS-IT",
+            "message": "Remap from archived GEOS-IT restarts?\n",
             "default": False,
-            "when": lambda x: SITE_MERRA2(x),
+            "when": lambda x: SITE_GEOSIT(x),
         },
         {
             "type": "confirm",
-            "name": "input:shared:GEOS-IT",
-            "message": "Remap archived GEOS-IT restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
+            "name": "input:shared:MERRA-2",
+            "message": "Remap from archived MERRA-2 restarts?\n",
             "default": False,
-            "when": lambda x: SITE_GEOSIT(x) and not x.get("input:shared:MERRA-2", False),
+            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT", False) and os.path.isdir('/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'),
         },
         {
             "type": "path",
