@@ -1,4 +1,13 @@
-      subroutine TEM( TEM_VARS,im,jm,lm,TEM_NVARS,                          &
+module tem_mod
+
+   implicit none
+
+   private
+   public :: TEM
+
+contains
+
+subroutine TEM( TEM_VARS,im,jm,lm,TEM_NVARS,                          &
                       EXPID,lon,lat,lev,levunits,nymd,nhms,timinc,undef )
       implicit none
       character*6   date
@@ -88,7 +97,7 @@
 
 ! Read data from grads.fwrite: Data is written BOT (L=1) to TOP (L=LM)
 ! --------------------------------------------------------------------
- 
+
           ntime = 1
 
           print *
@@ -188,7 +197,7 @@
       allocate(  wstar2(jm,lm) )
       allocate(  wmean2(jm,lm) )
       allocate(  weddy2(jm,lm) )
-                                                                                                                                
+
       allocate(  upvp  (jm,LM)  )
       allocate(  upwp  (jm,LM)  )
       allocate(  dudp  (jm,LM)  )
@@ -233,7 +242,7 @@
 ! Compute Meridional Streamfunction
 ! ---------------------------------
       call stream ( vz,pl,jm,lm,strm,undef )
- 
+
       call make_psi ( uz,vz,thz,omg,upvpz,upwpz,vpthpz,pl,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv, &
                       undef,upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,vstar2,veddy,wstar2,wmean2,weddy2,plz,delp)
 
@@ -244,7 +253,7 @@
 ! Compute Residual Circulation using wmean2 from model data rather than wz from continuity
 ! ----------------------------------------------------------------------------------------
       call residual ( vz,vpthpz,thz,wmean2,pl,jm,lm,res,vstar,wstar,wmean,weddy,undef )
- 
+
 
 ! **********************************************************************
 ! ****               Write TEM_Diag Monthly Output File             ****
@@ -461,9 +470,12 @@
     ! ************************************************************************************************************
 
       SUBROUTINE  GLAWRT  (A, JM,LM, KTP, undef)
+      implicit none
+      integer  JM,LM,KTP
       real        A   (JM,LM)
       real*4      TEM (JM), undef
       logical defined
+      integer J,L
       DO  L=1,LM
           DO  J=1,JM
               if( defined(a(J,L),undef) ) then
@@ -488,7 +500,7 @@
       integer j,k,L,jm,lm
       real undef,dphi,a,g,pi,phi,pk0,H
       logical defined
-       
+
       real    th0(jm,lm),    th(jm,lm)
       real  upvp0(jm,lm),  upvp(jm,lm)
       real  upwp0(jm,lm),  upwp(jm,lm)
@@ -769,14 +781,14 @@
                phi = -pi/2 + (j-1)*dphi
           if( defined( dudp(j,L),undef)  .and. &
               defined( psie(j,L),undef)  .and. &
-              defined( upvp(j,L),undef) ) then 
+              defined( upvp(j,L),undef) ) then
                        epfy(j,L) = a*cos(phi)*( dudp(j,L)*psie(j,L) - upvp(j,L) )
           else
                        epfy(j,L) = undef
           endif
-          if( defined( dudphi(j,L),undef)  .and.& 
+          if( defined( dudphi(j,L),undef)  .and.&
               defined(   psie(j,L),undef)  .and. &
-              defined(   upwp(j,L),undef) ) then 
+              defined(   upwp(j,L),undef) ) then
                          epfz(j,L) = a*cos(phi)*( (f(j)-dudphi(j,L))*psie(j,L) - upwp(j,L) )
           else
                          epfz(j,L) = undef
@@ -799,7 +811,7 @@
       do L=1,lm
       do j=1,jm
           if( defined(   dfdp(j,L),undef)  .and. &
-              defined( dfdphi(j,L),undef) ) then 
+              defined( dfdphi(j,L),undef) ) then
                        epfdiv(j,L) = dfdphi(j,L) + dfdp(j,L)
           else
                        epfdiv(j,L) = undef
@@ -868,7 +880,7 @@
       implicit none
       integer j,k,L,jm,lm
       real pi,dp,a,g,const,phi,undef
-       
+
       real  v(jm,lm), v0(jm,lm)
       real  s(jm,lm)
       real p0(jm,lm),  p(jm,lm)
@@ -945,7 +957,7 @@
       integer j,k,L,jm,lm
       real pi,dp,a,g,H,ps,ts,rhos,z,phi,undef
       real airmw,runiv,cpd,rgas,akap, sum
-       
+
       real     v0(jm,lm),   v(jm,lm)
       real     w0(jm,lm),   w(jm,lm)
       real vpthp0(jm,lm), th0(jm,lm)
@@ -1004,7 +1016,7 @@
       rho0(j,L) = rhos*exp(-z/H)
       enddo
       enddo
-      
+
       do j=1,jm
       phi = -pi/2 + (j-1)*dp
       cosp(j) = cos(phi)
@@ -1178,7 +1190,7 @@
       use MAPL_ConstantsMod
       implicit none
       integer j,k,L,jm,lm
-       
+
       real     v0(jm,lm),    v(jm,lm)
       real     p0(jm,lm),    p(jm,lm)
       real      w(jm,lm), rho0(jm,lm)
@@ -1376,7 +1388,7 @@
       do j=2,jm-1
          phi = -pi/2 + (j-1)*dphi
          if( defined(stuff(j+1,L),undef)  .and. &
-             defined(stuff(j-1,L),undef) ) then 
+             defined(stuff(j-1,L),undef) ) then
              dqdphi(j,L) = ( stuff(j+1,L)-stuff(j-1,L) )/(a*cos(phi)*2*dphi)
          else
              dqdphi(j,L) = undef
@@ -1573,3 +1585,4 @@
 
       return
       end subroutine map1_cubic
+end module tem_mod
