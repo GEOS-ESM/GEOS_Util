@@ -4,7 +4,6 @@
 #  remap_base.py does [???]
 #
 import os
-import ruamel.yaml
 import shutil
 import subprocess
 from remap_utils import *
@@ -16,7 +15,8 @@ class remap_base(object):
           print( "use Config yaml file: " + value)
           self.config = get_config_from_file(value)
           out_dir    = self.config['output']['shared']['out_dir']
-          if not os.path.exists(out_dir) : os.makedirs(out_dir)
+          if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
           f = os.path.basename(value)
           dest = out_dir+'/'+f
           try:
@@ -27,7 +27,8 @@ class remap_base(object):
           print( "use Config obj")
           self.config = value
           out_dir    = self.config['output']['shared']['out_dir']
-          if not os.path.exists(out_dir) : os.makedirs(out_dir)
+          if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
         break
   def remove_merra2(self):
     if self.config['input']['shared']['MERRA-2']:
@@ -64,17 +65,20 @@ class remap_base(object):
          if 'fvcore_internal' in rst:
            fvrst     = nc.Dataset(rst)
            in_levels = fvrst.dimensions['lev'].size
-           if in_levels != int(out_levels): return False
+           if in_levels != int(out_levels):
+              return False
 
        cmd = 'diff -q ' + compared_file_in + ' ' + compared_file_out
        print('\n' + cmd)
        diff  = subprocess.call(shlex.split(cmd))
        # diff = 0 means no difference
-       if diff != 0: return False
+       if diff != 0:
+          return False
 
        # for catchment, even tile files are the same, if bc is different, it still need remap
        if (catch) :
-          if in_bc_version != out_bc_version : return False
+          if in_bc_version != out_bc_version:
+            return False
 
        expid = config['output']['shared']['expid']
        if (expid) :

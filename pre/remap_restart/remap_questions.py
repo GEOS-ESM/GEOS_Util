@@ -378,7 +378,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+            "message": '''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
                         (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,

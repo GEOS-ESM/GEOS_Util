@@ -15,7 +15,6 @@ import shlex
 import shutil
 import glob
 import fileinput
-import ruamel.yaml
 from remap_base import remap_base
 from remap_utils import get_label, MERRA2_RST_BASE
 import fnmatch
@@ -31,7 +30,8 @@ class analysis(remap_base):
   def remap(self):
      config = self.config
      bkg = config['output']['analysis']['bkg']
-     if ( not bkg ): return
+     if ( not bkg ):
+        return
 
      analysis_in = self.find_analysis()
      if len(analysis_in) ==0 :
@@ -43,12 +43,14 @@ class analysis(remap_base):
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
      out_dir    = config['output']['shared']['out_dir']
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
      tmpdir = out_dir+'/ana_data/'
-     if os.path.exists(tmpdir) : subprocess.call(['rm', '-rf',tmpdir])
+     if os.path.exists(tmpdir):
+        subprocess.call(['rm', '-rf',tmpdir])
      print ("mkdir " + tmpdir)
      os.makedirs(tmpdir)
 
@@ -60,7 +62,6 @@ class analysis(remap_base):
      mm_   = yyyymmddhh_[4:6]
      dd_   = yyyymmddhh_[6:8]
      hh_   = yyyymmddhh_[8:10]
-     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
      expid_in  = config['input']['shared']['expid']
      expid_out = config['output']['shared']['expid']
      if (expid_out) :
@@ -165,7 +166,8 @@ class analysis(remap_base):
     if not self.config['input']['shared']['MERRA-2']:
       return
     bkg = self.config['output']['analysis']['bkg']
-    if ( not bkg ): return
+    if ( not bkg ):
+      return
 
     expid = self.config['input']['shared']['expid']
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
@@ -236,7 +238,8 @@ class analysis(remap_base):
     m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
     fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
     f = m2_rst_dir+'/'+fname
-    if (os.path.isfile(f)): anafiles.append(f)
+    if (os.path.isfile(f)):
+      anafiles.append(f)
 
     for f in anafiles + canafiles:
       fname    = os.path.basename(f)

@@ -7,7 +7,7 @@
 # remapped.  The set of yaml config files "bin2nc_merra2_*.yaml" include hard-wired
 # variables names, long names, and tile/grid dimensions specific to MERRA-2 restarts.
 
-from yaml import safe_load, load, dump
+import ruamel.yaml
 from netCDF4 import Dataset
 import numpy as np
 from scipy.io import FortranFile
@@ -114,16 +114,18 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
      bintype=np.float64
   
   
-  f=open(yamlfile,'r')
+  yaml = ruamel.yaml.YAML()
   
-  data=safe_load(f)
+  with open(yamlfile,'r') as f:
+    data = yaml.load(f)
   
   dimensions = data["dimensions"]
   variables = data["variables"]
   
   if debug:
-     print(dump(variables))
-     print(dump(dimensions))
+     import sys
+     yaml.dump(variables, sys.stdout)
+     yaml.dump(dimensions, sys.stdout)
   
   ncfid = Dataset(ncfile,mode='w',format='NETCDF4')
   

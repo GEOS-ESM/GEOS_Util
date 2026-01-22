@@ -10,9 +10,7 @@
 #   source g5_modules       [csh]
 #
 import sys
-import argparse
 import textwrap
-import ruamel.yaml
 import questionary
 from remap_utils import *
 from remap_questions import *
@@ -23,7 +21,7 @@ from remap_analysis  import *
 from remap_catchANDcn  import *
 
 
-program_description = textwrap.dedent(f'''
+program_description = textwrap.dedent('''
       USAGE:
 
       This script provides four options for remapping GEOS restart files:
@@ -58,9 +56,7 @@ program_description = textwrap.dedent(f'''
     ''')
 def main():
 
-  question_flag = False
   config        = ''
-  yaml = ruamel.yaml.YAML()
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
   cmdl, extra_args = parse_args(program_description)
   answers = {}
@@ -78,7 +74,6 @@ def main():
   if (len(sys.argv) == 1 or answers) :
       if not answers:
          answers = ask_questions()
-         question_flag = True
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
       # just for debugging

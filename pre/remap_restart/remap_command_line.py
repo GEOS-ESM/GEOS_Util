@@ -5,12 +5,7 @@
 #   into matching "Answers" for the questionary (remap_questions.py)
 #
 import os
-import subprocess
-import shlex
 import ruamel.yaml
-import shutil
-import questionary
-import glob
 import argparse
 from remap_utils import *
 

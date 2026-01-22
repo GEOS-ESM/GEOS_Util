@@ -12,9 +12,7 @@
 import os
 import subprocess as sp
 import shutil
-import subprocess
 import glob
-import ruamel.yaml
 import shlex
 from remap_base   import remap_base
 from remap_utils  import get_label, get_geomdir, get_zoom, MERRA2_RST_BASE
@@ -84,19 +82,23 @@ class lake_landice_saltwater(remap_base):
         expid = ''
 
      no_remap = self.copy_without_remap(restarts_in, in_tile_file, out_tile_file, suffix)
-     if no_remap : return
+     if no_remap:
+        return
 
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
      InData_dir = out_dir+'/InData/'
-     if os.path.exists(InData_dir) : sp.call(['rm', '-rf',InData_dir])
+     if os.path.exists(InData_dir):
+        sp.call(['rm', '-rf',InData_dir])
      print ("mkdir " + InData_dir)
      os.makedirs(InData_dir)
 
      OutData_dir = out_dir+'/OutData/'
-     if os.path.exists(OutData_dir) : sp.call(['rm', '-rf',OutData_dir])
+     if os.path.exists(OutData_dir):
+        sp.call(['rm', '-rf',OutData_dir])
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
@@ -112,23 +114,34 @@ class lake_landice_saltwater(remap_base):
      for rst in restarts_in:
         f = os.path.basename(rst)
         dest = InData_dir+'/'+f
-        if os.path.exists(dest) : shutil.remove(dest)
+        if os.path.exists(dest):
+          shutil.remove(dest)
         print('\nCopy ' + rst + ' to ' +dest)
         shutil.copy(rst,dest)
-        if 'saltwater_internal'     in f : saltwater_internal    = f
-        if 'saltwater_import'       in f : saltwater_import      = f
-        if 'seaicethermo_internal'  in f : seaicethermo_internal = f
-        if 'seaicethermo_import'    in f : seaicethermo_import   = f
-        if 'landice'                in f : landice               = f
-        if 'lake'                   in f : lake                  = f
-        if 'roue'                   in f : route                 = f
-        if 'openwater'              in f : openwater             = f
+        if 'saltwater_internal'     in f:
+          saltwater_internal    = f
+        if 'saltwater_import'       in f:
+          saltwater_import      = f
+        if 'seaicethermo_internal'  in f:
+          seaicethermo_internal = f
+        if 'seaicethermo_import'    in f:
+          seaicethermo_import   = f
+        if 'landice'                in f:
+          landice               = f
+        if 'lake'                   in f:
+          lake                  = f
+        if 'roue'                   in f:
+          route                 = f
+        if 'openwater'              in f:
+          openwater             = f
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
      out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
 
-     if os.path.exists(in_til)  : shutil.remove(in_til)
-     if os.path.exists(out_til) : shutil.remove(out_til)
+     if os.path.exists(in_til):
+       shutil.remove(in_til)
+     if os.path.exists(out_til):
+       shutil.remove(out_til)
      print('\n Copy ' + in_tile_file  + ' to ' + in_til)
      shutil.copy(in_tile_file, in_til)
      print('\n Copy ' + out_tile_file + ' to ' + out_til)

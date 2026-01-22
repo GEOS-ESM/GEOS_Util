@@ -6,12 +6,9 @@
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
 import os
-import sys, getopt
 import ruamel.yaml
-import questionary
 import glob
 import subprocess as sp
-import remap_restarts 
 from remap_utils import *
 from remap_upper import *
 from remap_lake_landice_saltwater import *
@@ -35,7 +32,7 @@ def compare(base, result):
      print(cmd)
      p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
      (out, err) = p.communicate()
-     rc = p.wait()
+     p.wait()
      out = out.decode().split()
      if "identical." in out :
         print('identical')

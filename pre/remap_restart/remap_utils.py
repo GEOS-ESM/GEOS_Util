@@ -12,7 +12,6 @@ import questionary
 import glob
 import shlex
 import netCDF4 as nc
-import linecache
 import re
 
 # shared global variables
@@ -53,7 +52,7 @@ GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
-message_stretch =  f'''\n
+message_stretch =  '''
  Select parameters of stretched cubed-sphere grid for new restarts:
 
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
@@ -81,7 +80,7 @@ message_expid       = "Enter experiment ID for new restarts:  (Added as prefix t
 message_bc_base_in  = "BCs base directory for input restarts: \n"
 message_bc_base_new = "BCs base directory for new restarts: \n"
 
-message_bc_ops     = f'''\n
+message_bc_ops     = '''
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
  v12: v12         | future               | 12.0             ... present
@@ -97,7 +96,7 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 # in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
 #v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
 
-message_bc_other   = f'''\n
+message_bc_other   = '''\n
 
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
@@ -107,7 +106,7 @@ message_bc_other   = f'''\n
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
-message_agrid_list = f'''
+message_agrid_list = '''
  C12   C180    C1120
  C24   C360    C1440
  C48   C720    C2880
@@ -159,7 +158,8 @@ job_directive = {"SLURM": """#!/bin/csh -f
 # --------------------------------------------------------------------------------
 
 def init_merra2(x):
-  if not x.get('input:shared:MERRA-2') : return False
+  if not x.get('input:shared:MERRA-2'):
+    return False
 
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
@@ -192,7 +192,8 @@ def init_merra2(x):
   return False
 
 def init_geosit(x):
-  if not x.get('input:shared:GEOS-IT') : return False
+  if not x.get('input:shared:GEOS-IT'):
+    return False
 
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
 
@@ -226,18 +227,21 @@ def fvcore_info(x):
   if 'input:shared:agrid' in x.keys():
      return True
   rst_dir = x.get('input:shared:rst_dir')
-  if not rst_dir : return False
+  if not rst_dir:
+    return False
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
   files = glob.glob(rst_dir+'/*fvcore_internal*')
-  if len (files) == 0 : return False
+  if len (files) == 0:
+    return False
 
   fname =''
   ymdh  =''
 
   if len(files) > 1 :
     ymdh = x.get('input:shared:yyyymmddhh')
-    if (not ymdh): return False
+    if (not ymdh):
+      return False
     time = ymdh[0:8] + '_'+ymdh[8:10]
     files = glob.glob(rst_dir+'/*fvcore_internal*'+time+'*')
     fname = files[0]
@@ -261,7 +265,8 @@ def fvcore_info(x):
   expid = os.path.basename(fname).split('fvcore')[0]
   expid = expid[0:-1]
   x['input:shared:expid'] = expid
-  if (expid) : print("The input fvcore restart has experiment ID " + expid + '\n')
+  if (expid):
+    print("The input fvcore restart has experiment ID " + expid + '\n')
 
   # get stretch parameters from input restart file
   x['input:shared:stretch'] = False
@@ -282,16 +287,16 @@ def fvcore_info(x):
   return True
 
 def catch_model(x):
-  ymdh = x['input:shared:yyyymmddhh']
-  time = ymdh[0:8] + '_'+ymdh[8:10]
   rst_dir = x.get('input:shared:rst_dir')
-  if not rst_dir : return False
+  if not rst_dir:
+    return False
 
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
   files = glob.glob(rst_dir+'/*catch*')
 
-  if len (files) == 0 : return False
+  if len (files) == 0:
+    return False
   fname = ''
   fname = os.path.basename(files[0])
 
@@ -305,7 +310,8 @@ def catch_model(x):
 def data_ocean_default(resolution):
    # the default string should match the choice in remapl_question.py
    default_ = 'CS  (same as atmosphere OSTIA cubed-sphere grid)'
-   if resolution in ['C12','C24', 'C48'] : default_ = '360x180   (Reynolds)'
+   if resolution in ['C12','C24', 'C48']:
+     default_ = '360x180   (Reynolds)'
    return default_
 
 def get_label(config):
@@ -340,7 +346,8 @@ def get_label(config):
 #       associated with the given set of restarts.
 def wemin_default(bc_version):
    default_ = '13'
-   if bc_version =='GM4' or bc_version == 'ICA' : default_ = '26'
+   if bc_version =='GM4' or bc_version == 'ICA':
+     default_ = '26'
    return default_
 
 def show_wemin_default(x):
@@ -370,8 +377,10 @@ def get_zoom(x):
       if (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
          lat = int(agrid[1:])
          zoom = lat /90.0
-         if zoom < 1 : zoom = 1
-         if zoom > 8 : zoom = 8
+         if zoom < 1:
+           zoom = 1
+         if zoom > 8:
+           zoom = 8
          zoom_= str(int(zoom))
    return zoom_
 
@@ -379,7 +388,7 @@ def get_account():
    cmd = 'id -gn'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
    (accounts, err) = p.communicate()
-   p_status = p.wait()
+   p.wait()
    accounts = accounts.decode().split()
    return accounts[0]
 
@@ -396,7 +405,8 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               break
    yaml = ruamel.yaml.YAML()
    out_dir = os.path.dirname(yaml_file)
-   if not os.path.exists(out_dir) : os.mkdir(out_dir)
+   if not os.path.exists(out_dir):
+     os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
       yaml.dump(config, f)
 
@@ -411,7 +421,8 @@ def yaml_to_config(yaml_file):
 def write_cmd( out_dir, cmdl) :
 
    out_dir = os.path.realpath(out_dir)
-   if not os.path.exists(out_dir) : os.makedirs(out_dir)
+   if not os.path.exists(out_dir):
+     os.makedirs(out_dir)
    bin_path = os.path.dirname(os.path.realpath(__file__))
    cmdl = bin_path+'/'+ cmdl
    with open(out_dir + '/remap_restarts.CMD', 'w') as f:
@@ -606,7 +617,8 @@ def get_config_from_answers(answers, config_tpl = False):
    return config
 
 def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
-   if grid is not None : return grid
+   if grid is not None:
+     return grid
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):
@@ -636,7 +648,7 @@ def get_default_bc_base():
    cmd = 'uname -n'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
    (node, err) = p.communicate()
-   p_status = p.wait()
+   p.wait()
    node = node.decode().split()
    node0 = node[0]
    discover = ['dirac', 'borg','warp', 'discover']
@@ -684,7 +696,8 @@ def remove_ogrid_comment(x, opt):
     ogrid = x.get('input:shared:ogrid')
   else:
     ogrid = x.get('output:shared:ogrid')
-  if not ogrid: return False
+  if not ogrid:
+    return False
 
   ogrid = ogrid.split()[0]
   if opt == "IN":

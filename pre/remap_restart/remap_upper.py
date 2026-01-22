@@ -9,7 +9,6 @@
 #   source g5_modules       [csh]
 #
 import os
-import ruamel.yaml
 import subprocess
 import shlex
 import shutil
@@ -17,7 +16,6 @@ import glob
 from remap_base import remap_base
 from remap_utils import *
 from remap_bin2nc import bin2nc
-import netCDF4 as nc
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -66,7 +64,8 @@ class upperair(remap_base):
      bindir  = os.path.dirname(os.path.realpath(__file__))
      out_dir    = config['output']['shared']['out_dir']
 
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
      types = '.bin'
      type_str = subprocess.check_output(['file','-b', os.path.realpath(restarts_in[0])])
@@ -106,13 +105,15 @@ class upperair(remap_base):
         expid = ''
 
      no_remap = self.copy_without_remap(restarts_in, topoin, topoout, suffix)
-     if (no_remap) : return
+     if (no_remap):
+        return
 
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
      tmpdir = out_dir+'/upper_data/'
-     if os.path.exists(tmpdir) : subprocess.call(['rm', '-rf',tmpdir])
+     if os.path.exists(tmpdir):
+        subprocess.call(['rm', '-rf',tmpdir])
      print ("mkdir " + tmpdir)
      os.makedirs(tmpdir)
 
@@ -143,21 +144,29 @@ class upperair(remap_base):
        exit("Only support cs grid so far")
 
      if (imout <90):
-       NPE =   12; nwrit = 1
+       NPE =   12
+       nwrit = 1
      elif (imout<=180):
-       NPE =   24; nwrit = 1
+       NPE =   24
+       nwrit = 1
      elif (imout<=540):
-       NPE =   96; nwrit = 1
+       NPE =   96
+       nwrit = 1
      elif (imout<=720):
-       NPE =  192; nwrit = 2
+       NPE =  192
+       nwrit = 2
      elif (imout<=1080):
-       NPE =  384; nwrit = 2
+       NPE =  384
+       nwrit = 2
      elif (imout<=1440):
-       NPE =  576; nwrit = 2
+       NPE =  576
+       nwrit = 2
      elif (imout< 2880):
-       NPE =  768; nwrit = 2
+       NPE =  768
+       nwrit = 2
      elif (imout>=2880):
-       NPE = 5400; nwrit = 6
+       NPE = 5400
+       nwrit = 6
 
      RESERVATION =''
      reservation = config['slurm_pbs']['reservation']
@@ -442,7 +451,6 @@ endif
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
     yyyy_ = yyyymmddhh_[0:4]
     mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'

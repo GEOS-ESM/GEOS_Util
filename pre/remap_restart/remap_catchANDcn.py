@@ -13,8 +13,6 @@ import sys
 import subprocess
 import shutil
 import glob
-import ruamel.yaml
-import shlex
 import mimetypes
 import netCDF4 as nc
 from remap_base import remap_base
@@ -99,7 +97,8 @@ class catchANDcn(remap_base):
         expid = ''
 
      no_remap = self.copy_without_remap([in_rstfile], in_tilefile, out_tilefile, suffix, catch=True)
-     if (no_remap) : return
+     if (no_remap):
+        return
 
      print("\nRemapping " + model + ".....\n")
  # determine NPE based on *approximate* number of input and output tile
@@ -135,7 +134,8 @@ class catchANDcn(remap_base):
      qos  = config['slurm_pbs']['qos']
 
      TIME  = "1:00:00"
-     if qos != "debug": TIME="3:00:00"
+     if qos != "debug":
+       TIME="3:00:00"
 
      NNODE = ''
      job = ''
@@ -162,7 +162,8 @@ class catchANDcn(remap_base):
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix
 
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     if not os.path.exists(out_dir):
+       os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
 
@@ -278,7 +279,8 @@ def ask_catch_questions():
      return False
 
    def has_catch_rst(text):
-     if len(text) !=10: return False
+     if len(text) !=10:
+       return False
      yyyy = text[0:4]
      mm   = text[4:6]
      dd   = text[6:8]
