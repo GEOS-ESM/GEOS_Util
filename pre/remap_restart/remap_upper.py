@@ -303,7 +303,7 @@ setenv I_MPI_ADJUST_BARRIER 9
 #setenv I_MPI_TUNING_BIN_DUMP tuning-results.dat
 #setenv I_MPI_DEBUG 6
 #setenv MPS_STAT_LEVEL 4
-env | grep 'I_MPI\|FI_'
+env | grep 'I_MPI\\|FI_'
 endif
 
 set infiles = ()
