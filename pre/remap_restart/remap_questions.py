@@ -63,14 +63,14 @@ def validate_geosit_time(text):
      return False
 
 def SITE_MERRA2(x):
+  x['input:shared:MERRA-2']= False
   if GEOS_SITE == "NAS":
-     x['input:shared:MERRA-2']= False
      return False
   return True
 
 def SITE_GEOSIT(x):
+  x['input:shared:GEOS-IT']= False
   if GEOS_SITE == "NAS":
-     x['input:shared:GEOS-IT']= False
      return False
   return True
 
