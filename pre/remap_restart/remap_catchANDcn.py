@@ -146,6 +146,7 @@ class catchANDcn(remap_base):
        CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
+
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix

@@ -335,10 +335,10 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if x['input:shared:MERRA-2']:
+   if x.get('input:shared:MERRA-2'):
        x['input:surface:wemin'] = '26'
        return False
-   elif x['input:shared:GEOS-IT']:
+   elif x.get('input:shared:GEOS-IT'):
        x['input:surface:wemin'] = '13'
        return False
    else:
@@ -621,6 +621,7 @@ def get_default_bc_base():
       if node in node0:
          return choices_bc_base[0]
    return choices_bc_base[1]
+
 
 def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
   gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)

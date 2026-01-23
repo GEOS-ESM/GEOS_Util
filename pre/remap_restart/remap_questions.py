@@ -6,12 +6,8 @@
 #
 #
 import os
-import subprocess
-import shlex
 import ruamel.yaml
-import shutil
 import questionary
-import glob
 from remap_utils import *
 
 def echo_level(x):
@@ -36,10 +32,10 @@ def echo_bcs(x,opt):
   return False
 
 def default_partition(x):
-   if x['slurm_pbs:qos'] == 'debug':
-      x['slurm_pbs:partition'] = 'compute'
-      return False
-   return True
+    if x['slurm_pbs:qos'] == 'debug':
+        x['slurm_pbs:partition'] = 'compute'
+        return False
+    return True
 
 def validate_merra2_time(text):
    if len(text) == 10 :
@@ -63,14 +59,14 @@ def validate_geosit_time(text):
      return False
 
 def SITE_MERRA2(x):
-  x['input:shared:MERRA-2']= False
   if GEOS_SITE == "NAS":
+     x['input:shared:MERRA-2']= False
      return False
   return True
 
 def SITE_GEOSIT(x):
-  x['input:shared:GEOS-IT']= False
   if GEOS_SITE == "NAS":
+     x['input:shared:GEOS-IT']= False
      return False
   return True
 
@@ -92,34 +88,34 @@ def ask_questions():
             "name": "input:shared:MERRA-2",
             "message": "Remap from archived MERRA-2 restarts?\n",
             "default": False,
-            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT", False) and os.path.isdir(MERRA2_RST_BASE),
+            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT") and os.path.isdir(MERRA2_RST_BASE),
         },
         {
             "type": "path",
             "name": "input:shared:rst_dir",
             "message": "Enter input directory with restart files to be remapped:\n",
-            "when": lambda x: not x.get("input:shared:MERRA-2", False) and not x.get("input:shared:GEOS-IT", False),
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH):\n",
             "validate": lambda text: len(text) == 10,
-            "when": lambda x: not x.get('input:shared:MERRA-2', False) and not x.get('input:shared:GEOS-IT', False) and not fvcore_info(x),
+            "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT') and not fvcore_info(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH, hour = 03, 09, 15, or 21 [z]):\n",
             "validate": lambda text: validate_merra2_time(text),
-            "when": lambda x: x.get("input:shared:MERRA-2", False),
+            "when": lambda x: x.get("input:shared:MERRA-2"),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH, Only days available are 14th and 28th and only hour = 21 [z]):\n",
             "validate": lambda text: validate_geosit_time(text),
-            "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
+            "when": lambda x: x.get("input:shared:GEOS-IT") and not x.get("input:shared:MERRA-2"),
         },
 
         {
@@ -152,7 +148,7 @@ def ask_questions():
            "name": "input:shared:agrid",
            "message": message_agrid_in,
            "validate": lambda text: text in validate_agrid,
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT') and not fvcore_info(x),
         },
 
         {
@@ -161,7 +157,7 @@ def ask_questions():
            "message": "Select ocean model of input restarts:\n",
            "choices": choices_omodel,
            "default": "data",
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT'),
        },
 
        {
@@ -170,7 +166,7 @@ def ask_questions():
           "message": message_ogrid_in,
           "choices": choices_ogrid_data,
           "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
-          "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+          "when": lambda x: x.get('input:shared:omodel') == 'data' and not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT'),
        },
 
         # dummy (invisible) question to remove parenthetical comments from selected input:shared:ogrid
@@ -274,7 +270,7 @@ def ask_questions():
             "name": "input:shared:bc_version",
             "message": message_bc_ops_in,
             "choices": choices_bc_ops,
-            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -291,7 +287,7 @@ def ask_questions():
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: x["input:shared:MERRA-2"] or x["input:shared:GEOS-IT"],
+            "when": lambda x: x.get("input:shared:MERRA-2") or x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -300,7 +296,7 @@ def ask_questions():
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -459,8 +455,9 @@ def ask_questions():
    answers['input:shared:rst_dir']  = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
    answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
-   if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:
+   if answers.get('input:air:nlevel'):
+       del answers['input:air:nlevel']
+   if answers["output:surface:remap"] and not answers.get("input:shared:MERRA-2") and not answers.get("input:shared:GEOS-IT"):
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
