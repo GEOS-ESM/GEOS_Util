@@ -122,7 +122,7 @@ def ask_questions():
             "name": "input:air:hydrostatic",
             "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
             "default": True,
-            "when": lambda x: not x['input:shared:MERRA-2'],
+            "when": lambda x: not x.get('input:shared:MERRA-2'),
         },
         {
             "type": "path",
@@ -154,7 +154,7 @@ def ask_questions():
            "name": "input:shared:agrid",
            "message": message_agrid_in,
            "validate": lambda text: text in validate_agrid,
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT') and not fvcore_info(x),
         },
 
         {
@@ -163,7 +163,7 @@ def ask_questions():
            "message": "Select ocean model of input restarts:\n",
            "choices": choices_omodel,
            "default": "data",
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT'),
        },
 
        {
