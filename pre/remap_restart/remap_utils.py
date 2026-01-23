@@ -344,10 +344,10 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if x['input:shared:MERRA-2']:
+   if x.get('input:shared:MERRA-2'):
        x['input:surface:wemin'] = '26'
        return False
-   elif x['input:shared:GEOS-IT']:
+   elif x.get('input:shared:GEOS-IT'):
        x['input:surface:wemin'] = '13'
        return False
    else:
