@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
+
 ### Removed
 
 ### Deprecated
