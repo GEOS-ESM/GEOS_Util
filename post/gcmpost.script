@@ -1479,6 +1479,8 @@ endif
 
 # Create Plot Lists
 # ---------------------------------------------------------------------------------
+         $GEOSUTIL/plots/configure
+         source $SOURCE/plot/.quickplotrc
          if( -e  portrait.list ) /bin/rm -f  portrait.list
          if( -e landscape.list ) /bin/rm -f landscape.list
          if( -e dummy          ) /bin/rm -f dummy
