@@ -14,6 +14,14 @@ python3 /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas
 2. For ens restarts, 
 -------------------------------------
 
+Copy ebkg, ecbkg, erst, stat, and rndperts files (from /home/dao_ops/f5295_fp/run/.../archive/atmens/Y2024/M07) to atmens directory and untar files and put them together in mem### directory.
+
+mkdir RST
+
+Satellite/aircraft bias files should be copied to RST.
+
+copy rst.lcv file to atmens/RST/
+
 cd /discover/nobackup/projects/gmao/obsdev/eyang2/PBLH/Exp/pblhl/atmens/mem001
 
 source /discover/nobackup/projects/gmao/obsdev/eyang2/GEOSadas-5.42.11/GEOSadas/install-SLES15/bin/g5_modules.sh 
