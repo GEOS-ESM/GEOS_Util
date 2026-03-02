@@ -245,9 +245,9 @@ endwhile
 'setdates'
 
 'run getenv "BEGDATE"'
-             begdate.EXPIDa = result
+             begdate = result
 'run getenv "ENDDATE"'
-             enddate.EXPIDa = result
+             enddate = result
 
 'setlons'
 'sety'
@@ -329,13 +329,13 @@ else
 endif
 
 'run getenv "CLIMATE"'
-             climate.EXPIDa = result
+             climate = result
 
 say ''
 say '        EXPID = 'EXPID
-say 'begdate.EXPID => begdate.'EXPID' = 'begdate.EXPIDa
-say 'enddate.EXPID => enddate.'EXPID' = 'enddate.EXPIDa
-say 'climate.EXPID => climate.'EXPID' = 'climate.EXPIDa
+say 'begdate = 'begdate
+say 'enddate = 'enddate
+say 'climexp = 'climexp
 say ''
 
 *******************************************************************
@@ -438,8 +438,8 @@ if( found = "TRUE" )
 
 'set dfile 'ofile.1
     'getdates'
-     begdate.CMPIDa = subwrd(result,1)
-     enddate.CMPIDa = subwrd(result,2)
+     begdate.num = subwrd(result,1)
+     enddate.num = subwrd(result,2)
 
 'set lon 'lonmin' 'lonmax
 'set lat 'latmin' 'latmax
@@ -518,15 +518,16 @@ endif
 say 'Processing Season: 'season
 
 'set dfile 'mfile.1
-'count "'season'" 'begdate.EXPIDa' 'enddate.EXPIDa
+'count "'season'" 'begdate' 'enddate
  nmod =  result
 
 'set dfile 'ofile.1
-'count "'season'" 'begdate.CMPIDa' 'enddate.CMPIDa
+'count "'season'" 'begdate.num' 'enddate.num
  nobs =  result
 
 'run getenv "CLIMATE"'
-             climate.CMPIDa = result
+             climate.num = result
+             climcmp.CMPIDa = climate.num
 
 * Set EXPORT Model and Observation Scaling Factors
 * ------------------------------------------------
@@ -605,7 +606,7 @@ while( n<=NPTOPS )
                        flag = ""
                while ( flag = "" )
 
-'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.CMPIDa' -OEDATE 'enddate.CMPIDa' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate.EXPIDa' -CLIMCMP 'climate.CMPIDa' -MBDATE 'begdate.EXPIDa' -MEDATE 'enddate.EXPIDa
+'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.num' -OEDATE 'enddate.num' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate' -CLIMCMP 'climate.num' -MBDATE 'begdate' -MEDATE 'enddate
 
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
