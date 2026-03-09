@@ -242,7 +242,7 @@ class lake_landice_saltwater(remap_base):
 
         if saltwater_internal:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir+"/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -280,7 +280,7 @@ class lake_landice_saltwater(remap_base):
 
         if saltwater_import:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir +"/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -309,7 +309,7 @@ class lake_landice_saltwater(remap_base):
 
         if openwater:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir+ "/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -323,7 +323,7 @@ class lake_landice_saltwater(remap_base):
 
         if seaicethermo_internal:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir+ "/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -337,7 +337,7 @@ class lake_landice_saltwater(remap_base):
 
         if seaicethermo_import:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir+ "/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -351,7 +351,7 @@ class lake_landice_saltwater(remap_base):
 
         if lake:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir + "/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
@@ -365,7 +365,7 @@ class lake_landice_saltwater(remap_base):
 
         if landice:
             cmd = (
-                "{Bin}/esma_mpirun -np 1 "
+                bindir + "/esma_mpirun -np 1 "
                 + exe
                 + out_til
                 + " "
