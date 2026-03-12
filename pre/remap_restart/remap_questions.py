@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   interactive questionary to create a yaml configuration file (remap_params.yaml) and 
+#   interactive questionary to create a yaml configuration file (remap_params.yaml) and
 #   a matching command line argument string (remap_restarts.CMD)
 #
 #
 import os
-import subprocess
-import shlex
 import ruamel.yaml
-import shutil
 import questionary
-import glob
 from remap_utils import *
 
 def echo_level(x):
@@ -36,10 +32,10 @@ def echo_bcs(x,opt):
   return False
 
 def default_partition(x):
-   if x['slurm_pbs:qos'] == 'debug':
-      x['slurm_pbs:partition'] = 'compute'
-      return False
-   return True
+    if x['slurm_pbs:qos'] == 'debug':
+        x['slurm_pbs:partition'] = 'compute'
+        return False
+    return True
 
 def validate_merra2_time(text):
    if len(text) == 10 :
@@ -47,7 +43,7 @@ def validate_merra2_time(text):
       if hh in ['03','09','15','21']:
          return True
       else:
-         return False 
+         return False
    else:
      return False
 
@@ -72,7 +68,7 @@ def SITE_GEOSIT(x):
   if GEOS_SITE == "NAS":
      x['input:shared:GEOS-IT']= False
      return False
-  return True 
+  return True
 
 def ask_questions():
 
@@ -82,44 +78,44 @@ def ask_questions():
    questions = [
         {
             "type": "confirm",
-            "name": "input:shared:MERRA-2",
-            "message": "Remap archived MERRA-2 restarts? (Only if NCCS/Discover directory /archive is available; else, select 'N' and complete full config; requires nc4 restarts.)\n",
+            "name": "input:shared:GEOS-IT",
+            "message": "Remap from archived GEOS-IT restarts?\n",
             "default": False,
-            "when": lambda x: SITE_MERRA2(x),
+            "when": lambda x: SITE_GEOSIT(x),
         },
         {
             "type": "confirm",
-            "name": "input:shared:GEOS-IT",
-            "message": "Remap archived GEOS-IT restarts? (NCCS/Discover only; elsewhere, select 'N' and complete full config; requires nc4 restarts.)\n",
+            "name": "input:shared:MERRA-2",
+            "message": "Remap from archived MERRA-2 restarts?\n",
             "default": False,
-            "when": lambda x: SITE_GEOSIT(x) and not x.get("input:shared:MERRA-2", False),
+            "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT") and os.path.isdir(MERRA2_RST_BASE),
         },
         {
             "type": "path",
             "name": "input:shared:rst_dir",
             "message": "Enter input directory with restart files to be remapped:\n",
-            "when": lambda x: not x.get("input:shared:MERRA-2", False) and not x.get("input:shared:GEOS-IT", False),
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH):\n",
             "validate": lambda text: len(text) == 10,
-            "when": lambda x: not x.get('input:shared:MERRA-2', False) and not x.get('input:shared:GEOS-IT', False) and not fvcore_info(x),
+            "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT') and not fvcore_info(x),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH, hour = 03, 09, 15, or 21 [z]):\n",
             "validate": lambda text: validate_merra2_time(text),
-            "when": lambda x: x.get("input:shared:MERRA-2", False),
+            "when": lambda x: x.get("input:shared:MERRA-2"),
         },
         {
             "type": "text",
             "name": "input:shared:yyyymmddhh",
             "message": "Enter the restart date and hour (YYYYMMDDHH, Only days available are 14th and 28th and only hour = 21 [z]):\n",
             "validate": lambda text: validate_geosit_time(text),
-            "when": lambda x: x.get("input:shared:GEOS-IT", False) and not x.get("input:shared:MERRA-2", False),
+            "when": lambda x: x.get("input:shared:GEOS-IT") and not x.get("input:shared:MERRA-2"),
         },
 
         {
@@ -152,25 +148,25 @@ def ask_questions():
            "name": "input:shared:agrid",
            "message": message_agrid_in,
            "validate": lambda text: text in validate_agrid,
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'] and not fvcore_info(x),
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT') and not fvcore_info(x),
         },
 
-        {        
+        {
            "type": "select",
            "name": "input:shared:omodel",
            "message": "Select ocean model of input restarts:\n",
            "choices": choices_omodel,
            "default": "data",
-           "when": lambda x: not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+           "when": lambda x: not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT'),
        },
 
-       {   
+       {
           "type": "select",
           "name": "input:shared:ogrid",
           "message": message_ogrid_in,
           "choices": choices_ogrid_data,
           "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
-          "when": lambda x: x.get('input:shared:omodel') == 'data' and not x['input:shared:MERRA-2'] and not x['input:shared:GEOS-IT'],
+          "when": lambda x: x.get('input:shared:omodel') == 'data' and not x.get('input:shared:MERRA-2') and not x.get('input:shared:GEOS-IT'),
        },
 
         # dummy (invisible) question to remove parenthetical comments from selected input:shared:ogrid
@@ -208,7 +204,7 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:stretch",
-            "message": message_stretch, 
+            "message": message_stretch,
             "choices": choices_stretch[1:3],
             "when": lambda x : x['output:shared:stretch'],
         },
@@ -217,7 +213,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG001 grid for new restarts: \n",
-            "choices": choices_res_SG001, 
+            "choices": choices_res_SG001,
             "when": lambda x : x.get('output:shared:stretch') == 'SG001',
         },
 
@@ -225,7 +221,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:agrid",
             "message": "Select resolution of SG002 grid for new restarts: \n",
-            "choices": choices_res_SG002, 
+            "choices": choices_res_SG002,
             "when": lambda x : x.get('output:shared:stretch') == 'SG002',
         },
 
@@ -274,7 +270,7 @@ def ask_questions():
             "name": "input:shared:bc_version",
             "message": message_bc_ops_in,
             "choices": choices_bc_ops,
-            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -291,7 +287,7 @@ def ask_questions():
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: x["input:shared:MERRA-2"] or x["input:shared:GEOS-IT"],
+            "when": lambda x: x.get("input:shared:MERRA-2") or x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -300,7 +296,7 @@ def ask_questions():
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
             "default": "NL3",
-            "when": lambda x: not x["input:shared:MERRA-2"] and not x["input:shared:GEOS-IT"],
+            "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
         {
@@ -376,8 +372,8 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs? 
-                        (NOTE: Preferred method is to regenerate IAU file, 
+            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+                        (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,
             "when": lambda x: echo_level(x),
@@ -459,14 +455,15 @@ def ask_questions():
    answers['input:shared:rst_dir']  = os.path.abspath(os.path.expanduser(answers['input:shared:rst_dir']))
    answers['output:shared:out_dir'] = os.path.abspath(os.path.expanduser(answers['output:shared:out_dir']))
 
-   if answers.get('input:air:nlevel') : del answers['input:air:nlevel']
-   if answers["output:surface:remap"] and not answers["input:shared:MERRA-2"] and not answers["input:shared:GEOS-IT"]:  
+   if answers.get('input:air:nlevel'):
+       del answers['input:air:nlevel']
+   if answers["output:surface:remap"] and not answers.get("input:shared:MERRA-2") and not answers.get("input:shared:GEOS-IT"):
       answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
 
- 
+
    return answers
 
 if __name__ == "__main__":

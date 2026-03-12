@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+
 ### Fixed
 
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
