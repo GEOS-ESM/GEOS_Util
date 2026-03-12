@@ -45,6 +45,10 @@ choices_ogrid_cpld = ['72x36', '360x200', '540x458', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
+# Base locations of MERRA2 and GEOS-IT Restarts
+MERRA2_RST_BASE = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'
+GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
+
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
@@ -331,10 +335,10 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if x['input:shared:MERRA-2']:
+   if x.get('input:shared:MERRA-2'):
        x['input:surface:wemin'] = '26'
        return False
-   elif x['input:shared:GEOS-IT']:
+   elif x.get('input:shared:GEOS-IT'):
        x['input:surface:wemin'] = '13'
        return False
    else:
@@ -342,7 +346,7 @@ def show_wemin_default(x):
        return True
 
 def get_zoom(x):
-   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8);
    # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
@@ -617,6 +621,7 @@ def get_default_bc_base():
       if node in node0:
          return choices_bc_base[0]
    return choices_bc_base[1]
+
 
 def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
   gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
