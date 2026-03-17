@@ -217,9 +217,9 @@ endif
 * -------------------------------------------------
 'setdates'
 'run getenv "BEGDATE"'
-             begdate.EXPIDa = result
+             begdate = result
 'run getenv "ENDDATE"'
-             enddate.EXPIDa = result
+             enddate = result
 'sett'
 
 * Ensure NAME has no underscores
@@ -296,13 +296,13 @@ if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
 endif
 
 'run getenv "CLIMATE"'
-             climate.EXPIDa = result
+             climexp = result
 
 say ''
 say '        EXPID = 'EXPID
-say 'begdate.EXPID => begdate.'EXPID' = 'begdate.EXPIDa
-say 'enddate.EXPID => enddate.'EXPID' = 'enddate.EXPIDa
-say 'climate.EXPID => climate.'EXPID' = 'climate.EXPIDa
+say 'begdate = 'begdate
+say 'enddate = 'enddate
+say 'climexp = 'climexp
 say ''
 
 ***********************************************************************************
@@ -439,11 +439,11 @@ if( found = "TRUE" )
                      obslev = result
 
            'getdates'
-            begdate.cmpnama = subwrd(result,1)
-            enddate.cmpnama = subwrd(result,2)
+            begdate.numexp = subwrd(result,1)
+            enddate.numexp = subwrd(result,2)
 
-            say 'begdate.cmpname: begdate.'cmpname' = 'begdate.cmpnama
-            say 'enddate.cmpname: enddate.'cmpname' = 'enddate.cmpnama
+            say 'begdate.'numexp' = 'begdate.numexp
+            say 'enddate.'numexp' = 'enddate.numexp
 
 *          'run setenv   "BEGDATEO" 'begdate.numexp
 *          'run setenv   "ENDDATEO" 'enddate.numexp
@@ -505,7 +505,7 @@ endif
 * Compute CLIMATOLOGY Flag for Comparison Experiment
 * --------------------------------------------------
                'run getenv "CLIMATE"'
-                        climate.cmpnama = result
+                        climate.numexp = result
                         anafile = obsfile.numexp.1
                         anadsc  =  obsdsc.numexp.1
                         ananam  =  obsnam.numexp.1
@@ -519,16 +519,16 @@ endif
                    k = k+1
 
                   'set dfile 'qfile.1
-             say  'count "'season'" 'begdate.EXPIDa' 'enddate.EXPIDa
-                  'count "'season'" 'begdate.EXPIDa' 'enddate.EXPIDa
+             say  'count "'season'" 'begdate' 'enddate
+                  'count "'season'" 'begdate' 'enddate
                    nmod = result
-             say  'climate.EXPID = 'climate.EXPIDa
+             say  'climexp = 'climexp
 
                   'set dfile 'anafile
-             say  'count "'season'" 'begdate.cmpnama' 'enddate.cmpnama
-                  'count "'season'" 'begdate.cmpnama' 'enddate.cmpnama
+             say  'count "'season'" 'begdate.numexp' 'enddate.numexp
+                  'count "'season'" 'begdate.numexp' 'enddate.numexp
                    nobs.numexp = result
-             say  'climate.cmpname = 'climate.cmpnama
+             say  'climate.'numexp' = 'climate.numexp
 
                   if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
                      'define obs'numexp''season' = sqrt( obs'numexp''season' )'
@@ -537,7 +537,7 @@ endif
 
                        flag = ""
                while ( flag = "" )
-              'run genplt.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'alias.1' -SEASON 'season' -MBDATE 'begdate.EXPIDa' -MEDATE 'enddate.EXPIDa' -CLIMEXP 'climate.EXPIDa' -CBDATE 'begdate.cmpnama' -CEDATE 'enddate.cmpnama' -CLIMCMP 'climate.cmpnama' -OUTPUT 'OUTPUT' -LEVEL 'LEVEL' -NMOD 'nmod' -CMOD 'nobs.numexp' -MFILE 'qfile.1' -CFILE 'anafile' -CNAME 'ananam' -CDESC 'anadsc' -DEBUG 'DEBUG' -MDESC 'qdesc.1' -STAT 'STAT
+              'run genplt.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'alias.1' -SEASON 'season' -MBDATE 'begdate' -MEDATE 'enddate' -CLIMEXP 'climexp' -CBDATE 'begdate.numexp' -CEDATE 'enddate.numexp' -CLIMCMP 'climate.numexp' -OUTPUT 'OUTPUT' -LEVEL 'LEVEL' -NMOD 'nmod' -CMOD 'nobs.numexp' -MFILE 'qfile.1' -CFILE 'anafile' -CNAME 'ananam' -CDESC 'anadsc' -DEBUG 'DEBUG' -MDESC 'qdesc.1' -STAT 'STAT
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
                     say "Type 'next' for  next plot, 'done' for next field"
@@ -573,10 +573,17 @@ endwhile
 * we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
 * ---------------------------------------------------------------------------
 
+* Assign ctag and cname for all experiments first
        k  = 1
 while( k <= numexp )
   cname.k =  oname.k.1
    ctag.k = obsnam.k.1
+k = k + 1
+endwhile
+
+* Now do the closeness loop
+       k  = 1
+while( k <= numexp )
 say ' '
 say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
 say '--------------------------------------------------------------'
@@ -618,17 +625,11 @@ else
          say '                        obs: 'ctag.TAG
          say '              Total  numexp: 'numexp
          say ''
-                                cmpnam = ctag.n
-                                obsnam = ctag.TAG
-                  'run fixname 'cmpnam
-                                cmpnamf = result
-                  'run fixname 'obsnam
-                                obsnamf = result
-
-     say '                          cmpnam: 'cmpnam
-     say '                          obsnam: 'obsnam
-     say '                  climate.cmpnam: 'climate.cmpnamf
-     say '                  climate.obsnam: 'climate.obsnamf
+     
+         say '                          cmpnam: 'ctag.n
+         say '                          obsnam: 'ctag.TAG
+         say '                       climate.n = 'climate.n
+         say '                     climate.TAG = 'climate.TAG
 
                  flag = ""
          while ( flag = "" )
@@ -637,7 +638,7 @@ else
              'define zobs'n''season'   = regrid2( obs'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
              'define zmod'season'      = regrid2( mod'season'     ,0.25,0.25,bs_p1,0,-90 )'
 
-             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ALIAS 'alias.1' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate.EXPIDa' -MENDDATE 'enddate.EXPIDa' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdate.obsnamf' -OENDDATE 'enddate.obsnamf' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climate.EXPIDa' -CLIMCMP 'climate.cmpnamf' -CLIMOBS 'climate.obsnamf' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
+             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ALIAS 'alias.1' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -CFILE 'obsfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdate.TAG' -OENDDATE 'enddate.TAG' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climate.n' -CLIMOBS 'climate.TAG' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
 
              'myprint -name 'OUTPUT'/hdiag_'ctag.n'_'NAME'.'GC.1'_'LEVEL'_closeness_'ctag.TAG'.'season
 
