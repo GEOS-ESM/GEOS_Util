@@ -204,7 +204,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'alias
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
