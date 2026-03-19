@@ -198,13 +198,26 @@ while( n<=numfiles )
 
         if( (analysis = true) | ( (analysis != true) & (CMPID.n != 'MERRA-2') ) )
 
-        if( time = B )
-           'sett' 
-           'run setdates'
-        endif
-       'run getdates'
-       'run getenv BEGDATE'
-                   begdate = result
+              if( time = B )
+                 'sett' 
+                 'run setdates'
+                 'run getdates'
+                 'run getenv BEGDATE.'n
+                             begdate = result
+                             bdate.n = substr(result,6,7)
+                 'run getenv ENDDATE.'n
+                             enddate = result
+                             edate.n = substr(result,6,7)
+              else 
+                 'run getdates'
+                 'run getenv BEGDATE'
+                             begdate = result
+                             bdate.n = substr(result,6,7)
+                 'run getenv ENDDATE'
+                             enddate = result
+                             edate.n = substr(result,6,7)
+              endif
+
        'getinfo tmin'
                 tmin = result
        'getinfo tmax'
@@ -931,14 +944,22 @@ endif
               if( time = B )
                  'sett' 
                  'run setdates'
+                 'run getdates'
+                 'run getenv BEGDATE.'n
+                             begdate = result
+                             bdate.n = substr(result,6,7)
+                 'run getenv ENDDATE.'n
+                             enddate = result
+                             edate.n = substr(result,6,7)
+              else 
+                 'run getdates'
+                 'run getenv BEGDATE'
+                             begdate = result
+                             bdate.n = substr(result,6,7)
+                 'run getenv ENDDATE'
+                             enddate = result
+                             edate.n = substr(result,6,7)
               endif
-             'run getdates'
-             'run getenv BEGDATE'
-                         begdate = result
-                         bdate.n = substr(result,6,7)
-             'run getenv ENDDATE'
-                         enddate = result
-                         edate.n = substr(result,6,7)
               if( maskfile != 'NULL' )
                  'run count.gs "'season'" 'begdate' 'enddate' -field w'type'.'maskfile
                   nseasons.n = result

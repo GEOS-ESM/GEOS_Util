@@ -11,11 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+
 ### Fixed
+
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
 
 ### Removed
 
 ### Deprecated
+
+## [2.1.12] - 2026-01-07
+
+### Fixed
+
+- Add a message to `remap_restarts` indicating the removal of MERRA-2 restarts from `/archive`
+- Update `TEM` to be an object library in `CMake`.
+- Make `TEM.F90` a module to try and avoid build race conditions and build as object library in CMake to avoid Intel parallel build issues.
+
+## [2.1.11] - 2025-09-16
+
+### Fixed
+
+- Fix for All-Times Transport Diagnostics
+- Fixed issues keeping zonal mean plots from working when experiments had different levels/times
+- Update `movestat` to extract seasons in files with dots in the name
 
 
 ## [2.1.10] - 2025-08-29
