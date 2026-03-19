@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- BLEND-OSTIA-REYNOLDS.pl - script to control real-time update of BCS(SST)
+
 ### Changed
+
+- update blend_bcs.pl to accommodate handling of slurm contraint.
 
 - Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
 
