@@ -573,10 +573,17 @@ endwhile
 * we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
 * ---------------------------------------------------------------------------
 
+* Assign ctag and cname for all experiments first
        k  = 1
 while( k <= numexp )
   cname.k =  oname.k.1
    ctag.k = obsnam.k.1
+k = k + 1
+endwhile
+
+* Now do the closeness loop
+       k  = 1
+while( k <= numexp )
 say ' '
 say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
 say '--------------------------------------------------------------'

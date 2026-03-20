@@ -303,7 +303,7 @@ setenv I_MPI_ADJUST_BARRIER 9
 #setenv I_MPI_TUNING_BIN_DUMP tuning-results.dat
 #setenv I_MPI_DEBUG 6
 #setenv MPS_STAT_LEVEL 4
-env | grep 'I_MPI\|FI_'
+env | grep 'I_MPI\\|FI_'
 endif
 
 set infiles = ()
@@ -446,7 +446,7 @@ endif
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
-    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    merra_2_rst_dir = MERRA2_RST_BASE + expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
     print(' Stage MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
