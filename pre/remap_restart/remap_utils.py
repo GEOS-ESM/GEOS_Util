@@ -152,6 +152,8 @@ job_directive = {"SLURM": """#!/bin/csh -f
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
+  assert os.path.exists(MERRA2_RST_BASE), "Must be on discover30 or discover36 to access MERRA-2 restarts at " + MERRA2_RST_BASE
+    
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
      exit("Error. MERRA-2 data < 1979 not available\n")
@@ -180,6 +182,8 @@ def init_merra2(x):
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
   x['input:air:nlevel']          = 72
   x['input:surface:wemin']       = '26'
+  x['input:surface:catch_tilefile'] = '/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/GM4/geometry/CF0180x6C_DE1440xPE0720/CF0180x6C_DE1440xPE0720-Pfafstetter.til'
+
   return False
 
 def init_geosit(x):
