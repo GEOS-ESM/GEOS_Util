@@ -179,7 +179,7 @@ def init_merra2(x):
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
   x['input:air:nlevel']          = 72
-
+  x['input:surface:wemin']       = '26'
   return False
 
 def init_geosit(x):
@@ -209,7 +209,7 @@ def init_geosit(x):
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/geosit_tmp_'+x['input:shared:yyyymmddhh']+'/'
   x['input:air:nlevel']          = 72
-
+  x['input:surface:wemin']       = '13'
   return False
 
 
