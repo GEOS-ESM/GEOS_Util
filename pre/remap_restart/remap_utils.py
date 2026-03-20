@@ -152,6 +152,8 @@ job_directive = {"SLURM": """#!/bin/csh -f
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
+  assert os.path.exists(MERRA2_RST_BASE), MERRA2_RST_BASE + " does not exist. Need to login discover30 or discover36 to access it"
+    
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
      exit("Error. MERRA-2 data < 1979 not available\n")
