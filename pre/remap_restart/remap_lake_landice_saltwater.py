@@ -17,7 +17,7 @@ import glob
 import ruamel.yaml
 import shlex
 from remap_base   import remap_base
-from remap_utils  import get_label, get_geomdir, get_zoom
+from remap_utils  import get_label, get_geomdir, get_zoom, MERRA2_RST_BASE
 from remap_bin2nc import bin2nc
 
 class lake_landice_saltwater(remap_base):
@@ -272,7 +272,7 @@ class lake_landice_saltwater(remap_base):
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
-    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    merra_2_rst_dir = MERRA2_RST_BASE + expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
     print(' Copy MERRA-2 surface restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
