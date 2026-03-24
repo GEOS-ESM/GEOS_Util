@@ -22,6 +22,7 @@ input:
     rst_dir:
     yyyymmddhh:
   surface:
+    split_saltwater: true
     zoom:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm51
@@ -66,3 +67,4 @@ slurm_pbs:
   account:
   qos: ''
   partition: ''
+  reservation: ''
