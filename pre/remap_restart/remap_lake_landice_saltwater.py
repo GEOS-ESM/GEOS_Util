@@ -161,7 +161,7 @@ class lake_landice_saltwater(remap_base):
                 QOS = "#PBS  -q " + qos
         else:
             job = "SLURM"
-            CONSTRAINT = '"[cas|mil]"'
+            CONSTRAINT = 'mil'
             if reservation != "":
                 RESERVATION = "#SBATCH --reservation=" + reservation
             if partition != "":

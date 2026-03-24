@@ -154,7 +154,7 @@ class catchANDcn(remap_base):
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
 
-       CONSTRAINT = '"[cas|mil]"'
+       CONSTRAINT = 'mil'
 
      account    = config['slurm_pbs']['account']
 
