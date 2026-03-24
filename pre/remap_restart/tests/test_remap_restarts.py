@@ -31,7 +31,7 @@ def compare(base, result):
   basedir = os.environ['BASEDIR']
   NCCMP   = basedir+'/Linux/bin/nccmp'
   for b, r in zip(bases, results):
-     cmd = NCCMP + ' -dmgfs '+ b + ' ' + r
+     cmd = NCCMP + ' -dmgs '+ b + ' ' + r
      print(cmd)
      p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
      (out, err) = p.communicate()

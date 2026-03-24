@@ -21,6 +21,7 @@ input:
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/
     yyyymmddhh: '2019061421'
   surface:
+    split_saltwater: true
     zoom: '8'
     wemin: '26'
     catch_model: catch
@@ -58,3 +59,4 @@ slurm_pbs:
   account:
   qos: debug
   partition: ''
+  reservation: ''

@@ -21,6 +21,7 @@ input:
     rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c360Toc24/inputs
     yyyymmddhh: '2022010121'
   surface:
+    split_saltwater: true
     zoom: '4'
     wemin: '13'
     # it supports three models: catch, catchcnclm40, catchcnclm45
@@ -62,3 +63,4 @@ slurm_pbs:
   account:
   qos: debug
   partition: ''
+  reservation: ''
