@@ -17,7 +17,7 @@ import glob
 import fileinput
 import ruamel.yaml
 from remap_base import remap_base
-from remap_utils import get_label
+from remap_utils import get_label, MERRA2_RST_BASE
 import fnmatch
 
 class analysis(remap_base):
@@ -95,9 +95,9 @@ class analysis(remap_base):
      agrid_out = config['output']['shared']['agrid']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
 
-     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*') 
+     dyn2dyn = fnmatch.filter(local_fs, '*bkg??_eta_rst*')
      for f in dyn2dyn:
-        if "cbkg" not in f: 
+        if "cbkg" not in f:
           f_orig = f + ".orig"
           shutil.move(f,f_orig)
           cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
@@ -106,15 +106,15 @@ class analysis(remap_base):
 
      for f in local_fs:
        fname = os.path.basename(f)
-       fname = fname + label 
+       fname = fname + label
        shutil.move(f, out_dir+'/'+fname)
     # write lcv file
-    #  (Info about "lcv" file provided by Ricardo Todling via email, 1 Sep 2023, 
+    #  (Info about "lcv" file provided by Ricardo Todling via email, 1 Sep 2023,
     #   paraphrased by Rolf Reichle:
     #   The lcv file is binary and inherits the nomenclature of the old GCM primary restarts [GEOS-4].
-    #   The file simply carries the date of the restarts, e.g., 20231201 210000. 
-    #   The file is required by the ADAS. 
-    #   LCV stands for Lagrangian Control Volume, which is what the grid coordinates of the model are 
+    #   The file simply carries the date of the restarts, e.g., 20231201 210000.
+    #   The file is required by the ADAS.
+    #   LCV stands for Lagrangian Control Volume, which is what the grid coordinates of the model are
     #   [on the cubed-sphere for GEOS-5].)
      lcv = config['output']['analysis']['lcv']
      if lcv :
@@ -174,7 +174,7 @@ class analysis(remap_base):
     dd_   = yyyymmddhh_[6:8]
     hh_   = yyyymmddhh_[8:10]
 
-    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    merra_2_rst_dir = MERRA2_RST_BASE + expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
     print(' Stage MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
@@ -182,7 +182,7 @@ class analysis(remap_base):
     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
 
     anafiles=[]
-    canafiles=[] 
+    canafiles=[]
     for h in [3,4,5,6,7,8,9]:
        delt = timedelta(hours = h-3)
        new_time = rst_time + delt
@@ -218,7 +218,7 @@ class analysis(remap_base):
        else:
           print('Warning: Cannot find '+f)
 
-       # satb files 
+       # satb files
        for ftype in ['satbias', 'satbang']:
           fname = expid + '.ana_'+ftype+'_rst.'+ymd+'_'+newhh+'z.txt'
           f = m2_rst_dir+'/'+fname
