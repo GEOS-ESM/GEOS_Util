@@ -32,24 +32,30 @@ suffix  = " "
              geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
-say ''
-                        'getresource 'PLOTRC' 'export'_'GC'_TITLE'  ; title   = result
-                        'getresource 'PLOTRC' 'export'_'GC'_FACTOR' ; fact    = result
+if( alias != '' )
+   rc_name = alias
+else
+   rc_name = export
+endif
 
-                        'getresource 'PLOTRC' 'export'_'GC'_Z_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CCOLS' ; endif
+say ''
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_TITLE'  ; title   = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_FACTOR' ; fact    = result
+
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_Z_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CCOLS' ; endif
                                                             ccols = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_Z_CLEVS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_Z_CLEVS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CLEVS' ; endif
                                                             clevs = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_CNTLEVS'; cntlevs = result
-                        'getresource 'PLOTRC' 'export'_'GC'_YLAB'    ; ylab    = result
-                        'getresource 'PLOTRC' 'export'_'GC'_YFMT'    ; yfmt    = result
-                        'getresource 'PLOTRC' 'export'_'GC'_CBSCALE'; cbscale = result
-                        'getresource 'PLOTRC' 'export'_'GC'_AXLIM'  ; axlim   = result
-                        'getresource 'PLOTRC' 'export'_'GC'_ZLOG'   ; zlog    = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_CNTLEVS'; cntlevs = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_YLAB'    ; ylab    = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_YFMT'    ; yfmt    = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_CBSCALE'; cbscale = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_AXLIM'  ; axlim   = result
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_ZLOG'   ; zlog    = result
 say ''
 
 if( zlog   != 'NULL' )

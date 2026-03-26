@@ -93,6 +93,9 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      YLAB'  ; endif
                         'getresource 'PLOTRC' 'PFX'GRID' 
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      GRID'  ; endif
                                                    grid   = result
+                        'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result                                                   
 else
 
 * Check Variable Attributes from Generic PLOTRC
@@ -115,6 +118,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLEVS' ; endif
                                                                 clevs = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FACTOR' ; endif
+                                                                factor = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_REGRID'
                                                                 method = result
 
@@ -123,6 +130,7 @@ if( axlim = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_AXLIM'math ; end
 endif
 
 say ''
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 if( axlim != NULL )
 axmin = subwrd(axlim,1)
@@ -132,8 +140,8 @@ endif
 
 * Perform Mathematics if necessary
 * --------------------------------
-'define qmod = 'mvar''season
-'define qobs = 'ovar''season
+'define qmod = 'mvar''season' * 'factor
+'define qobs = 'ovar''season' * 'factor
 
 m = 0
 if( ccols = NULL )

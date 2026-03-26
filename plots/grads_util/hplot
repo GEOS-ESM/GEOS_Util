@@ -65,36 +65,40 @@ say ''
 
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
+if( alias != '' )
+   rc_name = alias
+else
+   rc_name = export
+endif
+
 say 'LEVTYPE: 'CLEVS
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_CBSCALE' 
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CBSCALE' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_CBSCALE' 
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CBSCALE' ; endif
                                                             cbscale = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_FACTOR'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_FACTOR' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_FACTOR' ; endif
                                                             fact = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_TITLE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_TITLE' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_TITLE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_TITLE' ; endif
                                                             title = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CCOLS' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CCOLS' ; endif
                                                             ccols = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_'CLEVS
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_'CLEVS ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_'CLEVS
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_'CLEVS ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CLEVS' ; endif
                                                             clevs = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_REGRID'
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_REGRID'
                                                             method = result
 say ''
 
-
 * Set Default Plotting Variables
 ********************************
-
 if( title   = 'NULL' )
   'getdesc 'name
      title  = result
