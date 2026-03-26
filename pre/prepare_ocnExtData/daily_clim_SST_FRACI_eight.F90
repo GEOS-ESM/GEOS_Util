@@ -12,7 +12,7 @@ PROGRAM daily_clim_SST_FRACI_eight
   CHARACTER (LEN = 200)   :: data_path
   CHARACTER (LEN = 200)   :: sst_file_pref, ice_file_pref
   CHARACTER (LEN = 200)   :: sst_file_suff, ice_file_suff
- 
+
   INTEGER                 :: nymd_in, nYears
   INTEGER                 :: nymd_out, NLON, NLAT
   REAL                    :: LON(2880), LAT(1440)
@@ -29,7 +29,7 @@ PROGRAM daily_clim_SST_FRACI_eight
   LOGICAL                 :: verbose
 
   character (len=4) :: arg
-  integer :: numArgs
+  integer :: numArgs, iargc
   numArgs = iargc()
 
   verbose = .false.
@@ -49,7 +49,7 @@ PROGRAM daily_clim_SST_FRACI_eight
     call getarg(4, arg)
     read(arg, '(I2)') day
   end if
-  
+
 ! - Set inputs
   clim_year  = 1 ! Set, can't be "0" since GEOS/ESMF does not like that!
 ! GMAO OPS has following fixed
@@ -103,7 +103,7 @@ PROGRAM daily_clim_SST_FRACI_eight
         mean_sst = sst
         mean_ice = ice
       else
-        mean_sst = mean_sst + sst 
+        mean_sst = mean_sst + sst
         mean_ice = mean_ice + ice
       endif
     endif
