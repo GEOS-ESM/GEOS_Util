@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Update `binarytile.F90` to open the text tile files as read-only and allow longer paths
+
 ### Removed
 
 ### Deprecated
