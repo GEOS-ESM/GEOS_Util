@@ -344,6 +344,11 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT       RI:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT      DMDTDYN:DYN  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT     DMDT:PHYSICS  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT    UU10M:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT     U10M:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT     V10M:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT    USTAR:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT   USTARW:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMDTDYN:DYN  DMDTANA:DYN              -NAME DMDTDYNANA     -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMDTDYN:DYN  DMDTANA:DYN DMDT:PHYSICS -NAME DMDTDYNANAPHY  -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
