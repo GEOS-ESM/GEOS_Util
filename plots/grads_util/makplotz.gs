@@ -37,7 +37,10 @@ endwhile
 
 if( math = NULL ) ; math = '' ; endif
 
+'setlons'
 'set t 1'
+'undefine qmodz'
+'undefine qobsz'
 'run getenv "GEOSUTIL"'
              geosutil = result
 
@@ -329,8 +332,21 @@ if( math = LOG )
 else
     mathparm = ''
 endif
-'myprint -name 'output'/'mname'_z_'mathparm''PFX''oname'.'season
 
+'set gxout stat'
+'d qmodz'
+qmodz_line  = sublin(result,6)
+qmodz_valid = subwrd(qmodz_line,4)
+'d qobsz'
+qobsz_line  = sublin(result,6)
+qobsz_valid = subwrd(qobsz_line,4)
+'set gxout line'
+
+if( qmodz_valid > 0 & qobsz_valid > 0 )
+'myprint -name 'output'/'mname'_z_'mathparm''PFX''oname'.'season
+endif
+
+'setlons'
 'set mproj latlon'
 return
 
