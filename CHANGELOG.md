@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Edited makplotz.gs to prevent blank or fake zonal line plots from being created
 - Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 
