@@ -16,11 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new res C1120
 - NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
 - Add support for v14 BCs
+- Add SLURM/PBS job submission capability to lake-landice remapping, bringing it in line with upper-air and catch remapping (batch queues on both NAS and NCCS)
+- Add `reservation` field to `remap_params.tpl` and all test YAML files
+- Add `split_saltwater` field to `remap_params.tpl` and all test YAML files
 
 ### Changed
 
 - Update `movestat` to allow for multiple seasons
 - Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+- Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
 
 ### Fixed
 
@@ -29,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
 - Edited makplotz.gs to prevent blank or fake zonal line plots from being created
+- Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
+- Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 
 ### Removed
 

@@ -186,7 +186,7 @@ class upperair(remap_base):
        if (qos != ''):
          QOS = "#SBATCH  --qos="+qos
 
-       CONSTRAINT = '"[cas|mil]"'
+       CONSTRAINT = 'mil'
 
      # We need to create an input.nml file which is different if we are running stretched grid
      # If we are running stretched grid, we need to pass in the target lon+lat and stretch factor
