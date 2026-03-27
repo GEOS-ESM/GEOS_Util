@@ -9,6 +9,7 @@ dqmax = NULL
 dqmin = NULL
 STAT  = ''
 PRFX  = ''
+usealias = NULL
 
         num = 0
 while ( num < numargs )
@@ -18,6 +19,7 @@ if( subwrd(args,num) = '-EXPID'   ) ; expid    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-EXPORT'  ) ; EXPORT   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-GC'      ) ; GC       = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ALIAS'   ) ; alias    = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-USEALIAS') ; usealias = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-QFILE'   ) ; qfile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OFILE'   ) ; ofile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ONAME'   ) ; obsnam   = subwrd(args,num+1) ; endif
@@ -176,10 +178,20 @@ say 'DCOLS: 'dcols
 say 'DIFFMAX: 'diffmax
 say 'DIFFMIN: 'diffmin
 
-if( zlog = 'OFF' )
-    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_z'
+if( usealias != NULL & usealias != '' )
+* User provided alias - use short format
+    if( zlog = 'OFF' )
+        oname = '/hdiag_'PRFX''obsnam'_'usealias'_z'
+    else
+        oname = '/hdiag_'PRFX''obsnam'_'usealias'_zlog'ptop
+    endif
 else
-    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_zlog'ptop
+* No user alias - use traditional format with EXPORT:GC
+    if( zlog = 'OFF' )
+        oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_z'
+    else
+        oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_zlog'ptop
+    endif
 endif
 
 * Remove possible BLANKS from FACTOR
