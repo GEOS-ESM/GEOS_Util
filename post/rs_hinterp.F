@@ -1479,7 +1479,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
  
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit   none
       integer    im,jm
       real    ps(im,jm)

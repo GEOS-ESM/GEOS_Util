@@ -469,7 +469,7 @@ c ----------------------------
 
       subroutine get_ncep_map ( filename,format,ps,dp,u,v,t,q,phis,im,jm,mlev,nq,
      .                          nvars,names,lmvars )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  im,jm,mlev,nq
       integer              nvars
@@ -783,7 +783,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,lm1,lm2,nq

@@ -1084,7 +1084,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,nq,lm1,lm2
