@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate `use MAPL_ConstantsMod` to `use MAPL_Constants` in 18 source files for MAPL3 compatibility (fixes #191)
 - Modified interfaces for variables gFTL container to be V2.  Changes include
   - `%key()` becomes `%first()`
   - `%value()` becomes `%second()`

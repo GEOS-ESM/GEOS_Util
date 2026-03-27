@@ -1,5 +1,5 @@
       program  main
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
 
       use dynamics_lattice_module
@@ -665,7 +665,7 @@ c            ----------------------------------------------
       subroutine get_ana_data  ( id,ps,u,v,t,q,h,
      .                           im,jm,lm,nymd,nhms,
      .                           imana,jmana,lmana,undef,plevs,Lzflip,lattice )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice
@@ -1706,7 +1706,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,lm1,lm2,nq
@@ -1827,7 +1827,7 @@ c -------------------------------
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lats,lons,
      .                       timeinc,precision,lattice )
       use MAPL_BaseMod, only: MAPL_UNDEF
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       use dynamics_lattice_module
       implicit  none
