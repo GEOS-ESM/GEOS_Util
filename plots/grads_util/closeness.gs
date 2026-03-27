@@ -132,7 +132,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FIXED_PLOT_CINT' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      CLOSE_PLOT_CINT' ; endif
                                                    clspltcint = result
 
-factor = 1
+                        'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 else
 
