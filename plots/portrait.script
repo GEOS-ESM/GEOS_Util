@@ -315,10 +315,18 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LHFX:SURFACE  -NAME eflux   -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 1 -PREFIX LAND  -LAND  -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LHFX:SURFACE  -NAME eflux   -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 1               -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQL:AGCM           -OBS LWP:MOIST  -NAME lwp  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM                           -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM                           -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 0.1 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQL:AGCM TQR:AGCM  -OBS TLWP:AGCM  -NAME tlwp -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQI:AGCM                           -NAME tqi  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQR:AGCM                           -NAME tqr  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQS:AGCM                           -NAME tqs  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQG:AGCM                           -NAME tqg  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWP:MOIST CCWP:MOIST -OBS LWP:MOIST -NAME lwp  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 1000 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM   -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 0.1 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  VENT:SURFACE   -NAME speed        -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT     TS:SURFACE  -NAME sst          -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT     TS:SURFACE  -NAME tskin        -EXPID $expid -OUTPUT $output -DEBUG $debug        -LAND  -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  SPEED:DYN      -NAME SPEED_ocean  -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -333,7 +341,6 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   U10M:SURFACE  -NAME U10M_land    -EXPID $expid -OUTPUT $output -DEBUG $debug        -LAND  -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   V10M:SURFACE  -NAME V10M_ocean   -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   V10M:SURFACE  -NAME V10M_land    -EXPID $expid -OUTPUT $output -DEBUG $debug        -LAND  -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   TAUX:SURFACE  -NAME taux    -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 100 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   TAUY:SURFACE  -NAME tauy    -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 100 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT ALBEDO:SOLAR    -NAME albedo  -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -752,6 +759,10 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DVDT:MOIST      -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT TIM:PHYSICS     -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQDT:MOIST      -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQLDT:MOIST     -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQIDT:MOIST     -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQADT:MOIST     -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DTDTFRIC:MOIST  -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT QCTOT:AGCM      -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT QGTOT:AGCM      -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -789,19 +800,41 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT RSU_AN:MOIST    -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT RSU_LS:MOIST    -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQG:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQI:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQL:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQR:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQS:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp  -EXPID $expid -EXPORT TQV:AGCM        -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT  DTDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQVDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQLDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQIDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQADT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQRDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQSDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQGDT_micro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT  DTDT_macro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQVDT_macro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQLDT_macro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQIDT_macro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT DQADT_macro:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT     DTDT_DC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQVDT_DC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQLDT_DC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQIDT_DC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQADT_DC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT     DTDT_SC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQVDT_SC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQLDT_SC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQIDT_SC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmpz -EXPID $expid -EXPORT    DQADT_SC:MOIST -SEASON $seasons -OUTPUT $output -DEBUG $debug -PTOP 10" ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-      set LEVS = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300 250 200 150 100'
+      set LEVS = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300 250 200 150 100 70 50 30 20 10 7 5 3 1 0.4'
       foreach LEV ($LEVS)
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DUDT:MOIST     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DVDT:MOIST     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT  TIM:PHYSICS   -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQDT:MOIST     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQLDT:MOIST    -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQIDT:MOIST    -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQADT:MOIST    -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DTDTFRIC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT QCTOT:AGCM     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT QGTOT:AGCM     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT QITOT:AGCM     -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -835,6 +868,31 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT RSU_CN:MOIST   -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT RSU_AN:MOIST   -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT RSU_LS:MOIST   -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+ 
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT  DTDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQVDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQLDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQIDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQADT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQRDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQSDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQGDT_micro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT  DTDT_macro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQVDT_macro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQLDT_macro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQIDT_macro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT DQADT_macro:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT     DTDT_DC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQVDT_DC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQLDT_DC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQIDT_DC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQADT_DC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT     DTDT_SC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQVDT_SC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQLDT_SC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQIDT_SC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n ) $grads $batch -p -c "run gencmp -EXPID $expid -SEASON $seasons -OUTPUT $output -DEBUG $debug -EXPORT    DQADT_SC:MOIST -LEVEL $LEV " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
       end
 
 # Turbulence Diagnostics

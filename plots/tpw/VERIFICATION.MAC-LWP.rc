@@ -1,0 +1,9 @@
+OBSNAM: MAC-LWP
+OBSDSC: Multisensor_Advanced_Climatology_of_LWP (MAC-LWP)
+
+        filename:   '/discover/nobackup/projects/gmao/geos_itv/mefrazer/MAC-LWP/mac-lwp.tabl'
+        filetype:   'HDF'
+        fields:     'TLWP' , 'AGCM' , 'totallwp' , 0.001
+                    'TQV'  , 'AGCM' , 'wvp'      , 1
+                    'LWP'  , 'MOIST', 'cloudlwp' , 0.001
+                    ::

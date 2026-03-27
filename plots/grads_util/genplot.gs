@@ -525,6 +525,12 @@ while ( m <= numMGCs & FOUND = TRUE )
          m  = m + 1
 endwhile
 
+if ( FOUND = TRUE )
+   isvalid.numexp = 1
+else
+   isvalid.numexp = 0
+endif
+
 if( FOUND = TRUE )
 'setlons'
 'setlats'
@@ -747,7 +753,7 @@ say 'Looping through experiments, k = 'k' CTAG = 'ctag.k.1' TYPE = 'type.k
 say '--------------------------------------------------------------'
 say ' '
 
-if( ( ctag.k.1 = "MERRA-2" | type.k = V ) & cname.k.1 != 'NULL' )
+if( ( ctag.k.1 = "MERRA-2" | type.k = V ) & isvalid.k = 1 )
      TAG   = k
      say 'Performing Closeness plots to: 'ctag.TAG.1' k = 'k
      say '------------------------------------------------'
@@ -781,8 +787,8 @@ while( mathparm != 'DONE' )
 while( n <= numexp )
 
      say 'n = 'n' Testing 'qtag.1' and 'ctag.n.1' for closeness with 'ctag.TAG.1
-
-     if( ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & ctag.n.1 != ctag.TAG.1 & type.n != V & cname.n.1 != 'NULL' )
+     
+     if( ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & ctag.n.1 != ctag.TAG.1 & type.n != V & isvalid.n = 1 )
      say 'Closeness plot between  exp: 'qtag.1
      say '                       cexp: 'ctag.n.1
      say '                        obs: 'ctag.TAG.1
@@ -1177,7 +1183,7 @@ endwhile ;* END While_FLAG Loop
 * ---------------------------------------------------------
        n  = 1
 while( n <= numexp )
-if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n != V )
+if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n != V & isvalid.n = 1 )
 say 'Closeness plot between  exp: 'qtag.1
 say '                       cexp: 'ctag.n.1
 say '                        obs: 'otag.1
