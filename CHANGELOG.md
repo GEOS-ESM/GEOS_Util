@@ -41,6 +41,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.13] - 2026-03-19
+
+### Added
+
+- BLEND-OSTIA-REYNOLDS.pl - script to control real-time update of BCS(SST)
+
+### Changed
+
+- update blend_bcs.pl to accommodate handling of slurm contraint.
+
+- Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+- Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
+
+### Fixed
+
+- Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
+- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
+
 ## [2.1.12] - 2026-01-07
 
 ### Fixed
