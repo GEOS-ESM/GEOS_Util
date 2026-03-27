@@ -9,8 +9,10 @@ function template (args)
 
 PTOP   = NULL
 NAME   = NULL
+ALIAS  = NULL
 DEBUG  = FALSE
-ZLOG   = OFF  
+ZLOG   = OFF
+MATH   = NULL
 levels = 0
 
         n   = 0
@@ -22,7 +24,9 @@ if( subwrd(args,num) = '-EXPID'  ) ; EXPID  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT' ) ; OUTPUT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ZLOG'   ) ; ZLOG   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-MATH'   ) ; MATH   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-ALIAS'  ) ; ALIAS  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-PTOP'   ) ; PTOP   = subwrd(args,num+1) ; endif
 
 * Read EXPORTS
@@ -87,31 +91,69 @@ endif
 endwhile
 
 
-* Construct GCs from Input EXPORTS
+* Parse EXPORT:GC:SUFFIX (handling double colons)
 * --------------------------------
         m  = 0
         k  = 1
 while ( k <= n )
         EX = ''
+        GC = ''
+        SUFFIX = ''
          j = 1
        bit = substr(EXPORT.k,j,1)
-       while(bit != ':' & bit != '')
-        EX = EX''bit
-         j = j + 1
-       bit = substr(EXPORT.k,j,1)
-       endwhile
-       if( EX != EXPORT.k )
-         m = m + 1
-         j = j + 1
-       GC.m = ''
-       bit = substr(EXPORT.k,j,1)
+
+* Get EXPORT (up to first single colon)
        while(bit != '')
-       GC.m = GC.m''bit
-         j = j + 1
-       bit = substr(EXPORT.k,j,1)
+           nextbit = substr(EXPORT.k,j+1,1)
+           if( bit = ':' & nextbit != ':' )
+               break
+           endif
+           if( bit = ':' & nextbit = ':' )
+               EX = EX''bit''nextbit
+               j = j + 2
+           else
+               EX = EX''bit
+               j = j + 1
+           endif
+           bit = substr(EXPORT.k,j,1)
        endwhile
-       EXPORT.k = EX
+
+* Get GC (between first and second single colon)
+       if( bit = ':' )
+           j = j + 1
+           bit = substr(EXPORT.k,j,1)
+           while(bit != '')
+               nextbit = substr(EXPORT.k,j+1,1)
+               if( bit = ':' & nextbit != ':' )
+                   break
+               endif
+               if( bit = ':' & nextbit = ':' )
+                   GC = GC''bit''nextbit
+                   j = j + 2
+               else
+                   GC = GC''bit
+                   j = j + 1
+               endif
+               bit = substr(EXPORT.k,j,1)
+           endwhile
+
+* Get SUFFIX (after second single colon)
+           if( bit = ':' )
+               j = j + 1
+               bit = substr(EXPORT.k,j,1)
+               while(bit != '')
+                   SUFFIX = SUFFIX''bit
+                   j = j + 1
+                   bit = substr(EXPORT.k,j,1)
+               endwhile
+           endif
+
+           m = m + 1
+           EXPORT.k = EX
+           GC.m = GC
+           SUFFIX.k = SUFFIX
        endif
+
 k = k + 1
 endwhile
 
@@ -126,7 +168,7 @@ else
     say '              GCS: 'm
     return
 endif
- 
+
 'numargs  'levels
  numlevs = result
 
@@ -185,11 +227,15 @@ endif
 * -------------------
         n  = 1
 while ( n <= nexp )
-'run getvar 'EXPORT.n' 'GC.n
-        qname.n = subwrd(result,1)
-        qfile.n = subwrd(result,2)
-        scale.n = subwrd(result,3)
-       expdsc.n = subwrd(result,4)
+    if( SUFFIX.n != '' )
+        'run getvar_2G 'EXPORT.n':'SUFFIX.n' 'GC.n
+    else
+        'run getvar_2G 'EXPORT.n' 'GC.n
+    endif
+    qname.n = subwrd(result,1)
+    qfile.n = subwrd(result,2)
+    scale.n = subwrd(result,3)
+    expdsc.n = subwrd(result,4)
     if( qfile.n = 'NULL' ) ; return ; endif
          n  = n + 1
 endwhile
@@ -221,11 +267,11 @@ endif
         m=1
 while ( m<nexp+1 )
 'fixname 'qname.m
-          alias.m = result
-     say 'Alias #'m' = 'alias.m
-      if( qname.m != alias.m )
+          qalias.m = result
+     say 'Alias #'m' = 'qalias.m
+      if( qname.m != qalias.m )
          'set lon -180 360'
-         'rename 'qname.m ' 'alias.m''qfile.m
+         'rename 'qname.m ' 'qalias.m''qfile.m
          'setlons'
       endif
       m = m+1
@@ -254,7 +300,6 @@ if( enddate = "NULL" )
          enddate = result
 endif
 
-
 * Loop Over Levels
 * ----------------
 if( do_h = 'true' )
@@ -275,21 +320,21 @@ say ' '
 if( nexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
-    EXPORT =  alias.1
-    if( qname.1 != alias.1 )
-       'seasonalf -FUNCTION 'alias.1''qfile.1'*'scale.1' -NAME 'EXPORT
+    EXPORT =  qalias.1
+    if( qname.1 != qalias.1 )
+       'seasonalf -FUNCTION 'qalias.1''qfile.1'*'scale.1' -NAME 'EXPORT
     else
-       'seasonalf -FUNCTION 'alias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
+       'seasonalf -FUNCTION 'qalias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
     endif
     climfile = result
 else
     mstring = NAME
     m  = 1
     while ( m <= nexp )
-       if( qname.m != alias.m )
-           mstring = mstring' 'alias.m''qfile.m'*'scale.m
+       if( qname.m != qalias.m )
+           mstring = mstring' 'qalias.m''qfile.m'*'scale.m
        else
-           mstring = mstring' 'alias.m'.'qfile.m'*'scale.m
+           mstring = mstring' 'qalias.m'.'qfile.m'*'scale.m
        endif
        m = m + 1
     endwhile
@@ -301,6 +346,10 @@ endif
 'set dfile 'qfile.1
 'set lev   'level
 
+* Loop over MATH transformations
+* ------------------------------
+       mathparm = MATH
+while( mathparm != 'DONE' )
 
 * Loop over SEASONS for PLOT
 * --------------------------
@@ -316,7 +365,7 @@ endif
                      num = result
                            flag = ""
                    while ( flag = "" )
-                   'run hplot 'EXPID' 'NAME' 'GC' 'EXPORT' 'season' 'OUTPUT' 'level' 'num' 'begdate' 'enddate' 'expdsc.1' 'qname.1
+                   'run hplot 'EXPID' 'NAME' 'GC' 'EXPORT' 'season' 'OUTPUT' 'level' 'num' 'begdate' 'enddate' 'expdsc.1' 'qname.1' 'mathparm' 'ALIAS
                     if( DEBUG = "debug" )
                         say "Hit  ENTER  to repeat plot"
                         say "Type 'next' for  next plot, 'done' for next field"
@@ -328,6 +377,15 @@ endif
 
           endif
           endwhile
+
+* End MATH loop for horizontal plots
+* -----------------------------------
+       if( mathparm != 'NULL' )
+           mathparm = 'NULL'
+       else
+           mathparm = 'DONE'
+       endif
+endwhile
 
       if( flag = "done" )
          z = numlevs + 1
@@ -370,21 +428,21 @@ endif
 if( nexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
-    EXPORT =  alias.1
-    if( qname.1 != alias.1 )
-       'seasonalf -FUNCTION 'alias.1''qfile.1'*'scale.1' -NAME 'EXPORT
+    EXPORT =  qalias.1
+    if( qname.1 != qalias.1 )
+       'seasonalf -FUNCTION 'qalias.1''qfile.1'*'scale.1' -NAME 'EXPORT
     else
-       'seasonalf -FUNCTION 'alias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
+       'seasonalf -FUNCTION 'qalias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
     endif
     climfile = result
 else
     mstring = NAME
     m  = 1
     while ( m <= nexp )
-       if( qname.m != alias.m )
-           mstring = mstring' 'alias.m''qfile.m'*'scale.m
+       if( qname.m != qalias.m )
+           mstring = mstring' 'qalias.m''qfile.m'*'scale.m
        else
-           mstring = mstring' 'alias.m'.'qfile.m'*'scale.m
+           mstring = mstring' 'qalias.m'.'qfile.m'*'scale.m
        endif
        m = m + 1
     endwhile
@@ -400,6 +458,11 @@ if( PTOP != 'NULL' )
 else
    'setz'
 endif
+
+* Loop over MATH transformations
+* ------------------------------
+       mathparm = MATH
+while( mathparm != 'DONE' )
 
                  k = 1
           while( k > 0 )
@@ -418,7 +481,7 @@ endif
               'makez     'EXPORT''season' z'
               'set dfile 'qfile.1
               'set lon 0'
-              'run zplot 'EXPID' 'NAME' 'GC' 'EXPORT' 'season' 'OUTPUT' 'ZLOG' 'num' 'begdate' 'enddate' 'expdsc.1' 'qname.1
+              'run zplot 'EXPID' 'NAME' 'GC' 'EXPORT' 'season' 'OUTPUT' 'ZLOG' 'num' 'begdate' 'enddate' 'expdsc.1' 'qname.1' 'mathparm' 'ALIAS
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
                     say "Type 'next' for  next plot, 'done' for next field"
@@ -429,9 +492,20 @@ endif
                endwhile
           endif
           endwhile
+
+* End MATH loop for zonal plots
+* ------------------------------
+       if( mathparm != 'NULL' )
+           mathparm = 'NULL'
+       else
+           mathparm = 'DONE'
+       endif
+endwhile
+
 endif
 
 'run unsetenv "ZDIM"'
+
 'quit'
 return
 
