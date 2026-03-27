@@ -523,38 +523,293 @@ end
 
 # GOCART dust and aerosols
 # ------------------------
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    BCEXTTAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    BCSCATAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    DUEXTTAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    DUSCATAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    OCEXTTAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    OCSCATAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    SSEXTTAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    SSSCATAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    SUEXTTAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    SUSCATAU:GOCART -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    set INFO  = "-MATH LOG -SEASON $seasons -OUTPUT $output -DEBUG $debug "
+# ---tavg2d_aer_x---
+# Total:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT TOTEXTTAU:GOCART2G                    -ALIAS TOTEXTTAU   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT TOTSCATAU:GOCART2G                    -ALIAS TOTSCATAU   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT TOTANGSTR:GOCART2G                    -ALIAS TOTANGSTR   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT TOTSTEXTTAU:GOCART2G                  -ALIAS TOTSTEXTTAU $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT TOTSTSCATAU:GOCART2G                  -ALIAS TOTSTSCATAU $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT PM25:GOCART2G                         -ALIAS PM25        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT PM:GOCART2G                           -ALIAS PM          $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Dust:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEM:DU:001                           -ALIAS DUEM001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEM:DU:002                           -ALIAS DUEM002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEM:DU:003                           -ALIAS DUEM003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEM:DU:004                           -ALIAS DUEM004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEM:DU:005                           -ALIAS DUEM005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSD:DU:001                           -ALIAS DUSD001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSD:DU:002                           -ALIAS DUSD002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSD:DU:003                           -ALIAS DUSD003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSD:DU:004                           -ALIAS DUSD004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSD:DU:005                           -ALIAS DUSD005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUDP:DU:001                           -ALIAS DUDP001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUDP:DU:002                           -ALIAS DUDP002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUDP:DU:003                           -ALIAS DUDP003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUDP:DU:004                           -ALIAS DUDP004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUDP:DU:005                           -ALIAS DUDP005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUWT:DU:001                           -ALIAS DUWT001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUWT:DU:002                           -ALIAS DUWT002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUWT:DU:003                           -ALIAS DUWT003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUWT:DU:004                           -ALIAS DUWT004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUWT:DU:005                           -ALIAS DUWT005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSMASS:DU                            -ALIAS DUSMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUCMASS:DU                            -ALIAS DUCMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSMASS25:DU                          -ALIAS DUSMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUCMASS25:DU                          -ALIAS DUCMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEXTT25:DU                           -ALIAS DUEXTT25    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSCAT25:DU                           -ALIAS DUSCAT25    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEXTTAU:DU                           -ALIAS DUEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSCATAU:DU                           -ALIAS DUSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSTEXTTAU:DU                         -ALIAS DUSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSTSCATAU:DU                         -ALIAS DUSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUANGSTR:DU                           -ALIAS DUANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUEXTTFM:DU                           -ALIAS DUEXTTFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUSCATFM:DU                           -ALIAS DUSCATFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUFLUXU:DU                            -ALIAS DUFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUFLUXV:DU                            -ALIAS DUFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%DU::DUIM:PHYSICS             -ALIAS DUSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Salt:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEM:SS:001                           -ALIAS SSEM001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEM:SS:002                           -ALIAS SSEM002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEM:SS:003                           -ALIAS SSEM003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEM:SS:004                           -ALIAS SSEM004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEM:SS:005                           -ALIAS SSEM005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSD:SS:001                           -ALIAS SSSD001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSD:SS:002                           -ALIAS SSSD002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSD:SS:003                           -ALIAS SSSD003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSD:SS:004                           -ALIAS SSSD004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSD:SS:005                           -ALIAS SSSD005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSDP:SS:001                           -ALIAS SSDP001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSDP:SS:002                           -ALIAS SSDP002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSDP:SS:003                           -ALIAS SSDP003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSDP:SS:004                           -ALIAS SSDP004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSDP:SS:005                           -ALIAS SSDP005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSWT:SS:001                           -ALIAS SSWT001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSWT:SS:002                           -ALIAS SSWT002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSWT:SS:003                           -ALIAS SSWT003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSWT:SS:004                           -ALIAS SSWT004     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSWT:SS:005                           -ALIAS SSWT005     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSMASS:SS                            -ALIAS SSSMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSCMASS:SS                            -ALIAS SSCMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSMASS25:SS                          -ALIAS SSSMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSCMASS25:SS                          -ALIAS SSCMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEXTT25:SS                           -ALIAS SSEXTT25    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSCAT25:SS                           -ALIAS SSSCAT25    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEXTTAU:SS                           -ALIAS SSEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSCATAU:SS                           -ALIAS SSSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSTEXTTAU:SS                         -ALIAS SSSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSTSCATAU:SS                         -ALIAS SSSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSANGSTR:SS                           -ALIAS SSANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSEXTTFM:SS                           -ALIAS SSEXTTFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSSCATFM:SS                           -ALIAS SSSCATFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSFLUXU:SS                            -ALIAS SSFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSFLUXV:SS                            -ALIAS SSFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%SS::SSIM:PHYSICS             -ALIAS SSSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Sulfates:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUEM:SU:DMSEM                         -ALIAS DMSEM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUEM:SU:SO2EM                         -ALIAS SO2EM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUEM:SU:SO4EM                         -ALIAS SO4EM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUEM:SU:MSAEM                         -ALIAS MSAEM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUDP:SU:DMSDP                         -ALIAS DMSDP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUDP:SU:SO2DP                         -ALIAS SO2DP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUDP:SU:SO4DP                         -ALIAS SO4DP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUDP:SU:MSADP                         -ALIAS MSADP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUWT:SU:DMSWT                         -ALIAS DMSWT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUWT:SU:SO2WT                         -ALIAS SO2WT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUWT:SU:SO4WT                         -ALIAS SO4WT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUWT:SU:MSAWT                         -ALIAS MSAWT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSD:SU:DMSSD                         -ALIAS DMSSD       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSD:SU:SO2SD                         -ALIAS SO2SD       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSD:SU:SO4SD                         -ALIAS SO4SD       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSD:SU:MSASD                         -ALIAS MSASD       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2SMASS:SU                           -ALIAS SO2SMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2CMASS:SU                           -ALIAS SO2CMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO4SMASS:SU                           -ALIAS SO4SMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO4CMASS:SU                           -ALIAS SO4CMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMSSMASS:SU                           -ALIAS DMSSMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMSCMASS:SU                           -ALIAS DMSCMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUPSO2:SU                             -ALIAS SUPSO2      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUPSO4G:SU                            -ALIAS SUPSO4G     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUPSO4AQ:SU                           -ALIAS SUPSO4AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUPSO4WT:SU                           -ALIAS SUPSO4WT    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUPMSA:SU                             -ALIAS SUPMSA      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUEXTTAU:SU                           -ALIAS SUEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSCATAU:SU                           -ALIAS SUSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSTEXTTAU:SU                         -ALIAS SUSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUSTSCATAU:SU                         -ALIAS SUSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUANGSTR:SU                           -ALIAS SUANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO4EMAN:SU                            -ALIAS SO4EMAN     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2EMAN:SU                            -ALIAS SO2EMAN     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2EMBB:SU                            -ALIAS SO2EMBB     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2EMVN:SU                            -ALIAS SO2EMVN     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2EMVE:SU                            -ALIAS SO2EMVE     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUFLUXU:SU                            -ALIAS SUFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SUFLUXV:SU                            -ALIAS SUFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%SU::SO4IM:PHYSICS            -ALIAS SUSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Nitrates:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT HNO3SMASS:NI                          -ALIAS HNO3SMASS   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3SMASS:NI                           -ALIAS NH3SMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4SMASS:NI                           -ALIAS NH4SMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISMASS:NI                            -ALIAS NISMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISMASS25:NI                          -ALIAS NISMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT HNO3CMASS:NI                          -ALIAS HNO3CMASS   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3CMASS:NI                           -ALIAS NH3CMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4CMASS:NI                           -ALIAS NH4CMASS    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NICMASS:NI                            -ALIAS NICMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NICMASS25:NI                          -ALIAS NICMASS25   $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIEXTTFM:NI                           -ALIAS NIEXTTFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISCATFM:NI                           -ALIAS NISCATFM    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIEXTTAU:NI                           -ALIAS NIEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISCATAU:NI                           -ALIAS NISCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIANGSTR:NI                           -ALIAS NIANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNO3AQ:NI                           -ALIAS NIPNO3AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNH4AQ:NI                           -ALIAS NIPNH4AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNH3AQ:NI                           -ALIAS NIPNH3AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIHT:NI                               -ALIAS NIHT        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISD:NI                               -ALIAS NISD        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIDP:NI                               -ALIAS NIDP        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIWT:NI                               -ALIAS NIWT        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3EM:NI                              -ALIAS NH3EM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3DP:NI                              -ALIAS NH3DP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3WT:NI                              -ALIAS NH3WT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4SD:NI                              -ALIAS NH4SD       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4DP:NI                              -ALIAS NH4DP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4WT:NI                              -ALIAS NH4WT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIFLUXU:NI                            -ALIAS NIFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIFLUXV:NI                            -ALIAS NIFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%NI::NO3an1IM:PHYSICS         -ALIAS NISV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%NI::NH3IM:PHYSICS            -ALIAS NH3SV       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%NI::NH4aIM:PHYSICS           -ALIAS NH4SV       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Black Carbon:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEM:CA.bc:BCPHOBICEM              -ALIAS BCPHOBICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEM:CA.bc:BCPHILICEM              -ALIAS BCPHILICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcDP:CA.bc:BCPHOBICDP              -ALIAS BCPHOBICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcDP:CA.bc:BCPHILICDP              -ALIAS BCPHILICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcWT:CA.bc:BCPHOBICWT              -ALIAS BCPHOBICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcWT:CA.bc:BCPHILICWT              -ALIAS BCPHILICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSD:CA.bc:BCPHOBICSD              -ALIAS BCPHOBICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSD:CA.bc:BCPHILICSD              -ALIAS BCPHILICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSMASS:CA.bc                      -ALIAS BCSMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcCMASS:CA.bc                      -ALIAS BCCMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEXTTAU:CA.bc                     -ALIAS BCEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSCATAU:CA.bc                     -ALIAS BCSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSTEXTTAU:CA.bc                   -ALIAS BCSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcSTSCATAU:CA.bc                   -ALIAS BCSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcANGSTR:CA.bc                     -ALIAS BCANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcHYPHIL:CA.bc                     -ALIAS BCPHOB2PHIL $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEMBB:CA.bc                       -ALIAS BCEMBB      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEMBF:CA.bc                       -ALIAS BCEMBF      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcEMAN:CA.bc                       -ALIAS BCEMAN      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcFLUXU:CA.bc                      -ALIAS BCFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcFLUXV:CA.bc                      -ALIAS BCFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%CA.bc::CA.bcphilicIM:PHYSICS -ALIAS BCSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Organic Carbon:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEM:CA.oc:OCPHOBICEM              -ALIAS OCPHOBICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEM:CA.oc:OCPHILICEM              -ALIAS OCPHILICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocDP:CA.oc:OCPHOBICDP              -ALIAS OCPHOBICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocDP:CA.oc:OCPHILICDP              -ALIAS OCPHILICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocWT:CA.oc:OCPHOBICWT              -ALIAS OCPHOBICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocWT:CA.oc:OCPHILICWT              -ALIAS OCPHILICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSD:CA.oc:OCPHOBICSD              -ALIAS OCPHOBICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSD:CA.oc:OCPHILICSD              -ALIAS OCPHILICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSMASS:CA.oc                      -ALIAS OCSMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocCMASS:CA.oc                      -ALIAS OCCMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEXTTAU:CA.oc                     -ALIAS OCEXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSCATAU:CA.oc                     -ALIAS OCSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSTEXTTAU:CA.oc                   -ALIAS OCSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocSTSCATAU:CA.oc                   -ALIAS OCSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocANGSTR:CA.oc                     -ALIAS OCANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocHYPHIL:CA.oc                     -ALIAS OCPHOB2PHIL $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEMBB:CA.oc                       -ALIAS OCEMBB      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEMBF:CA.oc                       -ALIAS OCEMBF      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEMAN:CA.oc                       -ALIAS OCEMAN      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocEMBG:CA.oc                       -ALIAS OCEMBG      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocPSOA:CA.oc                       -ALIAS OCPSOA      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocFLUXU:CA.oc                      -ALIAS OCFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocFLUXV:CA.oc                      -ALIAS OCFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%CA.oc::CA.ocphilicIM:PHYSICS -ALIAS OCSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Brown Carbon:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEM:CA.br:BRPHOBICEM              -ALIAS BRPHOBICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEM:CA.br:BRPHILICEM              -ALIAS BRPHILICEM  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brDP:CA.br:BRPHOBICDP              -ALIAS BRPHOBICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brDP:CA.br:BRPHILICDP              -ALIAS BRPHILICDP  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brWT:CA.br:BRPHOBICWT              -ALIAS BRPHOBICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brWT:CA.br:BRPHILICWT              -ALIAS BRPHILICWT  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSD:CA.br:BRPHOBICSD              -ALIAS BRPHOBICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSD:CA.br:BRPHILICSD              -ALIAS BRPHILICSD  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSMASS:CA.br                      -ALIAS BRSMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brCMASS:CA.br                      -ALIAS BRCMASS     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEXTTAU:CA.br                     -ALIAS BREXTTAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSCATAU:CA.br                     -ALIAS BRSCATAU    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSTEXTTAU:CA.br                   -ALIAS BRSTEXTTAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brSTSCATAU:CA.br                   -ALIAS BRSTSCATAU  $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brANGSTR:CA.br                     -ALIAS BRANGSTR    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brHYPHIL:CA.br                     -ALIAS BRPHOB2PHIL $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEMBB:CA.br                       -ALIAS BREMBB      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEMBF:CA.br                       -ALIAS BREMBF      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brEMAN:CA.br                       -ALIAS BREMAN      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brPSOA:CA.br                       -ALIAS BRPSOA      $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brFLUXU:CA.br                      -ALIAS BRFLUXU     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brFLUXV:CA.br                      -ALIAS BRFLUXV     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MCHEMTRI%CA.br::CA.brphilicIM:PHYSICS -ALIAS BRSV        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+# ---tavg3d_aer_p---
+# Dust:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DUMASS:DU       -ALIAS DU  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Salt:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SSMASS:SS       -ALIAS SS  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Sulfates:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2:SU          -ALIAS SO2 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO4:SU          -ALIAS SO4 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Nitrates:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3MASS:NI      -ALIAS NH3 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4MASS:NI      -ALIAS NH4 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIMASS:NI       -ALIAS NI  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Black Carbon
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcMASS:CA.bc -ALIAS BC  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Organic Carbon:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocMASS:CA.oc -ALIAS OC  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Brown Carbon:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brMASS:CA.br -ALIAS BR  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
+# ---inst3d_aer_v---
     set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 400 300 250 200 150 100 85 70'
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    BCPHOBIC:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT    BCPHILIC:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       DU001:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       DU002:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       DU003:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       DU004:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       DU005:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       OC001:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       OC002:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       SS001:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       SS002:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       SS003:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       SS004:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT       SS005:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT         DMS:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT         SO2:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT         SO4:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT         MSA:GOCART -LEVELS $levels -SEASON $seasons -OUTPUT $output -ZLOG OFF -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Dust:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DU001:DU          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DU002:DU          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DU003:DU          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DU004:DU          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DU005:DU          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Salt: 
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SS001:SS          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SS002:SS          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SS003:SS          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SS004:SS          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SS005:SS          -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Sulfates:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMS:SU            -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO2:SU            -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT SO4:SU            -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT MSA:SU            -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Nitrates:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3:NI            -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4a:NI           -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NO3an1:NI         -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NO3an2:NI         -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NO3an3:NI         -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Black Carbon:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcphilic:CA.bc -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcphobic:CA.bc -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Organic Carbon:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocphilic:CA.oc -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocphobic:CA.oc -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Brown Carbon:
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brphilic:CA.br -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    # if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brphobic:CA.br -LEVELS $levels -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-# Miscellanious Plots
+# Miscellaneous Plots
 # -------------------
     if( -e $homdir/HISTORY.rc ) then
     set EXPORTS = `$GEOSUTIL/plots/get_exports  $homdir/HISTORY.rc  landscape.script`

@@ -12,6 +12,8 @@ bdate   = subwrd(args,9)
 edate   = subwrd(args,10)
 expdsc  = subwrd(args,11)
 name    = subwrd(args,12)
+math    = subwrd(args,13)
+alias   = subwrd(args,14)
 
 say "export  = "export
 say "LogFlag = "logflag
@@ -25,6 +27,26 @@ cint    = undef
 qtype   = "continuous"
 prefix  = "0"
 suffix  = " "
+
+if( math = NULL ) ; math = '' ; endif
+if( alias = NULL ) ; alias = '' ; endif
+
+* Check if MULTI mode (produce linear30 and log10)
+* Only apply to 3D data (zonal cross-sections)
+* -----------------------------------------------
+'getinfo zdim'
+         zdim = result
+
+if( logflag = "MULTI" | logflag = "multi" )
+    if( zdim > 1 )
+        multi_mode = 1
+    else
+        say 'MULTI mode disabled for 2D data (zdim='zdim')'
+        multi_mode = 0
+    endif
+else
+    multi_mode = 0
+endif
 
 * Get Plotting Values from Resource File
 * --------------------------------------
@@ -90,290 +112,370 @@ if( cntlevs = 'NULL' ) ; cntlevs = "0.0 0.0"    ; endif
 ****                                                           ****
 *******************************************************************
 
-'c'
+* If MULTI mode, loop over configurations
+if( multi_mode = 1 )
+    configs = 'linear30 log10'
+    ptops   = '30 10'
+    zlogs   = 'off on'
+    iconfig = 1
+else
+    configs = 'single'
+    ptops   = 'NULL'
+    zlogs   = logflag
+    iconfig = 1
+endif
+
+while( iconfig <= 2 )
+
+    'c'
+    if( multi_mode = 1 )
+        config_suffix = subwrd(configs, iconfig)
+        ptop_use      = subwrd(ptops, iconfig)
+        logflag       = subwrd(zlogs, iconfig)
+
+* For linear30, use empty suffix to match portrait convention
+        if( config_suffix = 'linear30' )
+            config_suffix = ''
+        endif
+
+        say 'MULTI MODE: Processing iteration 'iconfig' (ptop='ptop_use' zlog='logflag' suffix='config_suffix')'
+    else
+        config_suffix = ''
+        ptop_use      = 'NULL'
+    endif
+
+* Override z-range if ptop specified in MULTI mode
+    if( ptop_use != 'NULL' )
+        'set lev 'ptop_use
+        'getinfo zpos'
+        ztop = result
+        'set z 1 'ztop
+    endif
 
 * Temperature Tendencies
 * ----------------------
 
-if( export = 'TIM' )
-     title = 'DTDT from Moist Physics (K/day)'
-     fact  = 86400
-    clevs  = '-5 -4 -3 -2 -1 -.8 -.6 -.4 -0.2 0.2 .4 .6 .8 1 2 3 4 5'
-     qtype = 'plsmns'
-endif
+    if( export = 'TIM' )
+        title = 'DTDT from Moist Physics (K/day)'
+        fact  = 86400
+        clevs  = '-5 -4 -3 -2 -1 -.8 -.6 -.4 -0.2 0.2 .4 .6 .8 1 2 3 4 5'
+        qtype = 'plsmns'
+    endif
 
-if( export = 'TIT' )
-     title = 'DTDT from Turbulence (K/day)'
-     fact  = 86400
-    clevs  = '-1.8 -1.6 -1.4 -1.2 -1 -.8 -.6 -.4 -.2 1 2 3 4 5 6 7 8 9'
-     qtype = 'plsmns'
-endif
-
+    if( export = 'TIT' )
+        title = 'DTDT from Turbulence (K/day)'
+        fact  = 86400
+        clevs  = '-1.8 -1.6 -1.4 -1.2 -1 -.8 -.6 -.4 -.2 1 2 3 4 5 6 7 8 9'
+        qtype = 'plsmns'
+    endif
 
 * Miscellaneous
 * -------------
-if( export = 'RI' & GC = 'TURBULENCE' )
-     title = 'Richardson Number from Louis'
-endif
+    if( export = 'RI' & GC = 'TURBULENCE' )
+        title = 'Richardson Number from Louis'
+    endif
 
-if( export = 'SRFDIS' )
-     title = 'Frictional Heating Rate from Surface Drag K/s Pa'
-endif
-if( export = 'RI'  & GC = 'MOIST' )
-     title = 'Ice phase cloud particle effective radius  (x10`a-6`n m)'
-     fact  = 1e6
-endif
-if( export = 'RL' )
-     title = 'Liquid cloud particle effective radius  (x10`a-6`n m)'
-     fact  = 1e6
-endif
-if( export = 'REV_CN' )
-     title = 'Evaporation of Convective Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'REV_AN' )
-     title = 'Evaporation of Anvil Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'REV_LS' )
-     title = 'Evaporation of Large-Scale Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'RSU_AN' )
-     title = 'Sublimation of Anvil Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'RSU_LS' )
-     title = 'Sublimation of Large-Scale Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'RSU_CN' )
-     title = 'Sublimation of Convective Rain  (g/kg/day)'
-     fact  = 1000*86400
-endif
-if( export = 'TAUIR' )
-     title = 'Longwave Optical Thickness at 800 cm`a-1`n'
-     clevs = "5  10  15  20  25  30  35  40  45  50  60  70  80  90  100 120 120 130"
-     ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
-endif
-if( export = 'TAUCLI' )
-     title = 'Shortwave Optical Thickness for Cloud Ice'
-     clevs = "0.01  0.02  0.03  0.04  0.05  0.06   0.08  0.10  0.12  0.14  0.16  0.18  0.20  0.25  0.3 .35 .4 .45"
-     ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
-endif
-if( export = 'TAUCLW' )
-     title = 'Shortwave Optical Thickness for Cloud Liquid'
-     clevs = "0.1  0.2  0.3  0.4  0.5  0.6   0.8  1.0  1.2  1.4  1.6  1.8  2.0  2.5  3 3.5 4 4.5"
-     ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
-endif
+    if( export = 'SRFDIS' )
+        title = 'Frictional Heating Rate from Surface Drag K/s Pa'
+    endif
+    if( export = 'RI'  & GC = 'MOIST' )
+        title = 'Ice phase cloud particle effective radius  (x10`a-6`n m)'
+        fact  = 1e6
+    endif
+    if( export = 'RL' )
+        title = 'Liquid cloud particle effective radius  (x10`a-6`n m)'
+        fact  = 1e6
+    endif
+    if( export = 'REV_CN' )
+        title = 'Evaporation of Convective Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'REV_AN' )
+        title = 'Evaporation of Anvil Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'REV_LS' )
+        title = 'Evaporation of Large-Scale Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'RSU_AN' )
+        title = 'Sublimation of Anvil Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'RSU_LS' )
+        title = 'Sublimation of Large-Scale Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'RSU_CN' )
+        title = 'Sublimation of Convective Rain  (g/kg/day)'
+        fact  = 1000*86400
+    endif
+    if( export = 'TAUIR' )
+        title = 'Longwave Optical Thickness at 800 cm`a-1`n'
+        clevs = "5  10  15  20  25  30  35  40  45  50  60  70  80  90  100 120 120 130"
+        ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
+    endif
+    if( export = 'TAUCLI' )
+        title = 'Shortwave Optical Thickness for Cloud Ice'
+        clevs = "0.01  0.02  0.03  0.04  0.05  0.06   0.08  0.10  0.12  0.14  0.16  0.18  0.20  0.25  0.3 .35 .4 .45"
+        ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
+    endif
+    if( export = 'TAUCLW' )
+        title = 'Shortwave Optical Thickness for Cloud Liquid'
+        clevs = "0.1  0.2  0.3  0.4  0.5  0.6   0.8  1.0  1.2  1.4  1.6  1.8  2.0  2.5  3 3.5 4 4.5"
+        ccols = "0 49 47 45 44 37 36 34 33 32 31 21 22 23 24 25 26 27 28"
+    endif
 
 
 * Create Plot
 *************
 
-'getinfo zdim'
-         zdim = result
+    'getinfo zdim'
+            zdim = result
 
-'set display color white'
-'set vpage off'
-'set parea 1.5 10.5 0.75 7.5'
+    'set display color white'
+    'set vpage off'
+    'set parea 1.5 10.5 0.75 7.5'
 
-'set lat -90 90'
-'set lon 0'
-'define qmod = 'field''season'z'
+    'set lat -90 90'
+    'set lon 0'
+    'define qmod = 'field''season'z'
 
-'set grads off'
-'set clab off'
-if( blak = 1 ) ; 'black' ; endif
-                                        'set zlog off'
-if( logflag = "ON" | logflag = "on" | logflag = " ON" | logflag = " on" ) 
-                                        'set zlog on'
-                                        'setlevs' 
-endif
 
-if( axlim != "NULL" ) ; 'set axlim 'axlim ; endif
-if( yfmt  != "NULL" ) ; 'set ylab  'yfmt  ; endif
+* Perform Mathematics if necessary
+* --------------------------------
+    if( math = LOG )
+    'define qmod = log(qmod+0.00001)'
+    endif
 
-'define  qdum = qmod*'fact
+    'set grads off'
+    'set clab off'
+    if( blak = 1 ) ; 'black' ; endif
+    'set zlog off'
+    say 'LOGFLAG: 'logflag
+    if( logflag = "ON" | logflag = "on" | logflag = " ON" | logflag = " on" )
+        'set zlog on'
+        'setlevs' 
+    endif
 
-if( ccols = "0.0 0.0" )
+    if( axlim != "NULL" ) ; 'set axlim 'axlim ; endif
+    if( yfmt  != "NULL" ) ; 'set ylab  'yfmt  ; endif
 
-  gg = xyz (xmin,xmax,ymin,ymax,zmin,zmax)
-xmin = subwrd(gg,1)
-xmax = subwrd(gg,2)
-ymin = subwrd(gg,3)
-ymax = subwrd(gg,4)
-zmin = subwrd(gg,5)
-zmax = subwrd(gg,6)
+    'define  qdum = qmod*'fact
 
-say ' XMIN: 'xmin'   XMAX: 'xmax
-say ' YMIN: 'ymin'   YMAX: 'ymax
-say ' ZMIN: 'zmin'   ZMAX: 'zmax
+    if( ccols = "0.0 0.0" )
 
-'set x 'xmin' 'xmax
-'set y 'ymin' 'ymax
+    gg = xyz (xmin,xmax,ymin,ymax,zmin,zmax)
+    xmin = subwrd(gg,1)
+    xmax = subwrd(gg,2)
+    ymin = subwrd(gg,3)
+    ymax = subwrd(gg,4)
+    zmin = subwrd(gg,5)
+    zmax = subwrd(gg,6)
+
+    say ' XMIN: 'xmin'   XMAX: 'xmax
+    say ' YMIN: 'ymin'   YMAX: 'ymax
+    say ' ZMIN: 'zmin'   ZMAX: 'zmax
+
+    'set x 'xmin' 'xmax
+    'set y 'ymin' 'ymax
 
 * Find QMIN and QMAX
 * ------------------
-     z  = zmin
-'set z 'z
+    z  = zmin
+    'set z 'z
 
-'minmax.simple qdum'
-   qmax = subwrd(result,1)
-   qmin = subwrd(result,2)
-  qzmax = zmin
-  qzmin = zmin
-      z = z + 1
+    'minmax.simple qdum'
+    qmax = subwrd(result,1)
+    qmin = subwrd(result,2)
+    qzmax = zmin
+    qzmin = zmin
+        z = z + 1
 
- while( z <= zmax )
-'set z 'z
-'minmax.simple qdum'
- dmax = subwrd(result,1)
- dmin = subwrd(result,2)
- if( dmax > qmax ) ; qmax = dmax ; qzmax = z ; endif
- if( dmin < qmin ) ; qmin = dmin ; qzmin = z ; endif
- z = z + 1
- endwhile
+    while( z <= zmax )
+    'set z 'z
+    'minmax.simple qdum'
+    dmax = subwrd(result,1)
+    dmin = subwrd(result,2)
+    if( dmax > qmax ) ; qmax = dmax ; qzmax = z ; endif
+    if( dmin < qmin ) ; qmin = dmin ; qzmin = z ; endif
+    z = z + 1
+    endwhile
 * ------------------
 
-say ' QMIN: 'qmin'   QMAX: 'qmax
-say 'QZMIN: 'qzmin'  QZMAX: 'qzmax
+    say ' QMIN: 'qmin'   QMAX: 'qmax
+    say 'QZMIN: 'qzmin'  QZMAX: 'qzmax
 
-'d abs('qmin')'
-        qmin = subwrd(result,4)
-'d abs('qmax')'
-        qmax = subwrd(result,4)
+    'd abs('qmin')'
+            qmin = subwrd(result,4)
+    'd abs('qmax')'
+            qmax = subwrd(result,4)
 
-if( qmin > qmax ) 
-    qmax = qmin
-   'd abs('qzmin')'
-           qzmin = subwrd(result,4)
-   'd abs('qzmax')'
-           qzmax = subwrd(result,4)
-    if( qzmin > qzmax ) ; qzmax = qzmin ; endif
-endif
+    if( qmin > qmax ) 
+        qmax = qmin
+    'd abs('qzmin')'
+            qzmin = subwrd(result,4)
+    'd abs('qzmax')'
+            qzmax = subwrd(result,4)
+        if( qzmin > qzmax ) ; qzmax = qzmin ; endif
+    endif
 
-* Determin if ZLOG is appropriate
+* Determine if ZLOG is appropriate
 * -------------------------------
-if( zmin < zmax ) then
-   'set lev 100'
-   'getinfo zpos'
-            zpos = result
-   'set z 'zmin' 'zmax
-   if( qzmax > zpos ) 
-      'setlevs'
-   else
-      'set zlog off'
-   endif
-endif
-
-'set z 'zmin' 'zmax
+    if( multi_mode = 0 )
+        if( zmin < zmax )
+            'set lev 100'
+            'getinfo zpos'
+                        zpos = result
+            'set z 'zmin' 'zmax
+            if( qzmax > zpos ) 
+                'setlevs'
+            else
+                'set zlog off'
+            endif
+        endif
+    endif
+    'set z 'zmin' 'zmax
 * -------------------------------
 
-if( qmax > 0 )
-   'd log10('qmax')'
-    n = subwrd(result,4)
-else
-    n = 0
-endif
-say '    Log Factor: 'n
-
-if( n<0 ) ; n = n-2 ; endif
-'getint 'n
-         n = result
-if( n>0 )
-    if( n<=2 ) 
+    if( qmax > 0 )
+    'd log10('qmax')'
+        n = subwrd(result,4)
+    else
         n = 0
-     else
-        n = n+2 
-     endif
-endif
+    endif
+    say '    Log Factor: 'n
 
-if( n<0 )
-    m = -n
-else
-    m =  n
-endif
+    if( n<0 ) ; n = n-2 ; endif
+    'getint 'n
+            n = result
+    if( n>0 )
+        if( n<=2 ) 
+            n = 0
+        else
+            n = n+2 
+        endif
+    endif
 
-say 'Scaling Factor: 'n
-if( n>0 )
-    say 'define qdum = qdum / 1e'm 
-        'define qdum = qdum / 1e'm 
-else
-    say 'define qdum = qdum * 1e'm 
-        'define qdum = qdum * 1e'm 
-endif
+    if( n<0 )
+        m = -n
+    else
+        m =  n
+    endif
 
-'minmax qdum'
-   qmax = subwrd(result,1)
-   qmin = subwrd(result,2)
-say 'New MAX: 'qmax
-say 'New MIN: 'qmin
+    say 'Scaling Factor: 'n
+    if( n>0 )
+        say 'define qdum = qdum / 1e'm 
+            'define qdum = qdum / 1e'm 
+    else
+        say 'define qdum = qdum * 1e'm 
+            'define qdum = qdum * 1e'm 
+    endif
 
-     'shades  qdum  0'
-      cint = result
-else
+    'minmax qdum'
+    qmax = subwrd(result,1)
+    qmin = subwrd(result,2)
+    say 'New MAX: 'qmax
+    say 'New MIN: 'qmin
+
+        'shades  qdum  0'
+        cint = result
+    else
+        'set clevs 'clevs
+        'set ccols 'ccols
+            n = 0
+    endif
+
+    'set gxout shaded'
+    if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
+    'd qdum'
+    'cbarn  -xmid 5.95 -ymid 0.25 -snum 'cbscale
+
+    'q shades'
+    num = sublin(result,1)
+    num = subwrd(num,5)
+    clevs = sublin(result,2)
+    clevs = subwrd(clevs,3)
+    k = 2
+    while( k<= num )
+    loc = k+1
+    line = sublin(result,loc)
+    clevs = clevs' 'subwrd(line,2)
+    k = k+1
+    endwhile
+
+    if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
+    if( blak = 1 )                    ; 'black' ; endif
+    'set gxout contour'
     'set clevs 'clevs
-    'set ccols 'ccols
-         n = 0
-endif
+    'set ccolor  1'
+    'd qdum'
 
-'set gxout shaded'
-if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
-'d qdum'
-'cbarn  -xmid 5.95 -ymid 0.25 -snum 'cbscale
+    if( zdim > 1 )       ; 'draw ylab Pressure (mb)' ; endif
+    if( ylab != "NULL" ) ; 'draw ylab 'ylab          ; endif
 
-'q shades'
-num = sublin(result,1)
-num = subwrd(num,5)
-clevs = sublin(result,2)
-clevs = subwrd(clevs,3)
-k = 2
-while( k<= num )
-loc = k+1
-line = sublin(result,loc)
-clevs = clevs' 'subwrd(line,2)
-k = k+1
-endwhile
+    'set string 1 c 6 0'
+    'set strsiz .12'
+    'draw string 5.96 8.2 EXPID: 'expid'  'expdsc
 
-if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
-if( blak = 1 )                    ; 'black' ; endif
-'set gxout contour'
-'set clevs 'clevs
-'set ccolor  1'
-'d qdum'
+* Create labels for math and export
+    if( math = LOG )
+        mathlabel = 'LOG  '
+    else
+        mathlabel = ''
+    endif
+    if( alias != '' )
+        exportlabel = alias
+    else
+        exportlabel = export':'GC
+    endif
 
-if( zdim > 1 )       ; 'draw ylab Pressure (mb)' ; endif
-if( ylab != "NULL" ) ; 'draw ylab 'ylab          ; endif
-
-'set string 1 c 6 0'
-'set strsiz .12'
-'draw string 5.96 8.2 EXPID: 'expid'  'expdsc
-if( n != 0 )
-'draw string 5.96 7.8 'export':'GC'  'title'  'season' ('nseason')    (x10`a'n'`n)'
-else
-'draw string 5.96 7.8 'export':'GC'  'title'  'season' ('nseason')'
-endif
+    if( n != 0 )
+    'draw string 5.96 7.8 'mathlabel''exportlabel'  'title'  'season' ('nseason')    (x10`a'n'`n)'
+    else
+    'draw string 5.96 7.8 'mathlabel''exportlabel'  'title'  'season' ('nseason')'
+    endif   
 
 * Print Beginning and Ending Dates
 * --------------------------------
-                date = getdate (bdate)
-bmnthm = subwrd(date,1)
-byearm = subwrd(date,2)
-                date = getdate (edate)
-emnthm = subwrd(date,1)
-eyearm = subwrd(date,2)
+                    date = getdate (bdate)
+    bmnthm = subwrd(date,1)
+    byearm = subwrd(date,2)
+                    date = getdate (edate)
+    emnthm = subwrd(date,1)
+    eyearm = subwrd(date,2)
 
-'set string 1 l 4'
-'set strsiz .08'
-'draw string 0.30  7.90 Beg: 'bmnthm' 'byearm
-'draw string 0.30  7.75 End: 'emnthm' 'eyearm
-'set string 1 c 6'
+    'set string 1 l 4'
+    'set strsiz .08'
+    'draw string 0.30  7.90 Beg: 'bmnthm' 'byearm
+    'draw string 0.30  7.75 End: 'emnthm' 'eyearm
+    'set string 1 c 6'
 * --------------------------------
 
-'set string 1 c 6 0'
+    'set string 1 c 6 0'
 
-'myprint -name 'output'/hdiag_'export'.'GC'_z.'season
+    if( math = LOG )
+        mathparm = 'LOG_'
+    else
+        mathparm = ''
+    endif
+
+    if( alias != '' )
+* ALIAS provided, use it without GC
+        'myprint -name 'output'/hdiag_'alias'_'mathparm'z'config_suffix'.'season
+    else
+* No ALIAS, use EXPORT.GC
+        'myprint -name 'output'/hdiag_'export'.'GC'_'mathparm'z'config_suffix'.'season
+    endif
+
+* End configuration loop
+    if( multi_mode = 0 )
+        iconfig = 4
+    else
+        iconfig = iconfig + 1
+    endif
+    
+endwhile
 
 'set vpage off'
 'set parea off'

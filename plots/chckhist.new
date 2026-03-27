@@ -39,8 +39,14 @@ chmod +x $FILE
 
 # Check for SUFFIX appended to EXPORT (as EXPORT:SUFFIX)
 # ------------------------------------------------------
-set SUFFIX = `echo $EXPORT | grep : | cut -d: -f2`
-set EXPORT = `echo $EXPORT          | cut -d: -f1`
+# Replace :: with placeholder to avoid splitting on them
+set TEMP_EXPORT = `echo $EXPORT | sed 's/::/DBLCOLON/g'`
+
+# Extract SUFFIX (field 2 after single colon)
+set SUFFIX = `echo $TEMP_EXPORT | grep : | cut -d: -f2 | sed 's/DBLCOLON/::/g'`
+
+# Extract EXPORT (field 1 before single colon)
+set EXPORT = `echo $TEMP_EXPORT | cut -d: -f1 | sed 's/DBLCOLON/::/g'`
 
 #######################################################################
 
@@ -60,7 +66,7 @@ endif
     set HISTORY  = `cat  HISTORY.T`
 
 #######################################################################
-#              Find and Split HISTORY Collections 
+#              Find and Split HISTORY Collections
 #######################################################################
 
 # Define Collections
@@ -167,10 +173,34 @@ foreach collection ($finalcolls)
        if( .$SUFFIX != . ) then
             if( .$QALIAS == . ) then
                   set XEXPORT = `echo $QEXPORT                         | sed -e "s/'//g"`
-                  set XALIAS  = `echo $QEXPORT                         | sed -e "s/'//g"`${SUFFIX} # Append SUFFIX to EXPORT name
-            else                    
+                # Check if SUFFIX is numeric
+                echo "$SUFFIX" | grep -q '^[0-9][0-9]*$'
+                if ( $status == 0 ) then
+                    # Numeric suffix - concatenate 
+                    set XALIAS  = `echo $QEXPORT                       | sed -e "s/'//g"`${SUFFIX} # Append SUFFIX to EXPORT name
+                else
+                    # String suffix with no alias list results in a failure
+                    set XALIAS = "NULL"
+                endif
+            else
                   set XEXPORT = `echo $QEXPORT                         | sed -e "s/'//g"`
-                  set XALIAS  = `echo $QALIAS  | cut -d';' -f${SUFFIX} | sed -e "s/'//g"` # Select QALIAS based on SUFFIX Index
+                  
+                  # Check if SUFFIX is numeric or string
+                  echo "$SUFFIX" | grep -q '^[0-9][0-9]*$'
+                  if ( $status == 0 ) then
+                      # SUFFIX is numeric - use as field index
+                      set XALIAS  = `echo $QALIAS  | cut -d';' -f${SUFFIX} | sed -e "s/'//g"` # Select QALIAS based on SUFFIX Index
+                  else
+                      # SUFFIX is string - search for exact match in semicolon-separated list
+                      set XALIAS = "NULL"
+                      set alias_list = `echo $QALIAS | sed -e "s/'//g" | sed 's/;/ /g'`
+                      foreach possible_alias ($alias_list)
+                          if ( "$possible_alias" == "$SUFFIX" ) then
+                              set XALIAS = "$SUFFIX"
+                              break
+                          endif
+                      end
+                  endif
             endif
             if( "$EXPORT"  == "$XEXPORT" && $GC == $QGC ) then
                  set found  = TRUE
@@ -189,7 +219,7 @@ foreach collection ($finalcolls)
 end      # End Collection Loop
 
 #######################################################################
-#              Find HISTORY Collections 
+#              Find HISTORY Collections
 #######################################################################
 
 if(! $?TBEG )      set TBEG = "NULL"
@@ -233,8 +263,8 @@ if( $found == TRUE ) then
             if( "$dummy" == "" ) then
                  if( -e ${source}/${collection}/xdf.tabl && $CLIM == "false" ) then
                                  set dummy  = `echo ${source}/${collection}/xdf.tabl`
-     
-                 else 
+
+                 else
                       if( -e ${source}/${collection}/clim.tabl && ( $TBEG == "NULL" && $TEND == "NULL" && .$3 == "." && $PLOT_QUAD == "false" ) ) then
                                  set dummy  = `echo ${source}/${collection}/clim.tabl`
                       else
@@ -246,7 +276,7 @@ if( $found == TRUE ) then
                       endif
                  endif
             endif
-     
+
         endif
 
     else
@@ -263,8 +293,8 @@ if( $found == TRUE ) then
             if( "$dummy" == "" ) then
                  if( -e ${source}/${collection}/xdf.tabl && $CLIM == "false" ) then
                                  set dummy  = `echo ${source}/${collection}/xdf.tabl`
-     
-                 else 
+
+                 else
                       if( -e ${source}/${collection}/clim.tabl && ( $TBEG == "NULL" && $TEND == "NULL" && .$3 == "." && $PLOT_QUAD == "false" ) ) then
                                  set dummy  = `echo ${source}/${collection}/clim.tabl`
                       else
@@ -276,7 +306,7 @@ if( $found == TRUE ) then
                       endif
                  endif
             endif
-     
+
         endif
 
     endif
@@ -299,7 +329,7 @@ setenv BASE   $expid
 
         echo '   '
         echo "Number of History Output Streams: $num_collections"
-if( $EXPORT == $ALIAS ) then 
+if( $EXPORT == $ALIAS ) then
         echo "                          Source: $source"
         echo "                           Found: $EXPORT from GC: $GC"
         echo "                      CTL or DDF: ${OUTPUT}"
@@ -322,4 +352,3 @@ echo $OUTPUT >> hist.txt
 echo $scale  >> hist.txt
 echo $FORMAT >> hist.txt
 echo $BASE   >> hist.txt
-
