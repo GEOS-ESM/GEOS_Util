@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
 - Comprehensively updated aerosol plotting with added plots and features
 - Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
+- Updated wind and velocity surface plots with bugfix
 - Comprehensively updated moist plotting with added plots and features
 
 ### Fixed

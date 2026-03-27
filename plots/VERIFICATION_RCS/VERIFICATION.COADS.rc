@@ -19,7 +19,7 @@ OBSDSC: COADS_CLIMATOLOGY_(1945-1989)
 
         filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
         filetype:   'BIN'
-        fields:     'VENT', 'SURFACE' , 'W3' , 1
+        fields:     'SPEED', 'SURFACE' , 'W3' , 1
                     ::
 
         filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'

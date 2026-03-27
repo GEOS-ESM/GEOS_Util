@@ -662,6 +662,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -767,6 +769,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -798,6 +802,9 @@ while( n <= numexp )
 
              flag = ""
      while ( flag = "" )
+
+                  'setlons'
+                  'setlats'
      
                   'define zobs'TAG''season' = regrid2( cmod'TAG''season',0.25,0.25,bs_p1,0,-90 )'
                   'define zobs'n''season'   = regrid2( cmod'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
@@ -1144,6 +1151,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -1294,6 +1303,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
