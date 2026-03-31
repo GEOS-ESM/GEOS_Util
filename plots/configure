@@ -56,7 +56,7 @@ if( $arch == 'Linux'    ) then
                               setenv VERIFICATION /ford1/share/gmao_SIteam/ModelData/verification # Note: A dead link, but needed
                               setenv OPENGADIR    /ford1/local/opengrads/Contents/opengrads
                               setenv GRADS_LOC    ${OPENGADIR}
-                           
+
                               setenv PATH         ${OPENGADIR}:${PATH}
                               set    path =     ( ${OPENGADIR} ${path} )
                               setenv GRADS      `which grads`
@@ -124,7 +124,7 @@ end
 
 # VERIFICATION.COADS
 # -----------------------
-set dirs = `echo emp speed eflux hflux cldtt taux tauy`
+set dirs = `echo emp SPEED eflux hflux cldtt taux tauy`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.COADS.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.COADS.rc  .
@@ -140,7 +140,7 @@ end
 
 # VERIFICATION.GSSTF
 # -----------------------
-set dirs = `echo eflux hflux speed taux tauy tpw`
+set dirs = `echo eflux hflux SPEED taux tauy tpw`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.GSSTF.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
