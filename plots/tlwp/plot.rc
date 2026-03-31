@@ -1,4 +1,4 @@
-TITLE:   Liquid Water Path (g/m`a2`n)
+TITLE:   Total Liquid (Cloud + Rain) (g/m`a2`n)
 FACTOR:  1000
 AXLIM:   0 120
 YFMT:    %.1f

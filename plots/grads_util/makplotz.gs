@@ -37,7 +37,10 @@ endwhile
 
 if( math = NULL ) ; math = '' ; endif
 
+'setlons'
 'set t 1'
+'undefine qmodz'
+'undefine qobsz'
 'run getenv "GEOSUTIL"'
              geosutil = result
 
@@ -93,6 +96,9 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      YLAB'  ; endif
                         'getresource 'PLOTRC' 'PFX'GRID' 
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      GRID'  ; endif
                                                    grid   = result
+                        'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result                                                   
 else
 
 * Check Variable Attributes from Generic PLOTRC
@@ -115,6 +121,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLEVS' ; endif
                                                                 clevs = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FACTOR' ; endif
+                                                                factor = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_REGRID'
                                                                 method = result
 
@@ -123,6 +133,7 @@ if( axlim = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_AXLIM'math ; end
 endif
 
 say ''
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 if( axlim != NULL )
 axmin = subwrd(axlim,1)
@@ -132,8 +143,8 @@ endif
 
 * Perform Mathematics if necessary
 * --------------------------------
-'define qmod = 'mvar''season
-'define qobs = 'ovar''season
+'define qmod = 'mvar''season' * 'factor
+'define qobs = 'ovar''season' * 'factor
 
 m = 0
 if( ccols = NULL )
@@ -329,8 +340,21 @@ if( math = LOG )
 else
     mathparm = ''
 endif
-'myprint -name 'output'/'mname'_z_'mathparm''PFX''oname'.'season
 
+'set gxout stat'
+'d qmodz'
+qmodz_line  = sublin(result,6)
+qmodz_valid = subwrd(qmodz_line,4)
+'d qobsz'
+qobsz_line  = sublin(result,6)
+qobsz_valid = subwrd(qobsz_line,4)
+'set gxout line'
+
+if( qmodz_valid > 0 & qobsz_valid > 0 )
+'myprint -name 'output'/'mname'_z_'mathparm''PFX''oname'.'season
+endif
+
+'setlons'
 'set mproj latlon'
 return
 

@@ -37,6 +37,7 @@ OCEAN  = FALSE
 SCALE  = 1.0
 RC     = NULL
 LEVEL  = NULL
+DIR    = NULL
 MATH   = NULL
 
     numOGCs = 0
@@ -87,11 +88,26 @@ if( subwrd(args,num) = '-EXPORT' )
              EX = ''
               j = 1
             bit = substr(OLD_EXPORT.k,j,1)
-            while(bit != ':' & bit != '')
-             EX = EX''bit
-              j = j + 1
-            bit = substr(OLD_EXPORT.k,j,1)
+            while(bit != '')
+            nextbit = substr(OLD_EXPORT.k,j+1,1)
+* Check if this is a single colon (not double)
+            if( bit = ':' & nextbit != ':' )
+* Found single colon, stop building EX
+                break
+            endif
+* If this is a double colon, add both and skip ahead
+            if( bit = ':' & nextbit = ':' )
+                EX = EX''bit''nextbit
+                j = j + 2
+                bit = substr(OLD_EXPORT.k,j,1)
+            else
+* Normal character, just add it
+                EX = EX''bit
+                j = j + 1
+                bit = substr(OLD_EXPORT.k,j,1)
+            endif
             endwhile
+* If single colon found, read GC and update EXPORT
             if( EX != OLD_EXPORT.k )
                   m = m + 1
                   j = j + 1
@@ -111,6 +127,8 @@ endif
 
 * Read Alternate Model EXPORT:GC[:SUFFIX]
 * ---------------------------------------
+* Read Alternate Model EXPORT:GC[:SUFFIX] (skip double colons)
+* --------------------------------------------------------------
               m = mnew
 if( subwrd(args,num) = '-ALT_EXPORT' )
      say ' '
@@ -131,38 +149,83 @@ if( subwrd(args,num) = '-ALT_EXPORT' )
        endwhile
        numMGCs = m
 
+*    Parse ALT_EXPORT into NEW_EXPORT:NEW_GC[:SUFFIX]
+*    -------------------------------------------------
               k  = 1
-              j  = 2
        while( k <= numMGCs )
-
-      '!remove NEW_EXPORT.txt'
-      '! echo 'ALT_EXPORT.k' | cut -d: -f1 > NEW_EXPORT.txt'
-      'run getenv NEW_EXPORT'
-                  NEW_EXPORT.k = result
-
-      '!remove NEW_GC.txt'
-      '! echo 'ALT_EXPORT.k' | cut -d: -f2 > NEW_GC.txt'
-      'run getenv NEW_GC'
-                  NEW_GC.k = result
-
-      '!remove SUFFIX.txt'
-      '! echo 'ALT_EXPORT.k' | grep : | cut -d: -f3 > SUFFIX.txt'
-      'run getenv SUFFIX'
-                  SUFFIX.k = result
+              EX = ''
+              j = 1
+            bit = substr(ALT_EXPORT.k,j,1)
+            while(bit != '')
+            nextbit = substr(ALT_EXPORT.k,j+1,1)
+* Check if this is a single colon (not double)
+            if( bit = ':' & nextbit != ':' )
+* Found first single colon, stop building NEW_EXPORT
+                break
+            endif
+* If this is a double colon, add both and skip ahead
+            if( bit = ':' & nextbit = ':' )
+                EX = EX''bit''nextbit
+                j = j + 2
+                bit = substr(ALT_EXPORT.k,j,1)
+            else
+* Normal character, just add it
+                EX = EX''bit
+                j = j + 1
+                bit = substr(ALT_EXPORT.k,j,1)
+            endif
+            endwhile
+            NEW_EXPORT.k = EX
+            
+* Skip the first colon and read GC part
+            j = j + 1
+            GC = ''
+            bit = substr(ALT_EXPORT.k,j,1)
+            while(bit != '')
+            nextbit = substr(ALT_EXPORT.k,j+1,1)
+* Check if this is a single colon (not double)
+            if( bit = ':' & nextbit != ':' )
+* Found second single colon, stop building NEW_GC
+                break
+            endif
+* If this is a double colon, add both and skip ahead
+            if( bit = ':' & nextbit = ':' )
+                GC = GC''bit''nextbit
+                j = j + 2
+                bit = substr(ALT_EXPORT.k,j,1)
+            else
+* Normal character, just add it
+                GC = GC''bit
+                j = j + 1
+                bit = substr(ALT_EXPORT.k,j,1)
+            endif
+            endwhile
+            NEW_GC.k = GC
+            
+* Read SUFFIX (everything after second colon, if it exists)
+            j = j + 1
+            SUFFIX.k = ''
+            bit = substr(ALT_EXPORT.k,j,1)
+            while(bit != '')
+                SUFFIX.k = SUFFIX.k''bit
+                j = j + 1
+                bit = substr(ALT_EXPORT.k,j,1)
+            endwhile
+            
+* If no suffix found, set to empty string
+            if( SUFFIX.k = '' )
+                SUFFIX.k = ''
+            endif
       
               say '  NEW_EXPORT.'k': 'NEW_EXPORT.k
               say '      NEW_GC.'k': 'NEW_GC.k
               say '      SUFFIX.'k': 'SUFFIX.k
 
-              if( SUFFIX.k = NULL )
-                  SUFFIX.k = ''
-              say 'Reset SUFFIX.'k': 'SUFFIX.k
-              endif
-
                     k  = k + 1
        endwhile
       
 endif
+
       
 * Read Verification OBS:OBSGC
 * ---------------------------
@@ -1279,7 +1342,7 @@ endwhile ;* END While_FLAG Loop
 * ---------------------------------------------------------
        n  = 1
 while( n <= numexp )
-if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n != V )
+if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n != V & cname.n.1 != 'NULL' )
 say 'Closeness plot between  exp: 'qtag.1
 say '                       cexp: 'ctag.n.1
 say '                        obs: 'otag.1
@@ -1386,7 +1449,7 @@ endwhile
 ****            No Verification Case               ****
 *******************************************************
 
-if( numrc = 0 )
+if( numrc = 0 & DIR != 'NULL')
 
 * Loop over Seasons to Process
 * ----------------------------

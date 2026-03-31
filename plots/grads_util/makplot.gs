@@ -103,7 +103,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DPCT' ; endif
                                                    dpct  = result
 
-factor = 1
+'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 else
 
@@ -423,7 +426,7 @@ endif
 'draw string 4.25 10.85 'math' 'title
 'set strsiz .10'
 
-if( m != 0 )
+if( m != 0 & ccols = 'NULL' )
    if( m>0 )
       'draw string 4.25 10.62 'expid'  'season' ('nmod')  (x 10** -'m')'
    else

@@ -12,12 +12,17 @@ bdate   = subwrd(args,9)
 edate   = subwrd(args,10)
 expdsc  = subwrd(args,11)
 name    = subwrd(args,12)
+math    = subwrd(args,13)
+alias   = subwrd(args,14)
 
 undef   = 1e15
 qmin    = undef
 qmax    = undef
 qcnt    = undef
 'set undef 'undef
+
+if( math = NULL ) ; math = '' ; endif
+if( alias = NULL ) ; alias = '' ; endif
 
  prefix = " "
  suffix = " "
@@ -65,36 +70,40 @@ say ''
 
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
+if( alias != '' )
+   rc_name = alias
+else
+   rc_name = export
+endif
+
 say 'LEVTYPE: 'CLEVS
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_CBSCALE' 
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CBSCALE' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_CBSCALE' 
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CBSCALE' ; endif
                                                             cbscale = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_FACTOR'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_FACTOR' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_FACTOR' ; endif
                                                             fact = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_TITLE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_TITLE' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_TITLE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_TITLE' ; endif
                                                             title = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CCOLS' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CCOLS' ; endif
                                                             ccols = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_'level'_'CLEVS
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_'CLEVS ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'export'_'GC'_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_'level'_'CLEVS
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_'CLEVS ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'rc_name'_'GC'_CLEVS' ; endif
                                                             clevs = result
 
-                        'getresource 'PLOTRC' 'export'_'GC'_REGRID'
+                        'getresource 'PLOTRC' 'rc_name'_'GC'_REGRID'
                                                             method = result
 say ''
 
-
 * Set Default Plotting Variables
 ********************************
-
 if( title   = 'NULL' )
   'getdesc 'name
      title  = result
@@ -275,6 +284,13 @@ endif
 
 
 'define qmod = 'field''season'*'fact
+
+* Perform Mathematics if necessary
+* --------------------------------
+if( math = LOG )
+   'define qmod = log(qmod+0.00001)'
+endif
+
 'getinfo lon'
          lon = result
 'getinfo lat'
@@ -455,20 +471,31 @@ if( prefix = "0" | suffix = "0" ) ; 'black' ; endif
 'set string 1 c 6'
 'set strsiz .12'
 'draw string 5.5 8.1 'expdsc
+if( math = LOG )
+    mathlabel = 'LOG  '
+else
+    mathlabel = ''
+endif
+* Use ALIAS if provided, otherwise use export:GC
+if( alias != '' )
+    exportlabel = alias
+else
+    exportlabel = export':'GC
+endif
 if( level != 0 )
     if( n != 0 )
-   'draw string 5.5 7.73 'export':'GC
+   'draw string 5.5 7.73 'mathlabel''exportlabel
    'draw string 5.5 7.48 'level'-mb 'title'  'season' ('nseason')    (x10`a'n'`n)'
     else
-   'draw string 5.5 7.73 'export':'GC
+   'draw string 5.5 7.73 'mathlabel''exportlabel
    'draw string 5.5 7.48 'level'-mb 'title'  'season' ('nseason')'
     endif
 else
     if( n != 0 )
-   'draw string 5.5 7.73 'export':'GC
+   'draw string 5.5 7.73 'mathlabel''exportlabel
    'draw string 5.5 7.48 'title'  'season' ('nseason')    (x10`a'n'`n)'
     else
-   'draw string 5.5 7.73 'export':'GC
+   'draw string 5.5 7.73 'mathlabel''exportlabel
    'draw string 5.5 7.48 'title'  'season' ('nseason')'
     endif
 endif
@@ -494,7 +521,18 @@ eyearm = subwrd(date,2)
 'draw string 0.14 7.70 Mean: 'avgmod
 'draw string 0.14 7.55  Std: 'stdmod
 
-'myprint -name 'output'/hdiag_'export'.'GC'_'level'.'season
+if( math = LOG )
+    mathparm = 'LOG_'
+else
+    mathparm = ''
+endif
+if( alias != '' )
+* ALIAS provided, use it without GC
+    'myprint -name 'output'/hdiag_'alias'_'mathparm''level'.'season
+else
+* No ALIAS, use EXPORT.GC
+    'myprint -name 'output'/hdiag_'export'.'GC'_'mathparm''level'.'season
+endif
 
 return
 
