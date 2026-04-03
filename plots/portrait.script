@@ -317,16 +317,12 @@ endif
 
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQL:AGCM           -OBS LWP:MOIST  -NAME lwp  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM                           -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM                           -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 0.1 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQL:AGCM TQR:AGCM  -OBS TLWP:AGCM  -NAME tlwp -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQI:AGCM                           -NAME tqi  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQR:AGCM                           -NAME tqr  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQS:AGCM                           -NAME tqs  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQG:AGCM                           -NAME tqg  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWP:MOIST CCWP:MOIST -OBS LWP:MOIST -NAME lwp  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 1000 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TQV:AGCM   -NAME tpw  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 0.1 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  VENT:SURFACE                      -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT     TS:SURFACE  -NAME sst          -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT     TS:SURFACE  -NAME tskin        -EXPID $expid -OUTPUT $output -DEBUG $debug        -LAND  -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  SPEED:DYN      -NAME SPEED_ocean  -EXPID $expid -OUTPUT $output -DEBUG $debug        -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1

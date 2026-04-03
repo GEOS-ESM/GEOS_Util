@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edited makplotz.gs to prevent blank or fake zonal line plots from being created
 - Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
+- Removed duplicates from portrait.script that were created as a result of merging previous pull requests
 
 ### Removed
 
