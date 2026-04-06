@@ -40,7 +40,7 @@ class remap_base(object):
 
   def copy_without_remap(self, restarts_in, compared_file_in, compared_file_out, suffix, catch=False):
 #
-#    Determine if remapping is needed for a group of restart files, or if the input restart files 
+#    Determine if remapping is needed for a group of restart files, or if the input restart files
 #    can just simply be copied to the output dir, based on the following dependency table:
 #
 #    restarts     | agrid/stretch | #levels | topo files | tile file | bcs version
@@ -96,21 +96,21 @@ class remap_base(object):
 
   def copy_geosit(self):
     if not self.config['input']['shared']['GEOS-IT']:
-        return 
-     
+        return
+
     expid = self.config['input']['shared']['expid']
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
     yyyy_ = yyyymmddhh_[0:4]
     mm_   = yyyymmddhh_[4:6]
     day_  = yyyymmddhh_[6:8]  # Extract the day from yyyymmddhh_
-          
-    time_suffix = '_21z' 
-    time_suffix_nc4 = '_2100z' 
-        
-    geos_it_rst_dir = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/' + expid + '/rs/Y' + yyyy_ + '/M' + mm_ + '/'
+
+    time_suffix = '_21z'
+    time_suffix_nc4 = '_2100z'
+
+    geos_it_rst_dir = GEOSIT_RST_BASE + expid + '/rs/Y' + yyyy_ + '/M' + mm_ + '/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok=True)
-             
+
     print('Stage GEOS-IT restarts \n from \n    ' + geos_it_rst_dir + '\n to\n    ' + rst_dir + '\n')
 
     # Only use the specific day from yyyymmddhh_

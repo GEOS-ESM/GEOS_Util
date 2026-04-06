@@ -46,6 +46,10 @@ choices_ogrid_cpld = ['72x36', '360x200', '540x458', '720x410', '1440x1080']
 
 choices_ogrid_cmd  = ['360x180', '1440x720', '2880x1440', 'CS'] + choices_ogrid_cpld
 
+# Base locations of MERRA2 and GEOS-IT Restarts
+MERRA2_RST_BASE = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'
+GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
+
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
@@ -150,6 +154,8 @@ job_directive = {"SLURM": """#!/bin/csh -f
 def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
+  assert os.path.exists(MERRA2_RST_BASE), "Must be on discover30 or discover36 to access MERRA-2 restarts at " + MERRA2_RST_BASE
+
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
      exit("Error. MERRA-2 data < 1979 not available\n")
@@ -177,6 +183,8 @@ def init_merra2(x):
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
   x['input:air:nlevel']          = 72
+  x['input:surface:wemin']       = '26'
+  x['input:surface:catch_tilefile'] = '/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/GM4/geometry/CF0180x6C_DE1440xPE0720/CF0180x6C_DE1440xPE0720-Pfafstetter.til'
 
   return False
 
@@ -207,7 +215,7 @@ def init_geosit(x):
   x['input:shared:stretch']      = False
   x['input:shared:rst_dir']      = x['output:shared:out_dir'] + '/geosit_tmp_'+x['input:shared:yyyymmddhh']+'/'
   x['input:air:nlevel']          = 72
-
+  x['input:surface:wemin']       = '13'
   return False
 
 
@@ -333,10 +341,10 @@ def wemin_default(bc_version):
    return default_
 
 def show_wemin_default(x):
-   if x['input:shared:MERRA-2']:
+   if x.get('input:shared:MERRA-2'):
        x['input:surface:wemin'] = '26'
        return False
-   elif x['input:shared:GEOS-IT']:
+   elif x.get('input:shared:GEOS-IT'):
        x['input:surface:wemin'] = '13'
        return False
    else:
@@ -344,7 +352,7 @@ def show_wemin_default(x):
        return True
 
 def get_zoom(x):
-   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8); 
+   # "zoom" approximates the (integer) number of grid cells per degree lat or lon (min=1, max=8);
    # for EASEv2 grid and lat/lon grid, always use the default value of 8.
    zoom_ = '8'
    if x.get('input:shared:MERRA-2') or x.get('input:shared:GEOS-IT'):
