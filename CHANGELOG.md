@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
 - Updated wind and velocity surface plots with bugfix
 - Comprehensively updated moist plotting with added plots and features
+- Added convective mass flux plotting with bug fixes for exports with aliases that include underscores
 
 ### Fixed
 

@@ -90,10 +90,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DCOLS' ; endif
                         'getresource 'PLOTRC' 'PFX'AXLIM'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      AXLIM' ; endif
                                                    axlim  = result
-                        'getresource 'PLOTRC' 'PFX'YLAB' 
+                        'getresource 'PLOTRC' 'PFX'YLAB'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      YLAB'  ; endif
                                                    ylab   = result
-                        'getresource 'PLOTRC' 'PFX'GRID' 
+                        'getresource 'PLOTRC' 'PFX'GRID'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      GRID'  ; endif
                                                    grid   = result
                         'getresource 'PLOTRC' 'PFX'FACTOR'
@@ -250,7 +250,7 @@ endif
 if( ylab  != NULL ) ; 'set ylab  'ylab  ; endif
 if( grid  != NULL ) ; 'set grid  'grid  ; endif
 
-if( axlim = NULL ) 
+if( axlim = NULL )
 'set dfile 'ofile
 'set t   1'
 'set lon 0'
@@ -303,7 +303,15 @@ endif
 'set strsiz .11'
 *'xlabel 1 4.25 10.5'
 'draw string 4.25  10.5 EXPID: 'expid'  'mdesc
-'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)'
+if( m != 0 & ccols = 'NULL' )
+   if( m>0 )
+      'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)  (x 10** -'m')'
+   else
+      'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)  (x 10**'m')'
+   endif
+else
+   'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)'
+endif
 'set string 1 c 6'
 'draw string 4.25  9.70 vs'
 'draw string 4.25  9.45 'odesc'  'season' ('nobs')  ('climate')  (black)'
@@ -343,11 +351,15 @@ endif
 
 'set gxout stat'
 'd qmodz'
+say 'QMODZ STATS: 'result
 qmodz_line  = sublin(result,6)
-qmodz_valid = subwrd(qmodz_line,4)
+qmodz_valid = subwrd(qmodz_line,8)
+
 'd qobsz'
+say 'QOBSZ STATS: 'result
 qobsz_line  = sublin(result,6)
-qobsz_valid = subwrd(qobsz_line,4)
+qobsz_valid = subwrd(qobsz_line,8)
+
 'set gxout line'
 
 if( qmodz_valid > 0 & qobsz_valid > 0 )

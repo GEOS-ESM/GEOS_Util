@@ -269,11 +269,6 @@ while ( m<nexp+1 )
 'fixname 'qname.m
           qalias.m = result
      say 'Alias #'m' = 'qalias.m
-      if( qname.m != qalias.m )
-         'set lon -180 360'
-         'rename 'qname.m ' 'qalias.m''qfile.m
-         'setlons'
-      endif
       m = m+1
 endwhile
 
@@ -321,11 +316,7 @@ if( nexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT =  qalias.1
-    if( qname.1 != qalias.1 )
-       'seasonalf -FUNCTION 'qalias.1''qfile.1'*'scale.1' -NAME 'EXPORT
-    else
-       'seasonalf -FUNCTION 'qalias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
-    endif
+    'seasonalf -FUNCTION 'qname.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
     climfile = result
 else
     mstring = NAME
@@ -429,11 +420,7 @@ if( nexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT =  qalias.1
-    if( qname.1 != qalias.1 )
-       'seasonalf -FUNCTION 'qalias.1''qfile.1'*'scale.1' -NAME 'EXPORT
-    else
-       'seasonalf -FUNCTION 'qalias.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
-    endif
+    'seasonalf -FUNCTION 'qname.1'.'qfile.1'*'scale.1' -NAME 'EXPORT
     climfile = result
 else
     mstring = NAME

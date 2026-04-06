@@ -47,41 +47,47 @@ if( stat = 'BIAS' )
     PRFX = 'BIAS_'
 endif
 
+if( alias != 'NULL' & alias != '' )
+   rc_name = alias
+else
+   rc_name = EXPORT
+endif
+
 say 'LEVTYPE: 'CLEVS
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CBSCALE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CBSCALE' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_CBSCALE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CBSCALE' ; endif
                                                                   cbscale = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_FACTOR'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FACTOR' ; endif
                                                                   fact = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_FACTOR'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_FACTOR'
                                                                   fixpltfact = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_CINT'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_CINT'
                                                                   fixpltcint = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_TITLE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_TITLE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_TITLE' ; endif
                                                    title  = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CCOLS' ; endif
                                                    ccols  = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_'CLEVS
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CLEVS' ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'CLEVS ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_'CLEVS
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_CLEVS' ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'CLEVS ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CLEVS' ; endif
                                                                   clevs = result
 
-                        'getresource 'PLOTRC' 'mname'_'GC'_'level'_DPCT'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'GC'_DPCT' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'level'_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DPCT' ; endif
                                                    dpct  = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_REGRID'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_REGRID'
                                                                   method = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_MASK'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_MASK'
                                                                   mask   = result
 
 * Remove possible BLANKS from mask
