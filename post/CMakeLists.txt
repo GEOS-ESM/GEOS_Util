@@ -8,7 +8,7 @@ set(srcs
 
 esma_add_library (${this}
   SRCS ${srcs}
-  DEPENDENCIES GEOS_Shared MAPL mapl3g GMAO_hermes)
+  DEPENDENCIES GEOS_Shared MAPL2 MAPL GMAO_hermes)
 target_compile_definitions(${this} PRIVATE mpi)
 
 

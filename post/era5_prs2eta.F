@@ -1826,7 +1826,6 @@ c -------------------------------
       subroutine put_fveta ( ps,dp,u,v,thv,q,phis,
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lats,lons,
      .                       timeinc,precision,lattice )
-      use MAPL_BaseMod, only: MAPL_UNDEF
       use MAPL_Constants
       use m_set_eta, only: set_eta
       use dynamics_lattice_module
@@ -1880,7 +1879,7 @@ c -------------------------------
 
       if( lattice%myid.eq.0 ) print *, im,jm,lm,nq,nymd,nhms,trim(ext)
 
-      undef = MAPL_UNDEF
+      undef = MAPL_UNDEFINED_REAL
       kappa = MAPL_KAPPA
       rgas  = MAPL_RGAS
       rvap  = MAPL_RVAP

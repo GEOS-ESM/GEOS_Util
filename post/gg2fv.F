@@ -541,7 +541,7 @@ C **********************************************************************
      .                       frland,frlandice,frlake,frocean,frseaice,
      .                       ts,im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision,dgrid,tvflag )
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constants, only: MAPL_UNDEFINED_REAL
       use m_set_eta, only: set_eta
       implicit  none
 
@@ -610,7 +610,7 @@ C **********************************************************************
       grav  = 9.81
       nstep = 100
 
-      undef     = MAPL_UNDEF
+      undef     = MAPL_UNDEFINED_REAL
       write( cnymd,200 ) nymd
       write( cnhms,300 ) nhms/10000
   200 format(i8.8)
@@ -987,7 +987,7 @@ c --------------------
       subroutine get_ncep_ts ( filename,ts,im,jm,nymd,nhms )
 c program to read ts from ncep surface analysis file
 c --------------------------------------------------
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constants, only: MAPL_UNDEFINED_REAL
       implicit none
       integer  im,jm,nymd,nhms
       real  ts(im,jm)
@@ -1026,7 +1026,7 @@ c --------------------------------------------------
           print *, 'does not match upper-air date and time: ',nymd,nhms
           stop 101
       endif
-      undef = MAPL_UNDEF
+      undef = MAPL_UNDEFINED_REAL
 
 c compute guassian latitudes
 c ----------------------------------

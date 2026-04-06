@@ -7,7 +7,7 @@ module GenESMFGridCompMod
 ! !USES:
 
    use ESMF
-   use MAPL
+   use MAPL2
 
    use, intrinsic :: iso_fortran_env
 
@@ -554,7 +554,7 @@ end Program regrid_forcing
 
 Subroutine do_regrid_forcing(rc)
   use ESMF
-  use MAPL
+  use MAPL2
   use MPI
 
   use GenESMFGridCompMod,          only : Root_SetServices => SetServices

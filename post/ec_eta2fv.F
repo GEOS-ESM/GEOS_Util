@@ -405,7 +405,7 @@ C **********************************************************************
       subroutine put_fvrst ( ps,dp,u,v,thv,q,phis,
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision,dgrid,tvflag )
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constants, only: MAPL_UNDEFINED_REAL
       use m_set_eta, only: set_eta
       implicit  none
 
@@ -465,7 +465,7 @@ C **********************************************************************
       grav  = 9.81
       nstep = 100
 
-      undef     = MAPL_UNDEF
+      undef     = MAPL_UNDEFINED_REAL
       write( cnymd,200 ) nymd
       write( cnhms,300 ) nhms/10000
   200 format(i8.8)

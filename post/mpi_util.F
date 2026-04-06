@@ -713,7 +713,7 @@ C ****  lattice . Grid Lattice for MPI                              ****
 C ****  flag .... Character*(*) to do 'east' or 'west' only         ****
 C ****                                                              ****
 C **********************************************************************
-      use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
+      use MAPL_Constants, only: MAPL_UNDEFINED_REAL
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice
@@ -838,7 +838,7 @@ C ****  lattice . Grid Lattice for MPI                              ****
 C ****  flag .... Character*(*) to do 'north', 'south', or 'pole'   ****
 C ****                                                              ****
 C **********************************************************************
-      use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
+      use MAPL_Constants, only: MAPL_UNDEFINED_REAL
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice

@@ -233,7 +233,7 @@ C **********************************************************************
       subroutine put_fveta ( ps,dp,u,v,thv,q,phis,
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision )
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constant, only: MAPL_UNDEFINED_REAL
       use m_set_eta, only: set_eta
       implicit  none
 
@@ -286,7 +286,7 @@ C **********************************************************************
       kappa = 2.0/7.0
       grav  = 9.80
 
-      undef = MAPL_UNDEF
+      undef = MAPL_UNDEFINED_REAL
       write( cnymd,200 ) nymd
       write( cnhms,300 ) nhms/10000
   200 format(i8.8)

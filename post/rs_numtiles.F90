@@ -1,7 +1,7 @@
 program rs_numtiles
 
   use iso_fortran_env
-  use MAPL
+  use MAPL2
 
   implicit none
 
