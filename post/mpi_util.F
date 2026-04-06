@@ -713,7 +713,7 @@ C ****  lattice . Grid Lattice for MPI                              ****
 C ****  flag .... Character*(*) to do 'east' or 'west' only         ****
 C ****                                                              ****
 C **********************************************************************
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice
@@ -740,7 +740,7 @@ C **********************************************************************
       comm      = lattice%comm
       myid      = lattice%myid
       nx        = lattice%nx
-      undef     = MAPL_UNDEF
+      undef     = MAPL_UNDEFINED_REAL
 
       if( n.gt.im ) then
       print *
@@ -838,7 +838,7 @@ C ****  lattice . Grid Lattice for MPI                              ****
 C ****  flag .... Character*(*) to do 'north', 'south', or 'pole'   ****
 C ****                                                              ****
 C **********************************************************************
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice
@@ -865,7 +865,7 @@ C **********************************************************************
       comm      = lattice%comm
       myid      = lattice%myid
       nx        = lattice%nx
-      undef     = MAPL_UNDEF
+      undef     = MAPL_UNDEFINED_REAL
 
       _UNUSED_DUMMY(msgn)
       if( (lattice%pej.eq.0            .and. n.gt.jm-1) .or.  ! Pole values cannot be used for ghosting

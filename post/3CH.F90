@@ -25,7 +25,7 @@
 
       use ESMF
       use ESMF_CFIOMOD, only:  ESMF_CFIOstrTemplate
-      use MAPL_Mod
+      !use MAPL_Mod
 
       use dynamics_lattice_module
       use ThreeCornerHat_mod
