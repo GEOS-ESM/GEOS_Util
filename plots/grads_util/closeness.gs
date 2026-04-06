@@ -132,7 +132,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FIXED_PLOT_CINT' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      CLOSE_PLOT_CINT' ; endif
                                                    clspltcint = result
 
-factor = 1
+                        'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 else
 
@@ -204,7 +207,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'alias
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"

@@ -1,5 +1,5 @@
       program  main
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
 
 ! **********************************************************************
@@ -550,7 +550,7 @@
 ! *****                                                                     *****
 ! *******************************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,lm1,lm2,nt
