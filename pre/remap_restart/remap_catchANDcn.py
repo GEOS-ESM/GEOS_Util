@@ -146,6 +146,7 @@ class catchANDcn(remap_base):
        CONSTRAINT = '"[cas|mil]"'
 
      account    = config['slurm_pbs']['account']
+
      # even if the (MERRA-2) input restarts are binary, the output restarts will always be nc4 (remap_bin2nc.py)
      suffix = '_rst.' + suffix
      out_rstfile = expid + os.path.basename(in_rstfile).split('_rst')[0].split('.')[-1]+suffix
@@ -241,7 +242,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
-    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    merra_2_rst_dir = MERRA2_RST_BASE + expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
     rst_dir = self.config['input']['shared']['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
     print(' Copy MERRA-2 catchment Restart \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')

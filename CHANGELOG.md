@@ -13,9 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
+- Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
+- Fixed incorrect labeling of model data as actual or climatological in some plots
+- Updated makplotz to prevent blank or fake zonal line plots from being created
+
 ### Removed
 
 ### Deprecated
+
+## [2.1.13] - 2026-03-19
+
+### Added
+
+- BLEND-OSTIA-REYNOLDS.pl - script to control real-time update of BCS(SST)
+
+### Changed
+
+- update blend_bcs.pl to accommodate handling of slurm contraint.
+
+- Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+
+### Fixed
+
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
 
 ## [2.1.12] - 2026-01-07
 
