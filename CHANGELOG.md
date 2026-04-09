@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
 - Fixed incorrect labeling of model data as actual or climatological in some plots
 - Updated makplotz to prevent blank or fake zonal line plots from being created
+- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
 
 ### Removed
 
@@ -39,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
-- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
 
 ## [2.1.12] - 2026-01-07
 
