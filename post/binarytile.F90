@@ -14,18 +14,18 @@ Program binarytile
   integer            :: grid_info(2),status
   real, allocatable  :: AVR(:,:)
   real               :: DUMMY
-  character(len=128) :: NAME 
-  character(len=128) :: filenameIN 
-  character(len=128) :: filenameOUT
-  integer, parameter :: max_rec=2 
+  character(len=512) :: NAME
+  character(len=512) :: filenameIN
+  character(len=512) :: filenameOUT
+  integer, parameter :: max_rec=2
 
   call getarg(1,filenameIN)
-  if (filenameIN == "") filenameIN = 'input'
+  if (trim(filenameIN) == "") filenameIN = 'input'
   call getarg(2,filenameOUT)
-  if (filenameOUT == "") filenameOUT = 'output'
+  if (trim(filenameOUT) == "") filenameOUT = 'output'
 
-  open(unit=unitR, file=filenameIN, form='FORMATTED')
-  open(unit=unitW, file=filenameOUT,form='UNFORMATTED')
+  open(unit=unitR, file=trim(filenameIN),  form='FORMATTED',   action='READ')
+  open(unit=unitW, file=trim(filenameOUT), form='UNFORMATTED')
   !READ (unitR, *) NT, NPFAF
   !WRITE(unitW   ) NT, NPFAF
 
