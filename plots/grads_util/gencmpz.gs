@@ -107,7 +107,7 @@ while ( k <= n )
          j = j + 1
        bit = substr(dummy,j,1)
        endwhile
-  
+
        if( bit != '' )
            m = m + 1
            j = j + 1
@@ -173,14 +173,14 @@ while ( n <= nexp )
         mname.n = 'VAR_'mname.n
     endif
     if( STAT = "BIAS" )
-              k = n + 1 
+              k = n + 1
         mname.k =       mname.n
         mfile.k =       mfile.n
        mscale.k =      mscale.n
        expdsc.k =      expdsc.n
     endif
     if( STAT = "RMS" )
-              k = n + 1 
+              k = n + 1
         mname.k = 'VAR_'mname.n
         mfile.k =       mfile.n
        mscale.k =      mscale.n
@@ -189,7 +189,7 @@ while ( n <= nexp )
     if( mfile.n != 'NULL' )
             mexp = mexp + 1
     else
-      if( OPT.n = 'FALSE' ) 
+      if( OPT.n = 'FALSE' )
           return
       endif
     endif
@@ -201,7 +201,7 @@ endif
 
 
 * Compute PTOP Info
-* ----------------- 
+* -----------------
 if( PTOPS = NULL )
     'getinfo zdim'
              zdim = result
@@ -233,7 +233,7 @@ endwhile
 
 'run getenv "GEOSUTIL"'
          geosutil = result
-                                                                                                   
+
 'run getenv "VERIFICATION"'
          verification = result
 
@@ -357,10 +357,10 @@ while( exp != 'NULL' )
 say ' '
 say 'Comparing with: 'exp
 
-* analysis = false  EXP=M CMP=M  => ALEVS   
-* analysis = false  EXP=M CMP=A  => DLEVS   
-* analysis = true   EXP=A CMP=A  => ALEVS   
-* analysis = true   EXP=A CMP=M  => DLEVS   
+* analysis = false  EXP=M CMP=M  => ALEVS
+* analysis = false  EXP=M CMP=A  => DLEVS
+* analysis = true   EXP=A CMP=A  => ALEVS
+* analysis = true   EXP=A CMP=M  => DLEVS
 
 if( analysis != "false" )
     if( type = A )
@@ -404,14 +404,14 @@ while ( n <= nexp )
         oname.n = 'VAR_'oname.n
     endif
     if( STAT = "RMS" )
-              k = n + 1 
+              k = n + 1
         oname.k = 'VAR_'oname.n
         ofile.k =       ofile.n
        oscale.k =      oscale.n
        obsdsc.k =      obsdsc.n
     endif
     if( STAT = "BIAS" )
-              k = n + 1 
+              k = n + 1
         oname.k =       oname.n
         ofile.k =       ofile.n
        oscale.k =      oscale.n
@@ -420,7 +420,7 @@ while ( n <= nexp )
     if( ofile.n != 'NULL' )
             oexp = oexp + 1
     else
-      if( OPT.n = 'FALSE' ) 
+      if( OPT.n = 'FALSE' )
           found =  FALSE
       endif
     endif
