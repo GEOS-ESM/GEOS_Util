@@ -196,7 +196,7 @@ class other_restarts(remap_base):
 
      if (route):
        # WY note: the param file will be settled soon
-       param_file = '/discover/nobackup/yzeng3/data/river_input_weiyuan/route_restart_package/route_parameters.nc'
+       param_file = out_bc_base+'/'+ out_bc_version+'/route/route_parameters.nc'
        assemble_route_rst(route, param_file, log_name)
 
      suffix = '_rst.' + suffix
