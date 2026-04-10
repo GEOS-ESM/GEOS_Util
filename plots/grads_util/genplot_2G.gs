@@ -830,6 +830,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -935,6 +937,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -1312,6 +1316,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
@@ -1462,6 +1468,8 @@ else
          m = m+1
          say 'Processing Season: 'season
 
+'setlons'
+'setlats'
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
