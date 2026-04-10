@@ -109,7 +109,7 @@ say '-CLIMCMP 'climcmp
 'run getenv "GEOSUTIL"'
              geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
- 
+
 say ''
 if( STAT = 'STD' )
     PRFX = 'STD_'
@@ -121,10 +121,17 @@ if( STAT = 'BIAS' )
     PRFX = 'BIAS_'
 endif
 
-if( alias != 'NULL' & alias != '' )
-   rc_name = alias
-else
-   rc_name = EXPORT
+rc_name = EXPORT
+
+if ( alias != 'NULL' & alias != '' )
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'
+   chk_titl = result
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR'
+   chk_fact = result
+
+   if ( chk_titl = 'NULL' & chk_fact = 'NULL' )
+      rc_name = alias
+   endif
 endif
 
                         'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_TITLE'  ; title   = result
@@ -507,13 +514,13 @@ say '------------'
 if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
 * -------------------------------------------------------
 
-  if( diffmax = NULL ) 
+  if( diffmax = NULL )
    'd 'dqmax'*'fact
        dqmax = subwrd(result,4)
   else
        dqmax = diffmax
   endif
-  if( diffmin = NULL ) 
+  if( diffmin = NULL )
    'd 'dqmin'*'fact
        dqmin = subwrd(result,4)
   else
@@ -572,7 +579,7 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
    endif
 
    say 'Scaling Factor: 'dn
-   
+
    if( dn<0 )
   say 'dm = -1 * 'dn
        dm = -1 * dn
