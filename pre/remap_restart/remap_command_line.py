@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # remap_restarts package:
-#   remap_command_line.py parses and converts the command-line arguments and converts the information 
+#   remap_command_line.py parses and converts the command-line arguments and converts the information
 #   into matching "Answers" for the questionary (remap_questions.py)
 #
 import os
@@ -64,7 +64,7 @@ def parse_args(program_description):
     p_command.add_argument('-ocnmdlout',   default='data',    help='Ocean model for new restarts',          choices=choices_omodel)
     p_command.add_argument('-in_stretch',  default=False,     help='Stretched CS params of input restarts', choices=choices_stretch)
     p_command.add_argument('-out_stretch', default=False,     help='Stretched CS params for new restarts',  choices=choices_stretch)
-    
+
     # Unlike remap_questions.py, command-line feature does not deduce Catch vs. CatchCN[40,51] for simplicity, thus requires input argument
     p_command.add_argument('-catch_model',default='catch',    help='Catchment[CN] model', choices=choices_catchmodel)
 
@@ -99,14 +99,14 @@ def get_answers_from_command_line(cml):
       init_merra2(answers)
    elif  cml.geosit:
       init_geosit(answers)
-   else:   
+   else:
       answers["input:shared:bc_base"]     =  cml.in_bc_base
       answers["input:shared:omodel"]      = cml.ocnmdlin
       answers["input:shared:bc_version"]  = cml.bcvin
       answers["input:surface:catch_model"]= cml.catch_model
       answers["input:shared:stretch"]     = cml.in_stretch
       answers["input:shared:rst_dir"]     = os.path.abspath(os.path.expanduser(cml.rst_dir))
-      fvcore_info(answers) 
+      fvcore_info(answers)
       ogrid                               = cml.oceanin
       if ogrid == "CS":
          ogrid = answers["input:shared:agrid"]
@@ -143,7 +143,7 @@ def get_answers_from_command_line(cml):
 
    answers["output:air:agcm_import_rst"] = not cml.noagcm_import_rst
 
-   if cml.zoom: 
+   if cml.zoom:
       answers["input:surface:zoom"]    = cml.zoom
    else:
       answers["input:surface:zoom"]    = get_zoom(answers)
@@ -161,7 +161,7 @@ def get_answers_from_command_line(cml):
    answers["slurm_pbs:account"]    = cml.account
    answers["slurm_pbs:qos"]        = cml.qos
    answers["slurm_pbs:partition"]  = cml.partition
-  
+
    return answers
 
 if __name__ == "__main__":
@@ -174,7 +174,7 @@ if __name__ == "__main__":
    with open("raw_command.yaml", "w") as f:
      yaml.dump(config, f)
 
-   config = get_config_from_answers(answers, config_tpl= True) 
+   config = get_config_from_answers(answers, config_tpl= True)
    with open("params_from_command.yaml", "w") as f:
      yaml.dump(config, f)
 
