@@ -47,10 +47,17 @@ if( stat = 'BIAS' )
     PRFX = 'BIAS_'
 endif
 
-if( alias != 'NULL' & alias != '' )
-   rc_name = alias
-else
-   rc_name = EXPORT
+rc_name = EXPORT
+
+if ( alias != 'NULL' & alias != '' )
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'
+   chk_titl = result
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR'
+   chk_fact = result
+
+   if ( chk_titl = 'NULL' & chk_fact = 'NULL' )
+      rc_name = alias
+   endif
 endif
 
 say 'LEVTYPE: 'CLEVS
