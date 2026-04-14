@@ -279,12 +279,18 @@ endif
 
 * Ensure NAMES have no underscores
 * --------------------------------
+*        m=1
+*while ( m<numMGCs+1 )
+*'fixname 'qname.m
+*          alias.m = result
+*say 'Alias #'m' = 'alias.m
+*        m = m+1
+*endwhile
+
         m=1
 while ( m<numMGCs+1 )
-'fixname 'qname.m
-          alias.m = result
-say 'Alias #'m' = 'alias.m
-        m = m+1
+          alias.m = qname.m
+      m = m+1
 endwhile
 
 

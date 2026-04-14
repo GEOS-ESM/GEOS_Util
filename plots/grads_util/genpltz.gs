@@ -109,7 +109,7 @@ say '-CLIMCMP 'climcmp
 'run getenv "GEOSUTIL"'
              geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
- 
+
 say ''
 if( STAT = 'STD' )
     PRFX = 'STD_'
@@ -121,39 +121,52 @@ if( STAT = 'BIAS' )
     PRFX = 'BIAS_'
 endif
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'  ; title   = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; fact    = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_FACTOR' ; fixpltfact = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_CINT'   ; fixpltcint = result
+rc_name = EXPORT
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
+if ( alias != 'NULL' & alias != '' )
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'
+   chk_titl = result
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR'
+   chk_fact = result
+
+   if ( chk_titl = 'NULL' & chk_fact = 'NULL' )
+      rc_name = alias
+   endif
+endif
+
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_TITLE'  ; title   = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FACTOR' ; fact    = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_FACTOR' ; fixpltfact = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_CINT'   ; fixpltcint = result
+
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CCOLS' ; endif
                                                                   ccols = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DCOLS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_DCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DCOLS' ; endif
                                                                   dcols = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DPCT'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DPCT' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DPCT' ; endif
                                                                   dpct = result
 
 if( zlog = 'ON' & ptop < 10 )
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_ZLOG_CLEVS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_ZLOG_CLEVS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CLEVS' ; endif
 else
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CLEVS'
 endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CLEVS' ; endif
                                                                   clevs = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_'LEVTYPE
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'LEVTYPE ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_'LEVTYPE
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'LEVTYPE ; endif
                                                                    dlevs = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMAX'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DIFFMAX'
                                                                   diffmax = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMIN'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DIFFMIN'
                                                                   diffmin = result
 
 if( fact    = 'NULL' ) ; fact = 1   ; endif
@@ -501,13 +514,13 @@ say '------------'
 if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
 * -------------------------------------------------------
 
-  if( diffmax = NULL ) 
+  if( diffmax = NULL )
    'd 'dqmax'*'fact
        dqmax = subwrd(result,4)
   else
        dqmax = diffmax
   endif
-  if( diffmin = NULL ) 
+  if( diffmin = NULL )
    'd 'dqmin'*'fact
        dqmin = subwrd(result,4)
   else
@@ -566,7 +579,7 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
    endif
 
    say 'Scaling Factor: 'dn
-   
+
    if( dn<0 )
   say 'dm = -1 * 'dn
        dm = -1 * dn
