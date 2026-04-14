@@ -45,6 +45,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.14] - 2026-04-09
+
+### Fixed
+
+- Update `binarytile.F90` to open the text tile files as read-only and allow longer paths
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
+- Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
+- Fixed incorrect labeling of model data as actual or climatological in some plots
+- Updated makplotz to prevent blank or fake zonal line plots from being created
+- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
+
 ## [2.1.13] - 2026-03-19
 
 ### Added
@@ -64,7 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
-- Updated `test_remap_cases.yaml` to point to baselines consistent with v11
 
 ## [2.1.12] - 2026-01-07
 
