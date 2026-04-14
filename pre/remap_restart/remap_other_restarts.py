@@ -195,7 +195,8 @@ class other_restarts(remap_base):
        self.run_and_log(cmd, log_name)
 
      if (route):
-       param_file = '/discover/nobackup/projects/gmao/bcs_shared/make_bcs_inputs/route/routing_model/v1/route_parameters.nc'
+       # WY note: the param file will be settled soon
+       param_file = out_bc_base+'/'+ out_bc_version+'/route/route_parameters.nc'
        assemble_route_rst(route, param_file, log_name)
 
      suffix = '_rst.' + suffix
