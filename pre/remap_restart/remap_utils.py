@@ -32,9 +32,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v06','v11','v12','v14']
+choices_bc_other   = ['v06','v11','v12','v13','v14']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12', 'v14']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12','v13','v14']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -99,7 +99,8 @@ message_bc_other   = f'''\n
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
-          v14:     v12 + Coupled MOM6/v2 ocean bathymetry (OM4) and v2 topography for atmosphere \n\n'''\
+          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
+          v14:     As in v13 but with v2 topography for atmosphere \n\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)

@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Handling of river routing restarts.
+
 ### Changed
+
+- Reduce the default number of PLOT_JOBS
 
 ### Fixed
 
