@@ -9,17 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Handling of river routing restarts.
-
 ### Changed
-
-- Reduce the default number of PLOT_JOBS
 
 ### Fixed
 
 ### Removed
 
 ### Deprecated
+
+## [2.1.15] - 2026-04-15
+
+### Added
+
+- Handling of river routing restarts.
+
+### Changed
+
+- Reduce the default number of PLOT_JOBS
 
 ## [2.1.14] - 2026-04-09
 
