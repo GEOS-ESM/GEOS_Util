@@ -8,6 +8,7 @@ function gencmpz (args)
  numargs = result
 
 NAME   = NULL
+ALIAS  = NULL
 STAT   = NULL
 DEBUG  = FALSE
 PTOPS  = NULL
@@ -21,6 +22,7 @@ if( subwrd(args,num) = '-EXPID'  ) ; EXPID  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-EXPORT' ) ; EXPORT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT' ) ; OUTPUT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-ALIAS'  ) ; ALIAS  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-STAT'   ) ; STAT   = subwrd(args,num+1) ; endif
 
@@ -105,7 +107,7 @@ while ( k <= n )
          j = j + 1
        bit = substr(dummy,j,1)
        endwhile
-  
+
        if( bit != '' )
            m = m + 1
            j = j + 1
@@ -171,14 +173,14 @@ while ( n <= nexp )
         mname.n = 'VAR_'mname.n
     endif
     if( STAT = "BIAS" )
-              k = n + 1 
+              k = n + 1
         mname.k =       mname.n
         mfile.k =       mfile.n
        mscale.k =      mscale.n
        expdsc.k =      expdsc.n
     endif
     if( STAT = "RMS" )
-              k = n + 1 
+              k = n + 1
         mname.k = 'VAR_'mname.n
         mfile.k =       mfile.n
        mscale.k =      mscale.n
@@ -187,7 +189,7 @@ while ( n <= nexp )
     if( mfile.n != 'NULL' )
             mexp = mexp + 1
     else
-      if( OPT.n = 'FALSE' ) 
+      if( OPT.n = 'FALSE' )
           return
       endif
     endif
@@ -199,7 +201,7 @@ endif
 
 
 * Compute PTOP Info
-* ----------------- 
+* -----------------
 if( PTOPS = NULL )
     'getinfo zdim'
              zdim = result
@@ -231,7 +233,7 @@ endwhile
 
 'run getenv "GEOSUTIL"'
          geosutil = result
-                                                                                                   
+
 'run getenv "VERIFICATION"'
          verification = result
 
@@ -278,11 +280,11 @@ endif
         m  = 1
 while ( m <= mexp )
 'fixname 'mname.m
-          alias.m = result
-     say 'Alias #'m' = 'alias.m
-      if( mname.m != alias.m )
+          qalias.m = result
+     say 'Alias #'m' = 'qalias.m
+      if( mname.m != qalias.m )
          'set lon -180 360'
-         'rename 'mname.m ' 'alias.m''mfile.m
+         'rename 'mname.m ' 'qalias.m''mfile.m
          'setlons'
       endif
       m = m+1
@@ -300,20 +302,20 @@ if( mexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT = EXPORT.1
-    if( mname.1 != alias.1 )
-       'seasonalf -FUNCTION 'alias.1''mfile.1'*'mscale.1' -NAME 'mod0
+    if( mname.1 != qalias.1 )
+       'seasonalf -FUNCTION 'qalias.1''mfile.1'*'mscale.1' -NAME 'mod0
     else
-       'seasonalf -FUNCTION 'alias.1'.'mfile.1'*'mscale.1' -NAME 'mod0
+       'seasonalf -FUNCTION 'qalias.1'.'mfile.1'*'mscale.1' -NAME 'mod0
     endif
     modfile = result
 else
     mstring = mod0
     m  = 1
     while ( m <= mexp )
-       if( mname.m != alias.m )
-           mstring = mstring' 'alias.m''mfile.m'*'mscale.m
+       if( mname.m != qalias.m )
+           mstring = mstring' 'qalias.m''mfile.m'*'mscale.m
        else
-           mstring = mstring' 'alias.m'.'mfile.m'*'mscale.m
+           mstring = mstring' 'qalias.m'.'mfile.m'*'mscale.m
        endif
            m  = m + 1
     endwhile
@@ -355,10 +357,10 @@ while( exp != 'NULL' )
 say ' '
 say 'Comparing with: 'exp
 
-* analysis = false  EXP=M CMP=M  => ALEVS   
-* analysis = false  EXP=M CMP=A  => DLEVS   
-* analysis = true   EXP=A CMP=A  => ALEVS   
-* analysis = true   EXP=A CMP=M  => DLEVS   
+* analysis = false  EXP=M CMP=M  => ALEVS
+* analysis = false  EXP=M CMP=A  => DLEVS
+* analysis = true   EXP=A CMP=A  => ALEVS
+* analysis = true   EXP=A CMP=M  => DLEVS
 
 if( analysis != "false" )
     if( type = A )
@@ -402,14 +404,14 @@ while ( n <= nexp )
         oname.n = 'VAR_'oname.n
     endif
     if( STAT = "RMS" )
-              k = n + 1 
+              k = n + 1
         oname.k = 'VAR_'oname.n
         ofile.k =       ofile.n
        oscale.k =      oscale.n
        obsdsc.k =      obsdsc.n
     endif
     if( STAT = "BIAS" )
-              k = n + 1 
+              k = n + 1
         oname.k =       oname.n
         ofile.k =       ofile.n
        oscale.k =      oscale.n
@@ -418,7 +420,7 @@ while ( n <= nexp )
     if( ofile.n != 'NULL' )
             oexp = oexp + 1
     else
-      if( OPT.n = 'FALSE' ) 
+      if( OPT.n = 'FALSE' )
           found =  FALSE
       endif
     endif
@@ -606,7 +608,7 @@ while( n<=NPTOPS )
                        flag = ""
                while ( flag = "" )
 
-'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.num' -OEDATE 'enddate.num' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate' -CLIMCMP 'climate.num' -MBDATE 'begdate' -MEDATE 'enddate
+'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -USEALIAS 'ALIAS' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'CMPID' -OBDATE 'begdate.num' -OEDATE 'enddate.num' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT' -CLIMEXP 'climate' -CLIMCMP 'climate.num' -MBDATE 'begdate' -MEDATE 'enddate
 
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"

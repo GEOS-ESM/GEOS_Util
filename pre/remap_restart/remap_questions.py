@@ -79,14 +79,14 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "input:shared:GEOS-IT",
-            "message": "Remap from archived GEOS-IT restarts?\n",
+            "message": "Remap from archived GEOS-IT restarts? (Works only on NCCS/Discover.)\n",
             "default": False,
             "when": lambda x: SITE_GEOSIT(x),
         },
         {
             "type": "confirm",
             "name": "input:shared:MERRA-2",
-            "message": "Remap from archived MERRA-2 restarts?\n",
+            "message": "Remap from archived MERRA-2 restarts? (Works only on NCCS/Discover nodes discover[30,36].)\n",
             "default": False,
             "when": lambda x: SITE_MERRA2(x) and not x.get("input:shared:GEOS-IT") and os.path.isdir(MERRA2_RST_BASE),
         },
