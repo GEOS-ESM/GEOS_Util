@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated wind and velocity surface plots with bugfix
 - Comprehensively updated moist plotting with added plots and features
 - Added convective mass flux plotting with bug fixes for exports with aliases that include underscores
+- Added additional aerosol exports to plots
 
 ### Fixed
 
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 - Removed duplicates from portrait.script that were created as a result of merging previous pull requests
+- Updated moveplot to not crash with filenames included double colons
 
 ### Removed
 
