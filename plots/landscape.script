@@ -702,10 +702,18 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNO3AQ:NI                           -ALIAS NIPNO3AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNH4AQ:NI                           -ALIAS NIPNH4AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIPNH3AQ:NI                           -ALIAS NIPNH3AQ    $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIHT:NI                               -ALIAS NIHT        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISD:NI                               -ALIAS NISD        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIDP:NI                               -ALIAS NIDP        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIWT:NI                               -ALIAS NIWT        $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIHT:NI:001                           -ALIAS NIHT001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIHT:NI:002                           -ALIAS NIHT002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIHT:NI:003                           -ALIAS NIHT003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISD:NI:001                           -ALIAS NISD001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISD:NI:002                           -ALIAS NISD002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NISD:NI:003                           -ALIAS NISD003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIDP:NI:001                           -ALIAS NIDP001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIDP:NI:002                           -ALIAS NIDP002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIDP:NI:003                           -ALIAS NIDP003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIWT:NI:001                           -ALIAS NIWT001     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIWT:NI:002                           -ALIAS NIWT002     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIWT:NI:003                           -ALIAS NIWT003     $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3EM:NI                              -ALIAS NH3EM       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3DP:NI                              -ALIAS NH3DP       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3WT:NI                              -ALIAS NH3WT       $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -802,12 +810,17 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH3MASS:NI      -ALIAS NH3 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NH4MASS:NI      -ALIAS NH4 -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT NIMASS:NI       -ALIAS NI  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-# Black Carbon
+# Black Carbon:
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.bcMASS:CA.bc -ALIAS BC  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 # Organic Carbon:
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.ocMASS:CA.oc -ALIAS OC  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 # Brown Carbon:
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT CA.brMASS:CA.br -ALIAS BR  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Carbon Monoxide:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT GOCART::CO:GOCART    -ALIAS CO       -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+# Volatile Organic Compound:
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ACHEM::VOC:ACHEM     -ALIAS VOC      -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ACHEM::VOCbiob:ACHEM -ALIAS VOCbiob  -LEVELS misc -ZLOG MULTI $INFO " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
 # ---inst3d_aer_v---
     set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 400 300 250 200 150 100 85 70'
