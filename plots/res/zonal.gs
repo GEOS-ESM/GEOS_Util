@@ -464,7 +464,7 @@ say '----------------------------------------------------------- '
 say ' '
 *pause
 
-'!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
+'!cat HISTORY.rc | sed -e "s/#.*//g" | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
 'run getvar V DYN 'exp
 say 'GETVAR output: 'result

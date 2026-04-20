@@ -96,6 +96,7 @@ endwhile
 * ------------------------------------------------------------
         m  = 0
         k  = 1
+
 while ( k <= n )
 
         dummy = EXPORT.k
@@ -148,6 +149,7 @@ if( n = m )
 else
     say 'Number of EXPORTS does not equal number of GCs!'
     say 'Number of EXPORTS: 'n
+
     say '              GCS: 'm
     return
 endif
@@ -237,6 +239,7 @@ endwhile
 'run getenv "VERIFICATION"'
          verification = result
 
+
 'run getenv "ANALYSIS"'
          analysis = result
 
@@ -261,6 +264,7 @@ if(  numlevs = 1 )
     'set z 1'
 else
     'setz'
+
 endif
 
 * Get Dimension of Model Environment
@@ -386,7 +390,7 @@ endif
      endif
 '!remove CHECKFILE.txt'
 
-'!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
+'!cat HISTORY.rc | sed -e "s/#.*//g" | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
 * Get CMPEXP Variables
 * --------------------
@@ -696,4 +700,3 @@ function checkbit (word)
       dum = bit'TEST'
       if( dum = "ETEST" ) ; bit = A ; endif
 return bit
-
