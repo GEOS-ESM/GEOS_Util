@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 - Removed duplicates from portrait.script that were created as a result of merging previous pull requests
 - Updated moveplot to not crash with filenames included double colons
+- Updated plotting scripts to ignore comments in HISTORY.rc
 
 ### Removed
 
