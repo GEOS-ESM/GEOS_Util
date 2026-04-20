@@ -9,6 +9,7 @@ dqmax = NULL
 dqmin = NULL
 STAT  = ''
 PRFX  = ''
+usealias = NULL
 
         num = 0
 while ( num < numargs )
@@ -18,6 +19,7 @@ if( subwrd(args,num) = '-EXPID'   ) ; expid    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-EXPORT'  ) ; EXPORT   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-GC'      ) ; GC       = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ALIAS'   ) ; alias    = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-USEALIAS') ; usealias = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-QFILE'   ) ; qfile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OFILE'   ) ; ofile    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ONAME'   ) ; obsnam   = subwrd(args,num+1) ; endif
@@ -119,39 +121,52 @@ if( STAT = 'BIAS' )
     PRFX = 'BIAS_'
 endif
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'  ; title   = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; fact    = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_FACTOR' ; fixpltfact = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_CINT'   ; fixpltcint = result
+rc_name = EXPORT
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
+if ( alias != 'NULL' & alias != '' )
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'
+   chk_titl = result
+   'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR'
+   chk_fact = result
+
+   if ( chk_titl = 'NULL' & chk_fact = 'NULL' )
+      rc_name = alias
+   endif
+endif
+
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_TITLE'  ; title   = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FACTOR' ; fact    = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_FACTOR' ; fixpltfact = result
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_FIXED_PLOT_CINT'   ; fixpltcint = result
+
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CCOLS' ; endif
                                                                   ccols = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DCOLS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_DCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DCOLS' ; endif
                                                                   dcols = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DPCT'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DPCT' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DPCT' ; endif
                                                                   dpct = result
 
 if( zlog = 'ON' & ptop < 10 )
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_ZLOG_CLEVS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_ZLOG_CLEVS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CLEVS' ; endif
 else
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_CLEVS'
 endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_CLEVS' ; endif
                                                                   clevs = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_'LEVTYPE
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'LEVTYPE ; endif
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_Z_'LEVTYPE
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_'LEVTYPE ; endif
                                                                    dlevs = result
 
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMAX'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DIFFMAX'
                                                                   diffmax = result
-                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMIN'
+                        'getresource 'PLOTRC' 'PRFX''rc_name'_'GC'_DIFFMIN'
                                                                   diffmin = result
 
 if( fact    = 'NULL' ) ; fact = 1   ; endif
@@ -176,10 +191,20 @@ say 'DCOLS: 'dcols
 say 'DIFFMAX: 'diffmax
 say 'DIFFMIN: 'diffmin
 
-if( zlog = 'OFF' )
-    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_z'
+if( usealias != NULL & usealias != '' )
+* User provided alias - use short format
+    if( zlog = 'OFF' )
+        oname = '/hdiag_'PRFX''obsnam'_'usealias'_z'
+    else
+        oname = '/hdiag_'PRFX''obsnam'_'usealias'_zlog'ptop
+    endif
 else
-    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_zlog'ptop
+* No user alias - use traditional format with EXPORT:GC
+    if( zlog = 'OFF' )
+        oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_z'
+    else
+        oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_zlog'ptop
+    endif
 endif
 
 * Remove possible BLANKS from FACTOR

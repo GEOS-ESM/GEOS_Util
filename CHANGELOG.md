@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed incorrect labeling of model data as actual or climatological in some plots
 - Updated makplotz to prevent blank or fake zonal line plots from being created
 - Updated `test_remap_cases.yaml` to point to baselines consistent with v11
+- Updated plotting scripts for bug fixes and additional exports
 
 ## [2.1.13] - 2026-03-19
 
