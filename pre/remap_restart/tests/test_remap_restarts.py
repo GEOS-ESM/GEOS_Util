@@ -11,12 +11,13 @@ import ruamel.yaml
 import questionary
 import glob
 import subprocess as sp
-import remap_restarts 
-from remap_utils import *
-from remap_upper import *
-from remap_lake_landice_saltwater import *
-from remap_analysis  import *
-from remap_catchANDcn  import *
+import remap_restarts
+
+from remap_utils          import *
+from remap_upper          import *
+from remap_other_restarts import *
+from remap_analysis       import *
+from remap_catchANDcn     import *
 
 def compare(base, result):
   #1) comparing nc4
@@ -48,8 +49,8 @@ def test_remap(config):
 
   upper = upperair(config_obj=config)
   upper.remap()
-  lls  = lake_landice_saltwater(config_obj=config)
-  lls.remap()
+  ors  = other_restarts(config_obj=config)
+  ors.remap()
   catch  = catchANDcn(config_obj=config)
   catch.remap()
   ana = analysis(config_obj=config)
