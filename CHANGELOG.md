@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- stats_v2 directory with scripts to process forecast stats and create stats plots and scorecards
 
 ### Changed
 

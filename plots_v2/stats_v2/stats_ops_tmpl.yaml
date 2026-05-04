@@ -1,0 +1,81 @@
+# stats.yaml
+
+parameters:
+  # length and dates form inclusive ranges
+    fcst_length: 10 # days (whole numbers only)
+    fcst_interval: 6 # hours (whole numbers only)
+    init_hour: 0 # single fcst initialization hour to process; e.g., 0, 6, 12, 18, etc.
+
+  # stats options [comma-separated lists]
+    levels: [1000, 975, 950, 925, 900, 850, 800, 750, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 10, 7, 5, 3, 1] # pressure levels hPa
+    3d_vars_default: [H, Q, T, U, V] # chosen from among [H, Q, T, U, V]
+    2d_vars_default: [P, PS] # chosen from among [P, PS]
+    2d_vars_slices:  [Q2m, T2m, U10m, V10m, D2m] # chosen from among [Q2m, T2m, U10m, V10m, D2m]
+    2d_vars_aerosol: [AOD, PM25, LOGAOD] # chosen from among [AOD, PM25, LOGAOD]
+    regions: [GLO, NHE, TRO, SHE, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL]
+
+  # fcst/ana/clim directories/templates should reference initialization and valid dates/times using tags
+  # acceptable tags are: init and valid _YYYY, _MM, _DD, _HH, _YYYYMMDD, _YYYYMMDDHH
+  # shifts in hours can be included like: {init_YYYYMMDD,shift=-3h}
+  # templates for slices and aerosols are optional; if not present or left blank will be assumed to be the same as default
+
+    fcst_model: f5430fp
+    fcst_input_dir: /discover/nobackup/projects/gmao/geos_fp_arch/f5430_fp
+    fcst_input_template_default: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/GEOS.fp.fcst.inst3_3d_asm_Np.{init_YYYYMMDD}_{init_HH}+{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
+    fcst_input_template_slices: prog/Y{init_YYYY,shift=-3h}/M{init_MM,shift=-3h}/D{init_DD,shift=-3h}/H{init_HH,shift=-3h}/f5430_fp.prog.sfc.{init_YYYYMMDD,shift=-3h}_{init_HH,shift=-3h}z+{valid_YYYYMMDD}_{valid_HH}z.nc4
+    fcst_input_template_aerosol: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/GEOS.fp.fcst.tavg3_2d_aer_Nx.{init_YYYYMMDD}_{init_HH}+{valid_YYYYMMDD,shift=-2h}_{valid_HH,shift=-2h}30.V01.nc4
+
+    ana_model: f5430fp
+    ana_input_dir: /discover/nobackup/projects/gmao/gmao_ops/pub/f5430_fp/das
+    ana_input_template_default: Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/GEOS.fp.asm.inst3_3d_asm_Np.{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
+    ana_input_template_slices: Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/GEOS.fp.asm.inst3_2d_asm_Nx.{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
+    ana_input_template_aerosol: Y{valid_YYYY,shift=-2h}/M{valid_MM,shift=-2h}/D{valid_DD,shift=-2h}/GEOS.fp.asm.tavg3_2d_aer_Nx.{valid_YYYYMMDD,shift=-2h}_{valid_HH,shift=-2h}30.V01.nc4
+
+    clim_model: MERRA2
+    clim_input_dir: /discover/nobackup/projects/gmao/geos_itv/mefrazer/METplus/clim/trimmed
+    clim_input_template_default: MERRA-2.inst3_3d_asm_Np.198501_201412.clim_{valid_HH}z.576x361.data.nc4
+    clim_input_template_slices: MERRA-2.inst1_2d_asm_Nx.198501_201412.clim_{valid_HH}z.576x361.data.nc4
+    clim_input_template_aerosol: geos_it_climatology_{valid_HH}z_2003_2022.nc
+
+    # ana_model: ERA5
+    # ana_input_dir: /css/era5
+    # ana_input_template_default: pressure_level_hourly/Y{valid_YYYY}/M{valid_MM}/era5_pl-allvar.{valid_YYYYMMDD}_{valid_HH}z.nc4
+
+    # clim_model: ERA5
+    # clim_input_dir: /discover/nobackup/projects/gmao/geos_itv/mefrazer/METplus/clim/trimmed
+    # clim_input_template_default: era5_mnth.mrg1_avg.1440x0721.Y1985-2014.T{valid_HH}z.nc4
+
+  # Scorecard options (only used with stats_regional which writes the scorecard input files)
+    make_scorecard_files: True # Make .txt files with scorecard input? True or False
+    model:  f5430_fp # model name that will appear in the "forecast" column; used by scorecard code to query database
+    verify: self    # verification source name that will apear in the "verify" column, e.g., gmao or self or ecmwf or era5; used by scorecard code to query database
+    expver: gmao    # forecast model source name that will appear in the "expver" and "source" columns; not used by scorecard code
+
+  # output grid (fcst/ana/clim will be all be re-gridded to this)
+    Nlat: 91        # number of lat points
+    Nlon: 144       # number of lon points
+    delta_lat: 2.0  # latitude increment
+    delta_lon: 2.5  # longitude increment
+
+  # aliases (add to these case-insensitive lists if your fcst/ana/clim variables have names that aren't already listed)
+    H_alias: [h, hght, hgtprs, hgt, gh, z]
+    Q_alias: [q, qv, sphu, spfh]
+    T_alias: [t, tmpu, tmpprs, tmp]
+    U_alias: [u, uwnd, ugrdprs, ugrd]
+    V_alias: [v, vwnd, vgrdprs, vgrd]
+    P_alias: [slp, slprs, prmsl, msl]
+    T2m_alias: [t2m, t2, tmp_2m]
+    Q2m_alias: [q2m, q2, qv2m, qv2, spfh_2m]
+    U10m_alias: [u10m, u10, ugrd_10m]
+    V10m_alias: [v10m, v10, vgrd_10m]
+    D2m_alias: [d2m, d2, dpt_2m, dwpt, td, t2mdew]
+    PS_alias: [ps, sp, pres_sfc]
+    AOD_alias: [totexttau]
+    PM25_alias: [pm25]
+    SSSMASS25_alias: [sssmass25]
+    DUSMASS25_alias: [dusmass25]
+    BCSMASS_alias: [bcsmass]
+    OCSMASS_alias: [ocsmass]
+    SO4SMASS_alias: [so4smass]
+    NISMASS25_alias: [nismass25]
+    NH4SMASS_alias: [nh4smass]
