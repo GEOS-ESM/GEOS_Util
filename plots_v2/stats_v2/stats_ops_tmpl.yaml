@@ -13,7 +13,7 @@ parameters:
     2d_vars_slices:  [Q2m, T2m, U10m, V10m, D2m] # chosen from among [Q2m, T2m, U10m, V10m, D2m]
     2d_vars_aerosol: [AOD, PM25, LOGAOD] # chosen from among [AOD, PM25, LOGAOD]
     regions: [GLO, NHE, TRO, SHE, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL]
-  
+
   # fcst/ana/clim directories/templates should reference initialization and valid dates/times using tags
   # acceptable tags are: init and valid _YYYY, _MM, _DD, _HH, _YYYYMMDD, _YYYYMMDDHH
   # shifts in hours can be included like: {init_YYYYMMDD,shift=-3h}
@@ -56,7 +56,7 @@ parameters:
     Nlon: 144       # number of lon points
     delta_lat: 2.0  # latitude increment
     delta_lon: 2.5  # longitude increment
-  
+
   # aliases (add to these case-insensitive lists if your fcst/ana/clim variables have names that aren't already listed)
     H_alias: [h, hght, hgtprs, hgt, gh, z]
     Q_alias: [q, qv, sphu, spfh]
