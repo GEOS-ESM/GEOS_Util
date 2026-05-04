@@ -16,7 +16,7 @@ parameters:
   # optionally, override experiment fcst names for plot legends:
     fcst_exp0: EXP0
     fcst_exp1: EXP1
-  
+
   # plotting selections [comma-separated lists]
     levels: [1000, 975, 950, 925, 900, 850, 800, 750, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 10, 7, 5, 3, 1] # pressure levels hPa for which plots will be made
     3d_vars_default: [H, Q, T, U, V] # chosen from among [H, Q, T, U, V]
@@ -41,6 +41,6 @@ parameters:
     end_date: # YYYYMMDD
 
   # SBATCH parameters (only used by plots.run, not plots_corcmp.py or plots_syscmp.py)
-    account: 
-    partition: 
-    qos: 
+    account:
+    partition:
+    qos:
