@@ -13,6 +13,7 @@ import glob
 import shlex
 import netCDF4 as nc
 import linecache
+import re
 
 # shared global variables
 
@@ -31,9 +32,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v06','v11','v12','v13']
+choices_bc_other   = ['v06','v11','v12','v13','v14']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12','v13']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12','v13','v14']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -98,7 +99,8 @@ message_bc_other   = f'''\n
           v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
-          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n\n'''\
+          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
+          v14:     As in v13 but with v2 topography for atmosphere \n\n'''\
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
@@ -154,7 +156,7 @@ def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
   assert os.path.exists(MERRA2_RST_BASE), "Must be on discover30 or discover36 to access MERRA-2 restarts at " + MERRA2_RST_BASE
-    
+
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
      exit("Error. MERRA-2 data < 1979 not available\n")
@@ -629,15 +631,27 @@ def get_default_bc_base():
 
 
 def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
-  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
-  agrid_name = gridStr.split('_')[0]
-  bc_topo = ''
-  if 'GM4' == bc_version:
-     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name
-  else:
-     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name + '/smoothed'
+    gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
+    agrid_name = gridStr.split('_')[0]
 
-  return bc_topo
+    v = str(bc_version).strip().upper()
+
+    # GM4 stays on legacy tiles tree
+    if v.startswith('GM4'):
+        return os.path.join(str(bc_base), 'GM4', 'TOPO', f'TOPO_{agrid_name}')
+
+    # v2 from v14+, else v1
+    m = re.search(r'(\d+)', v)
+    ver_num = int(m.group(1)) if m else None
+    stream = 'v2' if (ver_num is not None and ver_num >= 14) else 'v1'
+
+    # Derive new topo base from bc_base; fallback to default if pattern not found
+    bc_base_str = str(bc_base or '')
+    topo_base = re.sub(r'/fvInput/ExtData/esm/tiles/?$', '/make_bcs_inputs/atmosphere', bc_base_str)
+    if topo_base == bc_base_str or not topo_base:
+        topo_base = '/discover/nobackup/projects/gmao/bcs_shared/make_bcs_inputs/atmosphere'
+
+    return os.path.join(topo_base, 'TOPO', stream, agrid_name, 'smoothed')
 
 def get_landdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
   gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch, grid=grid)
