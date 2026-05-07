@@ -90,12 +90,15 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DCOLS' ; endif
                         'getresource 'PLOTRC' 'PFX'AXLIM'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      AXLIM' ; endif
                                                    axlim  = result
-                        'getresource 'PLOTRC' 'PFX'YLAB' 
+                        'getresource 'PLOTRC' 'PFX'YLAB'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      YLAB'  ; endif
                                                    ylab   = result
-                        'getresource 'PLOTRC' 'PFX'GRID' 
+                        'getresource 'PLOTRC' 'PFX'GRID'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      GRID'  ; endif
                                                    grid   = result
+                        'getresource 'PLOTRC' 'PFX'FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FACTOR' ; endif
+                                                   factor = result                                                   
 else
 
 * Check Variable Attributes from Generic PLOTRC
@@ -118,6 +121,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLEVS' ; endif
                                                                 clevs = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FACTOR' ; endif
+                                                                factor = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_REGRID'
                                                                 method = result
 
@@ -126,6 +133,7 @@ if( axlim = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_AXLIM'math ; end
 endif
 
 say ''
+if( factor = 'NULL' ) ; factor = 1 ; endif
 
 if( axlim != NULL )
 axmin = subwrd(axlim,1)
@@ -135,8 +143,8 @@ endif
 
 * Perform Mathematics if necessary
 * --------------------------------
-'define qmod = 'mvar''season
-'define qobs = 'ovar''season
+'define qmod = 'mvar''season' * 'factor
+'define qobs = 'ovar''season' * 'factor
 
 m = 0
 if( ccols = NULL )
@@ -295,7 +303,15 @@ endif
 'set strsiz .11'
 *'xlabel 1 4.25 10.5'
 'draw string 4.25  10.5 EXPID: 'expid'  'mdesc
-'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)'
+if( m != 0 & ccols = 'NULL' )
+   if( m>0 )
+      'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)  (x 10** -'m')'
+   else
+      'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)  (x 10**'m')'
+   endif
+else
+   'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)'
+endif
 'set string 1 c 6'
 'draw string 4.25  9.70 vs'
 'draw string 4.25  9.45 'odesc'  'season' ('nobs')  ('climate')  (black)'
@@ -335,11 +351,13 @@ endif
 
 'set gxout stat'
 'd qmodz'
+say 'QMODZ STATS: 'result
 qmodz_line  = sublin(result,6)
-qmodz_valid = subwrd(qmodz_line,4)
+qmodz_valid = subwrd(qmodz_line,8)
 'd qobsz'
+say 'QOBSZ STATS: 'result
 qobsz_line  = sublin(result,6)
-qobsz_valid = subwrd(qobsz_line,4)
+qobsz_valid = subwrd(qobsz_line,8)
 'set gxout line'
 
 if( qmodz_valid > 0 & qobsz_valid > 0 )
