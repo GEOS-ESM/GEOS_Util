@@ -16,6 +16,7 @@ import subprocess
 import glob
 import ruamel.yaml
 import shlex
+import netCDF4 as nc
 from remap_base   import remap_base
 from remap_utils  import get_label, get_geomdir, get_zoom, MERRA2_RST_BASE
 from remap_bin2nc import bin2nc
@@ -121,7 +122,7 @@ class other_restarts(remap_base):
         if 'seaicethermo_import'    in f : seaicethermo_import   = f
         if 'landice'                in f : landice               = f
         if 'lake'                   in f : lake                  = f
-        if 'roue'                   in f : route                 = f
+        if 'route'                  in f : route                 = f
         if 'openwater'              in f : openwater             = f
 
      in_til  = InData_dir+'/' + os.path.basename(in_tile_file)
@@ -197,7 +198,7 @@ class other_restarts(remap_base):
      if (route):
        # WY note: the param file will be settled soon
        param_file = out_bc_base+'/'+ out_bc_version+'/route/route_parameters.nc'
-       assemble_route_rst(route, param_file, log_name)
+       self.assemble_route_rst('InData/' + route, param_file, log_name)
 
      suffix = '_rst.' + suffix
      for out_rst in glob.glob("OutData/*_rst*"):
@@ -284,7 +285,7 @@ class other_restarts(remap_base):
        bin2nc(dest, ncdest, yaml_file)
        os.remove(dest)
 
-  def assemble_route_rst(route_rst_file, route_param_file, log_name):
+  def assemble_route_rst(self, route_rst_file, route_param_file, log_name):    
     """
     Replace  variables in route_rst_file with matching variables from route_param_file.
     In the future, the state variables may be changed too.
