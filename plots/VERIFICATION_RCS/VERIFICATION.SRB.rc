@@ -74,5 +74,5 @@ OBSDSC: SRB_Rel2.5_Monthly_Data_(198307-200506)
 
         filename:   'VERIFICATION/SRB/SW/CWV_monthly.ctl'
         filetype:   'BIN'
-        fields:     'TQV'      , 'AGCM'          , 'CWV'         , 1 ,
+        fields:     'TQV'      , 'AGCM'          , 'CWV'         , 10 ,
                     ::
