@@ -20,6 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.16] - 2026-05-07
+
+### Added
+- Initial commit of `stats_v2` directory with scripts to process forecast stats and create stats plots and scorecards.
+
+### Changed
+- Updated plotting scripts for bug fixes and additional exports.
+
+### Fixed
+- Fixed rename of "lake_landice_saltwater" to "other_restarts" in remap_restarts test script.
+
 ## [2.1.15] - 2026-04-15
 
 ### Added
