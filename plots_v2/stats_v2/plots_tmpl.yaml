@@ -1,0 +1,46 @@
+# plots.yaml
+
+parameters:
+  # output directory name suffix (will be plots_suffix)
+    suffix: FPver
+  # make corcmp or syscmp plots or both? [corcmp, syscmp, or both] (only used by plots.run, not plots_corcmp.py or plots_syscmp.py)
+    plots_types: both
+
+  # experiment stats files (wildcards and comma-separated lists are acceptable; exp0 is the control experiment; up to exp9 is supported)
+  # regional stats files (required for corcmp)
+    cor_exp0: /path/to/stats_regional_exp0.nc4
+    cor_exp1: /path/to/stats_regional_exp1.nc4
+  # global stats files (required for syscmp)
+    sys_exp0: /path/to/stats_global_exp0.nc4
+    sys_exp1: /path/to/stats_global_exp1.nc4
+  # optionally, override experiment fcst names for plot legends:
+    fcst_exp0: EXP0
+    fcst_exp1: EXP1
+
+  # plotting selections [comma-separated lists]
+    levels: [1000, 975, 950, 925, 900, 850, 800, 750, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 10, 7, 5, 3, 1] # pressure levels hPa for which plots will be made
+    3d_vars_default: [H, Q, T, U, V] # chosen from among [H, Q, T, U, V]
+    2d_vars_default: [P, PS] # chosen from among [P, PS]
+    2d_vars_slices:  [Q2m, T2m, U10m, V10m, D2m] # chosen from among [Q2m, T2m, U10m, V10m, D2m]
+    2d_vars_aerosol: [AOD, PM25, LOGAOD] # chosen from among [AOD, PM25, LOGAOD]
+    regions: [GLO, NHE, TRO, SHE, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] -- ignored for syscmp
+
+  # plotting info
+    season: TBD # e.g., DEC or DJF or JUL-AUG-SEP
+    year: 2025 # e.g., 2024
+    plot_dpi: 300
+    plot_RMS_decomp: TRUE # only used with corcmp: make RMS_RANDOM, _BIAS, _AMPLITUDE, and _PHASE plots (traditional RMS and ACORR plots are always made)
+    corcmp_colormap: bwr             # bwr, RdBu_r, or custom_spectral
+    syscmp_colormap: custom_spectral # bwr, RdBu_r, or custom_spectral
+
+  # dates and times to plot (optional; will default to datetime specs in control model)
+    fcst_length: 5 # days (whole numbers only)
+    fcst_interval: 12 # hours (whole numbers only)
+    fcst_spacing: 1 # days between forecasts beginning on start_date
+    start_date: # YYYYMMDD
+    end_date: # YYYYMMDD
+
+  # SBATCH parameters (only used by plots.run, not plots_corcmp.py or plots_syscmp.py)
+    account:
+    partition:
+    qos:

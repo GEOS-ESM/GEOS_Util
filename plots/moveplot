@@ -174,7 +174,7 @@ endif
 
 # Total Plot Files
 # ----------------
-     set tfiles = `/bin/ls -1 | grep $ext`
+     set tfiles = `/bin/ls -1 | grep $ext | sed 's/^/.\//'`
 
 # Seasonal Plots
 # --------------
@@ -184,7 +184,7 @@ else
       set seasons = $season
 endif
 foreach season ($seasons)
-     set files = `/bin/ls -1 | grep ${season} | grep $ext`
+     set files = `/bin/ls -1 | grep ${season} | grep $ext | sed 's/^/.\//'`
      set   num = `/bin/ls -1 | grep ${season} | grep $ext | wc -l`
      if( $num != 0 ) then
          echo Number of plots for ${season}: $num
@@ -283,7 +283,7 @@ wait
 # -------------------
     set MISC_PLOTS = `echo taylor SERIES QBO VORTEX`
 foreach MISC_PLOT ($MISC_PLOTS)
-     set files = `/bin/ls -1 | grep ${MISC_PLOT} | grep $ext`
+     set files = `/bin/ls -1 | grep ${MISC_PLOT} | grep $ext | sed 's/^/.\//'`
      set   num = `/bin/ls -1 | grep ${MISC_PLOT} | grep $ext | wc -l`
      if( $num != 0 ) then
      echo Number of plots for ${MISC_PLOT}: $num
@@ -330,7 +330,7 @@ wait
 # ----------------------------
      if( -e misc ) then
          cd misc
-         set files = `ls -1 | grep $ext`
+         set files = `ls -1 | grep $ext | sed 's/^/.\//'`
          set  num  = $#files
          if( $num != 0 ) then
          echo Number of plots for MISC: $num
