@@ -96,7 +96,6 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 
 message_bc_other   = f'''\n
 
-          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
           v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
