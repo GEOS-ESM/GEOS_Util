@@ -9,6 +9,6 @@ OBSDSC: Goddard_V2_Sat-based_Surf_Turb_Fluxes
                     'SH'    , 'SURFACE' , 'HFLUX' , 1     ,
                     'TAUX'  , 'SURFACE' , 'UFLUX' , 100   ,
                     'TAUY'  , 'SURFACE' , 'VFLUX' , 100   ,
-                    'TQV'   , 'AGCM'    , 'TPWA'  , 1     ,
+                    'TQV'   , 'AGCM'    , 'TPWA'  , 10    ,
                     'Q10M'  , 'SURFACE' , 'Q10M'  , 0.001 ,
                     ::

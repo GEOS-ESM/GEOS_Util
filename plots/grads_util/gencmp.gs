@@ -372,7 +372,7 @@ endif
      endif
 '!remove CHECKFILE.txt'
 
-'!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
+'!cat HISTORY.rc | sed -e "s/#.*//g" | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
 * Get CMPEXP Variables
 * --------------------

@@ -147,7 +147,14 @@ say 'Looking for 'qnamelc
   n = n+1
   endwhile
 
-if( flag = false ) ; say qnamelc' not found!' ; endif
+if( flag = false )
+    say ' '
+    say 'ERROR: 'qnamelc' not found in file: 'qfile
+    say 'Variable exists in HISTORY.rc but not in the actual data file!'
+    say ' '
+    'set dfile 'curfile
+    return 'NULL NULL 1 NULL NULL NULL'
+endif
 'set dfile 'curfile
 
 endif
