@@ -13,6 +13,7 @@ import glob
 import shlex
 import netCDF4 as nc
 import linecache
+import re
 
 # shared global variables
 
@@ -31,9 +32,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 
 choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v06','v11','v12','v13']
+choices_bc_other   = ['v11', 'v12', 'v13', 'v14', 'v15_BETA']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v06', 'v11','v12','v13']
+choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v11', 'v12', 'v13','v14', 'v15_BETA']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -95,10 +96,11 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 
 message_bc_other   = f'''\n
 
-          v06:     NL3 + JPL veg height + PEATMAP + MODIS snow alb\n
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
-          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n\n'''\
+          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
+          v14:     As in v13 but with GPM 2.0 peat \n
+     v15_BETA:     As in v14 but with v2 topography for atmosphere \n\n'''     
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
@@ -154,7 +156,7 @@ def init_merra2(x):
   if not x.get('input:shared:MERRA-2') : return False
 
   assert os.path.exists(MERRA2_RST_BASE), "Must be on discover30 or discover36 to access MERRA-2 restarts at " + MERRA2_RST_BASE
-    
+
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
      exit("Error. MERRA-2 data < 1979 not available\n")
@@ -627,17 +629,86 @@ def get_default_bc_base():
          return choices_bc_base[0]
    return choices_bc_base[1]
 
+## make_bcs version matrix -> decides v1 or v2 (Done in Utils/Raster/makebcs/make_bcs_shared.py)
+## TOPO/TOPO_version_info -> records that decision
+## remap_restarts -> reads the recorded decision
+
+def _read_topo_version_info_or_exit(bc_base, bc_version):
+    topo_info = os.path.join(
+        str(bc_base).rstrip('/'),
+        str(bc_version).strip(),
+        'TOPO',
+        'TOPO_version_info'
+    )
+
+    if not os.path.isfile(topo_info):
+        raise SystemExit(
+            f"ERROR: Missing required TOPO version file:\n"
+            f"  {topo_info}\n"
+            f"This file must contain exactly 'v1' or 'v2'."
+        )
+
+    with open(topo_info, 'r') as f:
+        topo_version = f.readline().strip()
+
+    if topo_version not in ('v1', 'v2'):
+        raise SystemExit(
+            f"ERROR: Invalid TOPO version in:\n"
+            f"  {topo_info}\n"
+            f"Found: {topo_version!r}\n"
+            f"Expected exactly 'v1' or 'v2'."
+        )
+
+    return topo_version
 
 def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None):
-  gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch)
-  agrid_name = gridStr.split('_')[0]
-  bc_topo = ''
-  if 'GM4' == bc_version:
-     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name
-  else:
-     bc_topo = bc_base + '/' + bc_version + '/TOPO/TOPO_' + agrid_name + '/smoothed'
+    gridStr = get_resolutions(
+        agrid=agrid,
+        ogrid=ogrid,
+        omodel=omodel,
+        stretch=stretch
+    )
+    agrid_name = gridStr.split('_')[0]
 
-  return bc_topo
+    bc_base_str = str(bc_base).rstrip('/')
+    bc_version_str = str(bc_version).strip()
+
+    # GM4 stays on legacy tiles tree.
+    # No TOPO_version_info required for GM4.
+    if bc_version_str.upper().startswith('GM4'):
+        return os.path.join(
+            bc_base_str,
+            'GM4',
+            'TOPO',
+            f'TOPO_{agrid_name}'
+        )
+
+    # For every non-GM4 BCS version, require the file.
+    topo_version = _read_topo_version_info_or_exit(
+        bc_base_str,
+        bc_version_str
+    )
+
+    topo_base = re.sub(
+        r'/fvInput/ExtData/esm/tiles/?$',
+        '/make_bcs_inputs/atmosphere',
+        bc_base_str
+    )
+
+    if topo_base == bc_base_str:
+        raise SystemExit(
+            f"ERROR: Cannot derive make_bcs_inputs atmosphere path from:\n"
+            f"  {bc_base_str}\n"
+            f"Expected bc_base to end with /fvInput/ExtData/esm/tiles."
+        )
+
+    return os.path.join(
+        topo_base,
+        'TOPO',
+        topo_version,
+        agrid_name,
+        'smoothed'
+    )
 
 def get_landdir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
   gridStr = get_resolutions(agrid=agrid, ogrid=ogrid, omodel=omodel,stretch=stretch, grid=grid)
