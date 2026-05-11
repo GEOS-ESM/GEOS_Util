@@ -1467,7 +1467,7 @@ c -------------------------------
       subroutine put_fveta ( ps,dp,u,v,thv,q,phis,
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision )
-      use MAPL_BaseMod, only: MAPL_UNDEF      
+      use MAPL_Constants, only: MAPL_UNDEF
       use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit  none
