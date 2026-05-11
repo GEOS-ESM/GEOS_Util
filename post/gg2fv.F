@@ -541,7 +541,7 @@ C **********************************************************************
      .                       frland,frlandice,frlake,frocean,frseaice,
      .                       ts,im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision,dgrid,tvflag )
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constants, only: MAPL_UNDEF
       use m_set_eta, only: set_eta
       implicit  none
 
@@ -987,7 +987,7 @@ c --------------------
       subroutine get_ncep_ts ( filename,ts,im,jm,nymd,nhms )
 c program to read ts from ncep surface analysis file
 c --------------------------------------------------
-      use MAPL_BaseMod, only: MAPL_UNDEF
+      use MAPL_Constants, only: MAPL_UNDEF
       implicit none
       integer  im,jm,nymd,nhms
       real  ts(im,jm)

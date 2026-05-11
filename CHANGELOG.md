@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate `post/` files (`AI_prs2eta.F`, `gg2fv.F`, `era5_prs2eta.F`, `ec_prs2eta.F`, `gg2eta.F`, `mpi_util.F`, `ec_eta2fv.F`) from `use MAPL_BaseMod, only: MAPL_UNDEF` to `use MAPL_Constants, only: MAPL_UNDEF` (MAPL#4857)
 - Update `movestat` to allow for multiple seasons
 - Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
 - Comprehensively updated aerosol plotting with added plots and features
