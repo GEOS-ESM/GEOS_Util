@@ -29,17 +29,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated wind and velocity surface plots with bugfix
 - Comprehensively updated moist plotting with added plots and features
 - Added convective mass flux plotting with bug fixes for exports with aliases that include underscores
+- Added additional aerosol exports to plots
 
 ### Fixed
 
 - Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
-- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
+- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same characters before punctuation (or crashed due to long exp names if 8 characters or longer without punctuation); these variable names now utilize expid numbers instead of model names
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
 - Edited makplotz.gs to prevent blank or fake zonal line plots from being created
 - Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 - Removed duplicates from portrait.script that were created as a result of merging previous pull requests
+- Updated moveplot to not crash with filenames included double colons
+- Updated plotting scripts to ignore comments in HISTORY.rc
+- Updated gencmpz to handle export names which include double colons (like genplot_2G does)
+
 
 ### Removed
 
