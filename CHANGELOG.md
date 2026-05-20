@@ -50,6 +50,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.17] - 2026-05-20
+
+### Added
+- stats_v2 directory with scripts to process forecast stats and create stats plots and scorecards
+- support for v14 bcs 
+
+### Changed
+- updated topo path
+
+### Fixed
+- corrected fatal capitalization issue in plots/configure
+
+## [2.1.16] - 2026-05-07
+
+### Added
+- Initial commit of `stats_v2` directory with scripts to process forecast stats and create stats plots and scorecards.
+
+### Changed
+- Updated plotting scripts for bug fixes and additional exports.
+
+### Fixed
+- Fixed rename of "lake_landice_saltwater" to "other_restarts" in remap_restarts test script.
+
+## [2.1.15] - 2026-04-15
+
+### Added
+
+- Handling of river routing restarts.
+
+### Changed
+
+- Reduce the default number of PLOT_JOBS
+
 ## [2.1.14] - 2026-04-09
 
 ### Fixed
@@ -61,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed incorrect labeling of model data as actual or climatological in some plots
 - Updated makplotz to prevent blank or fake zonal line plots from being created
 - Updated `test_remap_cases.yaml` to point to baselines consistent with v11
+- Updated plotting scripts for bug fixes and additional exports
 
 ## [2.1.13] - 2026-03-19
 

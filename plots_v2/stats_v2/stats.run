@@ -1,0 +1,1165 @@
+#!/bin/csh -f
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+# Create unique timestamp for job files
+set timestamp = `date +%Y%m%d_%H%M%S`
+
+# Handle optional YAML filename argument
+if ($#argv >= 1) then
+    set filename = "$argv[1]"
+else
+    set filename = "stats.yaml"
+endif
+
+# Check if YAML file exists before proceeding
+if (! -f "$filename") then
+    echo "Error: YAML file '$filename' not found"
+    exit 1
+endif
+
+# Read and validate model names
+foreach model_name ("fcst_model" "ana_model" "clim_model")
+    set model_value = `grep -v '^[[:space:]]*#' ${filename} | grep "${model_name}:" | sed "s/.*${model_name}:[[:space:]]*//" | sed 's/[[:space:]]*#.*//' | sed '/[^[:alnum:]]/q1'`
+    if ($status != 0) then
+        echo "Error: $model_name contains non-alphanumeric characters"
+        exit 1
+    endif
+    set $model_name = "$model_value"
+end
+
+echo "Models: fcst=$fcst_model, ana=$ana_model, clim=$clim_model"
+
+# Read parameters from config file
+@ fdays         = `grep -v '^[[:space:]]*#' ${filename} | grep "fcst_length:"   | awk '{print $2}' | sed 's/[#].*//'`
+@ fcst_interval = `grep -v '^[[:space:]]*#' ${filename} | grep "fcst_interval:" | awk '{print $2}' | sed 's/[#].*//'`
+@ fcst_spacing  = `grep -v '^[[:space:]]*#' ${filename} | grep "fcst_spacing:"  | awk '{print $2}' | sed 's/[#].*//'`
+set start_date  = `grep -v '^[[:space:]]*#' ${filename} | grep "start_date:"    | awk '{print $2}' | sed 's/[#].*//'`
+set end_date    = `grep -v '^[[:space:]]*#' ${filename} | grep "end_date:"      | awk '{print $2}' | sed 's/[#].*//'`
+
+# Make directories
+setenv work_dir `pwd`
+set out_dir = ${work_dir}/output
+set sts_dir = stats_${fcst_model}_${ana_model}_${clim_model}_${start_date}-${end_date}_${timestamp}
+set log_dir = `pwd`/output/${sts_dir}/logs
+set job_dir = `pwd`/output/${sts_dir}/jobs
+set tmp_dir = `pwd`/output/${sts_dir}/tmp
+mkdir -p ${out_dir}
+mkdir -p ${log_dir}
+mkdir -p ${job_dir}
+mkdir -p ${tmp_dir}
+
+# Create a versioned copy of the YAML file
+set versioned_yaml = ${job_dir}/stats_${fcst_model}_${ana_model}_${clim_model}.yaml
+cp $filename $versioned_yaml
+echo "Created versioned config: $versioned_yaml"
+
+# Locate stats.py
+if ( -f "${work_dir}/stats.py" ) then
+    set stats_py_path = "${work_dir}/stats.py"
+    echo "Found stats.py in current directory: ${stats_py_path}"
+else if ( $?GEOSUTIL ) then
+    if ( -f "${GEOSUTIL}/plots_v2/stats_v2/stats.py" ) then
+        set stats_py_path = "${GEOSUTIL}/plots_v2/stats_v2/stats.py"
+        echo "Found stats.py in GEOSUTIL: ${stats_py_path}"
+    else
+        echo "Error: stats.py not found in CWD or ${GEOSUTIL}/plots_v2/stats_v2"
+        exit 1
+    endif
+else
+    echo "Error: stats.py not found in CWD and \$GEOSUTIL is not set."
+    exit 1
+endif
+echo ""
+
+# ============================================================================
+# SBATCH CONFIGURATION OPTIONS
+# ============================================================================
+
+# Read parameters from config file
+set account   = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "account:"   | awk '{print $2}' | sed 's/[#].*//'`
+set partition = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "partition:" | awk '{print $2}' | sed 's/[#].*//'`
+set qos       = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "qos:"       | awk '{print $2}' | sed 's/[#].*//'`
+
+if ("$account" == "" || "$partition" == "" || "$qos" == "") then
+    echo "Error: Missing required SBATCH parameters in config file"
+    exit 1
+endif
+
+echo "Using SBATCH parameters: account = $account, partition = $partition, qos = $qos"
+
+# Set timing/memory parameters
+
+set fcst_default_time = 01:00:00
+set fcst_slices_time  = 00:30:00
+set fcst_aerosol_time = 01:00:00
+set ana_default_time  = 01:00:00
+set ana_slices_time   = 00:30:00
+set ana_aerosol_time  = 00:30:00
+set clim_default_time = 00:15:00
+set clim_slices_time  = 00:10:00
+set clim_aerosol_time = 00:10:00
+set merge_time        = 00:10:00
+
+set default_mem  = 16G
+set slices_mem   = 8G
+set aerosol_mem  = 8G
+set merge_mem    = 32G
+
+set regional_time  = 03:00:00
+set global_time    = 02:00:00
+set reg_clean_time = 00:10:00
+set glo_clean_time = 01:00:00
+
+set regional_mem  = 4G
+set global_mem    = 32G
+set reg_clean_mem = 16G
+set glo_clean_mem = 256G
+
+set stats_chunk_size = 2
+
+# ============================================================================
+# STEP 1: DETERMINE NEEDS AND SETUP
+# ============================================================================
+
+# STEP 1A: SETUP OF DATES
+
+# Extract year, month, day using string manipulation
+set start_year  = `echo $start_date | cut -c1-4`
+set start_month = `echo $start_date | cut -c5-6`
+set start_day   = `echo $start_date | cut -c7-8`
+set end_year    = `echo $end_date | cut -c1-4`
+set end_month   = `echo $end_date | cut -c5-6`
+set end_day     = `echo $end_date | cut -c7-8`
+
+# Calculate difference in days and number of stats chunks needed
+set start_sec   = `date -u -d "${start_year}-${start_month}-${start_day}" +%s`
+set end_sec     = `date -u -d "${end_year}-${end_month}-${end_day}" +%s`
+@ day_diff      = ($end_sec - $start_sec) / 86400
+@ total_dates   = ($day_diff / $fcst_spacing) + 1
+@ last_date_idx = $total_dates - 1 
+@ num_chunks = ($total_dates + $stats_chunk_size - 1) / $stats_chunk_size
+
+# Warn about large numbers of init_dates
+echo "$total_dates init dates requested with $fdays day forecasts at $fcst_interval hour spacing."
+echo "It is not recommended to process more than the equivalent of 31 init dates with 10 day forecasts at 6 hour spacing at once." 
+echo ""
+
+# STEP 1B: CHECK EXISTING DATASETS
+echo "Checking existing datasets..."
+
+# Run check-only mode
+python -u ${stats_py_path} --config ${versioned_yaml} --check_only --info_dir ${sts_dir}
+
+# Read status file
+set status_file = "${job_dir}/dataset_status.txt"
+if (! -f $status_file) then
+    echo "ERROR: Dataset status file not found: $status_file"
+    exit 1
+endif
+
+# Parse status file and set flags
+set need_fcst = `grep "fcst_needed:" $status_file | cut -d: -f2`
+set need_ana = `grep "ana_needed:" $status_file | cut -d: -f2`
+set need_clim = `grep "clim_needed:" $status_file | cut -d: -f2`
+
+echo "Dataset generation needed:"
+echo "  Forecast: $need_fcst"
+echo "  Analysis: $need_ana"
+echo "  Climatology: $need_clim"
+echo ""
+
+# STEP 1C: DATASET-SPECIFIC COLLECTION PROCESSING PREPARATION
+
+# Initialize empty arrays for collections
+set fcst_collections = ()
+set ana_collections = ()  
+set clim_collections = ()
+
+# Only calculate forecast chunking if forecast is needed
+if ($need_fcst == "true") then
+    # Calculate number of chunks to not exceed 123 files per chunk
+    # (164 files is equivalent of 3 dates for a 10-day forecast at 6-hr intervals)
+    @ leads_per_fcst = (($fdays * 24) / $fcst_interval) + 1
+    @ dates_per_chunk = 123 / $leads_per_fcst
+    @ fcst_default_chunks = ($total_dates + $dates_per_chunk - 1) / $dates_per_chunk
+    if ($fcst_default_chunks < 1) set fcst_default_chunks = 1
+endif
+
+# Collection Detection Logic
+echo "Detecting needed dataset collections from YAML..."
+
+# Check each dataset type if needed
+foreach dataset_type (fcst ana clim)
+    # Skip this dataset type if not needed
+    if (($dataset_type == "fcst" && $need_fcst != "true") || \
+        ($dataset_type == "ana"  && $need_ana  != "true") || \
+        ($dataset_type == "clim" && $need_clim != "true")) then
+        echo "  Skipping ${dataset_type} collections (not needed)"
+        continue
+    endif
+    
+    echo "  Checking ${dataset_type} collections..."
+    
+    # Initialize collections array for this type
+    set collections = ()
+
+    # Check for default template with content AND variables
+    grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_default:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
+    if ($status == 0) then
+        # Check if either 2d_vars_default or 3d_vars_default has variables
+        set has_default_vars = 0
+
+        # Check 2d_vars_default
+        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_default:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+        if ($status == 0) set has_default_vars = 1
+
+        # Check 3d_vars_default
+        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*3d_vars_default:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+        if ($status == 0) set has_default_vars = 1
+
+        if ($has_default_vars) then
+            set collections = ($collections default)
+        endif
+    endif
+
+    # Check for slices template with content AND variables
+    grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_slices:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
+    if ($status == 0) then
+        # Check if 2d_vars_slices has variables (not empty [])
+        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_slices:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+        if ($status == 0) then
+            set collections = ($collections slices)
+        endif
+    endif
+
+    # Check for aerosol template with content AND variables
+    grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_aerosol:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
+    if ($status == 0) then
+        # Check if 2d_vars_aerosol has variables (not empty [])
+        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_aerosol:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+        if ($status == 0) then
+            set collections = ($collections aerosol)
+        endif
+    endif
+
+    # Store collections for this dataset type
+    if ("$dataset_type" == "fcst") then
+        set fcst_collections = ($collections)
+        echo "    Collections: ($fcst_collections)"
+    else if ("$dataset_type" == "ana") then
+        set ana_collections = ($collections)
+        echo "    Collections: ($ana_collections)"
+    else if ("$dataset_type" == "clim") then
+        set clim_collections = ($collections)
+        echo "    Collections: ($clim_collections)"
+    endif
+end
+
+# Validate required collections exist for datasets that need processing
+if ($need_fcst == "true" && $#fcst_collections == 0) then
+    echo "ERROR: No forecast collections found in config!"
+    exit 1
+endif
+if ($need_ana == "true" && $#ana_collections == 0) then
+    echo "ERROR: No analysis collections found in config!"
+    exit 1
+endif
+if ($need_clim == "true" && $#clim_collections == 0) then
+    echo "ERROR: No climatology collections found in config!"
+    exit 1
+endif
+
+# Determine merge needs
+set fcst_needs_merge = `if ($#fcst_collections > 1) echo 1; if ($#fcst_collections <= 1) echo 0`
+set ana_needs_merge = `if ($#ana_collections > 1) echo 1; if ($#ana_collections <= 1) echo 0`
+set clim_needs_merge = `if ($#clim_collections > 1) echo 1; if ($#clim_collections <= 1) echo 0`
+
+echo ""
+echo "Processing plan:"
+echo "  Forecast: $#fcst_collections collections" `if ($fcst_needs_merge) echo "(will merge)"`  
+echo "  Analysis: $#ana_collections collections" `if ($ana_needs_merge) echo "(will merge)"`
+echo "  Climatology: $#clim_collections collections" `if ($clim_needs_merge) echo "(will merge)"`
+echo ""
+
+# Read stats_types parameter and determine which stats to run
+set stats_types = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "stats_types:" | sed 's/.*stats_types:[[:space:]]*//' | sed 's/[[:space:]]*#.*//'`
+if ("$stats_types" == "") then
+    echo "Warning: stats_types not found in config, using default value 'both' (global and regional)"
+    set stats_types = "both"
+endif
+
+set run_regional = 0
+set run_global = 0
+
+if ("$stats_types" == "regional" || "$stats_types" == "both") then
+    set run_regional = 1
+endif
+
+if ("$stats_types" == "global" || "$stats_types" == "both") then
+    set run_global = 1
+endif
+
+echo "Stats types to run: $stats_types (regional=$run_regional, global=$run_global)"
+echo ""
+
+# ============================================================================
+# STEP 2: CREATE ALL JOB SCRIPTS (WITH PLACEHOLDERS FOR DEPENDENCIES)
+# ============================================================================
+echo "Creating all job scripts..."
+
+# Initialize tracking arrays - categorize scripts by type as we create them
+set fcst_chunk_collections = ()
+set fcst_job_scripts = ()
+set ana_job_scripts = ()
+set clim_job_scripts = ()
+set chunk_job_scripts = ()
+set chunk_merge_job_scripts = ()
+set fcst_collection_merge_job_scripts = ()
+set ana_collection_merge_job_scripts = ()
+set clim_collection_merge_job_scripts = ()
+set stats_job_scripts = ()
+set cleanup_job_scripts = ()
+
+# Step 2A: CREATE REGULAR PROCESSING JOB SCRIPTS
+echo "  Creating regular processing job scripts..."
+
+foreach dataset_type (fcst ana clim)
+    # Skip this dataset type if not needed
+    if (($dataset_type == "fcst" && $need_fcst != "true") || \
+        ($dataset_type == "ana"  && $need_ana  != "true") || \
+        ($dataset_type == "clim" && $need_clim != "true")) then
+        echo "    Skipping ${dataset_type} job creation (not needed)"
+        continue
+    endif
+
+    # Get collections and model name for this dataset type
+    if ("$dataset_type" == "fcst") then
+        set collections = ($fcst_collections)
+        set needs_merge = $fcst_needs_merge
+        set model_name = $fcst_model
+    else if ("$dataset_type" == "ana") then
+        set collections = ($ana_collections)  
+        set needs_merge = $ana_needs_merge
+        set model_name = $ana_model
+    else if ("$dataset_type" == "clim") then
+        set collections = ($clim_collections)
+        set needs_merge = $clim_needs_merge
+        set model_name = $clim_model
+    endif
+    
+    # Handle forecast special case
+    if ("$dataset_type" == "fcst") then
+        if ($needs_merge) then
+            # Multiple collections case: process non-default collections, flag default for chunking
+            foreach collection ($collections)
+                if ("$collection" == "default") then
+                    # Flag default for chunking
+                    set fcst_chunk_collections = ($fcst_chunk_collections $collection)
+                else
+                    # Create regular jobs for non-default collections (e.g., slices and aerosol)
+                    set job_script = "${job_dir}/stats_${dataset_type}_${collection}.j"
+                    set fcst_job_scripts = ($fcst_job_scripts $job_script)
+                    # Select time and memory parameters accordingly
+                    if ("$collection" == "slices") then
+                        set coll_mem  = $slices_mem
+                        set coll_time = $fcst_slices_time
+                    else if ("$collection" == "aerosol") then
+                        set coll_mem  = $aerosol_mem
+                        set coll_time = $fcst_aerosol_time
+                    endif
+                    
+                    cat << EOF > $job_script
+#!/bin/csh -e
+#SBATCH --time=${coll_time}
+#SBATCH --job-name=${dataset_type}_${collection}
+#SBATCH --output=${log_dir}/${dataset_type}_${collection}.%j.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${coll_mem}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --${dataset_type} --collection ${collection} --info_dir ${sts_dir}
+EOF
+                    echo "    Created: $job_script"
+                endif
+            end
+        else
+            # Single collection case: flag for chunking (no collection specified)
+            set fcst_chunk_collections = ($fcst_chunk_collections "all")
+        endif
+        
+    else
+        # Handle non-forecast datasets (ana, clim)
+        if ($needs_merge) then
+            # Multiple collections - create separate jobs for each
+            foreach collection ($collections)
+                set job_script = "${job_dir}/stats_${dataset_type}_${collection}.j"
+                
+                # Add to appropriate type array and select time and memory parameters accordingly
+                if ("$dataset_type" == "ana") then
+                    set ana_job_scripts = ($ana_job_scripts $job_script)
+                    if ("$collection" == "default") then
+                        set coll_time = $ana_default_time
+                        set coll_mem  = $default_mem
+                    else if ("$collection" == "slices") then
+                        set coll_time = $ana_slices_time
+                        set coll_mem  = $slices_mem
+                    else if ("$collection" == "aerosol") then
+                        set coll_time = $ana_aerosol_time
+                        set coll_mem  = $aerosol_mem
+                    endif
+                else if ("$dataset_type" == "clim") then
+                    set clim_job_scripts = ($clim_job_scripts $job_script)
+                    if ("$collection" == "default") then
+                        set coll_time = $clim_default_time
+                        set coll_mem  = $default_mem
+                    else if ("$collection" == "slices") then
+                        set coll_time = $clim_slices_time
+                        set coll_mem  = $slices_mem
+                    else if ("$collection" == "aerosol") then
+                        set coll_time = $clim_aerosol_time
+                        set coll_mem  = $aerosol_mem
+                    endif
+                endif
+                
+                cat << EOF > $job_script
+#!/bin/csh -e
+#SBATCH --time=${coll_time}
+#SBATCH --job-name=${dataset_type}_${collection}
+#SBATCH --output=${log_dir}/${dataset_type}_${collection}.%j.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${coll_mem}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --${dataset_type} --collection ${collection} --info_dir ${sts_dir}
+EOF
+                echo "    Created: $job_script"
+            end
+        else
+            # Single collection - process normally without --collection flag
+            set job_script = "${job_dir}/stats_${dataset_type}.j"
+            
+            # Add to appropriate type array and select time and memory parameters accordingly
+            if ("$dataset_type" == "ana") then
+                set ana_job_scripts = ($ana_job_scripts $job_script)
+                set coll_time = $ana_default_time
+            else if ("$dataset_type" == "clim") then
+                set clim_job_scripts = ($clim_job_scripts $job_script)
+                set coll_time = $clim_default_time
+            endif
+            
+            cat << EOF > $job_script
+#!/bin/csh -e
+#SBATCH --time=${coll_time}
+#SBATCH --job-name=${dataset_type}
+#SBATCH --output=${log_dir}/${dataset_type}.%j.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${default_mem}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --${dataset_type} --info_dir ${sts_dir}
+EOF
+            echo "    Created: $job_script"
+        endif
+    endif
+end
+
+# Step 2B: CREATE FORECAST CHUNKING AND MERGE JOB SCRIPTS
+if ($need_fcst == "true") then
+    echo "  Creating forecast chunking job scripts..."
+
+    foreach fcst_chunk_collection ($fcst_chunk_collections)
+        set collection_suffix = ""
+        set collection_arg = ""
+        if ("$fcst_chunk_collection" != "all") then
+            set collection_suffix = "_${fcst_chunk_collection}"
+            set collection_arg = "--collection ${fcst_chunk_collection}"
+        endif
+        
+        # Create array job script (no dependencies)
+        set chunk_job_script = "${job_dir}/stats_fcst${collection_suffix}.j"
+        set chunk_job_scripts = ($chunk_job_scripts $chunk_job_script)
+        
+        cat << EOF > $chunk_job_script
+#!/bin/csh -e
+#SBATCH --time=${fcst_default_time}
+#SBATCH --job-name=fcst${collection_suffix}
+#SBATCH --output=${log_dir}/fcst${collection_suffix}.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${default_mem}
+#SBATCH --array=1-${fcst_default_chunks}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+set ID = \${SLURM_ARRAY_TASK_ID}
+set dates_per_chunk = $dates_per_chunk
+set last_date_idx = $last_date_idx
+
+# Calculate start index in multiple steps
+@ temp = \$ID - 1
+@ chunk_start_idx = \$temp * \$dates_per_chunk
+
+# Calculate end index in multiple steps
+@ chunk_end_idx = \$chunk_start_idx + \$dates_per_chunk
+@ chunk_end_idx = \$chunk_end_idx - 1
+
+# Check bounds
+if (\$chunk_end_idx > \$last_date_idx) then
+    set chunk_end_idx = \$last_date_idx
+endif
+
+echo "Processing chunk \${ID}: dates \${chunk_start_idx} - \${chunk_end_idx}"
+
+python -u ${stats_py_path} --config ${versioned_yaml} --fcst ${collection_arg} --date_start_idx \$chunk_start_idx --date_end_idx \$chunk_end_idx --info_dir ${sts_dir}
+EOF
+
+        # Create forecast chunk merge job script WITH PLACEHOLDER
+        set chunk_merge_job_script = "${job_dir}/stats_merge_fcst_chunks${collection_suffix}.j"
+        set chunk_merge_job_scripts = ($chunk_merge_job_scripts $chunk_merge_job_script)
+
+        # Determine if we need the save_for_coll_merge argument
+        set merge_arg = ""
+        if ($fcst_needs_merge) then
+            set merge_arg = "--save_for_coll_merge"
+        endif
+        
+        cat << EOF > $chunk_merge_job_script
+#!/bin/csh -e
+
+#SBATCH --time=${merge_time}
+#SBATCH --job-name=merge_fcst_chunks${collection_suffix}
+#SBATCH --output=${log_dir}/merge_fcst_chunks${collection_suffix}.%j.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${merge_mem}
+#SBATCH --dependency=afterok:FCST_CHUNK_DEP_PLACEHOLDER
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --merge_forecast_chunks --info_dir ${sts_dir} ${merge_arg}
+EOF
+
+        echo "    Created: $chunk_job_script"
+        echo "    Created: $chunk_merge_job_script (with placeholder)"
+    end
+else
+    echo "  Skipping forecast chunking job scripts (not needed)"
+endif
+
+# Step 2C: CREATE COLLECTION MERGE JOB SCRIPTS
+echo "  Creating collection merge job scripts..."
+
+foreach dataset_type (fcst ana clim)
+    # Skip this dataset type if not needed
+    if (($dataset_type == "fcst" && $need_fcst != "true") || \
+        ($dataset_type == "ana" && $need_ana != "true") || \
+        ($dataset_type == "clim" && $need_clim != "true")) then
+        continue
+    endif
+
+    # Check if this dataset type needs collection merging
+    if ("$dataset_type" == "fcst" && $fcst_needs_merge) then
+        set collections = ($fcst_collections)
+        set model_name = $fcst_model
+        set needs_merge_flag = 1
+        set dep_placeholder = "FCST_COLLECTION_DEP_PLACEHOLDER"
+    else if ("$dataset_type" == "ana" && $ana_needs_merge) then
+        set collections = ($ana_collections)
+        set model_name = $ana_model
+        set needs_merge_flag = 1
+        set dep_placeholder = "ANA_COLLECTION_DEP_PLACEHOLDER"
+    else if ("$dataset_type" == "clim" && $clim_needs_merge) then
+        set collections = ($clim_collections)
+        set model_name = $clim_model
+        set needs_merge_flag = 1
+        set dep_placeholder = "CLIM_COLLECTION_DEP_PLACEHOLDER"
+    else
+        set needs_merge_flag = 0
+    endif
+    
+    if ($needs_merge_flag) then
+        set merge_job_script = "${job_dir}/stats_merge_${dataset_type}.j"
+        
+        # Add to appropriate type array
+        if ("$dataset_type" == "fcst") then
+            set fcst_collection_merge_job_scripts = ($fcst_collection_merge_job_scripts $merge_job_script)
+        else if ("$dataset_type" == "ana") then
+            set ana_collection_merge_job_scripts = ($ana_collection_merge_job_scripts $merge_job_script)
+        else if ("$dataset_type" == "clim") then
+            set clim_collection_merge_job_scripts = ($clim_collection_merge_job_scripts $merge_job_script)
+        endif
+        
+        cat << EOF > $merge_job_script
+#!/bin/csh -e
+
+#SBATCH --time=${merge_time}
+#SBATCH --job-name=merge_${dataset_type}
+#SBATCH --output=${log_dir}/merge_${dataset_type}.%j.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${merge_mem}
+#SBATCH --dependency=afterok:${dep_placeholder}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --merge_collections ${dataset_type} --info_dir ${sts_dir}
+EOF
+
+        echo "    Created: $merge_job_script (with placeholder)"
+    endif
+end
+
+# Step 2D: CREATE STATS JOB SCRIPTS
+echo "  Creating stats job scripts..."
+
+# Initialize separate arrays for regional and global jobs
+set regional_stats_scripts = ()
+set global_stats_scripts = ()
+set regional_cleanup_scripts = ()
+set global_cleanup_scripts = ()
+
+# Create regional stats if enabled
+if ($run_regional) then
+    set regional_stats_script = "${job_dir}/stats_calc_regional.j"
+    set regional_stats_scripts = ($regional_stats_scripts $regional_stats_script)
+    
+    cat << EOF > $regional_stats_script
+#!/bin/csh -e
+#SBATCH --time=${regional_time}
+#SBATCH --job-name=stats_reg
+#SBATCH --output=${log_dir}/stats_calc_regional.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${regional_mem}
+#SBATCH --array=1-${num_chunks}
+#SBATCH --dependency=afterok:STATS_DEP_PLACEHOLDER
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+@ ID = \${SLURM_ARRAY_TASK_ID}
+
+EOF
+
+    # Create the lines for the regional stats array job
+    set i = 1
+    while ($i <= $num_chunks)
+        @ start_idx = ($i - 1) * $stats_chunk_size
+        @ end_idx = $start_idx + $stats_chunk_size
+        if ($end_idx > $total_dates) then
+            set end_idx = $total_dates
+        endif
+        echo 'if( $ID == '"`printf %3d $i`"' ) python -u '${stats_py_path}' --config '$versioned_yaml' --stats reg --init_start_idx '$start_idx' --init_end_idx '$end_idx' --info_dir '${sts_dir}' --chunk '$i' --chunk_size '$stats_chunk_size >> $regional_stats_script
+        @ i++
+    end
+
+    # Create regional cleanup job
+    set regional_cleanup_script = "${job_dir}/stats_clean_regional.j"
+    set regional_cleanup_scripts = ($regional_cleanup_scripts $regional_cleanup_script)
+    
+    cat << EOF > $regional_cleanup_script
+#!/bin/csh -e
+#SBATCH --time=${reg_clean_time}
+#SBATCH --job-name=clean_reg
+#SBATCH --output=${log_dir}/stats_clean_regional.%A.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${reg_clean_mem}
+#SBATCH --dependency=afterok:REGIONAL_STATS_DEP_PLACEHOLDER
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --clean --info_dir ${sts_dir} --type reg
+
+EOF
+
+    echo "    Created: $regional_stats_script (with placeholder)"
+    echo "    Created: $regional_cleanup_script (with placeholder)"
+endif
+
+# Create global stats if enabled
+if ($run_global) then
+    set global_stats_script = "${job_dir}/stats_calc_global.j"
+    set global_stats_scripts = ($global_stats_scripts $global_stats_script)
+    
+    cat << EOF > $global_stats_script
+#!/bin/csh -e
+#SBATCH --time=${global_time}
+#SBATCH --job-name=stats_glo
+#SBATCH --output=${log_dir}/stats_calc_global.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${global_mem}
+#SBATCH --array=1-${num_chunks}
+#SBATCH --dependency=afterok:STATS_DEP_PLACEHOLDER
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+@ ID = \${SLURM_ARRAY_TASK_ID}
+
+EOF
+
+    # Create the lines for the global stats array job
+    set i = 1
+    while ($i <= $num_chunks)
+        @ start_idx = ($i - 1) * $stats_chunk_size
+        @ end_idx = $start_idx + $stats_chunk_size
+        if ($end_idx > $total_dates) then
+            set end_idx = $total_dates
+        endif
+        echo 'if( $ID == '"`printf %3d $i`"' ) python -u '${stats_py_path}' --config '$versioned_yaml' --stats glo --init_start_idx '$start_idx' --init_end_idx '$end_idx' --info_dir '${sts_dir}' --chunk '$i' --chunk_size '$stats_chunk_size >> $global_stats_script
+        @ i++
+    end
+
+    # Create global cleanup job
+    set global_cleanup_script = "${job_dir}/stats_clean_global.j"
+    set global_cleanup_scripts = ($global_cleanup_scripts $global_cleanup_script)
+    
+    cat << EOF > $global_cleanup_script
+#!/bin/csh -e
+#SBATCH --time=${glo_clean_time}
+#SBATCH --job-name=clean_glo
+#SBATCH --output=${log_dir}/stats_clean_global.%A.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${glo_clean_mem}
+#SBATCH --dependency=afterok:GLOBAL_STATS_DEP_PLACEHOLDER
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+python -u ${stats_py_path} --config ${versioned_yaml} --clean --info_dir ${sts_dir} --type glo
+
+EOF
+
+    echo "    Created: $global_stats_script (with placeholder)"
+    echo "    Created: $global_cleanup_script (with placeholder)"
+endif
+
+# ============================================================================
+# STEP 3: SUBMIT ALL JOBS WITH DEPENDENCY PLACEHOLDER REPLACEMENT
+# ============================================================================
+echo ""
+echo "Submitting all jobs with dependency management..."
+
+# Step 3A: SUBMIT REGULAR PROCESSING JOBS
+echo "  Submitting regular processing jobs..."
+
+# Submit fcst jobs
+set fcst_job_ids = ()
+if ($need_fcst == "true") then
+    foreach job_script ($fcst_job_scripts)
+        set job_id = `sbatch --parsable $job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $job_script"
+            exit 1
+        endif
+        set fcst_job_ids = ($fcst_job_ids $job_id)
+        echo "    Submitted: $job_id (`basename $job_script`)"
+    end
+else
+    echo "    Skipping forecast job submission (not needed)"
+endif
+
+# Submit ana jobs  
+set ana_job_ids = ()
+if ($need_ana == "true") then
+    foreach job_script ($ana_job_scripts)
+        set job_id = `sbatch --parsable $job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $job_script"
+            exit 1
+        endif
+        set ana_job_ids = ($ana_job_ids $job_id)
+        echo "    Submitted: $job_id (`basename $job_script`)"
+    end
+else
+    echo "    Skipping analysis job submission (not needed)"
+endif
+
+# Submit clim jobs
+set clim_job_ids = ()
+if ($need_clim == "true") then
+    foreach job_script ($clim_job_scripts)
+        set job_id = `sbatch --parsable $job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $job_script"
+            exit 1
+        endif
+        set clim_job_ids = ($clim_job_ids $job_id)
+        echo "    Submitted: $job_id (`basename $job_script`)"
+    end
+else
+    echo "    Skipping climatology job submission (not needed)"
+endif
+
+# Step 3B: CREATE FORECAST CHUNKING AND MERGE JOBS
+set fcst_chunk_job_ids = ()
+set fcst_chunk_merge_job_ids = ()
+
+if ($need_fcst == "true") then
+    echo "  Submitting forecast chunking jobs..."
+    
+    set i = 1
+    foreach chunk_job_script ($chunk_job_scripts)
+        # Submit chunk array job
+        set chunk_job_id = `sbatch --parsable $chunk_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $chunk_job_script"
+            exit 1
+        endif
+        
+        set fcst_chunk_job_ids = ($fcst_chunk_job_ids $chunk_job_id)
+        
+        # Update corresponding chunk merge job dependency
+        set chunk_merge_job_script = $chunk_merge_job_scripts[$i]
+        
+        # Create temp file with replacements
+        set temp_script = "${chunk_merge_job_script}.tmp"
+        sed "s/FCST_CHUNK_DEP_PLACEHOLDER/${chunk_job_id}/" $chunk_merge_job_script > $temp_script
+        mv $temp_script $chunk_merge_job_script
+        
+        # Submit chunk merge job
+        set chunk_merge_job_id = `sbatch --parsable $chunk_merge_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $chunk_merge_job_script"
+            exit 1
+        endif
+        
+        set fcst_chunk_merge_job_ids = ($fcst_chunk_merge_job_ids $chunk_merge_job_id)
+        
+        echo "    Submitted: $chunk_job_id (`basename $chunk_job_script`)"
+        echo "    Submitted: $chunk_merge_job_id (`basename $chunk_merge_job_script`)"
+        @ i++
+    end
+else
+    echo "  Skipping forecast chunking job submission (not needed)"
+endif
+
+# Step 3C: SUBMIT COLLECTION MERGE JOBS
+echo "  Submitting collection merge jobs..."
+
+# Initialize merge job ID arrays if not already set
+if (! $?fcst_collection_merge_job_ids) set fcst_collection_merge_job_ids = ()
+if (! $?ana_collection_merge_job_ids) set ana_collection_merge_job_ids = ()  
+if (! $?clim_collection_merge_job_ids) set clim_collection_merge_job_ids = ()
+set collection_merge_job_ids = ()
+
+# Submit fcst collection merge jobs
+if ($need_fcst == "true" && $fcst_needs_merge) then
+    foreach merge_job_script ($fcst_collection_merge_job_scripts)
+        # Set dependencies on all fcst job IDs (regular + chunk merge)
+        set all_fcst_deps = ($fcst_job_ids $fcst_chunk_merge_job_ids)
+        
+        # Create dependency string and update script
+        set deps = `echo $all_fcst_deps | tr ' ' ':'`
+        
+        # Create temp file with replacements
+        set temp_script = "${merge_job_script}.tmp"
+        sed "s/FCST_COLLECTION_DEP_PLACEHOLDER/${deps}/" $merge_job_script > $temp_script
+        mv $temp_script $merge_job_script
+        
+        # Submit job
+        set merge_job_id = `sbatch --parsable $merge_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $merge_job_script"
+            exit 1
+        endif
+        
+        set collection_merge_job_ids = ($collection_merge_job_ids $merge_job_id)
+        set fcst_collection_merge_job_ids = ($fcst_collection_merge_job_ids $merge_job_id)
+        
+        echo "    Submitted: $merge_job_id (`basename $merge_job_script`)"
+    end
+endif
+
+# Submit ana collection merge jobs
+if ($need_ana == "true" && $ana_needs_merge) then
+    foreach merge_job_script ($ana_collection_merge_job_scripts)
+        
+        # Create dependency string and update script
+        set deps = `echo $ana_job_ids | tr ' ' ':'`
+        
+        # Create temp file with replacements
+        set temp_script = "${merge_job_script}.tmp"
+        sed "s/ANA_COLLECTION_DEP_PLACEHOLDER/${deps}/" $merge_job_script > $temp_script
+        mv $temp_script $merge_job_script
+        
+        # Submit job
+        set merge_job_id = `sbatch --parsable $merge_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $merge_job_script"
+            exit 1
+        endif
+        
+        set collection_merge_job_ids = ($collection_merge_job_ids $merge_job_id)
+        set ana_collection_merge_job_ids = ($ana_collection_merge_job_ids $merge_job_id)
+        
+        echo "    Submitted: $merge_job_id (`basename $merge_job_script`)"
+    end
+endif
+
+# Submit clim collection merge jobs
+if ($need_clim == "true" && $clim_needs_merge) then
+    foreach merge_job_script ($clim_collection_merge_job_scripts)
+        
+        # Create dependency string and update script
+        set deps = `echo $clim_job_ids | tr ' ' ':'`
+        
+        # Create temp file with replacements
+        set temp_script = "${merge_job_script}.tmp"
+        sed "s/CLIM_COLLECTION_DEP_PLACEHOLDER/${deps}/" $merge_job_script > $temp_script
+        mv $temp_script $merge_job_script
+        
+        # Submit job
+        set merge_job_id = `sbatch --parsable $merge_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $merge_job_script"
+            exit 1
+        endif
+        
+        set collection_merge_job_ids = ($collection_merge_job_ids $merge_job_id)
+        set clim_collection_merge_job_ids = ($clim_collection_merge_job_ids $merge_job_id)
+        
+        echo "    Submitted: $merge_job_id (`basename $merge_job_script`)"
+    end
+endif
+
+# Step 3D: SUBMIT STATS JOBS
+echo "  Submitting stats jobs..."
+
+# Combine all job IDs that were actually submitted for dataset processing
+set all_deps = ($fcst_job_ids $ana_job_ids $clim_job_ids $fcst_chunk_job_ids $fcst_chunk_merge_job_ids $fcst_collection_merge_job_ids $ana_collection_merge_job_ids $clim_collection_merge_job_ids)
+
+# Build dependency string - only if we have dependencies
+set stats_deps = ""
+if ($#all_deps > 0) then
+    set stats_deps = "`echo $all_deps | tr ' ' ':'`"
+endif
+
+# Submit regional stats jobs
+if ($run_regional) then
+    echo "    Submitting regional stats jobs..."
+    set regional_stats_job_ids = ()
+    
+    foreach stats_job_script ($regional_stats_scripts)
+        # Update dependencies (or remove dependency line if no deps)
+        set temp_script = "${stats_job_script}.tmp"
+        if ("$stats_deps" != "") then
+            sed "s/STATS_DEP_PLACEHOLDER/${stats_deps}/" $stats_job_script > $temp_script
+        else
+            # Remove the dependency line entirely if no dependencies
+            sed '/--dependency=afterok:STATS_DEP_PLACEHOLDER/d' $stats_job_script > $temp_script
+        endif
+        mv $temp_script $stats_job_script
+        
+        # Submit job
+        set stats_job_id = `sbatch --parsable $stats_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $stats_job_script"
+            exit 1
+        endif
+        
+        set regional_stats_job_ids = ($regional_stats_job_ids $stats_job_id)
+        echo "    Submitted: $stats_job_id (`basename $stats_job_script`)"
+    end
+    
+    # Submit regional cleanup jobs
+    echo "    Submitting regional cleanup jobs..."
+    set i = 1
+    foreach cleanup_job_script ($regional_cleanup_scripts)
+        # Get corresponding stats job ID
+        set stats_job_id = $regional_stats_job_ids[$i]
+        # Update dependencies
+        set temp_script = "${cleanup_job_script}.tmp"
+        # Replace in dependency line
+        sed "s/REGIONAL_STATS_DEP_PLACEHOLDER/${stats_job_id}/g" $cleanup_job_script > $temp_script
+        mv $temp_script $cleanup_job_script
+        
+        # Submit job
+        set cleanup_job_id = `sbatch --parsable $cleanup_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $cleanup_job_script"
+            exit 1
+        endif
+        
+        echo "    Submitted: $cleanup_job_id (`basename $cleanup_job_script`)"
+        @ i++
+    end
+endif
+
+# Submit global stats jobs
+if ($run_global) then
+    echo "    Submitting global stats jobs..."
+    set global_stats_job_ids = ()
+    
+    foreach stats_job_script ($global_stats_scripts)
+        # Update dependencies (or remove dependency line if no deps)
+        set temp_script = "${stats_job_script}.tmp"
+        if ("$stats_deps" != "") then
+            sed "s/STATS_DEP_PLACEHOLDER/${stats_deps}/" $stats_job_script > $temp_script
+        else
+            # Remove the dependency line entirely if no dependencies
+            sed '/--dependency=afterok:STATS_DEP_PLACEHOLDER/d' $stats_job_script > $temp_script
+        endif
+        mv $temp_script $stats_job_script
+        
+        # Submit job
+        set stats_job_id = `sbatch --parsable $stats_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $stats_job_script"
+            exit 1
+        endif
+        
+        set global_stats_job_ids = ($global_stats_job_ids $stats_job_id)
+        echo "    Submitted: $stats_job_id (`basename $stats_job_script`)"
+    end
+    
+    # Submit global cleanup jobs
+    echo "    Submitting global cleanup jobs..."
+    set i = 1
+    foreach cleanup_job_script ($global_cleanup_scripts)
+        # Get corresponding stats job ID
+        set stats_job_id = $global_stats_job_ids[$i]
+        # Update dependencies
+        set temp_script = "${cleanup_job_script}.tmp"
+        # Replace in dependency line
+        sed "s/GLOBAL_STATS_DEP_PLACEHOLDER/${stats_job_id}/g" $cleanup_job_script > $temp_script
+        mv $temp_script $cleanup_job_script
+        
+        # Submit job
+        set cleanup_job_id = `sbatch --parsable $cleanup_job_script`
+        if ($status != 0) then
+            echo "ERROR: Failed to submit $cleanup_job_script"
+            exit 1
+        endif
+        
+        echo "    Submitted: $cleanup_job_id (`basename $cleanup_job_script`)"
+        @ i++
+    end
+endif
+
+# Calculate summary stats
+set stats_job_ids = ()
+if ($run_regional) then
+    set stats_job_ids = ($stats_job_ids $regional_stats_job_ids)
+endif
+if ($run_global) then
+    set stats_job_ids = ($stats_job_ids $global_stats_job_ids)
+endif
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+echo ""
+echo "Job submission summary:"
+echo "======================="
+
+# Calculate totals - handle cases where arrays might be empty or variables undefined
+@ total_regular_jobs = $#fcst_job_ids + $#ana_job_ids + $#clim_job_ids
+
+# Handle forecast-specific variables that might not exist
+if ($need_fcst == "true") then
+    @ total_chunk_jobs = $#fcst_chunk_job_ids
+    @ total_chunk_merge_jobs = $#fcst_chunk_merge_job_ids
+    if ($#chunk_job_scripts > 0) then
+        @ total_chunk_tasks = $fcst_default_chunks * $#chunk_job_scripts
+    else
+        @ total_chunk_tasks = 0
+    endif
+else
+    @ total_chunk_jobs = 0
+    @ total_chunk_merge_jobs = 0
+    @ total_chunk_tasks = 0
+endif
+
+@ total_collection_merge_jobs = $#collection_merge_job_ids
+
+# Calculate stats jobs
+if ($run_regional) then
+    @ total_regional_stats_jobs = $#regional_stats_job_ids
+else
+    @ total_regional_stats_jobs = 0
+endif
+if ($run_global) then
+    @ total_global_stats_jobs = $#global_stats_job_ids
+else
+    @ total_global_stats_jobs = 0
+endif
+@ total_stats_jobs = $total_regional_stats_jobs + $total_global_stats_jobs
+@ total_stats_tasks = $num_chunks * $total_stats_jobs
+
+# Calculate cleanup jobs
+@ total_regional_cleanup_jobs = `if ($run_regional) echo 1; if (! $run_regional) echo 0`
+@ total_global_cleanup_jobs = `if ($run_global) echo 1; if (! $run_global) echo 0`
+@ total_cleanup_jobs = $total_regional_cleanup_jobs + $total_global_cleanup_jobs
+
+# Print summary
+echo "• Regular processing:     $total_regular_jobs job(s)"
+if ($total_chunk_jobs > 0) then
+    echo "• Forecast chunking:      $#chunk_job_scripts array job(s) with $total_chunk_tasks tasks"
+    echo "• Forecast chunk merge:   $total_chunk_merge_jobs job(s)"
+endif
+if ($total_collection_merge_jobs > 0) then
+    echo "• Collection merge:       $total_collection_merge_jobs job(s)"
+endif
+if ($total_stats_jobs > 0) then
+    echo "• Statistics:             $total_stats_jobs array job(s) with $total_stats_tasks tasks"
+    echo "• Cleanup:                $total_cleanup_jobs job(s)"
+endif
+
+@ total_job_scripts = $total_regular_jobs + $#chunk_job_scripts + $total_chunk_merge_jobs + $total_collection_merge_jobs + $total_stats_jobs + $total_cleanup_jobs
+@ total_tasks = $total_regular_jobs + $total_chunk_tasks + $total_chunk_merge_jobs + $total_collection_merge_jobs + $total_stats_tasks + $total_cleanup_jobs
+
+echo ""
+echo "TOTAL: $total_job_scripts job scripts ($total_tasks total tasks)"
