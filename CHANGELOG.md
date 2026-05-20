@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.1.17] - 2026-05-20
+
+### Added
 - stats_v2 directory with scripts to process forecast stats and create stats plots and scorecards
 - support for v14 bcs 
 
@@ -16,10 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - corrected fatal capitalization issue in plots/configure
-
-### Removed
-
-### Deprecated
 
 ## [2.1.16] - 2026-05-07
 
