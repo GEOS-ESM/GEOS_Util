@@ -33,7 +33,7 @@ ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
 # So we use an OBJECT library to avoid this
 
 add_library(tem_lib OBJECT TEM.F90)
-target_link_libraries(tem_lib MAPL.constants)
+target_link_libraries(tem_lib MAPL)
 
 ecbuild_add_executable (TARGET time_ave.x SOURCES time_ave.F LIBS tem_lib)
 target_compile_definitions(time_ave.x PRIVATE mpi)
