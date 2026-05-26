@@ -1,0 +1,502 @@
+#!/bin/csh -f
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+# Create unique timestamp for job files
+set timestamp = `date +%Y%m%d_%H%M%S`
+
+# Handle optional YAML filename argument
+if ($#argv >= 1) then
+    set filename = "$argv[1]"
+else
+    set filename = "plots.yaml"
+endif
+
+# Make directories
+setenv work_dir `pwd`
+set log_dir = `pwd`/output/plots_${timestamp}/logs
+set job_dir = `pwd`/output/plots_${timestamp}/jobs
+mkdir -p ${log_dir}
+mkdir -p ${job_dir}
+
+# Create a versioned copy of the YAML file
+set versioned_yaml = ${job_dir}/plots_${timestamp}.yaml
+cp $filename $versioned_yaml
+echo "Created versioned config: $versioned_yaml"
+
+# Locate plots_corcmp.py
+if ( -f "${work_dir}/plots_corcmp.py" ) then
+    set plots_corcmp_path = "${work_dir}/plots_corcmp.py"
+    echo "Found plots_corcmp.py in current directory: ${plots_corcmp_path}"
+else if ( $?GEOSUTIL ) then
+    if ( -f "${GEOSUTIL}/plots_v2/stats_v2/plots_corcmp.py" ) then
+        set plots_corcmp_path = "${GEOSUTIL}/plots_v2/stats_v2/plots_corcmp.py"
+        echo "Found plots_corcmp.py in GEOSUTIL: ${plots_corcmp_path}"
+    else
+        echo "Error: plots_corcmp.py not found in CWD or ${GEOSUTIL}/plots_v2/stats_v2"
+        exit 1
+    endif
+else
+    echo "Error: plots_corcmp.py not found in CWD and \$GEOSUTIL is not set."
+    exit 1
+endif
+
+# Locate plots_syscmp.py
+if ( -f "${work_dir}/plots_syscmp.py" ) then
+    set plots_syscmp_path = "${work_dir}/plots_syscmp.py"
+    echo "Found plots_syscmp.py in current directory: ${plots_syscmp_path}"
+else if ( $?GEOSUTIL ) then
+    if ( -f "${GEOSUTIL}/plots_v2/stats_v2/plots_syscmp.py" ) then
+        set plots_syscmp_path = "${GEOSUTIL}/plots_v2/stats_v2/plots_syscmp.py"
+        echo "Found plots_syscmp.py in GEOSUTIL: ${plots_syscmp_path}"
+    else
+        echo "Error: plots_syscmp.py not found in CWD or ${GEOSUTIL}/plots_v2/stats_v2"
+        exit 1
+    endif
+else
+    echo "Error: plots_syscmp.py not found in CWD and \$GEOSUTIL is not set."
+    exit 1
+endif
+echo ""
+
+# ============================================================================
+# SBATCH CONFIGURATION OPTIONS
+# ============================================================================
+
+# Read parameters from config file
+set account   = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "account:"   | awk '{print $2}' | sed 's/[#].*//'`
+set partition = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "partition:" | awk '{print $2}' | sed 's/[#].*//'`
+set qos       = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "qos:"       | awk '{print $2}' | sed 's/[#].*//'`
+
+if ("$account" == "" || "$partition" == "" || "$qos" == "") then
+    echo "Error: Missing required SBATCH parameters in config file"
+    exit 1
+endif
+
+echo "Using SBATCH parameters: account = $account, partition = $partition, qos = $qos"
+
+# Set timing/memory parameters
+
+set corcmp_time  = 00:45:00
+set montage_time = 00:15:00
+set corcmp_mem   = 4G
+set montage_mem  = 4G
+
+set syscmp_indiv_time = 02:00:00
+set syscmp_comp_time  = 04:00:00
+set syscmp_indiv_mem  = 128G
+set syscmp_comp_mem   = 128G
+
+# ============================================================================
+# STEP 1: DETERMINE NEEDS AND SETUP
+# ============================================================================
+
+# STEP 1A: DETERMINE PLOT TYPES TO RUN
+
+# Read plots_types parameter
+set plots_types = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "plots_types:" | sed 's/.*plots_types:[[:space:]]*//' | sed 's/[[:space:]]*#.*//'`
+if ("$plots_types" == "") then
+    echo "Warning: plots_types not found in config, using default value 'both' (corcmp and syscmp)"
+    set plots_types = "both"
+endif
+
+set plots_corcmp = 0
+set plots_syscmp = 0
+
+if ("$plots_types" == "corcmp" || "$plots_types" == "both") then
+    set plots_corcmp = 1
+endif
+
+if ("$plots_types" == "syscmp" || "$plots_types" == "both") then
+    set plots_syscmp = 1
+endif
+
+echo "Stats types to run: $plots_types (corcmp=$plots_corcmp, syscmp=$plots_syscmp)"
+echo ""
+
+# STEP 1B: CHECK THAT NEEDED STATS FILES EXIST
+
+echo "Checking that requested stats files exist..."
+
+foreach plot_type (corcmp syscmp)
+    # Skip if this plot type is not needed
+    if ("$plot_type" == "corcmp" && ! $plots_corcmp) continue
+    if ("$plot_type" == "syscmp" && ! $plots_syscmp) continue
+    echo "Checking $plot_type files..."
+    
+    # Set the experiment prefix based on plot type
+    if ("$plot_type" == "corcmp") then
+        set exp_prefix = "cor_exp"
+    else
+        set exp_prefix = "sys_exp"
+    endif
+    
+    # Find all experiment entries that exist and store their filepaths
+    set found_numbers = ()
+    set found_filepaths = ()
+    set i = 0
+    while ($i <= 9)  # Check exp0 through exp9
+        # Extract filepath without wildcard expansion
+        set nonomatch_save = $?nonomatch
+        set nonomatch
+        set filepath = `grep -v '^[[:space:]]*#' $versioned_yaml | grep "^[[:space:]]*${exp_prefix}${i}:" | sed 's/^[^:]*:[[:space:]]*//' | sed 's/[[:space:]]*#.*//'`
+        if ($?nonomatch_save) then
+            unset nonomatch
+        else
+            if ($?nonomatch) unset nonomatch
+        endif
+        
+        if ("$filepath" != "") then
+            set found_numbers = ($found_numbers $i)
+            set found_filepaths = ($found_filepaths "$filepath")
+        endif
+        @ i++
+    end
+
+    # Check that numbers are sequential starting from 0
+    if ($#found_numbers > 0) then
+        set expected = 0
+        foreach num ($found_numbers)
+            if ($num != $expected) then
+                echo "Error: Missing ${exp_prefix}$expected (found ${exp_prefix}$num)"
+                exit 1
+            endif
+            @ expected++
+        end
+        
+        # Now check that the files actually exist - handle multiple files per experiment
+        set filepath_idx = 1
+        foreach num ($found_numbers)
+            set filepath = "$found_filepaths[$filepath_idx]"
+            
+            # Always split by comma first (handles both single files and lists)
+            set file_specs = (`echo "$filepath" | sed 's/,/ /g'`)
+            set all_files = ()
+            
+            # Process each file specification (could be single file or wildcard)
+            foreach spec ($file_specs)
+                set spec = `echo $spec | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//'`  # trim whitespace
+                
+                # Use safer wildcard expansion with nonomatch
+                set nonomatch_save = $?nonomatch
+                set nonomatch
+                set expanded_files = ($spec)
+                # Restore nonomatch setting
+                if ($?nonomatch_save) then
+                    unset nonomatch
+                else
+                    if ($?nonomatch) unset nonomatch
+                endif
+                
+                # Check if expansion failed (pattern returned unchanged and file doesn't exist)
+                if ($#expanded_files == 1 && "$expanded_files[1]" == "$spec" && ! -f "$spec") then
+                    set expanded_files = ()
+                endif
+                
+                if ($#expanded_files == 0) then
+                    echo "Error: No files match pattern for ${exp_prefix}${num}: $spec"
+                    exit 1
+                endif
+                
+                # Add each expanded file to all_files, checking for duplicates
+                foreach file ($expanded_files)
+                    set is_duplicate = 0
+                    
+                    # Only check for duplicates if all_files is not empty
+                    if ($#all_files > 0) then
+                        foreach existing_file ($all_files)
+                            if ("$existing_file" == "$file") then
+                                set is_duplicate = 1
+                                echo "  Warning: Duplicate file will be ignored: $file"
+                                break
+                            endif
+                        end
+                    endif
+                    
+                    if ($is_duplicate == 0) then
+                        set all_files = ($all_files $file)
+                    endif
+                end
+            end
+            
+            # Check that all expanded files exist
+            foreach file ($all_files)
+                if (! -f "$file") then
+                    echo "Error: Requested $plot_type file not found: $file"
+                    exit 1
+                endif
+                echo "  Found: $file"
+            end
+            
+            @ filepath_idx++
+        end
+    endif
+end
+
+echo "All requested stats files found."
+echo ""
+
+# ============================================================================
+# STEP 2: CREATE ALL JOB SCRIPTS (WITH PLACEHOLDERS FOR DEPENDENCIES)
+# ============================================================================
+
+# STEP 2A: CORCMP
+
+if ($plots_corcmp) then
+
+    # Count regions from config
+    echo "Counting regions..."
+    set noglob
+    set regions_line = `grep -v '^[[:space:]]*#' $versioned_yaml | grep "^[[:space:]]*regions:" | sed 's/#.*//'`
+    unset noglob
+    if ($status == 0) then
+        echo "$regions_line" | grep -q "\["
+        if ($status != 0) then
+            echo "Error: Found 'regions:' line but no brackets present"
+            exit 2
+        endif
+        set bracket_content = `echo "$regions_line" | sed 's/.*\[\([^]]*\)\].*/\1/' | sed 's/[ ]*,[ ]*/,/g'`
+        if ("$bracket_content" == "") then
+            set NUM_REGIONS = 0
+        else
+            # set NUM_REGIONS = `echo "$bracket_content" | tr ',' '\n' | grep -v '^$' | wc -l`
+            set comma_count = `echo "$bracket_content" | tr -cd ',' | wc -c`
+            @ NUM_REGIONS = $comma_count + 1
+        endif
+    else
+        echo "Error: No line starting with 'regions:' found"
+        exit 3
+    endif
+    echo "Creating corcmp job script for $NUM_REGIONS regions..."
+
+    # Create plot job array script
+    cat << EOF > ${job_dir}/corcmp_plot.j
+#!/bin/csh -e
+
+#SBATCH --time=${corcmp_time}
+#SBATCH --job-name=corcmp_plot
+#SBATCH --output=$log_dir/corcmp_plot.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${corcmp_mem}
+#SBATCH --array=1-${NUM_REGIONS}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+@ ID = \${SLURM_ARRAY_TASK_ID}
+
+EOF
+
+    # Add the plot jobs by region
+    set i = 1
+    while ( $i <= $NUM_REGIONS)
+        @ part = $i - 1
+        echo 'if( $ID == '"`printf %3d $i` ) python -u ${plots_corcmp_path} --config ${versioned_yaml} --process plot --part $part" >> ${job_dir}/corcmp_plot.j
+        @ i++
+    end
+
+    echo 'Created '${job_dir}'/corcmp_plot.j with one job per region'
+
+    # Create the montage job script (makes montages from previously created plots)
+    cat << EOF > ${job_dir}/corcmp_montage.j
+#!/bin/csh -e
+
+#SBATCH --time=${montage_time}
+#SBATCH --job-name=corcmp_montage
+#SBATCH --output=$log_dir/corcmp_montage.%A.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${montage_mem}
+#SBATCH --dependency=afterok:JOBID_PLACEHOLDER_1
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+cd $work_dir
+
+python -u ${plots_corcmp_path} --config ${versioned_yaml} --process mont
+
+EOF
+
+    echo 'Created '${job_dir}'/corcmp_montage.j'
+
+endif
+
+# STEP 2B: SYSCMP
+if ($plots_syscmp) then
+
+    # Count models
+    echo "Counting models..."
+
+    set models_lines = `grep -v '^[[:space:]]*#' $versioned_yaml | grep "^[[:space:]]*sys_exp[0-9]*:" | wc -l`
+    if ($models_lines == 0) then
+        echo "Error: No sys_exp entries found for syscmp"
+        exit 3
+    endif
+    set NUM_MODELS = $models_lines
+
+    # Count 3d_vars_default
+    echo "Counting 3d_vars_default..."
+    set vars_line = `grep -v '^[[:space:]]*#' $versioned_yaml | grep "^[[:space:]]*3d_vars_default:" | sed 's/#.*//'`
+    if ($status == 0) then
+        echo "$vars_line" | grep -q "\["
+        if ($status != 0) then
+            echo "Error: Found '3d_vars_default:' line but no brackets present"
+            exit 2
+        endif
+        set bracket_content = `echo "$vars_line" | sed 's/.*\[\([^]]*\)\].*/\1/' | sed 's/[ ]*,[ ]*/,/g'`
+        if ("$bracket_content" == "") then
+            set NUM_3D_VARS = 0
+        else
+            set NUM_3D_VARS = `echo "$bracket_content" | tr ',' '\n' | grep -v '^$' | wc -l`
+        endif
+    else
+        echo "Error: No line starting with '3d_vars_default:' found"
+        exit 3
+    endif
+
+    # Calculate individual jobs count for syscmp
+    @ INDIV_JOBS_COUNT = $NUM_MODELS * ($NUM_3D_VARS + 1)
+
+    # Calculate comparison jobs count
+    if ( $NUM_MODELS > 1 ) then
+        @ COMP_JOBS_COUNT = ($NUM_MODELS - 1) * ($NUM_3D_VARS + 1)
+    else
+        @ COMP_JOBS_COUNT = 0
+    endif
+
+    echo "Creating syscmp job scripts for $NUM_MODELS models and $NUM_3D_VARS 3D variables (plus 2D variables)..."
+    echo "Total individual jobs: $INDIV_JOBS_COUNT"
+    echo "Total comparison jobs: $COMP_JOBS_COUNT"
+
+    # Create individual plotting job script
+    cat << EOF > ${job_dir}/syscmp_indiv.j
+#!/bin/csh -e
+
+#SBATCH --time=${syscmp_indiv_time}
+#SBATCH --job-name=syscmp_indiv
+#SBATCH --output=$log_dir/syscmp_indiv.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${syscmp_indiv_mem}
+#SBATCH --array=1-${INDIV_JOBS_COUNT}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+module load cdo
+
+cd $work_dir
+
+@ ID = \${SLURM_ARRAY_TASK_ID}
+
+EOF
+
+    # Add the individual plotting jobs with part parameter
+    @ job_id = 1
+    @ i = 0
+    while ( $i < $NUM_MODELS )
+        @ total_parts = $NUM_3D_VARS + 1
+        @ part = 0
+        
+        # Generate jobs for each part (0 through NUM_3D_VARS)
+        while ( $part < $total_parts )
+            echo 'if( $ID == '"`printf %3d $job_id` ) python -u ${plots_syscmp_path} --exp $i --config ${versioned_yaml} --process indiv --part $part" >> ${job_dir}/syscmp_indiv.j
+            @ job_id++
+            @ part++
+        end
+        
+        @ i++
+    end
+
+    echo 'Created '${job_dir}'/syscmp_indiv.j with '$INDIV_JOBS_COUNT' individual jobs'
+
+    # Create comparison plotting job script
+    if ( $COMP_JOBS_COUNT > 0 ) then
+        cat << EOF > ${job_dir}/syscmp_comp.j
+#!/bin/csh -e
+
+#SBATCH --time=${syscmp_comp_time}
+#SBATCH --job-name=syscmp_comp
+#SBATCH --output=$log_dir/syscmp_comp.%A_%a.out
+#SBATCH --constraint=mil
+#SBATCH --account=${account}
+#SBATCH --partition=${partition}
+#SBATCH --qos=${qos}
+#SBATCH --mem=${syscmp_comp_mem}
+#SBATCH --array=1-${COMP_JOBS_COUNT}
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+module load cdo
+
+cd $work_dir
+
+@ ID = \${SLURM_ARRAY_TASK_ID}
+
+EOF
+
+        # Add the comparison plotting jobs
+        @ j = 1
+        @ comp_id = 1  # Start comp_id from 1 for the new array
+
+        while ( $j < $NUM_MODELS )
+            # Calculate the total number of parts needed for this model
+            @ total_parts = $NUM_3D_VARS + 1
+            @ part = 0
+
+            # Generate jobs for each part (0 through NUM_3D_VARS)
+            while ( $part < $total_parts )
+                echo 'if( $ID == '"`printf %3d $comp_id` ) python -u ${plots_syscmp_path} --exp $j --config ${versioned_yaml} --process comp --part $part" >> ${job_dir}/syscmp_comp.j
+                @ comp_id++
+                @ part++
+            end
+
+            @ j++
+        end
+
+        echo 'Created '${job_dir}'/syscmp_comp.j with '$COMP_JOBS_COUNT' comparison jobs'
+    else
+        echo 'Skipping comparison job script (only one model found)'
+    endif
+
+endif
+
+# ============================================================================
+# STEP 3: SUBMIT ALL JOBS WITH DEPENDENCY PLACEHOLDER REPLACEMENT
+# ============================================================================
+
+# STEP 3A: CORCMP
+if ($plots_corcmp) then
+    # Submit the plots job and capture its ID
+    echo "Submitting corcmp plotting jobs (corcmp_plot.j)..."
+    set JOB1 = `sbatch ${job_dir}/corcmp_plot.j | awk '{print $4}'`
+    echo "Submitted batch job $JOB1"
+    # Create a temporary file to replace the placeholder
+    sed "s/JOBID_PLACEHOLDER_1/$JOB1/g" ${job_dir}/corcmp_montage.j > ${job_dir}/corcmp_montage_temp.j
+    mv ${job_dir}/corcmp_montage_temp.j ${job_dir}/corcmp_montage.j
+    # Submit the montage job with dependency
+    echo "Submitting corcmp montage job (corcmp_montage.j) which makes montages from the previously created plots..."
+    sbatch ${job_dir}/corcmp_montage.j
+    echo "Montage job will start after the corcmp plotting jobs complete."
+endif
+
+# STEP 3B: SYSCMP
+if ($plots_syscmp) then
+    echo "Submitting syscmp individual jobs (syscmp_indiv.j)..."
+    sbatch ${job_dir}/syscmp_indiv.j
+    
+    if ( $COMP_JOBS_COUNT > 0 ) then
+        echo "Submitting syscmp comparison jobs (syscmp_comp.j)..."
+        sbatch ${job_dir}/syscmp_comp.j
+    endif
+endif
