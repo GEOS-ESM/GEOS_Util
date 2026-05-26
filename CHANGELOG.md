@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed a bug in gcmpost.script that prevented MAPL monthlies from being copied out of holding when a segment ended on the last day of a month.
+
 ### Removed
 
 ### Deprecated
