@@ -30,7 +30,7 @@ from remap_utils import (
 from remap_bin2nc import bin2nc
 
 
-class lake_landice_saltwater(remap_base):
+class other_restarts(remap_base):
     def __init__(self, **configs):
         super().__init__(**configs)
         if self.config["input"]["shared"]["MERRA-2"]:
@@ -572,6 +572,6 @@ endif
 
 
 if __name__ == "__main__":
-    lls = lake_landice_saltwater(params_file="remap_params.yaml")
+    lls = other_restarts(params_file="remap_params.yaml")
     lls.remap()
     lls.remove_geosit()
