@@ -1099,10 +1099,11 @@ EOF
 
    endif
 
+ endif # End IFTEST for $MOVEFILES and ${monthly_attribute} tests
+
    @ begloc = $endloc + 1
    @ m      = $m      + 1
 
- endif # End IFTEST for $MOVEFILES and ${monthly_attribute} tests
 end
 wait
 
