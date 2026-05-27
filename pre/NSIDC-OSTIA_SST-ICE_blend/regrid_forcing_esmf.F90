@@ -31,6 +31,10 @@ module GenESMFGridCompMod
      integer                   :: PJM
      integer                   :: GPIM
      integer                   :: GPJM
+     integer                   :: OIM
+     integer                   :: OJM
+     integer                   :: GOIM
+     integer                   :: GOJM
      type(ESMF_Time)           :: start_time
      type(ESMF_Time)           :: end_time
      logical                   :: select_time
@@ -277,6 +281,15 @@ contains
     PrivateState%ogrid=ogrid
     PrivateState%pgrid=pgrid
 
+! Query Ogrid to save IM and JM
+    call MAPL_GridGet(ogrid, localCellCountPerDim=COUNTS, &
+         globalCellCountPerDim=dims, RC=STATUS)
+    VERIFY_(STATUS)            
+    PrivateState%oim=counts(1) 
+    PrivateState%ojm=counts(2) 
+    PrivateState%goim=dims(1)  
+    PrivateState%gojm=dims(2)  
+
 ! Query Pgrid to save IM and JM
     call MAPL_GridGet(pgrid, localCellCountPerDim=COUNTS, &
          globalCellCountPerDim=dims, RC=STATUS)
@@ -346,6 +359,8 @@ contains
 
   integer :: IM, JM
   integer :: IM_WORLD, JM_WORLD
+  integer :: OIM, OJM
+  integer :: OIM_WORLD, OJM_WORLD
   type(ESMF_Grid) :: ogrid, pgrid
   type(ESMF_VM) :: vm
   type(ESMF_Time) :: currentTime, dateN
@@ -360,6 +375,7 @@ contains
   type (MAPL_MetaComp), pointer          :: MAPL 
   logical :: amIRoot,dowrite
   type(ESMF_Time) :: start_interval, end_interval
+  real    :: gmax, gmin
 
 !=============================================================================
 
@@ -404,6 +420,11 @@ contains
    VERIFY_(STATUS)
 
    UNIT_W = getfile(filename)
+
+   OIM = PrivateState%oim
+   OJM = PrivateState%ojm
+   OIM_WORLD = PrivateState%goim
+   OJM_WORLD = PrivateState%gojm
 
    IM = PrivateState%pim
    JM = PrivateState%pjm
@@ -484,13 +505,17 @@ contains
    !   read(unit_r) odata
       call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
       VERIFY_(STATUS)
-      ! transform data from ocean (tripolar or Reynolds) to mit-cubed
+      ! Check global max/min
+      call MAPL_MaxMin('In data: ', odata)
+      ! transform data from ocean (tripolar or Reynolds) to cubed
       call privateState%regridder%regrid(odata,pdata,rc=status)
       VERIFY_(status) 
       if (privateState%fix_fraction) then
          where(pdata > 1.0) pdata = 1.0
          where(pdata < 0.0) pdata = 0.0
       end if
+      ! Check global max/min
+      call MAPL_MaxMin('Out data: ', pdata)
    !   write(unit_w) pdata
       if (doWrite) then
          call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)

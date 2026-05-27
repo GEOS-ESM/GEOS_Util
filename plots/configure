@@ -56,7 +56,7 @@ if( $arch == 'Linux'    ) then
                               setenv VERIFICATION /ford1/share/gmao_SIteam/ModelData/verification # Note: A dead link, but needed
                               setenv OPENGADIR    /ford1/local/opengrads/Contents/opengrads
                               setenv GRADS_LOC    ${OPENGADIR}
-                           
+
                               setenv PATH         ${OPENGADIR}:${PATH}
                               set    path =     ( ${OPENGADIR} ${path} )
                               setenv GRADS      `which grads`

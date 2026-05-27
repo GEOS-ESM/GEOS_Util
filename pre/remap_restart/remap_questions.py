@@ -117,7 +117,13 @@ def ask_questions():
             "validate": lambda text: validate_geosit_time(text),
             "when": lambda x: x.get("input:shared:GEOS-IT") and not x.get("input:shared:MERRA-2"),
         },
-
+        {
+            "type": "confirm",
+            "name": "input:air:hydrostatic",
+            "message": "Is the upper air input hydrostatic? (If you are not sure, don't change the default 'True')\n",
+            "default": True,
+            "when": lambda x: not x.get('input:shared:MERRA-2'),
+        },
         {
             "type": "path",
             "name": "output:shared:out_dir",
@@ -261,7 +267,7 @@ def ask_questions():
             "type": "text",
             "name": "output:air:nlevel",
             "message": "Enter number of atmospheric levels for new restarts: (71 72 91 127 132 137 144 181)\n",
-            "default": "72",
+            "default": "181",
         },
 
         # to show the message, we ask output first
@@ -286,7 +292,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
-            "default": "NL3",
+            "default": "v12",
             "when": lambda x: x.get("input:shared:MERRA-2") or x.get("input:shared:GEOS-IT"),
         },
 
@@ -295,7 +301,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
-            "default": "NL3",
+            "default": "v12",
             "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
@@ -430,14 +436,12 @@ def ask_questions():
             "message": "Add labels for BCs version and atm/ocean resolutions to restart file names?",
             "default": False,
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:qos",
             "message": message_qos,
             "default": "debug",
         },
-
         {
             "type": "text",
             "name": "slurm_pbs:account",
@@ -446,9 +450,16 @@ def ask_questions():
         },
         {
             "type": "text",
+            "name": "slurm_pbs:reservation",
+            "message": message_reservation,
+            "default": "",
+        },
+        {
+            "type": "text",
             "name": "slurm_pbs:partition",
             "message": message_partition,
             "default": '',
+            "when": lambda x : default_partition(x),
         },
    ]
    answers = questionary.prompt(questions)
@@ -462,7 +473,14 @@ def ask_questions():
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]
-
+   if answers.get("input:shared:MERRA-2"):
+       answers["input:air:hydrostatic"] = True
+       # Due to the order of questions above, if a user asks
+       # for MERRA2, they will not be asked for GEOS-IT so
+       # we set to false so the next if-block doesn't run
+       answers["input:shared:GEOS-IT"] = False
+   if answers.get("input:shared:GEOS-IT"):
+       answers["input:air:hydrostatic"] = True
 
    return answers
 
