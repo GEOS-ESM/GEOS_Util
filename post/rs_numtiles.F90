@@ -1,4 +1,4 @@
-program rs_numtiles  
+program rs_numtiles
 
   use iso_fortran_env
   use MAPL
@@ -7,7 +7,7 @@ program rs_numtiles
 
   character(256)    :: fname1
 
-#ifndef __GFORTRAN__
+#if !defined(__GFORTRAN__) && !defined(__flang__)
   integer           :: ftell
   external          :: ftell
 #endif
@@ -17,7 +17,7 @@ program rs_numtiles
   type(Netcdf4_Fileformatter) :: formatter
   type(FileMetadata) :: cfg
   integer :: rc, filetype
-    
+
 ! Usage
 ! -----
 
@@ -58,7 +58,7 @@ program rs_numtiles
      bpos=0
      read (10)
      epos = ftell(10)            ! ending position of file pointer
-     ntiles = (epos-bpos)/4-2    ! record size (in 4 byte words; 
+     ntiles = (epos-bpos)/4-2    ! record size (in 4 byte words;
      rewind 10
   end if
 

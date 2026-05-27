@@ -250,7 +250,7 @@ endif
 if( ylab  != NULL ) ; 'set ylab  'ylab  ; endif
 if( grid  != NULL ) ; 'set grid  'grid  ; endif
 
-if( axlim = NULL ) 
+if( axlim = NULL )
 'set dfile 'ofile
 'set t   1'
 'set lon 0'
@@ -354,10 +354,12 @@ endif
 say 'QMODZ STATS: 'result
 qmodz_line  = sublin(result,6)
 qmodz_valid = subwrd(qmodz_line,8)
+
 'd qobsz'
 say 'QOBSZ STATS: 'result
 qobsz_line  = sublin(result,6)
 qobsz_valid = subwrd(qobsz_line,8)
+
 'set gxout line'
 
 if( qmodz_valid > 0 & qobsz_valid > 0 )

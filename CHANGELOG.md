@@ -9,9 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added choice 'blank' for qos in remap_restart python pacakage
+- Added hydrostatic question in remap_restart python pacakage
+- Added function to remap from stretched restarts to stretched restarts
+- Added remapping for GEOS-IT restarts
+- Added new res C1120
+- NOTE: If running on SLES15 remap tests will not be zero diff for GOCART RST but are zero diff for all other
+- Add support for v14 BCs
+- Add SLURM/PBS job submission capability to lake-landice remapping, bringing it in line with upper-air and catch remapping (batch queues on both NAS and NCCS)
+- Add `reservation` field to `remap_params.tpl` and all test YAML files
+- Add `split_saltwater` field to `remap_params.tpl` and all test YAML files
+
 ### Changed
 
+- Update `movestat` to allow for multiple seasons
+- Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+- Comprehensively updated aerosol plotting with added plots and features
+- Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
+- Updated wind and velocity surface plots with bugfix
+- Comprehensively updated moist plotting with added plots and features
+- Added convective mass flux plotting with bug fixes for exports with aliases that include underscores
+- Added additional aerosol exports to plots
+
 ### Fixed
+
+- Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
+- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same characters before punctuation (or crashed due to long exp names if 8 characters or longer without punctuation); these variable names now utilize expid numbers instead of model names
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
+- Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
+- Edited makplotz.gs to prevent blank or fake zonal line plots from being created
+- Fix `{Bin}` unexpanded string in `remap_lake_landice_saltwater.py` by substituting the resolved `bindir` variable before constructing `esma_mpirun` command strings
+- Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
+- Removed duplicates from portrait.script that were created as a result of merging previous pull requests
+- Updated moveplot to not crash with filenames included double colons
+- Updated plotting scripts to ignore comments in HISTORY.rc
+- Updated gencmpz to handle export names which include double colons (like genplot_2G does)
+
 
 ### Removed
 
@@ -74,9 +107,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - update blend_bcs.pl to accommodate handling of slurm contraint.
 
 - Update `remap_restarts.py` to first ask about remapping from GEOS-IT, then ask about MERRA-2. Add detection of MERRA-2 path as well
+- Restrict SLURM `--constraint` to `mil` (milan) only at NCCS in `remap_catchANDcn.py`, `remap_lake_landice_saltwater.py`, and `remap_upper.py`
 
 ### Fixed
 
+- Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
+- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
+- Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
 
 ## [2.1.12] - 2026-01-07
@@ -109,7 +146,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed issue with SLES15 in remapping
+- Fix for All-Times Transport Diagnostics
+- Update `movestat` to extract seasons in files with dots in the name
 - Provide default "zoom" value for remap_restarts yaml file
+
+### Removed
+
+- Remove `regrid.pl`
+- Removed detection of OS at NCCS as it is all SLES15 now
 
 
 ## [2.1.9] - 2025-06-25

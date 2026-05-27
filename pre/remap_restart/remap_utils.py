@@ -30,7 +30,7 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['NL3', 'ICA', 'GM4', 'Other']
+choices_bc_ops     = ['v12', 'NL3', 'ICA', 'Other']
 
 choices_bc_other   = ['v11', 'v12', 'v13', 'v14', 'v15_BETA']
 
@@ -84,15 +84,18 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = f'''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- GM4: Ganymed-4_0 | 5_12_2 ... 5_16_5    | Ganymed-4_0      ... Heracles-5_4_p3
+ v12: v12         | future               | 12.0             ... present
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
- NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... present
  ----------------------------------------------------------------------------------
- Other: Additional choices used in model or DAS development.
-           \n\n '''
+ Other: Additional choices used in model or DAS development.\n\n'''
 
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
+
+# v12 used to be in the "other" section but is now the default, but we preserve this information
+# in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
+#v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
 
 message_bc_other   = f'''\n
 
@@ -121,9 +124,11 @@ message_ogrid_in   = "Select data ocean grid/resolution of input restarts:\n"
 
 message_ogrid_new   = "Select data ocean grid/resolution of output restarts:\n"
 
-message_qos        = "SLURM or PBS quality-of-service (qos)?  (If resolution is c1440 or higher, enter 'allnccs' for NCCS or 'normal' for NAS.)\n"
+message_qos        = "SLURM or PBS quality-of-service (qos)?      (Use default 'debug' to get resource faster; or Enter 'allnccs' for NCCS or 'normal' for NAS if resolution is c1440 or higher; or leave it blank)\n"
 
 message_account    = "Select/enter SLURM or PBS account:\n"
+
+message_reservation  = "Enter SLURM or PBS reservation: (If desired, can leave blank)\n"
 
 message_partition  = "Enter SLURM or PBS partition: (If desired, can leave blank)\n"
 
@@ -133,20 +138,22 @@ job_directive = {"SLURM": """#!/bin/csh -f
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name={job_name}
 #SBATCH --output={log_name}
-#SBATCH --qos={QOS}
 #SBATCH --time={TIME}
 #SBATCH --constraint={CONSTRAINT}
+{RESERVATION}
 {PARTITION}
+{QOS}
 """,
 "PBS": """#!/bin/csh -f
 #PBS -l walltime={TIME}
 #PBS -l select={NNODE}:ncpus=40:mpiprocs=40:model={CONSTRAINT}
 #PBS -N {job_name}
-#PBS -q {QOS}
 #PBS -W group_list={account}
 #PBS -o {log_name}
 #PBS -j oe
+{RESERVATION}
 {PARTITION}
+{QOS}
 """
 }
 
@@ -469,7 +476,7 @@ def get_command_line_from_answers(answers):
 
    nobkg  = '' if answers["output:analysis:bkg"] else " -nobkg "
    nolcv  = '' if answers["output:analysis:lcv"] else " -nolcv "
-
+   nonhydrostatic = '' if answers["input:air:hydrostatic"] else " -nonhydrostatic "
    label  = ' -lbl ' if answers["output:shared:label"] else ""
 
    in_bc_base  = ' -in_bc_base '  + answers.get("input:shared:bc_base")
@@ -500,7 +507,12 @@ def get_command_line_from_answers(answers):
    noagcm_import_rst  = '' if answers["output:air:agcm_import_rst"] else " -noagcm_import_rst "
 
    account = " -account " + answers["slurm_pbs:account"]
-   qos     = " -qos  " + answers["slurm_pbs:qos"]
+   qos = ''
+   if answers["slurm_pbs:qos"] != '':
+     qos     = " -qos  " + answers["slurm_pbs:qos"]
+   reservation = ''
+   if answers["slurm_pbs:reservation"] != '':
+      reservation  = " -reservation  " + answers["slurm_pbs:reservation"]
    partition = ''
    if answers["slurm_pbs:partition"] != '':
       partition  = " -partition  " + answers["slurm_pbs:partition"]
@@ -529,11 +541,13 @@ def get_command_line_from_answers(answers):
                                           wemout + \
                                           label + \
                                           nobkg + \
+                                          nonhydrostatic + \
                                           noagcm_import_rst + \
                                           nolcv + \
                                           out_rs + \
                                           account + \
                                           qos + \
+                                          reservation + \
                                           partition
 
 
@@ -582,9 +596,16 @@ def get_config_from_answers(answers, config_tpl = False):
      if len(keys) == 3:
        config[keys[0]][keys[1]][keys[2]] = value
 
-   bc_version = config['output']['shared'].get('bc_version')
+   # Do the inputs have a split saltwater?
+   input_bc_version = config['input']['shared'].get('bc_version')
+   config['input']['surface']['split_saltwater'] = True
+   if 'Ganymed' in input_bc_version or 'GM4' in input_bc_version:
+     config['input']['surface']['split_saltwater'] = False
+
+   # Do the outputs need a split saltwater?
+   output_bc_version = config['output']['shared'].get('bc_version')
    config['output']['surface']['split_saltwater'] = True
-   if 'Ganymed' in bc_version :
+   if 'Ganymed' in output_bc_version or 'GM4' in output_bc_version:
      config['output']['surface']['split_saltwater'] = False
 
    return config
@@ -740,5 +761,5 @@ def remove_ogrid_comment(x, opt):
   return False
 
 if __name__ == '__main__' :
-   config = yaml_to_config('c24Toc12.yaml')
+   config = yaml_to_config('remap_params.tpl')
    print_config(config)

@@ -7,7 +7,7 @@
 input:
   air:
     drymass: 1
-    hydrostatic: 0
+    hydrostatic: true
   shared:
     MERRA-2: false
     GEOS-IT: false
@@ -22,6 +22,7 @@ input:
     rst_dir:
     yyyymmddhh:
   surface:
+    split_saltwater: true
     zoom:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm51
@@ -64,5 +65,6 @@ output:
     lcv: false
 slurm_pbs:
   account:
-  qos:
+  qos: ''
   partition: ''
+  reservation: ''
