@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
+
+## [3.0.0] - 2026-05-28
+
+### Added
+
 - Added choice 'blank' for qos in remap_restart python pacakage
 - Added hydrostatic question in remap_restart python pacakage
 - Added function to remap from stretched restarts to stretched restarts
@@ -46,10 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated plotting scripts to ignore comments in HISTORY.rc
 - Updated gencmpz to handle export names which include double colons (like genplot_2G does)
 
-
-### Removed
-
-### Deprecated
 
 ## [2.1.17] - 2026-05-20
 
