@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+### Deprecated
+
+
+## [3.0.0] - 2026-05-28
+
+### Added
+
 - Added choice 'blank' for qos in remap_restart python pacakage
 - Added hydrostatic question in remap_restart python pacakage
 - Added function to remap from stretched restarts to stretched restarts
@@ -33,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed a bug in gcmpost.script that prevented MAPL monthlies from being copied out of holding when a segment ended on the last day of a month.
 - Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
 - Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same characters before punctuation (or crashed due to long exp names if 8 characters or longer without punctuation); these variable names now utilize expid numbers instead of model names
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
@@ -45,10 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated plotting scripts to ignore comments in HISTORY.rc
 - Updated gencmpz to handle export names which include double colons (like genplot_2G does)
 
-
-### Removed
-
-### Deprecated
 
 ## [2.1.17] - 2026-05-20
 
