@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Added choices for remapping restart files for o720 (1/2-deg tripolar) and o2880 (1/8-deg tripolar) in MOM6 coupled exps 
+
 ### Added
 
 ### Changed
