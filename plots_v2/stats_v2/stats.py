@@ -83,9 +83,11 @@ VARS_SCALE_MAP = {'H': 1., 'U': 1., 'V': 1., 'T': 1., 'Q': 1000., 'P': 1./100.,
 
 # Calculable variables and their dependencies 
 # Note: see _calculate_variables() method for equations
-CALCULABLE_VARS = {'D2m': ['Q2m', 'PS'], 'LOGAOD': ['AOD'], 
-                   'PM25': ['SSSMASS25', 'DUSMASS25', 'BCSMASS', 'OCSMASS', 
-                            'SO4SMASS', 'NISMASS25', 'NH4SMASS']}
+CALCULABLE_VARS = {'D2m':    ['Q2m', 'PS'],
+                   'Q2m':    ['D2m', 'PS'], 
+                   'LOGAOD': ['AOD'], 
+                   'PM25':   ['SSSMASS25', 'DUSMASS25', 'BCSMASS', 'OCSMASS', 
+                              'SO4SMASS',  'NISMASS25', 'NH4SMASS']}
 
 # ================== REGIONS METADATA (FOR SCORECARDS) ==================
 # Note: see _create_regional_masks() method for region definitions for stats
@@ -771,7 +773,7 @@ class BatchDatasetProcessor:
         if regridder_key not in self.regridders:
             print(f'    Creating regridder for {grid_type}')
             try:
-                # Use conservative_normed for correcy polar handling
+                # Use conservative_normed for correct polar handling
                 regridder = xe.Regridder(
                     source_ds, self.target_grid, 'conservative_normed', 
                     periodic=True)
@@ -1602,6 +1604,7 @@ class BatchDatasetProcessor:
         
         # Process variables, including dependencies for calculated variables
         regridded_vars = {}
+        failed_vars = []
         # Define standardized coords (for cross-collection diffs and shifts)
         if file_type == 'clim':
             std_coords = np.arange(1, 13, dtype=np.int32)  # 1-12 for months
@@ -1629,12 +1632,12 @@ class BatchDatasetProcessor:
                                       f'{dep_var} (alias: {dep_source}) for '
                                       f'calculated variable {target_var}')
                             except Exception as e:
-                                # Propagate the error up
-                                raise ValueError(f'Failed to process '
-                                                 f'dependency {dep_var} '
-                                                 f'({dep_source}) for '
-                                                 f'calculated variable '
-                                                 f'{target_var}: {str(e)}')
+                                # Track the error
+                                print(f'[ERROR] Failed to process dependency '
+                                      f'{dep_var} ({dep_source}) for '
+                                      f'calculated variable {target_var}: '
+                                      f'{str(e)}')
+                                failed_vars.append(dep_var)
                 continue  # Skip the calculated variable itself
             try:
                 regridded_data = regridder(ds_levels[source_var])
@@ -1645,6 +1648,12 @@ class BatchDatasetProcessor:
             except Exception as e:
                 print(f'[ERROR] Failed to regrid {target_var} ({source_var}): '
                       f'{str(e)}')
+                failed_vars.append(target_var)
+
+        # Check if any variables failed and halt if so
+        if failed_vars:
+            raise ValueError(f'Regridding failed for variables: '
+                             f'{", ".join(failed_vars)}')
         
         return regridded_vars, colls_for_file
     
@@ -1720,7 +1729,8 @@ class BatchDatasetProcessor:
         return xr.Dataset(all_vars)
     
     def _load_and_process_files(self, coll_files: Dict[str, str], 
-                                file_type: str, validation_result=None):
+                                file_type: str, validation_result=None, 
+                                time_key=None):
         '''Load and process files from multiple collections'''
     
         # Group collections by file path to avoid duplicate processing
@@ -1735,6 +1745,17 @@ class BatchDatasetProcessor:
         for file_path, colls_for_file in file_to_colls.items():
             try:
                 ds = xr.open_dataset(file_path, decode_timedelta=True)
+                
+                # If analysis file has multiple timesteps, slice using time_key
+                time_coord_nm = self._get_time_coordinate_name(ds)
+                if (file_type == 'ana' and time_key is not None 
+                    and time_coord_nm):
+                    if ds[time_coord_nm].size > 1:
+                        # Extract exact datetime from the string key
+                        time_val = pd.to_datetime(time_key, 
+                                                  format='%Y-%m-%d_%H')
+                        ds = ds.sel({time_coord_nm: [time_val]}, 
+                                    method='nearest')
         
                 regridded_vars, _ = self._process_dataset_variables(
                     ds, colls_for_file, file_type, validation_result)
@@ -1957,7 +1978,7 @@ class BatchDatasetProcessor:
             for key, coll_files in all_coll_files.items():
                 file_counter += 1
                 result = self._load_and_process_files(
-                    coll_files, file_type, validation_result)
+                    coll_files, file_type, validation_result, time_key=key)
                 # Print progress every 5 files
                 if file_counter % 5 == 0 or file_counter == total_files:
                     print(f'  [PROGRESS] Processed {file_counter}/'
@@ -2215,21 +2236,31 @@ class BatchDatasetProcessor:
                         kelvin_values,
                         coords=dewpoint_celsius.coords,
                         dims=dewpoint_celsius.dims)
+                elif calc_var == 'Q2m':
+                    # Add units to the xarray DataArrays
+                    d2m_with_units = ds['D2m'] * units.K
+                    ps_with_units = ds['PS'] * units.Pa
+                    # Calculate specific humidity using metpy
+                    q2m_calc = mpcalc.specific_humidity_from_dewpoint(
+                        ps_with_units, d2m_with_units)
+                    q2m_values = q2m_calc.values
+                    # Add Q2m to the dataset with proper dimensions
+                    ds[calc_var] = xr.DataArray(
+                        q2m_values,
+                        coords=q2m_calc.coords,
+                        dims=q2m_calc.dims)
                 elif calc_var == 'LOGAOD':
                     ds[calc_var] = np.log(ds['AOD']+.01)
-                    ds[calc_var].attrs={
-                        'calculation_method': (
-                            f'Calculated from '
-                            f'{", ".join(list(dependencies.keys()))}')}
                 elif calc_var == 'PM25':
                     ds[calc_var] = (ds['SSSMASS25']  + ds['DUSMASS25'] 
                                     + ds['BCSMASS']  + ds['OCSMASS'] 
                                     + ds['SO4SMASS'] + ds['NISMASS25'] 
                                     + ds['NH4SMASS'])
-                    ds[calc_var].attrs={
-                        'calculation_method': (
-                            f'Calculated from '
-                            f'{", ".join(list(dependencies.keys()))}')}
+                # Add metadata attribute
+                ds[calc_var].attrs={
+                    'calculation_method': (
+                        f'Calculated from '
+                        f'{", ".join(list(dependencies.keys()))}')}
                 
                 print(f'  [SUCCESS] {calc_var} calculation complete')
             except Exception as e:
@@ -4874,7 +4905,7 @@ def parse_arguments():
     merge_group.add_argument('--clean', action='store_true', 
                              help='Merge chunked statistics files')
     merge_group.add_argument('--type', choices=['reg', 'glo'],
-                             help='stats type to merge: reg or glo')
+                             help='Stats type to merge: reg or glo')
 
     return parser.parse_args()
 
