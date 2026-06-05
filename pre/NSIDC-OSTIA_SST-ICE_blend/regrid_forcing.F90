@@ -74,18 +74,18 @@ contains
 
     Iam = 'SetServices'
     call ESMF_GridCompGet( GC, NAME=COMP_NAME, RC=STATUS )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     Iam = trim(COMP_NAME) // Iam
 
 ! Set the Initialize, Run, Finalize entry points
 ! ----------------------------------------------
 
     call MAPL_GridCompSetEntryPoint ( GC, ESMF_METHOD_INITIALIZE,   Initialize, RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     call MAPL_GridCompSetEntryPoint ( gc, ESMF_METHOD_RUN,  Run,  &
                                       RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 
 ! Set the state variable specs.
@@ -103,20 +103,20 @@ contains
         UNITS      = 'N/A',                                         &
         DIMS       = MAPL_DimsHorzOnly,                           &
         VLOCATION  = MAPL_VLocationNone,             RC=STATUS  )
-     VERIFY_(STATUS)
+     _VERIFY(STATUS)
 
 !EOS
     call MAPL_TimerAdd(GC, name="INITIALIZE"    ,RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Set generic init and final methods
 ! ----------------------------------
 
     call MAPL_GenericSetServices    ( gc, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 
-    RETURN_(ESMF_SUCCESS)
+    _RETURN(ESMF_SUCCESS)
   
   end subroutine SetServices
 
@@ -176,22 +176,22 @@ contains
 
     Iam = "Initialize"
     call ESMF_GridCompGet( gc, NAME=comp_name, RC=status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     Iam = trim(comp_name) // trim(Iam)
 
 ! Get my internal MAPL_Generic state
 !-----------------------------------
 
     call MAPL_GetObjectFromGC ( GC, MAPL, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_GridCompGet(GC, CONFIG = CF, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Allocate the private state...
 !------------------------------
     
     allocate( PrivateSTATE , stat=STATUS )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     wrap%ptr => PrivateState
 
@@ -200,26 +200,26 @@ contains
 
     CALL ESMF_UserCompSetInternalState( GC, trim(comp_name)//'_internal_state',&
          WRAP, STATUS )
-    VERIFY_(status)
+    _VERIFY(status)
 
     call ESMF_ConfigGetAttribute(cf,nx,label='NX:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,ny,label='NY:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_im,label='INPUT_IM:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_jm,label='INPUT_JM:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_gridname,label='INPUT_GRIDNAME:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Create grid for this component
 !-------------------------------
     ogrid = MAPL_LatLonGridCreate(input_gridname,nx=nx,ny=ny, &
             IM_World=input_im,JM_World=input_jm,LM_World=1,rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_GridCompSet(GC, grid=ogrid, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Profilers
 !----------
@@ -240,25 +240,25 @@ contains
 ! ------------------
 
     call MAPL_GenericInitialize( GC, IMPORT, EXPORT, CLOCK, RC=status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Get current ocean grid (ogrid)
 !-------------------------------
     call ESMF_GridCompGet(GC, grid=ogrid, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_GridGet(ogrid, DistGrid=distgrid, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_DistGridGet(distGRID, deLayout=layout, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     call ESMF_ConfigGetAttribute(cf,output_im,label='OUTPUT_IM:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     output_jm = output_im*6
     call ESMF_ConfigGetAttribute(cf,output_gridname,label='OUTPUT_GRIDNAME:',RC=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     pgrid = MAPL_LatLonGridCreate(output_gridname,nx=nx,ny=ny, &
             IM_World=output_im,JM_World=output_jm,LM_World=1,rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     PrivateState%ogrid=ogrid
     PrivateState%pgrid=pgrid
@@ -266,7 +266,7 @@ contains
 ! Query Pgrid to save IM and JM
     call MAPL_GridGet(pgrid, localCellCountPerDim=COUNTS, &
          globalCellCountPerDim=dims, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     PrivateState%pim=counts(1)
     PrivateState%pjm=counts(2)
     PrivateState%gpim=dims(1)
@@ -286,30 +286,30 @@ contains
 
        call MAPL_GetResource(MAPL, TILINGFILE, 'OUTPUT_TILING_FILE:', &
             default="mittile.til", RC=STATUS)
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
 
        call MAPL_LocStreamCreate(PrivateState%LocStream_O, LAYOUT=layout, &
                                  FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
                                  NAME='This_Ocn', grid=ogrid, NewGridNames=.true.,RC=STATUS)
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
        call MAPL_LocStreamCreate(PrivateState%LocStream_P, LAYOUT=layout, &
                                  FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
                                  NAME='Plug_Ocn', grid=pgrid, NewGridNames=.true.,RC=STATUS)
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
 
        call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_O2P, &
                                       LocStreamOut=PrivateState%LocStream_P, &
                                       LocStreamIn=PrivateState%LocStream_O, &
                                       NAME='XFORM_O2P', &
                                       RC=STATUS )
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
 
        call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_P2O, &
                                       LocStreamOut=PrivateState%LocStream_O, &
                                       LocStreamIn=PrivateState%LocStream_P, &
                                       NAME='XFORM_P2O', &
                                       RC=STATUS )
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
     end if
 
 
@@ -317,7 +317,7 @@ contains
 !---------
     call WRITE_PARALLEL("Done OUTPUT_PlugInit")
 
-    RETURN_(ESMF_SUCCESS)
+    _RETURN(ESMF_SUCCESS)
   end subroutine Initialize
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine DO_O2P(PSTATE, VARO, VARP, RC)
@@ -334,9 +334,9 @@ contains
     
     if (.not.pState%initialized) then
        call MAPL_LocStreamGet( pState%LOCSTREAM_O, nt_local=ntO, RC=STATUS ) 
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
        call MAPL_LocStreamGet( pState%LOCSTREAM_P, nt_local=ntP, RC=STATUS ) 
-       VERIFY_(STATUS)
+       _VERIFY(STATUS)
        pState%ntP = ntP
        pState%ntO = ntO
        pState%initialized = .true.
@@ -346,30 +346,30 @@ contains
     end if
 
     allocate(tileO(NTO), stat=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     allocate(tileP(NTP), stat=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     
 !    call ESMF_VMBarrier(VM, rc=status)
-!    VERIFY_(STATUS)
+!    _VERIFY(STATUS)
 
     !    G2T (ocean-grid-to-ocean-tile)
     call MAPL_LocStreamTransform( pState%LOCSTREAM_O, tileO, varO, RC=STATUS ) 
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     !    T2T (ocean-to-plug tile)
     call MAPL_LocStreamTransform( tileP, pState%XFORM_O2P, tileO, RC=STATUS ) 
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     !    T2G (plug-tile-to-plug-grid)
     call MAPL_LocStreamTransform( pState%LOCSTREAM_P, varP, tileP, RC=STATUS ) 
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 !    call ESMF_VMBarrier(VM, rc=status)
-!    VERIFY_(STATUS)
+!    _VERIFY(STATUS)
     deallocate(tileP)
     deallocate(tileO)
      
 
-    RETURN_(ESMF_SUCCESS)
+    _RETURN(ESMF_SUCCESS)
   end subroutine DO_O2P
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -429,20 +429,20 @@ contains
 
    Iam = "Run"
    call ESMF_GridCompGet( GC, name=COMP_NAME, VM=vm, RC=STATUS )
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
    Iam = trim(COMP_NAME) // Iam
 
 ! Get my internal MAPL_Generic state
 !-----------------------------------
 
     call MAPL_GetObjectFromGC ( GC, MAPL, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 ! Get Private State
 !--------------------
     CALL ESMF_UserCompGetInternalState( GC, trim(comp_name)//'_internal_state',&
          WRAP, STATUS )
-    VERIFY_(status)
+    _VERIFY(status)
     PrivateState => wrap%ptr 
 
 
@@ -450,17 +450,17 @@ contains
 ! ---------------------------------------------------
 
    call MAPL_GetPointer( EXPORT, odata, 'ODATA', alloc=.true., RC=STATUS )
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 
 ! get filename (SEAWIS..., or fraci...)
    call MAPL_GetResource(MAPL, filename, 'INPUT_FILE:', default='', RC=STATUS)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 
    UNIT_R = getfile(filename)
 
 ! get filename (SEAWIS..., or fraci...)
    call MAPL_GetResource(MAPL, filename, 'OUTPUT_FILE:', default='', RC=STATUS)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 
    UNIT_W = getfile(filename)
 
@@ -474,9 +474,9 @@ contains
 
    amIRoot = MAPL_Am_I_Root(vm)
    call ESMF_GridGet(pgrid, distGrid=distGrid, rc=STAT)
-   VERIFY_(STAT)
+   _VERIFY(STAT)
    call ESMF_DistGridGet(distGrid, delayout=layout, rc=STAT)
-   VERIFY_(STAT)
+   _VERIFY(STAT)
 
    do 
 
@@ -487,19 +487,19 @@ contains
       read(UNIT_R,IOSTAT=status)
    end if
    call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
-   VERIFY_(stat)
+   _VERIFY(stat)
 
    if (status == IOSTAT_END) then
-      RETURN_(ESMF_SUCCESS)
+      _RETURN(ESMF_SUCCESS)
    end if
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
    call MAPL_Backspace(UNIT_R,layout,rc=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
    
    if(amIRoot) then
 
       read(UNIT_R, iostat=status) HDR
-      VERIFY_(STATUS)
+      _VERIFY(STATUS)
       HEADER = nint(HDR)
 
       HDR(13) = IM_WORLD
@@ -508,20 +508,20 @@ contains
    end if
 
    call ESMF_VMBarrier(vm, rc=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
    
    allocate(PDATA(IM,JM), stat=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 
 !   read(unit_r) odata
    call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
    ! transform data from ocean (tripolar or Reynolds) to mit-cubed
    call DO_O2P(PrivateState, odata, pdata, rc=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 !   write(unit_w) pdata
    call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
-   VERIFY_(STATUS)
+   _VERIFY(STATUS)
 
    enddo
 
@@ -531,12 +531,12 @@ contains
 !   deallocate(odata)
 
 !   call Free_File(unit_r, rc=status)
-!   VERIFY_(STATUS)
+!   _VERIFY(STATUS)
 
 !   call Free_File(unit_w, rc=status)
-!   VERIFY_(STATUS)
+!   _VERIFY(STATUS)
 
-   RETURN_(ESMF_SUCCESS)
+   _RETURN(ESMF_SUCCESS)
 
   end subroutine RUN
 
@@ -619,65 +619,65 @@ Subroutine do_regrid_forcing(rc)
 !  Initialize framework
 !  --------------------
   call ESMF_Initialize(vm=vm, logKindFlag=ESMF_LOGKIND_NONE,rc=STATUS)
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
   call MAPL_Initialize(rc=status)
-  VERIFY_(status)
+  _VERIFY(status)
 
 !  Setup config
 !  ------------
 
   cf_root = ESMF_ConfigCreate(rc=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
   call ESMF_ConfigLoadFile(cf_root, CF_FILE, rc=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
    !  Create Root child
    !-------------------
   call MAPL_Set(MAPLOBJ, CF=CF_ROOT, RC=STATUS)
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
   ROOT = MAPL_AddChild ( MAPLOBJ,     &
        name       = "INPUT",        &
        SS         = ROOT_SetServices, &
        rc=STATUS )  
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
 
   call MAPL_ProfDisable( rc=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
   call MAPL_MemUtilsDisable( rc=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
 
    !  Query MAPL for the the children's for GCS, IMPORTS, EXPORTS
    !-------------------------------------------------------------
 
   call MAPL_Get ( MAPLOBJ, GCS=GCS, GIM=IMPORTS, GEX=EXPORTS, RC=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
 
 ! Set-up application clock
 
   call AppClockCreate(clock, cf_root, status)  
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
   call ESMF_GridCompInitialize ( GCS(ROOT), importState=IMPORTS(ROOT), &
        exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
   call ESMF_GridCompRun( GCS(ROOT), importState=IMPORTS(ROOT), &
        exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
 !  Finalize
 !  --------
 
   call MAPL_Finalize(rc=status)
-  VERIFY_(status)
+  _VERIFY(status)
   call ESMF_Finalize(rc=STATUS)
-  VERIFY_(STATUS)
+  _VERIFY(STATUS)
 
-  RETURN_(STATUS)
+  _RETURN(STATUS)
 
 contains
   subroutine AppClockCreate(clock, config, rc)
@@ -700,56 +700,56 @@ contains
 
     ! initialize calendar to be Gregorian type
     gregorianCalendar = ESMF_CalendarCreate( ESMF_CALKIND_GREGORIAN, name="ApplicationCalendar", rc=status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN, RC=STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     
     call ESMF_ConfigGetAttribute(config, start_year, label ='start_year:', default=2009, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(config, start_month, label ='start_month:', default=08, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(config, start_date, label ='start_date:', default=21, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute( config, start_hour, label ='start_hour:', default=21, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     ! initialize start time
     call ESMF_TimeSet(startTime, &
          YY=start_year, MM=start_month, DD=start_date, &
          H=start_hour, M=0, S=0, calendar=gregorianCalendar, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     
     call ESMF_ConfigGetAttribute( config, stop_year, label ='stop_year:', default=start_year, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute( config, stop_month, label ='stop_month:', default=start_month, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute( config, stop_date, label ='stop_date:', default=start_date+5, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute( config, stop_hour, label ='stop_hour:', default=start_hour, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
     ! initialize stop time
     call ESMF_TimeSet(stopTime, YY=stop_year, MM=stop_month, DD=stop_date, &
          H=stop_hour, M=0, S=0, calendar=gregorianCalendar, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     
     call ESMF_ConfigGetAttribute( config, ts, label ='timestep:', &
          default=1800, rc = status )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     ! initialize time interval
     call ESMF_TimeIntervalSet(timeStep, S=ts, rc=status)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     
     ! initialize the clock with the above values
     clock = ESMF_ClockCreate( name="ApplClock", timeStep=timeStep, &
          startTime=StartTime, stopTime=StopTime, rc=STATUS )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
 
 !ALT: there is a bug in ESMF_V1.4; remove as soon as the bug is fixed
 !    call ESMF_ClockAdvance(clock, rc=status)
-!    VERIFY_(STATUS)
+!    _VERIFY(STATUS)
 
-    RETURN_(STATUS)
+    _RETURN(STATUS)
   end subroutine AppClockCreate
   
   subroutine PrintClock(clock, rc)
