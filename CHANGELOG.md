@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
 
 ### Removed
 
