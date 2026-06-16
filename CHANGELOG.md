@@ -19,6 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Added choices for remapping restart files for o720 (1/2-deg tripolar) and o2880 (1/8-deg tripolar) in MOM6 coupled exps 
+
+### Added
+
+### Changed
+
+### Fixed
+Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
+
+### Removed
+
+### Deprecated
+
+
+## [3.0.0] - 2026-05-28
+
 ### Added
 
 - Added choice 'blank' for qos in remap_restart python pacakage
@@ -46,8 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed a bug in gcmpost.script that prevented MAPL monthlies from being copied out of holding when a segment ended on the last day of a month.
 - Corrected an issue where tags like ":V" after cmp exps were resulting in "ctag" showing up in filenames and labels for some plots
-- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same 8 characters; these variable names now utilize expid numbers instead of model names
+- Due to GRADS variable name character limits, the actual or climatology labels for some plots were being inaccurately overwritten if models names began with the same characters before punctuation (or crashed due to long exp names if 8 characters or longer without punctuation); these variable names now utilize expid numbers instead of model names
 - Corrected LWP plot command in portrait.script to only include LWP not CCWP
 - Edited gcmpost.script to move up the location of $SOURCE/plot/.quickplotrc to restore missing plots from landscape.list for some users.
 - Edited makplotz.gs to prevent blank or fake zonal line plots from being created
@@ -55,10 +73,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove forced `-f` flag from `nccmp` comparison in `test_remap_restarts.py`
 - Removed duplicates from portrait.script that were created as a result of merging previous pull requests
 - Updated moveplot to not crash with filenames included double colons
+- Updated plotting scripts to ignore comments in HISTORY.rc
+- Updated gencmpz to handle export names which include double colons (like genplot_2G does)
 
-### Removed
 
-### Deprecated
+## [2.1.17] - 2026-05-20
+
+### Added
+- stats_v2 directory with scripts to process forecast stats and create stats plots and scorecards
+- support for v14 bcs 
+
+### Changed
+- updated topo path
+
+### Fixed
+- corrected fatal capitalization issue in plots/configure
+
+## [2.1.16] - 2026-05-07
+
+### Added
+- Initial commit of `stats_v2` directory with scripts to process forecast stats and create stats plots and scorecards.
+
+### Changed
+- Updated plotting scripts for bug fixes and additional exports.
+
+### Fixed
+- Fixed rename of "lake_landice_saltwater" to "other_restarts" in remap_restarts test script.
+
+## [2.1.15] - 2026-04-15
+
+### Added
+
+- Handling of river routing restarts.
+
+### Changed
+
+- Reduce the default number of PLOT_JOBS
 
 ## [2.1.14] - 2026-04-09
 
@@ -71,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed incorrect labeling of model data as actual or climatological in some plots
 - Updated makplotz to prevent blank or fake zonal line plots from being created
 - Updated `test_remap_cases.yaml` to point to baselines consistent with v11
+- Updated plotting scripts for bug fixes and additional exports
 
 ## [2.1.13] - 2026-03-19
 
@@ -129,6 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Remove `regrid.pl`
 - Removed detection of OS at NCCS as it is all SLES15 now
 
 

@@ -53,7 +53,7 @@ set EXPORT = `echo $TEMP_EXPORT | cut -d: -f1 | sed 's/DBLCOLON/::/g'`
 # Create true comma-separated HISTORY variable
 # --------------------------------------------
 if(! -e HISTORY.T ) then
-   cat $HISTORYRC | sed -e 's/,/ , /g' | sed -e 's/*/@/g' | sed -e 's/?/ /g' > HISTORY.T
+   cat $HISTORYRC | sed -e 's/#.*//g' | sed -e 's/,/ , /g' | sed -e 's/*/@/g' | sed -e 's/?/ /g' > HISTORY.T
 endif
 
 ./strip HISTORY.T

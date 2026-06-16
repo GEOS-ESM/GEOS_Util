@@ -18,7 +18,7 @@ from remap_utils import *
 from remap_questions import *
 from remap_command_line import *
 from remap_upper import *
-from remap_lake_landice_saltwater import *
+from remap_other_restarts import *
 from remap_analysis  import *
 from remap_catchANDcn  import *
 
@@ -121,8 +121,8 @@ def main():
   upper = upperair(params_file=config_yaml)
   upper.remap()
 
-  # lake, landice and saltwater
-  lls  = lake_landice_saltwater(params_file=config_yaml)
+  # lake, landice, saltwater and others
+  lls  = other_restarts(params_file=config_yaml)
   lls.remap()
 
   # catchANDcn
