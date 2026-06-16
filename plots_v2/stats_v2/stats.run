@@ -107,13 +107,13 @@ set slices_mem   = 8G
 set aerosol_mem  = 8G
 set merge_mem    = 32G
 
-set regional_time  = 03:00:00
+set regional_time  = 04:00:00
 set global_time    = 02:00:00
 set reg_clean_time = 00:10:00
-set glo_clean_time = 01:00:00
+set glo_clean_time = 01:30:00
 
-set regional_mem  = 4G
-set global_mem    = 32G
+set regional_mem  = 8G
+set global_mem    = 64G
 set reg_clean_mem = 16G
 set glo_clean_mem = 256G
 
