@@ -71,7 +71,7 @@ endif
 
 # Set GRADS Environment Variables
 # -------------------------------
-setenv  GEOSUTIL /gpfsm/dnb06/projects/p260/mefrazer/Models/v11.10.0/install
+setenv  GEOSUTIL @CMAKE_INSTALL_PREFIX@
 setenv  GASCRP $GEOSUTIL/plots/grads_util
 setenv  GAUDFT $GEOSUTIL/plots/grads_util/udft_$arch.tools
 setenv  GAUDXT $GEOSUTIL/plots/grads_util/udxt

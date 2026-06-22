@@ -189,8 +189,8 @@ endif
 
 # Prognostic Zonal Mean Comparisons
 # ---------------------------------
-     set EXPORTS = `echo U   V   T   Q     RH2   ZLE OMEGA W   DIVG EPV VORT O3         QLTOT QITOT`
-     set GCS     = `echo DYN DYN DYN MOIST MOIST DYN DYN   DYN DYN  DYN DYN  CHEMISTRY  AGCM  AGCM `
+     set EXPORTS = `echo U   V   T   Q     RH2   ZLE OMEGA O3         QLTOT QITOT`
+     set GCS     = `echo DYN DYN DYN MOIST MOIST DYN DYN   CHEMISTRY  AGCM  AGCM `
      @ k = 0
      foreach EXPORT ($EXPORTS)
        @ k = $k + 1
@@ -202,7 +202,7 @@ endif
 # Prognostic Horizontal Mean Dynamics Comparisons
 # -----------------------------------------------
      if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/hcmp/hcmp2 SLP DYN 1000 $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-     set EXPORTS = `echo U V T ZLE HE OMEGA W DIVG VORT CHI PSI`
+     set EXPORTS = `echo U V T ZLE HE OMEGA CHI PSI`
      set LEVS = '1000 925 850 700 600 500 400 300 250 200 150 100 70 50 30 20 10 7 5 3 1 0.4'
      foreach EXPORT ($EXPORTS)
      foreach LEV    ($LEVS)
@@ -230,17 +230,13 @@ endif
      end
      end
 
-# Prognostic Horizontal Mean Ozone and EPV Comparisons
+# Prognostic Horizontal Mean Ozone Comparisons
 # --------------------------------------------
-     set EXPORTS = `echo O3        EPV`
-     set GCS     = `echo CHEMISTRY DYN`
+     set EXPORTS = `echo O3`
      set LEVS    = '70 50 40 30 20 10 7 5 4 3 2 1 .7 .5 .4 .3 .2 .1'
-     @ k = 0
      foreach EXPORT ($EXPORTS)
-       @ k = $k + 1
-       set GC = $GCS[$k]
      foreach LEV    ($LEVS)
-       if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/hcmp/hcmp2 $EXPORT $GC $LEV $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+       if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/hcmp/hcmp2 $EXPORT CHEMISTRY $LEV $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
      end
      end
 
