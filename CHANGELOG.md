@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
+Corrected plotting to treat HadCRU temperature as T2M not tskin; fixed qname_not_found titles when closeness was called from gencmp.gs; corrected SPEED/UU10M verification RCs.
 
 ### Removed
 
