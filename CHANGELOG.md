@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added choices for remapping restart files for o720 (1/2-deg tripolar) and o2880 (1/8-deg tripolar) in MOM6 coupled exps
 
 ### Added
+- Added new geosgcm_prog exports to plots
 
 ### Changed
 
@@ -19,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
 - Update `moveplot` and `movestat` for use on polar which is now `noexec`
+- Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
+- Updated stats.py and yaml templates to accept any datetime tag or shift (including minutes and seconds) and an expid tag. Padded time/memory limits in stats.run based on experience.
 
 ### Removed
 

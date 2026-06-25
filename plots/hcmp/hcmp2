@@ -115,6 +115,10 @@ if( EXPORT = 'T'     ) ; pname = tmpu  ; endif
 if( EXPORT = 'Q'     ) ; pname = sphu  ; endif
 if( EXPORT = 'RH2'   ) ; pname = rh    ; endif
 if( EXPORT = 'OMEGA' ) ; pname = omega ; endif
+if( EXPORT = 'W'     ) ; pname = wwnd  ; endif
+if( EXPORT = 'DIVG'  ) ; pname = divg  ; endif
+if( EXPORT = 'EPV'   ) ; pname = epv   ; endif
+if( EXPORT = 'VORT'  ) ; pname = vort  ; endif
 if( EXPORT = 'ZLE'   ) ; pname = hght  ; endif
 if( EXPORT = 'HE'    ) ; pname = hghte ; endif
 if( EXPORT = 'CHI'   ) ; pname = chi   ; endif
