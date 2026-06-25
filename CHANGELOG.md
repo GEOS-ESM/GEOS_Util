@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `moveplot` and `movestat` for use on polar which is now `noexec`
 - Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
 - Updated stats.py and yaml templates to accept any datetime tag or shift (including minutes and seconds) and an expid tag. Padded time/memory limits in stats.run based on experience.
+- Updated stats/plots scripts to fix log axes for corcmp zonal plots, add an additional_pairs option for corcmp comparison plots, add a check for pre-existing valid stats files, and fix dataset search to iterate through matches
 
 ### Removed
 
