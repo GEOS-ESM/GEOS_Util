@@ -140,7 +140,7 @@ end
 
 # VERIFICATION.GSSTF
 # -----------------------
-set dirs = `echo eflux hflux SPEED taux tauy tpw`
+set dirs = `echo eflux hflux taux tauy tpw`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.GSSTF.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
