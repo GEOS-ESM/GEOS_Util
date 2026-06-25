@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added new geosgcm_prog exports to plots
+- Added IMERG precip plots
 
 ### Changed
 
