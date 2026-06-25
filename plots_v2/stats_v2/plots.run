@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
 source /usr/share/lmod/lmod/init/csh
-module load python/GEOSpyD/25.3.1-0/3.13
+module load python/GEOSpyD
 
 # Create unique timestamp for job files
 set timestamp = `date +%Y%m%d_%H%M%S`
@@ -285,7 +285,7 @@ if ($plots_corcmp) then
 #SBATCH --array=1-${NUM_REGIONS}
 
 source /usr/share/lmod/lmod/init/csh
-module load python/GEOSpyD/25.3.1-0/3.13
+module load python/GEOSpyD
 
 cd $work_dir
 
@@ -318,7 +318,7 @@ EOF
 #SBATCH --dependency=afterok:JOBID_PLACEHOLDER_1
 
 source /usr/share/lmod/lmod/init/csh
-module load python/GEOSpyD/25.3.1-0/3.13
+module load python/GEOSpyD
 
 cd $work_dir
 
@@ -392,7 +392,7 @@ if ($plots_syscmp) then
 #SBATCH --array=1-${INDIV_JOBS_COUNT}
 
 source /usr/share/lmod/lmod/init/csh
-module load python/GEOSpyD/25.3.1-0/3.13
+module load python/GEOSpyD
 
 cd $work_dir
 
@@ -435,7 +435,7 @@ EOF
 #SBATCH --array=1-${COMP_JOBS_COUNT}
 
 source /usr/share/lmod/lmod/init/csh
-module load python/GEOSpyD/25.3.1-0/3.13
+module load python/GEOSpyD
 
 cd $work_dir
 
