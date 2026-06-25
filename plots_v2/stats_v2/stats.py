@@ -421,6 +421,9 @@ class BatchDatasetProcessor:
         '''Convert YAML config structure to internal format'''
         params = yaml_config['parameters']
         
+        # Extract optional expid to substitute into templates and directories
+        expid_val = str(params.get('expid', ''))
+        
         # Validate if single-forecast mode
         if single_fcst_mode is not None:
             override_date = single_fcst_mode
@@ -497,7 +500,15 @@ class BatchDatasetProcessor:
                             cleaned_vars.append(var)
                     config[key] = cleaned_vars
                 else:
-                    config[key] = value
+                    # Expand the {expid} tag in directories and templates.
+                    if isinstance(value, str):
+                        config[key] = value.replace('{expid}', expid_val)
+                    elif isinstance(value, list):
+                        config[key] = [v.replace('{expid}', expid_val) 
+                                       if isinstance(v, str) 
+                                       else v for v in value]
+                    else:
+                        config[key] = value
         return config
 
     def _create_target_grid(self):
@@ -747,24 +758,6 @@ class BatchDatasetProcessor:
         else:
             return None
 
-    def _get_date_variables(self, init_date: datetime, valid_time: datetime
-                            ) -> Dict[str, str]:
-        '''Get standardized date variables for template substitution'''
-        return {
-            'init_YYYY': init_date.strftime('%Y'),
-            'init_MM': init_date.strftime('%m'),
-            'init_DD': init_date.strftime('%d'),
-            'init_HH': init_date.strftime('%H'),
-            'init_YYYYMMDD': init_date.strftime('%Y%m%d'),
-            'init_YYYYMMDDHH': init_date.strftime('%Y%m%d%H'),
-            'valid_YYYY': valid_time.strftime('%Y'),
-            'valid_MM': valid_time.strftime('%m'),
-            'valid_DD': valid_time.strftime('%d'),
-            'valid_HH': valid_time.strftime('%H'),
-            'valid_YYYYMMDD': valid_time.strftime('%Y%m%d'),
-            'valid_YYYYMMDDHH': valid_time.strftime('%Y%m%d%H')
-        }
-
     def _get_regridder(self, source_ds, grid_type, collections=None):
         '''Retrieve or create regridder for given source dataset'''
         lat_key = source_ds.lat.shape[0] if 'lat' in source_ds.dims else 0
@@ -784,8 +777,7 @@ class BatchDatasetProcessor:
         return self.regridders[regridder_key]
 
     def _get_file_by_templates(self, templates: List[str], base_dir: str, 
-                               date_vars: Dict[str, str], context_info: str, 
-                               init_date: datetime = None, 
+                               context_info: str, init_date: datetime = None, 
                                valid_time: datetime = None) -> tuple:
         '''
         Universal file finder using multiple templates with shift support
@@ -798,70 +790,68 @@ class BatchDatasetProcessor:
             try:
                 processed_template = template
                 # Handle shift patterns like {init_YYYYMMDD,shift=-3h}
-                def replace_shift_tag(match):
-                    try:
-                        full_tag = match.group(1)
-                        if ',' not in full_tag:
-                            # No shift, return as-is
-                            return '{' + full_tag + '}'
-                        tag, shift_part = full_tag.split(',', 1)
-                        tag = tag.strip()
-                        shift_part = shift_part.strip()
-                        if not shift_part.startswith('shift='):
-                            # Not a shift, return as-is
-                            return '{' + full_tag + '}'
-                        # Parse shift amount
-                        shift_str = shift_part.replace('shift=', '')
+                def process_time_tag(match):
+                    full_tag = match.group(1)
+                    
+                    # Ignore anything that isn't an init or valid tag
+                    if not (full_tag.startswith('init_') or full_tag.startswith('valid_')):
+                        return '{' + full_tag + '}'
+                    
+                    parts = full_tag.split(',', 1)
+                    time_part = parts[0].strip()
+                    shift_part = parts[1].strip() if len(parts) > 1 else None
+                    
+                    # Determine base datetime and format string
+                    if time_part.startswith('init_'):
+                        base_dt = init_date
+                        fmt_str = time_part[5:]  # Remove 'init_'
+                    else:
+                        base_dt = valid_time
+                        fmt_str = time_part[6:]  # Remove 'valid_'
+                        
+                    if not base_dt:
+                        return '{' + full_tag + '}'
+                        
+                    # Apply shift if provided
+                    if shift_part and shift_part.startswith('shift='):
+                        shift_str = shift_part[6:]
                         try:
-                            if shift_str.endswith('h'):
-                                shift_hours = float(shift_str[:-1])
-                            elif shift_str.endswith('d'):
-                                shift_hours = float(shift_str[:-1]) * 24
+                            # Extract unit (last char) and value (enforcing integer)
+                            unit = shift_str[-1].lower()
+                            val = int(shift_str[:-1])
+                            
+                            if unit == 'h':
+                                base_dt += timedelta(hours=val)
+                            elif unit == 'm':
+                                base_dt += timedelta(minutes=val)
+                            elif unit == 's':
+                                base_dt += timedelta(seconds=val)
+                            elif unit == 'd':
+                                base_dt += timedelta(days=val)
                             else:
-                                shift_hours = float(shift_str)  # Assume hours
+                                return '{' + full_tag + '}'
                         except ValueError:
-                            # Invalid shift, return as-is
                             return '{' + full_tag + '}'
-                        # Determine which datetime to shift
-                        if tag.startswith('init_') and init_date:
-                            shifted_dt = init_date + \
-                                timedelta(hours=shift_hours)
-                        elif tag.startswith('valid_') and valid_time:
-                            shifted_dt = valid_time + \
-                                timedelta(hours=shift_hours)
-                        else:
-                            # Cannot shift, return as-is
-                            return '{' + full_tag + '}'
-                        # Format the shifted datetime (part after init_/valid_)
-                        fmt_part = tag.split('_', 1)[1]
-                        if fmt_part == 'YYYY':
-                            result = shifted_dt.strftime('%Y')
-                        elif fmt_part == 'MM':
-                            result = shifted_dt.strftime('%m')
-                        elif fmt_part == 'DD':
-                            result = shifted_dt.strftime('%d')
-                        elif fmt_part == 'HH':
-                            result = shifted_dt.strftime('%H')
-                        elif fmt_part == 'YYYYMMDD':
-                            result = shifted_dt.strftime('%Y%m%d')
-                        elif fmt_part == 'YYYYMMDDHH':
-                            result = shifted_dt.strftime('%Y%m%d%H')
-                        else:
-                            return '{' + full_tag + '}'  # Unknown format
-                        return result
-                    except Exception:
-                        return match.group(0)  # Return original on error
+                            
+                    # Translate standard tags to strftime directives dynamically
+                    translated_fmt = fmt_str.replace('YYYY', '%Y')\
+                                            .replace('MM', '%m')\
+                                            .replace('DD', '%d')\
+                                            .replace('HH', '%H')\
+                                            .replace('NN', '%M')\
+                                            .replace('SS', '%S')
+                                            
+                    return base_dt.strftime(translated_fmt)
 
-                # Replace all shift tags first
-                processed_template = re.sub(
-                    r'\{([^}]+)\}', replace_shift_tag, processed_template)
-                # Then handle any remaining regular tags
-                processed_template = processed_template.format(**date_vars)
-                # Build path and find files
+                # Combine directory and template
                 if processed_template.startswith('/'):
-                    path = processed_template
+                    full_unprocessed_path = processed_template
                 else:
-                    path = os.path.join(base_dir, processed_template)
+                    full_unprocessed_path = os.path.join(
+                        base_dir, processed_template)
+                # Process all tags anywhere in the full path 
+                path = re.sub(r'\{([^}]+)\}', process_time_tag, 
+                              full_unprocessed_path)
                 searched_paths.append(path)  # Track this path
                 matches = glob.glob(path)
                 all_matches.extend(matches)
@@ -924,15 +914,12 @@ class BatchDatasetProcessor:
                 context_info = (f'FORECAST: init='
                                 f'{init_date.strftime("%Y-%m-%d %H:%M")} '
                                 f'(multi-lead)')
-            date_vars = self._get_date_variables(init_date, valid_time)
         elif dataset_type == 'ana' and valid_time:
-            date_vars = self._get_date_variables(valid_time, valid_time)
             context_info = (f'ANALYSIS: valid_time='
                             f'{valid_time.strftime("%Y-%m-%d %H:%M")}')
         elif dataset_type == 'clim' and cycle:
             dummy_time = datetime(2000, 1, 1, int(cycle))
             valid_time = dummy_time
-            date_vars = self._get_date_variables(dummy_time, dummy_time)
             context_info = f'CLIMATOLOGY: cycle={cycle}z'
         else:
             return {}, {}, {}
@@ -970,10 +957,8 @@ class BatchDatasetProcessor:
                 colls_without_templates.append(coll_nm)
                 continue
             file_path, file_valid_time, paths = self._get_file_by_templates(
-                templates, base_dir, date_vars,
-                f'{context_info} collection={coll_nm}',
-                init_date, valid_time
-            )
+                templates, base_dir, f'{context_info} collection={coll_nm}',
+                init_date, valid_time)
             if file_path:
                 # Only add if we have not seen this file before
                 if file_path not in used_files:

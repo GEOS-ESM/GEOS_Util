@@ -205,6 +205,54 @@ if( EXPORT = "OMEGA"   )
    'getresource 'PLOTRC' OMEGA_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
     if( dpct = 'NULL' ) ; dpct = 0.2 ; endif
 endif
+if( EXPORT = "W"   )
+    oname = "/horiz_"obsnam"_wwnd_z"
+   'getresource 'PLOTRC' W_DYN_TITLE'           ; title = result
+   'getresource 'PLOTRC' W_DYN_CLEVS'           ; clevs = result
+   'getresource 'PLOTRC' W_DYN_CCOLS'           ; ccols = result
+   'getresource 'PLOTRC' W_DYN_DPCT'            ; dpct  = result
+   'getresource 'PLOTRC' W_DYN_'LEVTYPE'COLS'   ; dcols = result
+   'getresource 'PLOTRC' W_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' W_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' W_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
+    if( dpct = 'NULL' ) ; dpct = 0.2 ; endif
+endif
+if( EXPORT = "DIVG"   )
+    oname = "/horiz_"obsnam"_divg_z"
+   'getresource 'PLOTRC' DIVG_DYN_TITLE'           ; title = result
+   'getresource 'PLOTRC' DIVG_DYN_CLEVS'           ; clevs = result
+   'getresource 'PLOTRC' DIVG_DYN_CCOLS'           ; ccols = result
+   'getresource 'PLOTRC' DIVG_DYN_DPCT'            ; dpct  = result
+   'getresource 'PLOTRC' DIVG_DYN_'LEVTYPE'COLS'   ; dcols = result
+   'getresource 'PLOTRC' DIVG_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' DIVG_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' DIVG_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
+    if( dpct = 'NULL' ) ; dpct = 0.2 ; endif
+endif
+if( EXPORT = "EPV"   )
+    oname = "/horiz_"obsnam"_epv_z"
+   'getresource 'PLOTRC' EPV_DYN_TITLE'           ; title = result
+   'getresource 'PLOTRC' EPV_DYN_CLEVS'           ; clevs = result
+   'getresource 'PLOTRC' EPV_DYN_CCOLS'           ; ccols = result
+   'getresource 'PLOTRC' EPV_DYN_DPCT'            ; dpct  = result
+   'getresource 'PLOTRC' EPV_DYN_'LEVTYPE'COLS'   ; dcols = result
+   'getresource 'PLOTRC' EPV_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' EPV_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' EPV_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
+    if( dpct = 'NULL' ) ; dpct = 0.2 ; endif
+endif
+if( EXPORT = "VORT"   )
+    oname = "/horiz_"obsnam"_vort_z"
+   'getresource 'PLOTRC' VORT_DYN_TITLE'           ; title = result
+   'getresource 'PLOTRC' VORT_DYN_CLEVS'           ; clevs = result
+   'getresource 'PLOTRC' VORT_DYN_CCOLS'           ; ccols = result
+   'getresource 'PLOTRC' VORT_DYN_DPCT'            ; dpct  = result
+   'getresource 'PLOTRC' VORT_DYN_'LEVTYPE'COLS'   ; dcols = result
+   'getresource 'PLOTRC' VORT_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' VORT_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' VORT_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
+    if( dpct = 'NULL' ) ; dpct = 0.2 ; endif
+endif
 if( EXPORT = "O3"   )
     oname = "/horiz_"obsnam"_o3_z"
    'getresource 'PLOTRC' O3_CHEMISTRY_TITLE'                    ; title = result
