@@ -78,13 +78,13 @@ echo "Using SBATCH parameters: account = $account, partition = $partition, qos =
 
 # Set timing/memory parameters
 
-set corcmp_time  = 00:45:00
-set montage_time = 00:15:00
+set corcmp_time  = 01:00:00
+set montage_time = 00:30:00
 set corcmp_mem   = 4G
 set montage_mem  = 4G
 
 set syscmp_indiv_time = 02:00:00
-set syscmp_comp_time  = 04:00:00
+set syscmp_comp_time  = 06:00:00
 set syscmp_indiv_mem  = 128G
 set syscmp_comp_mem   = 128G
 
@@ -393,7 +393,6 @@ if ($plots_syscmp) then
 
 source /usr/share/lmod/lmod/init/csh
 module load python/GEOSpyD
-module load cdo
 
 cd $work_dir
 
@@ -437,7 +436,6 @@ EOF
 
 source /usr/share/lmod/lmod/init/csh
 module load python/GEOSpyD
-module load cdo
 
 cd $work_dir
 
