@@ -939,6 +939,7 @@ def load_stats_data(yaml_file: str, process: str, part: int
     data['out_suffix'] = out_suffix
     data['plot_RMS_decomp'] = plot_RMS_decomp
     data['colormap'] = params.get('corcmp_colormap', 'bwr')
+    data['additional_pairs'] = params.get('additional_pairs', [])
     
     return data
 
@@ -1019,11 +1020,12 @@ def plot_lev(s, reg, coll, v, var, z, lev):
             cil_vals, ciu_vals = [{} for _ in range(2)]
             for conf in conf_levels:
                 if is_3d[coll]:  # 3d
-                    cil_vals[conf] = cil[conf][coll][m][:, s, v, z]
-                    ciu_vals[conf] = ciu[conf][coll][m][:, s, v, z]
+                    cil_vals[conf] = cil[conf][coll][(0, m)][:, s, v, z]
+                    ciu_vals[conf] = ciu[conf][coll][(0, m)][:, s, v, z]
                 else:  # 2d
-                    cil_vals[conf] = cil[conf][coll][m][:, s, v]
-                    ciu_vals[conf] = ciu[conf][coll][m][:, s, v]
+                    cil_vals[conf] = cil[conf][coll][(0, m)][:, s, v]
+                    ciu_vals[conf] = ciu[conf][coll][(0, m)][:, s, v]
+                    
             base_width = fcst_interval/24.
             for i in range(nleads):
                 # For 2 models: rectangles (68%, 90%, 95%) and errorbar (99%)
@@ -1144,12 +1146,12 @@ def plot_lev(s, reg, coll, v, var, z, lev):
     print(plotnm)
     plt.savefig(f'{plotsdir}{plotnm}', dpi=dpi)
 
-def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
+def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
     '''
-    Create a zonal plot for a given model (m), stat (s), region (reg), 
+    Create a zonal plot for a given model (mod), stat (s), region (reg), 
     collection (coll), and variable (v, var).
     Additional parameters:
-    - comp: True for comparison plot, False for individual
+    - ctl: control model index (None for individual plot)
     - vmin, vmax: min and max for contour scale
     '''
     
@@ -1157,31 +1159,32 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
     fig = plt.figure(figsize=(8, 6))   
     ax = fig.add_axes([0.205, 0.117, 0.678, 0.766])
     
-    # Determine comparison model (self for individual plot)
-    comp_model = 0 if comp else m
-    comp_model_nm = models[comp_model]
+    # Determine control model name (self for individual plot)
+    ctl_nm = models[ctl] if ctl is not None else models[mod]
     
     # Info for title
     u = vars_unit_map.get(var.upper())
     region = region_long_map.get(reg)
     
     # Make comparison plot (color mesh of diffs with significance shading)
-    if comp: 
+    if ctl is not None: 
         # Determine contour level bounds and visible ticks
         offset = (vmax - vmin) / 20 / 2
         bounds = np.linspace(vmin-offset, vmax+offset, 22)
         norm = BoundaryNorm(bounds, cmap.N)
         ticks_vis = (bounds[:-1] + bounds[1:]) / 2
-        for i in range(len(ticks_vis)): # Fix precision for values near zero
+        for i in range(len(ticks_vis)):  # Fix precision for values near zero
             if abs(ticks_vis[i]) < 1e-10:
                 ticks_vis[i] = 0.0 
                 
         # Plot differences as color mesh
-        z_ctl = data['avg'][coll][0][reg][:, s, v, :]
-        z_mod = data['avg'][coll][m][reg][:, s, v, :]
+        z_ctl = data['avg'][coll][ctl][reg][:, s, v, :]
+        z_mod = data['avg'][coll][mod][reg][:, s, v, :]
         z_vals = (z_mod - z_ctl)
         im = ax.pcolormesh(x_vals, levs, (z_vals.T), cmap=cmap, norm=norm, 
                            shading='nearest')
+
+
         
         # Create colorbar
         cbar_ax = fig.add_axes([0.155, 0.030, 0.778, 0.020])
@@ -1208,8 +1211,9 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
         # Create a mask from CIs for each selected sig level (95%, 99%, 99.99%)
         mask = {}
         for conf in conf_levels[2:]:  
-            mask[conf] = (z_vals.T < cil[conf][coll][m][:, s, v, :].T) | (
-                z_vals.T > ciu[conf][coll][m][:, s, v, :].T)
+            mask[conf] = (
+                (z_vals.T < cil[conf][coll][(ctl, mod)][:, s, v, :].T) | (
+                 z_vals.T > ciu[conf][coll][(ctl, mod)][:, s, v, :].T))
         
         # Apply patches to areas corresponding to masks (centered on level)
         e_colors = ['#2a2a2a', '#3a3a3a', 'dimgrey']  # Dark grey to light
@@ -1238,8 +1242,10 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
                         ax.add_patch(rect)
                         break
         
-        # Add title
-        ax.set_title(f'{models[m]} - {comp_model_nm} ({nfcsts})\n'
+        # Add title        
+        mod_title_nm = f'{models[mod].replace("_", " (")}-ver)'
+        ctl_title_nm = f'{ctl_nm.replace("_", " (")}-ver)'
+        ax.set_title(f'{mod_title_nm} - {ctl_title_nm} ({nfcsts})\n'
                      f'{stat_nms[s]} Difference [dot: >95%, diag: >99%,'
                      f' hatch: >99.99%]\n{long[coll][v]} ({u}) {region}', 
                      fontsize=12)
@@ -1248,7 +1254,7 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
     else: 
         # Add contour lines
         num_levels = 10
-        Z = data['avg'][coll][m][reg][:, s, v, :]
+        Z = data['avg'][coll][mod][reg][:, s, v, :]
         contour_colors = plt.cm.rainbow(np.linspace(0, 1, num_levels))
         contour = ax.contour(x_vals, levs, Z.T, levels=num_levels, 
                              colors=contour_colors)
@@ -1267,7 +1273,8 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
             label.set_rotation(90)
         
         # Add title
-        ax.set_title(f'{models[m]} ({nfcsts}) {stat_lbls[s]}\n'
+        mod_title_nm = f'{models[mod].replace("_", " (")}-ver)'
+        ax.set_title(f'{mod_title_nm} ({nfcsts}) {stat_lbls[s]}\n'
                      f'{long[coll][v]} ({u}) {region}', fontsize=12)
     
     # Format axes, labels, and ticks
@@ -1288,7 +1295,7 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
                   fontsize=12, va='center', ha='left', rotation = 90)
     
     # Save figure
-    mnm = f'{models[m].replace("_", "-")}_{comp_model_nm.replace("_", "-")}'
+    mnm = f'{models[mod].replace("_", "-")}_{ctl_nm.replace("_", "-")}'
     plotnm = (f'{mnm}_stats_{title[coll][v]}_{stat_outnms[s]}_'
               f'{reg}_z_{season}.png')
     print(plotnm)
@@ -1304,6 +1311,7 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
             'ticks': [1, 2, 3, 5, 7, 10, 20, 30, 50, 70, 100, 200, 300, 500, 
                       700, 1000]})
     for config in log_configs:  # Adjust y-axis limits/ticks and save figure
+        ax.set_yscale('log')
         ax.set_ylim(*config['ylim'])
         ax.set_yticks(config['ticks'])
         ax.set_yticklabels([f'{tick}' for tick in config['ticks']])
@@ -1312,12 +1320,12 @@ def plot_zon(m, comp, s, reg, coll, v, var, vmin, vmax):
         print(plotnm)
         plt.savefig(f'{plotsdir}{plotnm}', dpi=dpi)
 
-def calc_syn_ci(ctl_data, model_data_all, coll, sig):
+def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
     '''
     Calculate synoptic confidence intervals for full experiment list
     Parameters:
     - ctl_data: control data
-    - model_data_all: list of non-control model data arrays
+    - mod_data_all: list of non-control model data arrays
     - coll: collection CIs are calculated for
     - sig: significance level CIs are caluclated for (i.e., 0.95)
     Returns lower/upper confidence intervals (centered on control exp values)
@@ -1347,14 +1355,13 @@ def calc_syn_ci(ctl_data, model_data_all, coll, sig):
                 else:  # 2d
                     varm_tr = np.zeros((len(models)-1, nvars[coll]))
                 for m in range(nexps-1):
-                    model_data = np.asarray(model_data_all[m][:, l, s, :])
-                    model_tr = 0.5 * np.log((1 + model_data) / 
-                                            (1 - model_data))
-                    varm_tr[m] = stats.tvar(model_tr)
+                    mod_data = np.asarray(mod_data_all[m][:, l, s, :])
+                    mod_tr = 0.5 * np.log((1 + mod_data) / (1 - mod_data))
+                    varm_tr[m] = stats.tvar(mod_tr)
                 # Calculate control variance and mean of other model variances
                 varctl_tr = stats.tvar(ctl_tr)
                 var_tr = np.mean(varm_tr, axis=0)
-                # Calculate standard error from average of control/other variances
+                # Calculate standard error from average of ctl/other variances
                 se_tr = ((varctl_tr + var_tr) / 2 / nfcsts)**(1/2)
                 # Calculate t-critical value (two-sided) and CIs
                 t_crit = stats.t.ppf((1 + sig) / 2, nfcsts-1)
@@ -1381,9 +1388,9 @@ def calc_syn_ci(ctl_data, model_data_all, coll, sig):
                 else:  #2d
                     varm_tr = np.zeros((len(models)-1, nvars[coll]))
                 for m in range(nexps-1):
-                    model_data = np.asarray(model_data_all[m][:, l, s, :])
-                    model_tr = (model_data)**2
-                    varm_tr[m] = stats.tvar(model_tr)
+                    mod_data = np.asarray(mod_data_all[m][:, l, s, :])
+                    mod_tr = (mod_data)**2
+                    varm_tr[m] = stats.tvar(mod_tr)
                 # Calculate control variance and mean of other model variances
                 varctl_tr = stats.tvar(ctl_tr)
                 var_tr = (varctl_tr + np.mean(varm_tr, axis=0)) / 2 
@@ -1403,16 +1410,16 @@ def calc_syn_ci(ctl_data, model_data_all, coll, sig):
             ci_upper[l, s] = ci_upper[l, s] + ctl_mean
     return ci_lower, ci_upper
 
-def calc_ci(ctl_data, model_data, coll, sig):
+def calc_ci(ctl_data, mod_data, coll, sig):
     '''
     Calculate asymmetric confidence intervals for model-control differences
     Parameters:
-    - ctl_data, model_data: control and comparison experiment data
+    - ctl_data, mod_data: control and comparison model experiment data
     - coll: collection CIs are calculated for
     - sig: significance level CIs are caluclated for (i.e., 0.95)
     Returns lower/upper confidence intervals for differences (centered on zero)
     '''
-    
+
     # Initialize confidence interval arrays
     if is_3d[coll]:
         ci_lower, ci_upper = [np.zeros((nleads, nstats, nvars[coll], nlevs)) 
@@ -1426,16 +1433,14 @@ def calc_ci(ctl_data, model_data, coll, sig):
         for s in range(nstats):
             if s == 0:  # ACORR
                 # Apply Fisher transform to control and model
-                ctl_clipped   = np.clip(ctl_data[:, l, s, :],
-                                        -1 + 5.0E-6, 1 - 5.0E-6)
-                model_clipped = np.clip(model_data[:, l, s, :], 
-                                        -1 + 5.0E-6, 1 - 5.0E-6)
-                ctl_tr   = 0.5 * np.log((1 + ctl_clipped) / 
-                                        (1 - ctl_clipped))
-                model_tr = 0.5 * np.log((1 + model_clipped) / 
-                                        (1 - model_clipped))
+                ctl_clipped = np.clip(ctl_data[:, l, s, :], 
+                                      -1 + 5.0E-6, 1 - 5.0E-6)
+                mod_clipped = np.clip(mod_data[:, l, s, :], 
+                                      -1 + 5.0E-6, 1 - 5.0E-6)
+                ctl_tr = 0.5 * np.log((1 + ctl_clipped) / (1 - ctl_clipped))
+                mod_tr = 0.5 * np.log((1 + mod_clipped) / (1 - mod_clipped))
                 # Calculate differences and control mean in transformed space
-                diffs_tr = model_tr - ctl_tr
+                diffs_tr = mod_tr - ctl_tr
                 ctl_tr_mean = np.mean(ctl_tr, axis=0)
                 # Calculate variance and standard error of transformed diffs
                 vard_tr = stats.tvar(diffs_tr, axis=0)
@@ -1456,10 +1461,10 @@ def calc_ci(ctl_data, model_data, coll, sig):
                      (np.exp(2 * ctl_tr_mean) + 1)))
             else:  # RMS  
                 # Apply power transform to control and model
-                ctl_tr   = (ctl_data[:, l, s, :])**2 
-                model_tr = (model_data[:, l, s, :])**2
+                ctl_tr = (ctl_data[:, l, s, :])**2 
+                mod_tr = (mod_data[:, l, s, :])**2
                 # Calculate differences and control mean in transformed space
-                diffs_tr = model_tr - ctl_tr
+                diffs_tr = mod_tr - ctl_tr
                 ctl_tr_mean = np.mean(ctl_tr, axis=0)
                 # Calculate variance and standard error of transformed diffs
                 vard_tr = stats.tvar(diffs_tr, axis=0)
@@ -1491,12 +1496,12 @@ def plot_3d_coll(coll):
                 plot_lev(n, reg, coll, v, var, l, lev)
                 plt.close('all')
             # Create comparison zonal plots 
-            for m in range(1, nexps):
-                plot_zon(m, True, n, reg, coll, v, var, vmin[n], vmax[n])
+            for ctl, mod in comparison_pairs:
+                plot_zon(mod, ctl, n, reg, coll, v, var, vmin[n], vmax[n])
                 plt.close('all')
             # Create individual zonal plots
-            for m in range(nexps):
-                plot_zon(m, False, n, reg, coll, v, var, vmin[n], vmax[n])
+            for mod in range(nexps):
+                plot_zon(mod, None, n, reg, coll, v, var, vmin[n], vmax[n])
                 plt.close('all')
 
 def plot_2d_coll(coll, lev):
@@ -1577,7 +1582,7 @@ def make_rmsd_montages(mont_nms, mont_vars, mont_title, mont_reg, mont_levs):
             print(plotnm)
             create_image_montage(mont[lev][var], f'{plotsdir}{plotnm}', (2,2),
                                  10)
-                
+            
 def make_montages(mont_nms, mont_vars, mont_title, stat_mont_regs, 
                   land_mont_regs, regs_mont_regs, z):
     '''
@@ -1595,9 +1600,9 @@ def make_montages(mont_nms, mont_vars, mont_title, stat_mont_regs,
     - z: top level (100, 10, or 1 where 10 or 1 imply log y-axis)
     '''
     
-    # Loop through comparison experiments
-    for model in models[1:]:
-        mnm = f'{model.replace("_", "-")}_{models[0].replace("_", "-")}'
+    for ctl, mod in comparison_pairs:
+        mnm = (f'{models[mod].replace("_", "-")}_'
+               f'{models[ctl].replace("_", "-")}')
         # Loop through stats
         for nm in mont_nms:
             # Collect plots (by region and var) for traditional stats montages
@@ -1691,6 +1696,18 @@ regions = data['regions']
 plot_RMS_decomp = data['plot_RMS_decomp']
 nstats = len(data['plot_stats'])
 
+# Construct explicit comparison pairs (default: all against exp0)
+comparison_pairs = [(0, mod) for mod in range(1, nexps)]
+for pair in data['additional_pairs']:
+    if (len(pair) == 2 and all(0 <= p < nexps for p in pair) 
+        and pair[0] != pair[1]):
+        t_pair = tuple(pair)
+        if t_pair not in comparison_pairs:
+            comparison_pairs.append(t_pair)
+    else:
+        print(f'WARNING: Invalid additional_pair {pair} skipped. '
+              f'Must be two unique indices between 0 and {nexps-1}.')
+
 # Collect plot label info
 if process == 'plot': 
     x_vals = [x / 24 for x in leads]
@@ -1779,15 +1796,17 @@ if process == 'plot':
             for coll in collections:
                 cil[conf][coll] = {}
                 ciu[conf][coll] = {}
-        # Calculate difference CIs for each comp exp and confidence level
-        for m in range(1, nexps):
+        # Calculate difference CIs for each ctl/mod pair and confidence level
+        for ctl, mod in comparison_pairs:
             # Loop through confidence levels and collections
             for conf in conf_levels:
                 for coll in collections:
                     if len(fvars[coll]) > 0:
-                        (cil[conf][coll][m], ciu[conf][coll][m]
-                         ) = calc_ci(data['raw'][coll][0][reg], 
-                                     data['raw'][coll][m][reg], coll, conf)
+                        (cil[conf][coll][(ctl, mod)], 
+                         ciu[conf][coll][(ctl, mod)]
+                         ) = calc_ci(data['raw'][coll][ctl][reg], 
+                                     data['raw'][coll][mod][reg], coll, conf)
+
         # Calculate synoptic CIs for full experiment list
         cisynl, cisynu = [{} for _ in range(2)]
         for c, coll in enumerate(collections):

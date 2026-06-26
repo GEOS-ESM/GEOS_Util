@@ -147,7 +147,7 @@ echo "It is not recommended to process more than the equivalent of 31 init dates
 echo ""
 
 # STEP 1B: CHECK EXISTING DATASETS
-echo "Checking existing datasets..."
+echo "Checking for existing stats files and datasets..."
 
 # Run check-only mode
 python -u ${stats_py_path} --config ${versioned_yaml} --check_only --info_dir ${sts_dir}
@@ -163,6 +163,8 @@ endif
 set need_fcst = `grep "fcst_needed:" $status_file | cut -d: -f2`
 set need_ana = `grep "ana_needed:" $status_file | cut -d: -f2`
 set need_clim = `grep "clim_needed:" $status_file | cut -d: -f2`
+set need_reg_stats = `grep "reg_stats_needed:" $status_file | cut -d: -f2`
+set need_glo_stats = `grep "glo_stats_needed:" $status_file | cut -d: -f2`
 
 echo "Dataset generation needed:"
 echo "  Forecast: $need_fcst"
@@ -294,13 +296,21 @@ set run_regional = 0
 set run_global = 0
 
 if ("$stats_types" == "regional" || "$stats_types" == "both") then
-    set run_regional = 1
+    if ("$need_reg_stats" == "true") set run_regional = 1
 endif
 
 if ("$stats_types" == "global" || "$stats_types" == "both") then
-    set run_global = 1
+    if ("$need_glo_stats" == "true") set run_global = 1
 endif
 
+# Check for early exit if absolutely nothing is needed
+if ($need_fcst == "false" && $need_ana == "false" && $need_clim == "false" && $run_regional == 0 && $run_global == 0) then
+    echo "============================================================================"
+    echo "SUCCESS: All requested final stats files already exist and are valid."
+    echo "Bypassing dataset creation and halting pipeline - no jobs to submit."
+    echo "============================================================================"
+    exit 0
+endif
 echo "Stats types to run: $stats_types (regional=$run_regional, global=$run_global)"
 echo ""
 

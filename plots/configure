@@ -71,7 +71,7 @@ endif
 
 # Set GRADS Environment Variables
 # -------------------------------
-setenv  GEOSUTIL @CMAKE_INSTALL_PREFIX@
+setenv  GEOSUTIL /gpfsm/dnb06/projects/p260/mefrazer/Models/v11.10.0/install
 setenv  GASCRP $GEOSUTIL/plots/grads_util
 setenv  GAUDFT $GEOSUTIL/plots/grads_util/udft_$arch.tools
 setenv  GAUDXT $GEOSUTIL/plots/grads_util/udxt
@@ -194,6 +194,14 @@ set dirs = `echo precip tseries`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.GPCP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GPCP.rc  .
+end
+
+# VERIFICATION.MAC-LWP
+# ----------------------
+set dirs = `echo lwp tlwp tpw`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+if (! -l VERIFICATION.MAC-LWP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.MAC-LWP.rc  .
 end
 
 
