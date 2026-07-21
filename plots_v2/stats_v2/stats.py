@@ -846,7 +846,17 @@ class BatchDatasetProcessor:
                                 return '{' + full_tag + '}'
                         except ValueError:
                             return '{' + full_tag + '}'
-                            
+                    
+                    # Handle 2- or 3-digit padded lead hours (not datetime)
+                    if 'FF' in fmt_str:
+                        if init_date and valid_time:
+                            lead_hours = int(
+                                (valid_time - init_date).total_seconds() / 3600)
+                            fmt_str = fmt_str.replace(
+                                'FFF', f'{lead_hours:03d}')
+                            fmt_str = fmt_str.replace(
+                                'FF', f'{lead_hours:02d}')
+                    
                     # Translate standard tags to strftime directives dynamically
                     translated_fmt = fmt_str.replace('YYYY', '%Y')\
                                             .replace('MM', '%m')\
@@ -3532,6 +3542,7 @@ class StatisticsProcessor:
                                                  f'levels: {missing_levels}')
                                 
                         self.datasets[dataset_type] = ds
+                        self.dataset_files[dataset_type] = file_path
                         dataset_validated = True
                         print(f'    [OK] Validated {dataset_type} successfully'
                               f'\n    Variables: {list(ds.data_vars.keys())}'
