@@ -17,16 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-
-## [3.0.1] - 2026-07-16
-
 ### Changed
 
-- Added choices for remapping restart files for o720 (1/2-deg tripolar) and o2880 (1/8-deg tripolar) in MOM6 coupled exps
-
 ### Added
-- Added new geosgcm_prog exports to plots
-- Added IMERG precip plots
+- Added Milan nodes to fcst_stats
 
 ### Fixed
 
