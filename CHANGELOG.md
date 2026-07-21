@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added Milan nodes to fcst_stats
-
 ### Changed
 
 ### Fixed
@@ -30,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added new geosgcm_prog exports to plots
 - Added IMERG precip plots
+- Added Milan nodes to fcst_stats
 
 ### Fixed
 
@@ -38,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
 - Updated stats.py and yaml templates to accept any datetime tag or shift (including minutes and seconds) and an expid tag. Padded time/memory limits in stats.run based on experience.
 - Updated stats/plots scripts to fix log axes for corcmp zonal plots, add an additional_pairs option for corcmp comparison plots, add a check for pre-existing valid stats files, and fix dataset search to iterate through matches
-
+- Updated stats.py to allow for for non-datetime forecast lead hour tags in templates and correct a bug preventing saving of stats files.
 
 ## [3.0.0] - 2026-05-28
 
