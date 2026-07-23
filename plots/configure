@@ -196,6 +196,14 @@ cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.GPCP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GPCP.rc  .
 end
 
+# VERIFICATION.MAC-LWP
+# ----------------------
+set dirs = `echo lwp tlwp tpw`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+if (! -l VERIFICATION.MAC-LWP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.MAC-LWP.rc  .
+end
+
 
 # Link Radiation Directories for 5% Cloud-Cleared (cc5) Diagnostics
 # -----------------------------------------------------------------------------------

@@ -632,7 +632,7 @@ class BatchDatasetProcessor:
                                                f'excluded from processing')
 
     def _check_for_existing_datasets(self, stats_only_mode: bool = False
-                                     ) -> Dict[str, str]:
+                                     ) -> Dict[str, List[str]]:
         '''Check for already-processed datasets in specified directories'''
         print('\n--- Checking for existing datasets ---')
         # Get search directories from config
@@ -661,15 +661,16 @@ class BatchDatasetProcessor:
         current_excl_count = len(exclude_dates)
         for dataset_type, (filenm, model_nm) in expected_files.items():
             print(f'\n  Looking for {dataset_type}: {filenm}')
-            found_file = None
+            candidates = []
             # Check all directories for this file
             for search_dir in search_dirs:
                 # First try exact match
                 full_path = os.path.join(search_dir, filenm)
                 if os.path.exists(full_path):
-                    found_file = full_path
-                    print(f'    [FOUND] {full_path}')
-                    break
+                    file_size_mb = os.path.getsize(full_path) // (1024 * 1024)
+                    # Tier 0 for exact matches
+                    candidates.append((full_path, 0, file_size_mb))
+                    print(f'    [FOUND] {full_path} ({file_size_mb} MB)')
                 else:
                     print(f'    [CHECKED] {full_path} - Not found')
                 # If forecast and exclusions, try files with fewer exclusions  
@@ -686,32 +687,45 @@ class BatchDatasetProcessor:
                                 f'_excl{excl_count}')
                         alt_path = os.path.join(search_dir, alt_filenm)
                         if os.path.exists(alt_path):
-                            found_file = alt_path
-                            print(f'    [FOUND] {alt_path} (fewer exclusions)')
-                            break
+                            file_size_mb = os.path.getsize(
+                                alt_path) // (1024 * 1024)
+                            # Tier based on distance from current exclusions
+                            tier = current_excl_count - excl_count
+                            candidates.append((alt_path, tier, file_size_mb))
+                            print(f'    [FOUND] {alt_path} (fewer exclusions, '
+                                  f'{file_size_mb} MB)')
                         else:
                             print(f'    [CHECKED] {alt_path} (fewer '
                                   f'exclusions) - Not found')
-                    if found_file:
-                        break
-            if found_file:
-                # Validate dates if the found file has exclusions in its name
-                needs_validation = ('_excl' in os.path.basename(found_file) 
-                                    and dataset_type == 'fcst')
-                if needs_validation:
-                    exclude_dates = self.config.get('exclude_dates', [])
-                    spacing = self.config.get('fcst_spacing', 1)
-                    expected_dates = self._parse_date_range_with_spacing(
-                        self.config['FDATES'], spacing, exclude_dates)
-                    if self._validate_dataset_dates(
-                            found_file, expected_dates):
-                        found_datasets[dataset_type] = found_file
-                        print('    [VALIDATED] Date validation passed')
+            if candidates:
+                # Sort by tier (ascending) then file size (descending)
+                candidates.sort(key=lambda x: (x[1], -x[2]))
+                valid_candidates = []
+                
+                for candidate_path, tier, size in candidates:
+                    # Validate dates if the found file has exclusions in its name
+                    needs_validation = ('_excl' in os.path.basename(candidate_path) 
+                                        and dataset_type == 'fcst')
+                    if needs_validation:
+                        exclude_dates = self.config.get('exclude_dates', [])
+                        spacing = self.config.get('fcst_spacing', 1)
+                        expected_dates = self._parse_date_range_with_spacing(
+                            self.config['FDATES'], spacing, exclude_dates)
+                        if self._validate_dataset_dates(
+                                candidate_path, expected_dates):
+                            valid_candidates.append(candidate_path)
+                            print(f'    [VALIDATED] Date validation passed '
+                                  f'for {os.path.basename(candidate_path)}')
+                        else:
+                            print(f'    [REJECTED] Date validation failed '
+                                  f'for {os.path.basename(candidate_path)}')
                     else:
-                        print('    [REJECTED] Date validation failed')
-                else:
-                    found_datasets[dataset_type] = found_file
-            else:
+                        valid_candidates.append(candidate_path)
+                
+                if valid_candidates:
+                    found_datasets[dataset_type] = valid_candidates
+                
+            if dataset_type not in found_datasets:
                 if stats_only_mode:
                     print(f'  [NOT FOUND] {dataset_type}: {filenm}')
                     print(f'    Searched in: {", ".join(search_dirs)}')
@@ -1004,7 +1018,7 @@ class BatchDatasetProcessor:
         return list(range(0, max_hours + 1, freq_hours))
     
     def find_match(self, dataset_vars, var, var_aliases, coll_nm, 
-                   calc_var=None):
+                   calc_var=None, quiet=False):
         '''
         Helper function to search for direct or alias match.
         Modifies coll_results in place.
@@ -1025,7 +1039,7 @@ class BatchDatasetProcessor:
         else:
             print(f'[WARNING] Missing alias definition for {var} - no '
                   f'{var}_alias in YAML')
-        if found_nm:
+        if found_nm and not quiet:
             if calc_var:
                 print(f'      Found dependency {var} in collection '
                       f'{coll_nm} for calculated variable {calc_var}')
@@ -1084,16 +1098,14 @@ class BatchDatasetProcessor:
                                          ) as ds:
                         dataset_vars = {var.lower(): var for var 
                                         in ds.data_vars.keys()}
-                        print(f'    File: {os.path.basename(file_path)} '
-                              f'(collections: '
-                              f'{", ".join(sorted(colls_for_file))})')
+                        print(f'    File: {os.path.basename(file_path)}')
                         # Check which variables exist
                         found_vars = []
                         coll_nms = ', '.join(sorted(colls_for_file))
                         for var in requested_vars:
-                            found_nm = self.find_match(dataset_vars, var, 
-                                                         self.var_aliases, 
-                                                         coll_nms)
+                            found_nm = self.find_match(
+                                dataset_vars, var, self.var_aliases, coll_nms, 
+                                quiet=True)
                             if found_nm:
                                 found_vars.append(var)
                             else:
@@ -1226,9 +1238,7 @@ class BatchDatasetProcessor:
                                                             dep_var
                                                             ] = found_nm
                     # Main validation for this file
-                    print(f'    File: {os.path.basename(file_path)} '
-                          f'(collections: '
-                          f'{", ".join(sorted(colls_for_file))})')
+                    print(f'    File: {os.path.basename(file_path)}')
                     # Check which requested variables are in this file
                     for coll_nm in colls_for_file:
                         coll_vars = self.var_colls.get(
@@ -1491,7 +1501,55 @@ class BatchDatasetProcessor:
             return validation_result
         except Exception as e:
             return f'{dataset_type.capitalize()} validation failed: {e}'        
-        
+
+    def _validate_existing_stats_file(
+            self, stat_file: str, is_regional: bool) -> bool:
+        '''Validate an existing stats file against config requirements'''
+        try:
+            with xr.open_dataset(stat_file) as ds:
+                # 1. Validate Variables
+                required_vars = set()
+                for coll_vars in self.var_colls.values():
+                    required_vars.update(coll_vars['3d'] + coll_vars['2d'])
+                
+                for var in required_vars:
+                    if f'{var}_rms' not in ds.data_vars:
+                        print(f'    [WARNING] Missing required variable: '
+                              f'{var}_rms')
+                        return False
+                
+                # 2. Validate Pressure Levels (if 3D variables are requested)
+                has_3d = any(
+                    self.var_colls[coll]['3d'] for coll in self.var_colls)
+                if has_3d:
+                    if 'lev' not in ds.coords:
+                        print('    [WARNING] Missing "lev" coordinate')
+                        return False
+                    file_levels = set(ds.lev.values)
+                    missing_levels = set(self.pressure_levels) - file_levels
+                    if missing_levels:
+                        print(f'    [WARNING] Missing pressure levels: '
+                              f'{missing_levels}')
+                        return False
+                        
+                # 3. Validate Regions (if checking a regional stats file)
+                if is_regional:
+                    if 'region' not in ds.coords:
+                        print('    [WARNING] Missing "region" coordinate')
+                        return False
+                    file_regions = set(ds.region.values)
+                    req_regions = set(self.config['regions'])
+                    missing_regions = req_regions - file_regions
+                    if missing_regions:
+                        print(f'    [WARNING] Missing regions: '
+                              f'{missing_regions}')
+                        return False
+                        
+            return True
+        except Exception as e:
+            print(f'    [WARNING] Could not read file properly: {e}')
+            return False
+
     def _calculate_monthly_weights(self, dt: datetime) -> tuple:
         '''Calculate distance-based weights for monthly interpolation'''
         
@@ -2446,59 +2504,122 @@ class BatchDatasetProcessor:
             dataset_status.append(f'Climatology={self.clim_model}')
         print(f'Dataset processing: {", ".join(dataset_status)}')
         
-        # Check for and validate existing datasets
-        if single_fcst_mode is None:
-            existing_datasets = self._check_for_existing_datasets()
-        else:
+        # Check for pre-existing stats files (if check-only)
+        if check_only:
+            print('\n--- Checking for pre-existing final stats ---')
+            
+            # Determine intended stats types and build the filename suffix
+            stats_types = self.config.get('stats_types', 'both')
+            reg_stats_needed = True if stats_types in [
+                'regional', 'both'] else False
+            glo_stats_needed = True if stats_types in [
+                'global', 'both'] else False
+            fcst_base_name = self._generate_output_filenm('fcst')
+            prefix = f'fcst_{self.fcst_model}_'
+            suffix = fcst_base_name.replace(prefix, '', 1)
+
+            # Search for and validate intended stats files
+            for stype in ['regional', 'global']:
+                if stype == 'regional' and not reg_stats_needed:
+                    continue
+                if stype == 'global' and not glo_stats_needed:
+                    continue
+                stat_file = (f'output/stats_{stype}_{self.fcst_model}_'
+                             f'{self.ana_model}_{self.clim_model}_{suffix}')
+                print(f'  Looking for: {stat_file}')
+                if os.path.exists(stat_file):
+                    print(f'    [FOUND] Validating {stype} stats...')
+                    is_regional = (stype == 'regional')
+                    if self._validate_existing_stats_file(
+                            stat_file, is_regional):
+                        full_path = os.path.abspath(stat_file)
+                        print(f'    [OK] Valid {stype} stats file exists:\n'
+                              f'         {full_path}')
+                        if stype == 'regional':
+                            reg_stats_needed = False
+                        else:
+                            glo_stats_needed = False
+                else:
+                    print('    [NOT FOUND]')
+
+            # If all requested stats exist, no need to process datasets
+            if not reg_stats_needed and not glo_stats_needed:
+                print('  [INFO] All requested stats files exist and are valid.'
+                      ' Bypassing dataset creation.\n')
+                process_fcst = False
+                process_ana  = False
+                process_clim = False
+        
+        # Check for and validate existing datasets (if needed)
+        if single_fcst_mode is not None:
             existing_datasets = {}
             print('[INFO] Single forecast mode: skipping existing dataset '
                   'check')
+        elif process_fcst or process_ana or process_clim:
+            existing_datasets = self._check_for_existing_datasets()
+        else:
+            existing_datasets = {}
         if existing_datasets:
             print('\n--- Validating existing datasets ---') 
         validation_errors = []
         datasets_to_reprocess = []
-        for dataset_type, file_path in list(existing_datasets.items()):
+        for dataset_type, candidate_paths in list(existing_datasets.items()):
             if ((dataset_type == 'fcst' and not process_fcst) or
                 (dataset_type == 'ana' and not process_ana) or 
                 (dataset_type == 'clim' and not process_clim)):
                 continue
-            print(f'\n  Validating {dataset_type}: '
-                  f'{os.path.basename(file_path)}')          
-            try:
-                # Load dataset for validation
-                with xr.open_dataset(file_path, decode_timedelta=True) as ds:
-                    # Establishe all collections for validation
-                    mock_coll_files = {}
-                    needed_colls = []
-                    for coll_nm, vars_dict in self.var_colls.items():
-                        if vars_dict['3d'] or vars_dict['2d']:
-                            needed_colls.append(coll_nm)
-                    for collection in needed_colls:
-                        mock_coll_files[collection] = file_path
-                    # Validate with the same method used for new files
-                    self._validate_variables_and_levels(
-                        mock_coll_files, dataset_type, 
-                        existing_dataset_mode=True)        
-                    
-                    # Successfully validated - update processing flag
-                    if dataset_type == 'fcst':
-                        process_fcst = False
-                        print('    [INFO] Skipping forecast processing - '
-                              'using validated dataset')
-                    elif dataset_type == 'ana':
-                        process_ana = False
-                        print('    [INFO] Skipping analysis processing - '
-                              'using validated dataset')
-                    elif dataset_type == 'clim':
-                        process_clim = False
-                        print('    [INFO] Skipping climatology processing - '
-                              'using validated dataset')
+            dataset_validated = False
+            for file_path in candidate_paths:
+                print(f'\n  Validating {dataset_type}: {file_path}')           
+                try:
+                    # Load dataset for validation
+                    with xr.open_dataset(
+                            file_path, decode_timedelta=True) as ds:
+                        # Establish all collections for validation
+                        mock_coll_files = {}
+                        needed_colls = []
+                        for coll_nm, vars_dict in self.var_colls.items():
+                            if vars_dict['3d'] or vars_dict['2d']:
+                                needed_colls.append(coll_nm)
+                        for collection in needed_colls:
+                            mock_coll_files[collection] = file_path
+                        # Validate with the same method used for new files
+                        self._validate_variables_and_levels(
+                            mock_coll_files, dataset_type, 
+                            existing_dataset_mode=True)        
                         
-            except Exception as e:
-                error_msg = str(e)
-                validation_errors.append(f'{dataset_type.capitalize()} '
-                                         f'validation failed: {error_msg}')
-                print(f'    [ERROR] Validation failed: {error_msg}')
+                        # Successfully validated
+                        dataset_validated = True
+                        # Replace the list with the single successful string
+                        existing_datasets[dataset_type] = file_path
+                        
+                        # Update processing flag
+                        if dataset_type == 'fcst':
+                            process_fcst = False
+                            print('    [INFO] Skipping forecast processing - '
+                                  'using validated dataset')
+                        elif dataset_type == 'ana':
+                            process_ana = False
+                            print('    [INFO] Skipping analysis processing - '
+                                  'using validated dataset')
+                        elif dataset_type == 'clim':
+                            process_clim = False
+                            print('    [INFO] Skipping climatology processing - '
+                                  'using validated dataset')
+                        break # Success, stop checking other candidates
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    print(f'    [WARNING] Validation failed for {file_path}: '
+                          f'{error_msg}')
+                    if file_path != candidate_paths[-1]:
+                        print('    Trying next candidate...')
+            
+            # If all candidates failed
+            if not dataset_validated:
+                validation_errors.append(
+                    f'{dataset_type.capitalize()} validation failed for all '
+                    f'candidates.')
                 # Mark for reprocessing
                 datasets_to_reprocess.append(dataset_type)
 
@@ -2529,29 +2650,36 @@ class BatchDatasetProcessor:
         if datasets_to_process:
             print(f'\n[INFO] Will process these datasets: '
                   f'{", ".join(datasets_to_process)}')
-
+        
         # If check_only mode, write status file and exit
         if check_only:
+
             # Create job directory and status output file
             job_dir = f'output/{info_dir}/jobs'
             os.makedirs(job_dir, exist_ok=True)
             status_file = f'{job_dir}/dataset_status.txt'
+            
             # Write status file
             need_fcst = 'true' if process_fcst else 'false'
             need_ana  = 'true' if process_ana  else 'false'
             need_clim = 'true' if process_clim else 'false'
+            need_reg  = 'true' if reg_stats_needed else 'false'
+            need_glo  = 'true' if glo_stats_needed else 'false'
             with open(status_file, 'w') as f:
                 f.write(f'fcst_needed:{need_fcst}\n')
                 f.write(f'ana_needed:{need_ana}\n') 
                 f.write(f'clim_needed:{need_clim}\n')
+                f.write(f'reg_stats_needed:{need_reg}\n')
+                f.write(f'glo_stats_needed:{need_glo}\n')
+                
             # Print summary
             print(f'[CHECK_ONLY] Dataset status written to: {status_file}')
-            print('[SUCCESS] Dataset check completed')
+            print('[SUCCESS] Dataset check completed\n')
             return {
                 'status': 'check_only_success',
                 'status_file': status_file,
                 'datasets_needed': datasets_to_process
-            }
+            }       
         
         # If all datasets are validated, return success
         if not any([process_fcst, process_ana, process_clim]):
@@ -3372,32 +3500,54 @@ class StatisticsProcessor:
             # Load datasets from files (regular mode)
             print('Loading datasets for statistics...')
             self.datasets = {}
-            for dataset_type, file_path in self.dataset_files.items():
-                if not os.path.exists(file_path):
-                    raise ValueError(
-                        f'{dataset_type} file not found: {file_path}')
-                print(f'  Loading {dataset_type}: {file_path}')
-                self.datasets[dataset_type] = xr.open_dataset(
-                    file_path, decode_timedelta=True)
-                print(f'    Variables: '
-                      f'{list(self.datasets[dataset_type].data_vars.keys())}')
-                print(f'    Dimensions: '
-                      f'{dict(self.datasets[dataset_type].sizes)}')
             
-        # Validate required variables and levels
-        print('  Validating datasets for required variables and levels...')
-        for dataset_type, ds in self.datasets.items():
-            missing_vars = [var for var in self.required_vars 
-                            if var not in ds.data_vars]
-            if missing_vars:
-                raise ValueError(f'{dataset_type} dataset missing required '
-                                 f'variables: {missing_vars}')
-            if 'lev' in ds.coords:
-                missing_levels = [lev for lev in self.required_levels 
-                                  if lev not in ds.lev.values]
-                if missing_levels:
-                    raise ValueError(f'{dataset_type} dataset missing '
-                                     f'required levels: {missing_levels}')
+            for dataset_type, candidate_paths in self.dataset_files.items():
+                if isinstance(candidate_paths, str):
+                    candidate_paths = [candidate_paths]
+                
+                dataset_validated = False
+                for file_path in candidate_paths:
+                    if not os.path.exists(file_path):
+                        print(f'    [WARNING] {dataset_type} file not '
+                              f'found: {file_path}')
+                        continue
+                        
+                    print(f'  Trying {dataset_type}: '
+                          f'{os.path.basename(file_path)}')
+                    try:
+                        ds = xr.open_dataset(file_path, decode_timedelta=True)
+                        
+                        missing_vars = [var for var in self.required_vars 
+                                        if var not in ds.data_vars]
+                        if missing_vars:
+                            raise ValueError(f'Missing required '
+                                             f'variables: {missing_vars}')
+                        
+                        if 'lev' in ds.coords:
+                            missing_levels = [
+                                lev for lev in self.required_levels 
+                                if lev not in ds.lev.values]
+                            if missing_levels:
+                                raise ValueError(f'Missing required '
+                                                 f'levels: {missing_levels}')
+                                
+                        self.datasets[dataset_type] = ds
+                        dataset_validated = True
+                        print(f'    [OK] Validated {dataset_type} successfully'
+                              f'\n    Variables: {list(ds.data_vars.keys())}'
+                              f'\n    Dimensions: {dict(ds.sizes)}')
+                        break
+                        
+                    except Exception as e:
+                        print(f'    [WARNING] Validation failed: {str(e)}')
+                        if 'ds' in locals():
+                            ds.close()
+                        if file_path != candidate_paths[-1]:
+                            print('    Trying next candidate...')
+                
+                if not dataset_validated:
+                    raise ValueError(f'Failed to find a valid {dataset_type} '
+                                     f'dataset among candidates.')
         print('  [OK] All datasets contain required variables and levels')
         
         # Filter datasets to only include requested pressure levels
@@ -5038,7 +5188,9 @@ def main():
         if not (args.stats and not args.process) or args.date:
         
             print('\n==================================================')
-            if args.stats:
+            if args.check_only:
+                print('STATUS CHECK')
+            elif args.stats:
                 print('DATASET CREATION AND STATISTICS CALCULATION')
             else:
                 print('DATASET CREATION')
@@ -5217,8 +5369,8 @@ def main():
                     processor.config['FDAYS'], processor.config['NFREQ'])
                 existing_datasets = processor._check_for_existing_datasets(
                     stats_only_mode=True)
-                for dataset_type, file_path in existing_datasets.items():
-                    dataset_files[dataset_type] = file_path
+                for dataset_type, file_paths in existing_datasets.items():
+                    dataset_files[dataset_type] = file_paths
 
             # Check if all datasets and neeeded variables are present
             required_datasets = {'fcst', 'ana', 'clim'}
