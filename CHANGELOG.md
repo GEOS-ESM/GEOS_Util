@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Corrected one more plotting script to avoid qname_not_found in plot titles.
 
 ### Removed
 
