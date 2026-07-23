@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
-
+- Edited plot.rc to apply a -1 factor and correct titles to aerosol scavenging (*SV) export plots and corrected genplot.gs to avoid qname_not_found in plot titles. 
 ### Removed
 
 ### Deprecated
