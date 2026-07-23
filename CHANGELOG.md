@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Corrected one more plotting script to avoid qname_not_found in plot titles.
-
+- Edited plot.rc to apply a -1 factor and correct titles to aerosol scavenging (*SV) export plots. 
 ### Removed
 
 ### Deprecated
