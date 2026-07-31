@@ -13,8 +13,9 @@ set -e
 #   $1  END_YEAR_MONTH   YYYYMM through which to extend the CMIP file
 #   $2  ZONAL_MEANS_DIR  directory containing the MERRA-2 monthly zonal-mean files
 #   $3  CMIP_DIR         directory containing the CMIP input species file
+#   $4  LEV_SOURCE       netCDF file whose lev variable (float64) is copied into the output
 #
-# $2 and $3 fall back to hardcoded defaults if not supplied.
+# $2, $3, and $4 fall back to hardcoded defaults if not supplied.
 #
 # END_YEAR_MONTH must be in YYYYMM format, e.g. 202512 (default) or 202612.
 # It can also be set via the END_YYYYMM environment variable; the command-line
@@ -52,6 +53,9 @@ trap _cleanup_tmpdir EXIT
 ZONAL_MEANS_DIR="${2:-/home/bmauer/noback/generate_pchem_zonal/monthly_zonal}"   # Directory containing the raw MERRA-2 monthly zonal-mean files
 
 CMIP_INPUT="${CMIP_DIR}/pchem.species.CMIP-5.1870-2097.z_91x72.nc4"
+
+# File whose lev variable (float64) is copied verbatim into the output.
+LEV_SOURCE="${4:-${LEV_SOURCE:-/home/bmauer/cleanup_script/file_with_levels_i_want.nc4}}"
 
 # Intermediate / output file names  (all derived from END_YYYYMM)
 CMIP_CARVED="${WORK_DIR}/pchem.species.CMIP-5.197902-${END_YYYYMM}.z_91x72.nc4"
@@ -179,15 +183,6 @@ with nc.Dataset(merra2_path, 'r') as m2ds, nc.Dataset(out_path, 'r+') as outds:
 
     print(f"  Replaced OX for {replaced} time steps.")
 
-    # Fix lev metadata: axis=Z, positive=down, type=double
-    lev_var = outds['lev']
-    lev_var.axis = 'Z'
-    lev_var.positive = 'down'
-    # Remove any spurious attributes CDO may have added
-    for attr in ('standard_name',):
-        if hasattr(lev_var, attr):
-            lev_var.delncattr(attr)
-
     # Fix lat metadata: standard_name, lowercase long_name, degrees_north units
     lat_var = outds['lat']
     lat_var.standard_name = 'latitude'
@@ -199,11 +194,53 @@ with nc.Dataset(merra2_path, 'r') as m2ds, nc.Dataset(out_path, 'r+') as outds:
 PYEOF
 
 # ---------------------------------------------------------------------------
-# Step 7 – Edit global metadata for model bracketing
+# Step 7 – Edit global metadata and restore lev from original CMIP file
 # ---------------------------------------------------------------------------
-echo "=== Step 7: Editing global metadata and fixing variable attributes ==="
-# Cast lev to double to match reference file format
-ncap2 -O -s 'lev=double(lev)' "${OUTPUT}" "${OUTPUT}"
+echo "=== Step 7: Editing global metadata and restoring lev from LEV_SOURCE ==="
+# Copy lev (as float64, bit-for-bit) from LEV_SOURCE into the output file.
+# The rest of the file is rebuilt unchanged around it.
+python3 - "${OUTPUT}" "${LEV_SOURCE}" <<'PYEOF'
+import sys, os, shutil
+import numpy as np
+import netCDF4 as nc
+
+out_path, lev_source_path = sys.argv[1], sys.argv[2]
+tmp_path = out_path + ".levfix.tmp.nc4"
+
+with nc.Dataset(out_path, 'r') as src, \
+     nc.Dataset(lev_source_path, 'r') as lev_src, \
+     nc.Dataset(tmp_path, 'w', format=src.file_format) as dst:
+
+    # Copy dimensions
+    for name, dim in src.dimensions.items():
+        dst.createDimension(name, None if dim.isunlimited() else len(dim))
+
+    # Copy variables, substituting lev from original CMIP
+    for name, var in src.variables.items():
+        if name == 'lev':
+            orig_lev = lev_src['lev']
+            # Always write lev as float64, values copied bit-for-bit from LEV_SOURCE
+            new_var = dst.createVariable('lev', 'f8', orig_lev.dimensions)
+            # Copy original attributes exactly
+            for attr in orig_lev.ncattrs():
+                new_var.setncattr(attr, orig_lev.getncattr(attr))
+            new_var[:] = np.array(orig_lev[:], dtype=np.float64)
+        else:
+            new_var = dst.createVariable(name, var.dtype, var.dimensions,
+                                         fill_value=var._FillValue if '_FillValue' in var.ncattrs() else False)
+            # Copy all attributes except _FillValue (already set)
+            for attr in var.ncattrs():
+                if attr != '_FillValue':
+                    new_var.setncattr(attr, var.getncattr(attr))
+            new_var[:] = var[:]
+
+    # Copy global attributes
+    dst.setncatts({attr: src.getncattr(attr) for attr in src.ncattrs()})
+
+os.replace(tmp_path, out_path)
+print("  lev copied from LEV_SOURCE as float64.")
+PYEOF
+
 ncatted -O \
     -a begClimYear,global,m,i,1979 \
     -a endClimYear,global,m,i,"${END_YEAR}" \

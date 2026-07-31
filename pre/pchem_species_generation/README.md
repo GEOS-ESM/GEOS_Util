@@ -52,7 +52,7 @@ The following tools must be available in your environment before running:
 | `bash` ≥ 4.0 | All scripts |
 | `python3` with `numpy`, `netCDF4` | `zonal_mean_subsample_o3.py`, `generate_merra2ox_species.sh` |
 | CDO ≥ 1.9.0 | `generate_merra2ox_species.sh` |
-| NCO (`ncatted`, `ncap2`) | `generate_merra2ox_species.sh` |
+| NCO (`ncatted`, `ncks`) | `generate_merra2ox_species.sh` |
 | GEOS `g5_modules.sh`, `time_ave.x` | `compute_time_ave.sh` |
 | SLURM (`sbatch`, `squeue`, `sacct`) | `run_pipeline.sh` (SLURM step only) |
 
@@ -122,6 +122,7 @@ Only months with neither file trigger the SLURM time-averaging step.
 MODEL_BUILD_DIR="/discover/swdev/bmauer/models/geosgcm_v11.10.0/GEOSgcm/install-release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
 CMIP_DIR="/path/to/cmip_dir"
+LEV_SOURCE="/path/to/file_with_desired_levels.nc4"
 ```
 
 | Variable | What it points to |
@@ -129,6 +130,7 @@ CMIP_DIR="/path/to/cmip_dir"
 | `MODEL_BUILD_DIR` | GEOSgcm `install-release` directory. Must contain `bin/g5_modules.sh` and `bin/time_ave.x`. |
 | `MERRA2_DAILY_SOURCE` | Root of the raw MERRA-2 daily files, organised as `Y{YYYY}/M{MM}/MERRA2_400.inst3_3d_asm_Nv.YYYYMMDD.nc4`. Only needed if SLURM time-averaging is triggered. |
 | `CMIP_DIR` | Directory containing `pchem.species.CMIP-5.1870-2097.z_91x72.nc4`. |
+| `LEV_SOURCE` | Path to a NetCDF file whose `lev` variable (float64) is copied verbatim into the output file. |
 
 ---
 
@@ -199,8 +201,9 @@ and `CMIP_DIR`. It performs the following sub-steps using CDO and Python:
 5. Standardises the vertical levels on the merged file.
 6. Uses an inline Python script to replace the OX variable in the CMIP file
    with MERRA-2 OX, matched by (year, month). Fixes coordinate metadata.
-7. Casts `lev` to double and sets global attributes `begClimYear`,
-   `endClimYear`, and `climYears`.
+7. Copies the `lev` variable (as float64, bit-for-bit) from `LEV_SOURCE` into
+       the output file, along with its attributes. Then sets global attributes
+       `begClimYear`, `endClimYear`, and `climYears`.
 
 Intermediate files are written to two temporary directories created with
 `mktemp -d` and are automatically deleted when the script exits.
@@ -259,12 +262,12 @@ python3 zonal_mean_subsample_o3.py \
 ### `generate_merra2ox_species.sh`
 
 ```bash
-bash generate_merra2ox_species.sh END_YYYYMM ZONAL_MEANS_DIR CMIP_DIR
+bash generate_merra2ox_species.sh END_YYYYMM ZONAL_MEANS_DIR CMIP_DIR LEV_SOURCE
 ```
 
 Example:
 ```bash
-bash generate_merra2ox_species.sh 202512 ./monthly_zonal /path/to/cmip
+bash generate_merra2ox_species.sh 202512 ./monthly_zonal /path/to/cmip /path/to/file_with_desired_levels.nc4
 ```
 
 All arguments fall back to hardcoded defaults if omitted.

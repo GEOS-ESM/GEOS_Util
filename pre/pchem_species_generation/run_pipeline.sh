@@ -30,8 +30,8 @@ set -euo pipefail
 # Configuration
 # ===========================================================================
 
-END_YEAR=2026
-END_MONTH=06
+END_YEAR=2017
+END_MONTH=6
 
 # Read-only archive directories (never written to by this script)
 MONTHLY_ARCHIVE_DIR="/home/bmauer/noback/merra2_data/monthly_ave"   # pre-existing monthly time-averaged files
@@ -40,7 +40,8 @@ ZONAL_ARCHIVE_DIR="/home/bmauer/noback/merra2_data/monthly_zonal"       # pre-ex
 # Input data paths passed through to sub-scripts
 MODEL_BUILD_DIR="/discover/swdev/bmauer/models/geosgcm_v11.10.0/GEOSgcm/install-release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
-CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/NL3/PCHEM"             # directory containing the CMIP input species file
+CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM"             # directory containing the CMIP input species file
+LEV_SOURCE="${CMIP_DIR}/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4"   # file whose lev variable (float64) is copied into the output
 
 # Working directories used during the pipeline run (deleted at the end)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -230,7 +231,7 @@ log "  Symlinked ${linked} archive zonal mean file(s)."
 # ===========================================================================
 
 log "Step 4: Assembling pchem species file through ${END_YYYYMM}..."
-bash "${SCRIPT_DIR}/generate_merra2ox_species.sh" "${END_YYYYMM}" "${ZONAL_OUT_DIR}" "${CMIP_DIR}"
+bash "${SCRIPT_DIR}/generate_merra2ox_species.sh" "${END_YYYYMM}" "${ZONAL_OUT_DIR}" "${CMIP_DIR}" "${LEV_SOURCE}"
 log "  pchem species file generation complete."
 
 # ===========================================================================
