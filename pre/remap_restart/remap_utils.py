@@ -485,9 +485,15 @@ def get_command_line_from_answers(answers):
    out_stretch = ''
    if answers["output:shared:stretch"]:
      out_stretch = ' -out_stretch ' + answers["output:shared:stretch"]
-   in_stretch  = ''
-   if answers["input:shared:stretch"]:
-     in_stretch  = ' -in_stretch ' + answers["input:shared:stretch"]
+# Matt suggested
+   in_stretch = ''
+   if answers.get("input:shared:stretch", False):
+     in_stretch = ' -in_stretch ' + answers["input:shared:stretch"]
+
+#   old code
+#   in_stretch  = ''
+#   if answers["input:shared:stretch"]:
+#     in_stretch  = ' -in_stretch ' + answers["input:shared:stretch"]
 
    zoom   = " -zoom "      + answers["input:surface:zoom"]
    wemin  = " -in_wemin "  + answers["input:surface:wemin"]
