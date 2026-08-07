@@ -41,7 +41,7 @@ echo "=== Generating output through ${END_YYYYMM} (${END_DATE}) ==="
 # ---------------------------------------------------------------------------
 # Configurable paths
 # ---------------------------------------------------------------------------
-CMIP_DIR="${3:-/home/bmauer/noback/generate_pchem_zonal/PCHEM}"
+CMIP_DIR="${3:-/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM}"
 MERRA2_DIR="$(mktemp -d)"
 WORK_DIR="$(mktemp -d)"
 
@@ -50,12 +50,12 @@ _cleanup_tmpdir() {
 }
 trap _cleanup_tmpdir EXIT
 
-ZONAL_MEANS_DIR="${2:-/home/bmauer/noback/generate_pchem_zonal/monthly_zonal}"   # Directory containing the raw MERRA-2 monthly zonal-mean files
+ZONAL_MEANS_DIR="${2:-/discover/nobackup/projects/gmao/SIteam/pchem_species_inputs/monthly_zonal}"   # Directory containing the raw MERRA-2 monthly zonal-mean files
 
 CMIP_INPUT="${CMIP_DIR}/pchem.species.CMIP-5.1870-2097.z_91x72.nc4"
 
 # File whose lev variable (float64) is copied verbatim into the output.
-LEV_SOURCE="${4:-${LEV_SOURCE:-/home/bmauer/cleanup_script/file_with_levels_i_want.nc4}}"
+LEV_SOURCE="${4:-${LEV_SOURCE:-${CMIP_DIR}/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4}}"
 
 # Intermediate / output file names  (all derived from END_YYYYMM)
 CMIP_CARVED="${WORK_DIR}/pchem.species.CMIP-5.197902-${END_YYYYMM}.z_91x72.nc4"

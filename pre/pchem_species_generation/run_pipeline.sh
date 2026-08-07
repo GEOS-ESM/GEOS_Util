@@ -30,15 +30,15 @@ set -euo pipefail
 # Configuration
 # ===========================================================================
 
-END_YEAR=2017
+END_YEAR=2026
 END_MONTH=6
 
 # Read-only archive directories (never written to by this script)
-MONTHLY_ARCHIVE_DIR="/home/bmauer/noback/merra2_data/monthly_ave"   # pre-existing monthly time-averaged files
-ZONAL_ARCHIVE_DIR="/home/bmauer/noback/merra2_data/monthly_zonal"       # pre-existing zonal mean files
+MONTHLY_ARCHIVE_DIR="/discover/nobackup/projects/gmao/SIteam/pchem_species_inputs/monthly_ave"   # pre-existing monthly time-averaged files
+ZONAL_ARCHIVE_DIR="/discover/nobackup/projects/gmao/SIteam/pchem_species_inputs/monthly_zonal"       # pre-existing zonal mean files
 
 # Input data paths passed through to sub-scripts
-MODEL_BUILD_DIR="/discover/swdev/bmauer/models/geosgcm_v11.10.0/GEOSgcm/install-release"
+MODEL_BUILD_DIR="${ESMADIR}/install-release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
 CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM"             # directory containing the CMIP input species file
 LEV_SOURCE="${CMIP_DIR}/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4"   # file whose lev variable (float64) is copied into the output

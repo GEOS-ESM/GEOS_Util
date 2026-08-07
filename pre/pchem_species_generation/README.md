@@ -119,10 +119,10 @@ Only months with neither file trigger the SLURM time-averaging step.
 ### Input data paths (required)
 
 ```bash
-MODEL_BUILD_DIR="/discover/swdev/bmauer/models/geosgcm_v11.10.0/GEOSgcm/install-release"
+MODEL_BUILD_DIR="${ESMADIR}/install-release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
-CMIP_DIR="/path/to/cmip_dir"
-LEV_SOURCE="/path/to/file_with_desired_levels.nc4"
+CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM/pchem.species.CMIP-5.1870-2097.z_91x72.nc4"
+LEV_SOURCE="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4"
 ```
 
 | Variable | What it points to |

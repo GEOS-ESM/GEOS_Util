@@ -22,7 +22,7 @@ set -euo pipefail
 #   $5  MODEL_BUILD_DIR  (path to GEOSgcm install-release)
 #   $6  SOURCE_ROOT      (path to raw MERRA-2 daily input files)
 #   $7  MONTHLY_OUT_DIR  (directory to write monthly average output files)
-model_build="${5:-/discover/swdev/bmauer/models/geosgcm_v11.10.0/GEOSgcm/install-release}"
+model_build="${5:-${ESMADIR}/install-release}"
 source $model_build/bin/g5_modules.sh
 
 source_root="${6:-/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10}"
