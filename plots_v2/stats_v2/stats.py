@@ -83,9 +83,11 @@ VARS_SCALE_MAP = {'H': 1., 'U': 1., 'V': 1., 'T': 1., 'Q': 1000., 'P': 1./100.,
 
 # Calculable variables and their dependencies 
 # Note: see _calculate_variables() method for equations
-CALCULABLE_VARS = {'D2m': ['Q2m', 'PS'], 'LOGAOD': ['AOD'], 
-                   'PM25': ['SSSMASS25', 'DUSMASS25', 'BCSMASS', 'OCSMASS', 
-                            'SO4SMASS', 'NISMASS25', 'NH4SMASS']}
+CALCULABLE_VARS = {'D2m':    ['Q2m', 'PS'],
+                   'Q2m':    ['D2m', 'PS'], 
+                   'LOGAOD': ['AOD'], 
+                   'PM25':   ['SSSMASS25', 'DUSMASS25', 'BCSMASS', 'OCSMASS', 
+                              'SO4SMASS',  'NISMASS25', 'NH4SMASS']}
 
 # ================== REGIONS METADATA (FOR SCORECARDS) ==================
 # Note: see _create_regional_masks() method for region definitions for stats
@@ -419,6 +421,9 @@ class BatchDatasetProcessor:
         '''Convert YAML config structure to internal format'''
         params = yaml_config['parameters']
         
+        # Extract optional expid to substitute into templates and directories
+        expid_val = str(params.get('expid', ''))
+        
         # Validate if single-forecast mode
         if single_fcst_mode is not None:
             override_date = single_fcst_mode
@@ -495,7 +500,15 @@ class BatchDatasetProcessor:
                             cleaned_vars.append(var)
                     config[key] = cleaned_vars
                 else:
-                    config[key] = value
+                    # Expand the {expid} tag in directories and templates.
+                    if isinstance(value, str):
+                        config[key] = value.replace('{expid}', expid_val)
+                    elif isinstance(value, list):
+                        config[key] = [v.replace('{expid}', expid_val) 
+                                       if isinstance(v, str) 
+                                       else v for v in value]
+                    else:
+                        config[key] = value
         return config
 
     def _create_target_grid(self):
@@ -619,7 +632,7 @@ class BatchDatasetProcessor:
                                                f'excluded from processing')
 
     def _check_for_existing_datasets(self, stats_only_mode: bool = False
-                                     ) -> Dict[str, str]:
+                                     ) -> Dict[str, List[str]]:
         '''Check for already-processed datasets in specified directories'''
         print('\n--- Checking for existing datasets ---')
         # Get search directories from config
@@ -648,15 +661,16 @@ class BatchDatasetProcessor:
         current_excl_count = len(exclude_dates)
         for dataset_type, (filenm, model_nm) in expected_files.items():
             print(f'\n  Looking for {dataset_type}: {filenm}')
-            found_file = None
+            candidates = []
             # Check all directories for this file
             for search_dir in search_dirs:
                 # First try exact match
                 full_path = os.path.join(search_dir, filenm)
                 if os.path.exists(full_path):
-                    found_file = full_path
-                    print(f'    [FOUND] {full_path}')
-                    break
+                    file_size_mb = os.path.getsize(full_path) // (1024 * 1024)
+                    # Tier 0 for exact matches
+                    candidates.append((full_path, 0, file_size_mb))
+                    print(f'    [FOUND] {full_path} ({file_size_mb} MB)')
                 else:
                     print(f'    [CHECKED] {full_path} - Not found')
                 # If forecast and exclusions, try files with fewer exclusions  
@@ -673,32 +687,45 @@ class BatchDatasetProcessor:
                                 f'_excl{excl_count}')
                         alt_path = os.path.join(search_dir, alt_filenm)
                         if os.path.exists(alt_path):
-                            found_file = alt_path
-                            print(f'    [FOUND] {alt_path} (fewer exclusions)')
-                            break
+                            file_size_mb = os.path.getsize(
+                                alt_path) // (1024 * 1024)
+                            # Tier based on distance from current exclusions
+                            tier = current_excl_count - excl_count
+                            candidates.append((alt_path, tier, file_size_mb))
+                            print(f'    [FOUND] {alt_path} (fewer exclusions, '
+                                  f'{file_size_mb} MB)')
                         else:
                             print(f'    [CHECKED] {alt_path} (fewer '
                                   f'exclusions) - Not found')
-                    if found_file:
-                        break
-            if found_file:
-                # Validate dates if the found file has exclusions in its name
-                needs_validation = ('_excl' in os.path.basename(found_file) 
-                                    and dataset_type == 'fcst')
-                if needs_validation:
-                    exclude_dates = self.config.get('exclude_dates', [])
-                    spacing = self.config.get('fcst_spacing', 1)
-                    expected_dates = self._parse_date_range_with_spacing(
-                        self.config['FDATES'], spacing, exclude_dates)
-                    if self._validate_dataset_dates(
-                            found_file, expected_dates):
-                        found_datasets[dataset_type] = found_file
-                        print('    [VALIDATED] Date validation passed')
+            if candidates:
+                # Sort by tier (ascending) then file size (descending)
+                candidates.sort(key=lambda x: (x[1], -x[2]))
+                valid_candidates = []
+                
+                for candidate_path, tier, size in candidates:
+                    # Validate dates if the found file has exclusions in its name
+                    needs_validation = ('_excl' in os.path.basename(candidate_path) 
+                                        and dataset_type == 'fcst')
+                    if needs_validation:
+                        exclude_dates = self.config.get('exclude_dates', [])
+                        spacing = self.config.get('fcst_spacing', 1)
+                        expected_dates = self._parse_date_range_with_spacing(
+                            self.config['FDATES'], spacing, exclude_dates)
+                        if self._validate_dataset_dates(
+                                candidate_path, expected_dates):
+                            valid_candidates.append(candidate_path)
+                            print(f'    [VALIDATED] Date validation passed '
+                                  f'for {os.path.basename(candidate_path)}')
+                        else:
+                            print(f'    [REJECTED] Date validation failed '
+                                  f'for {os.path.basename(candidate_path)}')
                     else:
-                        print('    [REJECTED] Date validation failed')
-                else:
-                    found_datasets[dataset_type] = found_file
-            else:
+                        valid_candidates.append(candidate_path)
+                
+                if valid_candidates:
+                    found_datasets[dataset_type] = valid_candidates
+                
+            if dataset_type not in found_datasets:
                 if stats_only_mode:
                     print(f'  [NOT FOUND] {dataset_type}: {filenm}')
                     print(f'    Searched in: {", ".join(search_dirs)}')
@@ -745,24 +772,6 @@ class BatchDatasetProcessor:
         else:
             return None
 
-    def _get_date_variables(self, init_date: datetime, valid_time: datetime
-                            ) -> Dict[str, str]:
-        '''Get standardized date variables for template substitution'''
-        return {
-            'init_YYYY': init_date.strftime('%Y'),
-            'init_MM': init_date.strftime('%m'),
-            'init_DD': init_date.strftime('%d'),
-            'init_HH': init_date.strftime('%H'),
-            'init_YYYYMMDD': init_date.strftime('%Y%m%d'),
-            'init_YYYYMMDDHH': init_date.strftime('%Y%m%d%H'),
-            'valid_YYYY': valid_time.strftime('%Y'),
-            'valid_MM': valid_time.strftime('%m'),
-            'valid_DD': valid_time.strftime('%d'),
-            'valid_HH': valid_time.strftime('%H'),
-            'valid_YYYYMMDD': valid_time.strftime('%Y%m%d'),
-            'valid_YYYYMMDDHH': valid_time.strftime('%Y%m%d%H')
-        }
-
     def _get_regridder(self, source_ds, grid_type, collections=None):
         '''Retrieve or create regridder for given source dataset'''
         lat_key = source_ds.lat.shape[0] if 'lat' in source_ds.dims else 0
@@ -771,7 +780,7 @@ class BatchDatasetProcessor:
         if regridder_key not in self.regridders:
             print(f'    Creating regridder for {grid_type}')
             try:
-                # Use conservative_normed for correcy polar handling
+                # Use conservative_normed for correct polar handling
                 regridder = xe.Regridder(
                     source_ds, self.target_grid, 'conservative_normed', 
                     periodic=True)
@@ -782,8 +791,7 @@ class BatchDatasetProcessor:
         return self.regridders[regridder_key]
 
     def _get_file_by_templates(self, templates: List[str], base_dir: str, 
-                               date_vars: Dict[str, str], context_info: str, 
-                               init_date: datetime = None, 
+                               context_info: str, init_date: datetime = None, 
                                valid_time: datetime = None) -> tuple:
         '''
         Universal file finder using multiple templates with shift support
@@ -796,70 +804,78 @@ class BatchDatasetProcessor:
             try:
                 processed_template = template
                 # Handle shift patterns like {init_YYYYMMDD,shift=-3h}
-                def replace_shift_tag(match):
-                    try:
-                        full_tag = match.group(1)
-                        if ',' not in full_tag:
-                            # No shift, return as-is
-                            return '{' + full_tag + '}'
-                        tag, shift_part = full_tag.split(',', 1)
-                        tag = tag.strip()
-                        shift_part = shift_part.strip()
-                        if not shift_part.startswith('shift='):
-                            # Not a shift, return as-is
-                            return '{' + full_tag + '}'
-                        # Parse shift amount
-                        shift_str = shift_part.replace('shift=', '')
+                def process_time_tag(match):
+                    full_tag = match.group(1)
+                    
+                    # Ignore anything that isn't an init or valid tag
+                    if not (full_tag.startswith('init_') or full_tag.startswith('valid_')):
+                        return '{' + full_tag + '}'
+                    
+                    parts = full_tag.split(',', 1)
+                    time_part = parts[0].strip()
+                    shift_part = parts[1].strip() if len(parts) > 1 else None
+                    
+                    # Determine base datetime and format string
+                    if time_part.startswith('init_'):
+                        base_dt = init_date
+                        fmt_str = time_part[5:]  # Remove 'init_'
+                    else:
+                        base_dt = valid_time
+                        fmt_str = time_part[6:]  # Remove 'valid_'
+                        
+                    if not base_dt:
+                        return '{' + full_tag + '}'
+                        
+                    # Apply shift if provided
+                    if shift_part and shift_part.startswith('shift='):
+                        shift_str = shift_part[6:]
                         try:
-                            if shift_str.endswith('h'):
-                                shift_hours = float(shift_str[:-1])
-                            elif shift_str.endswith('d'):
-                                shift_hours = float(shift_str[:-1]) * 24
+                            # Extract unit (last char) and value (enforcing integer)
+                            unit = shift_str[-1].lower()
+                            val = int(shift_str[:-1])
+                            
+                            if unit == 'h':
+                                base_dt += timedelta(hours=val)
+                            elif unit == 'm':
+                                base_dt += timedelta(minutes=val)
+                            elif unit == 's':
+                                base_dt += timedelta(seconds=val)
+                            elif unit == 'd':
+                                base_dt += timedelta(days=val)
                             else:
-                                shift_hours = float(shift_str)  # Assume hours
+                                return '{' + full_tag + '}'
                         except ValueError:
-                            # Invalid shift, return as-is
                             return '{' + full_tag + '}'
-                        # Determine which datetime to shift
-                        if tag.startswith('init_') and init_date:
-                            shifted_dt = init_date + \
-                                timedelta(hours=shift_hours)
-                        elif tag.startswith('valid_') and valid_time:
-                            shifted_dt = valid_time + \
-                                timedelta(hours=shift_hours)
-                        else:
-                            # Cannot shift, return as-is
-                            return '{' + full_tag + '}'
-                        # Format the shifted datetime (part after init_/valid_)
-                        fmt_part = tag.split('_', 1)[1]
-                        if fmt_part == 'YYYY':
-                            result = shifted_dt.strftime('%Y')
-                        elif fmt_part == 'MM':
-                            result = shifted_dt.strftime('%m')
-                        elif fmt_part == 'DD':
-                            result = shifted_dt.strftime('%d')
-                        elif fmt_part == 'HH':
-                            result = shifted_dt.strftime('%H')
-                        elif fmt_part == 'YYYYMMDD':
-                            result = shifted_dt.strftime('%Y%m%d')
-                        elif fmt_part == 'YYYYMMDDHH':
-                            result = shifted_dt.strftime('%Y%m%d%H')
-                        else:
-                            return '{' + full_tag + '}'  # Unknown format
-                        return result
-                    except Exception:
-                        return match.group(0)  # Return original on error
+                    
+                    # Handle 2- or 3-digit padded lead hours (not datetime)
+                    if 'FF' in fmt_str:
+                        if init_date and valid_time:
+                            lead_hours = int(
+                                (valid_time - init_date).total_seconds() / 3600)
+                            fmt_str = fmt_str.replace(
+                                'FFF', f'{lead_hours:03d}')
+                            fmt_str = fmt_str.replace(
+                                'FF', f'{lead_hours:02d}')
+                    
+                    # Translate standard tags to strftime directives dynamically
+                    translated_fmt = fmt_str.replace('YYYY', '%Y')\
+                                            .replace('MM', '%m')\
+                                            .replace('DD', '%d')\
+                                            .replace('HH', '%H')\
+                                            .replace('NN', '%M')\
+                                            .replace('SS', '%S')
+                                            
+                    return base_dt.strftime(translated_fmt)
 
-                # Replace all shift tags first
-                processed_template = re.sub(
-                    r'\{([^}]+)\}', replace_shift_tag, processed_template)
-                # Then handle any remaining regular tags
-                processed_template = processed_template.format(**date_vars)
-                # Build path and find files
+                # Combine directory and template
                 if processed_template.startswith('/'):
-                    path = processed_template
+                    full_unprocessed_path = processed_template
                 else:
-                    path = os.path.join(base_dir, processed_template)
+                    full_unprocessed_path = os.path.join(
+                        base_dir, processed_template)
+                # Process all tags anywhere in the full path 
+                path = re.sub(r'\{([^}]+)\}', process_time_tag, 
+                              full_unprocessed_path)
                 searched_paths.append(path)  # Track this path
                 matches = glob.glob(path)
                 all_matches.extend(matches)
@@ -922,15 +938,12 @@ class BatchDatasetProcessor:
                 context_info = (f'FORECAST: init='
                                 f'{init_date.strftime("%Y-%m-%d %H:%M")} '
                                 f'(multi-lead)')
-            date_vars = self._get_date_variables(init_date, valid_time)
         elif dataset_type == 'ana' and valid_time:
-            date_vars = self._get_date_variables(valid_time, valid_time)
             context_info = (f'ANALYSIS: valid_time='
                             f'{valid_time.strftime("%Y-%m-%d %H:%M")}')
         elif dataset_type == 'clim' and cycle:
             dummy_time = datetime(2000, 1, 1, int(cycle))
             valid_time = dummy_time
-            date_vars = self._get_date_variables(dummy_time, dummy_time)
             context_info = f'CLIMATOLOGY: cycle={cycle}z'
         else:
             return {}, {}, {}
@@ -968,10 +981,8 @@ class BatchDatasetProcessor:
                 colls_without_templates.append(coll_nm)
                 continue
             file_path, file_valid_time, paths = self._get_file_by_templates(
-                templates, base_dir, date_vars,
-                f'{context_info} collection={coll_nm}',
-                init_date, valid_time
-            )
+                templates, base_dir, f'{context_info} collection={coll_nm}',
+                init_date, valid_time)
             if file_path:
                 # Only add if we have not seen this file before
                 if file_path not in used_files:
@@ -1017,7 +1028,7 @@ class BatchDatasetProcessor:
         return list(range(0, max_hours + 1, freq_hours))
     
     def find_match(self, dataset_vars, var, var_aliases, coll_nm, 
-                   calc_var=None):
+                   calc_var=None, quiet=False):
         '''
         Helper function to search for direct or alias match.
         Modifies coll_results in place.
@@ -1038,7 +1049,7 @@ class BatchDatasetProcessor:
         else:
             print(f'[WARNING] Missing alias definition for {var} - no '
                   f'{var}_alias in YAML')
-        if found_nm:
+        if found_nm and not quiet:
             if calc_var:
                 print(f'      Found dependency {var} in collection '
                       f'{coll_nm} for calculated variable {calc_var}')
@@ -1097,16 +1108,14 @@ class BatchDatasetProcessor:
                                          ) as ds:
                         dataset_vars = {var.lower(): var for var 
                                         in ds.data_vars.keys()}
-                        print(f'    File: {os.path.basename(file_path)} '
-                              f'(collections: '
-                              f'{", ".join(sorted(colls_for_file))})')
+                        print(f'    File: {os.path.basename(file_path)}')
                         # Check which variables exist
                         found_vars = []
                         coll_nms = ', '.join(sorted(colls_for_file))
                         for var in requested_vars:
-                            found_nm = self.find_match(dataset_vars, var, 
-                                                         self.var_aliases, 
-                                                         coll_nms)
+                            found_nm = self.find_match(
+                                dataset_vars, var, self.var_aliases, coll_nms, 
+                                quiet=True)
                             if found_nm:
                                 found_vars.append(var)
                             else:
@@ -1239,9 +1248,7 @@ class BatchDatasetProcessor:
                                                             dep_var
                                                             ] = found_nm
                     # Main validation for this file
-                    print(f'    File: {os.path.basename(file_path)} '
-                          f'(collections: '
-                          f'{", ".join(sorted(colls_for_file))})')
+                    print(f'    File: {os.path.basename(file_path)}')
                     # Check which requested variables are in this file
                     for coll_nm in colls_for_file:
                         coll_vars = self.var_colls.get(
@@ -1504,7 +1511,55 @@ class BatchDatasetProcessor:
             return validation_result
         except Exception as e:
             return f'{dataset_type.capitalize()} validation failed: {e}'        
-        
+
+    def _validate_existing_stats_file(
+            self, stat_file: str, is_regional: bool) -> bool:
+        '''Validate an existing stats file against config requirements'''
+        try:
+            with xr.open_dataset(stat_file) as ds:
+                # 1. Validate Variables
+                required_vars = set()
+                for coll_vars in self.var_colls.values():
+                    required_vars.update(coll_vars['3d'] + coll_vars['2d'])
+                
+                for var in required_vars:
+                    if f'{var}_rms' not in ds.data_vars:
+                        print(f'    [WARNING] Missing required variable: '
+                              f'{var}_rms')
+                        return False
+                
+                # 2. Validate Pressure Levels (if 3D variables are requested)
+                has_3d = any(
+                    self.var_colls[coll]['3d'] for coll in self.var_colls)
+                if has_3d:
+                    if 'lev' not in ds.coords:
+                        print('    [WARNING] Missing "lev" coordinate')
+                        return False
+                    file_levels = set(ds.lev.values)
+                    missing_levels = set(self.pressure_levels) - file_levels
+                    if missing_levels:
+                        print(f'    [WARNING] Missing pressure levels: '
+                              f'{missing_levels}')
+                        return False
+                        
+                # 3. Validate Regions (if checking a regional stats file)
+                if is_regional:
+                    if 'region' not in ds.coords:
+                        print('    [WARNING] Missing "region" coordinate')
+                        return False
+                    file_regions = set(ds.region.values)
+                    req_regions = set(self.config['regions'])
+                    missing_regions = req_regions - file_regions
+                    if missing_regions:
+                        print(f'    [WARNING] Missing regions: '
+                              f'{missing_regions}')
+                        return False
+                        
+            return True
+        except Exception as e:
+            print(f'    [WARNING] Could not read file properly: {e}')
+            return False
+
     def _calculate_monthly_weights(self, dt: datetime) -> tuple:
         '''Calculate distance-based weights for monthly interpolation'''
         
@@ -1602,6 +1657,7 @@ class BatchDatasetProcessor:
         
         # Process variables, including dependencies for calculated variables
         regridded_vars = {}
+        failed_vars = []
         # Define standardized coords (for cross-collection diffs and shifts)
         if file_type == 'clim':
             std_coords = np.arange(1, 13, dtype=np.int32)  # 1-12 for months
@@ -1629,12 +1685,12 @@ class BatchDatasetProcessor:
                                       f'{dep_var} (alias: {dep_source}) for '
                                       f'calculated variable {target_var}')
                             except Exception as e:
-                                # Propagate the error up
-                                raise ValueError(f'Failed to process '
-                                                 f'dependency {dep_var} '
-                                                 f'({dep_source}) for '
-                                                 f'calculated variable '
-                                                 f'{target_var}: {str(e)}')
+                                # Track the error
+                                print(f'[ERROR] Failed to process dependency '
+                                      f'{dep_var} ({dep_source}) for '
+                                      f'calculated variable {target_var}: '
+                                      f'{str(e)}')
+                                failed_vars.append(dep_var)
                 continue  # Skip the calculated variable itself
             try:
                 regridded_data = regridder(ds_levels[source_var])
@@ -1645,6 +1701,12 @@ class BatchDatasetProcessor:
             except Exception as e:
                 print(f'[ERROR] Failed to regrid {target_var} ({source_var}): '
                       f'{str(e)}')
+                failed_vars.append(target_var)
+
+        # Check if any variables failed and halt if so
+        if failed_vars:
+            raise ValueError(f'Regridding failed for variables: '
+                             f'{", ".join(failed_vars)}')
         
         return regridded_vars, colls_for_file
     
@@ -1720,7 +1782,8 @@ class BatchDatasetProcessor:
         return xr.Dataset(all_vars)
     
     def _load_and_process_files(self, coll_files: Dict[str, str], 
-                                file_type: str, validation_result=None):
+                                file_type: str, validation_result=None, 
+                                time_key=None):
         '''Load and process files from multiple collections'''
     
         # Group collections by file path to avoid duplicate processing
@@ -1735,6 +1798,17 @@ class BatchDatasetProcessor:
         for file_path, colls_for_file in file_to_colls.items():
             try:
                 ds = xr.open_dataset(file_path, decode_timedelta=True)
+                
+                # If analysis file has multiple timesteps, slice using time_key
+                time_coord_nm = self._get_time_coordinate_name(ds)
+                if (file_type == 'ana' and time_key is not None 
+                    and time_coord_nm):
+                    if ds[time_coord_nm].size > 1:
+                        # Extract exact datetime from the string key
+                        time_val = pd.to_datetime(time_key, 
+                                                  format='%Y-%m-%d_%H')
+                        ds = ds.sel({time_coord_nm: [time_val]}, 
+                                    method='nearest')
         
                 regridded_vars, _ = self._process_dataset_variables(
                     ds, colls_for_file, file_type, validation_result)
@@ -1957,7 +2031,7 @@ class BatchDatasetProcessor:
             for key, coll_files in all_coll_files.items():
                 file_counter += 1
                 result = self._load_and_process_files(
-                    coll_files, file_type, validation_result)
+                    coll_files, file_type, validation_result, time_key=key)
                 # Print progress every 5 files
                 if file_counter % 5 == 0 or file_counter == total_files:
                     print(f'  [PROGRESS] Processed {file_counter}/'
@@ -2215,21 +2289,31 @@ class BatchDatasetProcessor:
                         kelvin_values,
                         coords=dewpoint_celsius.coords,
                         dims=dewpoint_celsius.dims)
+                elif calc_var == 'Q2m':
+                    # Add units to the xarray DataArrays
+                    d2m_with_units = ds['D2m'] * units.K
+                    ps_with_units = ds['PS'] * units.Pa
+                    # Calculate specific humidity using metpy
+                    q2m_calc = mpcalc.specific_humidity_from_dewpoint(
+                        ps_with_units, d2m_with_units)
+                    q2m_values = q2m_calc.values
+                    # Add Q2m to the dataset with proper dimensions
+                    ds[calc_var] = xr.DataArray(
+                        q2m_values,
+                        coords=q2m_calc.coords,
+                        dims=q2m_calc.dims)
                 elif calc_var == 'LOGAOD':
                     ds[calc_var] = np.log(ds['AOD']+.01)
-                    ds[calc_var].attrs={
-                        'calculation_method': (
-                            f'Calculated from '
-                            f'{", ".join(list(dependencies.keys()))}')}
                 elif calc_var == 'PM25':
                     ds[calc_var] = (ds['SSSMASS25']  + ds['DUSMASS25'] 
                                     + ds['BCSMASS']  + ds['OCSMASS'] 
                                     + ds['SO4SMASS'] + ds['NISMASS25'] 
                                     + ds['NH4SMASS'])
-                    ds[calc_var].attrs={
-                        'calculation_method': (
-                            f'Calculated from '
-                            f'{", ".join(list(dependencies.keys()))}')}
+                # Add metadata attribute
+                ds[calc_var].attrs={
+                    'calculation_method': (
+                        f'Calculated from '
+                        f'{", ".join(list(dependencies.keys()))}')}
                 
                 print(f'  [SUCCESS] {calc_var} calculation complete')
             except Exception as e:
@@ -2430,59 +2514,122 @@ class BatchDatasetProcessor:
             dataset_status.append(f'Climatology={self.clim_model}')
         print(f'Dataset processing: {", ".join(dataset_status)}')
         
-        # Check for and validate existing datasets
-        if single_fcst_mode is None:
-            existing_datasets = self._check_for_existing_datasets()
-        else:
+        # Check for pre-existing stats files (if check-only)
+        if check_only:
+            print('\n--- Checking for pre-existing final stats ---')
+            
+            # Determine intended stats types and build the filename suffix
+            stats_types = self.config.get('stats_types', 'both')
+            reg_stats_needed = True if stats_types in [
+                'regional', 'both'] else False
+            glo_stats_needed = True if stats_types in [
+                'global', 'both'] else False
+            fcst_base_name = self._generate_output_filenm('fcst')
+            prefix = f'fcst_{self.fcst_model}_'
+            suffix = fcst_base_name.replace(prefix, '', 1)
+
+            # Search for and validate intended stats files
+            for stype in ['regional', 'global']:
+                if stype == 'regional' and not reg_stats_needed:
+                    continue
+                if stype == 'global' and not glo_stats_needed:
+                    continue
+                stat_file = (f'output/stats_{stype}_{self.fcst_model}_'
+                             f'{self.ana_model}_{self.clim_model}_{suffix}')
+                print(f'  Looking for: {stat_file}')
+                if os.path.exists(stat_file):
+                    print(f'    [FOUND] Validating {stype} stats...')
+                    is_regional = (stype == 'regional')
+                    if self._validate_existing_stats_file(
+                            stat_file, is_regional):
+                        full_path = os.path.abspath(stat_file)
+                        print(f'    [OK] Valid {stype} stats file exists:\n'
+                              f'         {full_path}')
+                        if stype == 'regional':
+                            reg_stats_needed = False
+                        else:
+                            glo_stats_needed = False
+                else:
+                    print('    [NOT FOUND]')
+
+            # If all requested stats exist, no need to process datasets
+            if not reg_stats_needed and not glo_stats_needed:
+                print('  [INFO] All requested stats files exist and are valid.'
+                      ' Bypassing dataset creation.\n')
+                process_fcst = False
+                process_ana  = False
+                process_clim = False
+        
+        # Check for and validate existing datasets (if needed)
+        if single_fcst_mode is not None:
             existing_datasets = {}
             print('[INFO] Single forecast mode: skipping existing dataset '
                   'check')
+        elif process_fcst or process_ana or process_clim:
+            existing_datasets = self._check_for_existing_datasets()
+        else:
+            existing_datasets = {}
         if existing_datasets:
             print('\n--- Validating existing datasets ---') 
         validation_errors = []
         datasets_to_reprocess = []
-        for dataset_type, file_path in list(existing_datasets.items()):
+        for dataset_type, candidate_paths in list(existing_datasets.items()):
             if ((dataset_type == 'fcst' and not process_fcst) or
                 (dataset_type == 'ana' and not process_ana) or 
                 (dataset_type == 'clim' and not process_clim)):
                 continue
-            print(f'\n  Validating {dataset_type}: '
-                  f'{os.path.basename(file_path)}')          
-            try:
-                # Load dataset for validation
-                with xr.open_dataset(file_path, decode_timedelta=True) as ds:
-                    # Establishe all collections for validation
-                    mock_coll_files = {}
-                    needed_colls = []
-                    for coll_nm, vars_dict in self.var_colls.items():
-                        if vars_dict['3d'] or vars_dict['2d']:
-                            needed_colls.append(coll_nm)
-                    for collection in needed_colls:
-                        mock_coll_files[collection] = file_path
-                    # Validate with the same method used for new files
-                    self._validate_variables_and_levels(
-                        mock_coll_files, dataset_type, 
-                        existing_dataset_mode=True)        
-                    
-                    # Successfully validated - update processing flag
-                    if dataset_type == 'fcst':
-                        process_fcst = False
-                        print('    [INFO] Skipping forecast processing - '
-                              'using validated dataset')
-                    elif dataset_type == 'ana':
-                        process_ana = False
-                        print('    [INFO] Skipping analysis processing - '
-                              'using validated dataset')
-                    elif dataset_type == 'clim':
-                        process_clim = False
-                        print('    [INFO] Skipping climatology processing - '
-                              'using validated dataset')
+            dataset_validated = False
+            for file_path in candidate_paths:
+                print(f'\n  Validating {dataset_type}: {file_path}')           
+                try:
+                    # Load dataset for validation
+                    with xr.open_dataset(
+                            file_path, decode_timedelta=True) as ds:
+                        # Establish all collections for validation
+                        mock_coll_files = {}
+                        needed_colls = []
+                        for coll_nm, vars_dict in self.var_colls.items():
+                            if vars_dict['3d'] or vars_dict['2d']:
+                                needed_colls.append(coll_nm)
+                        for collection in needed_colls:
+                            mock_coll_files[collection] = file_path
+                        # Validate with the same method used for new files
+                        self._validate_variables_and_levels(
+                            mock_coll_files, dataset_type, 
+                            existing_dataset_mode=True)        
                         
-            except Exception as e:
-                error_msg = str(e)
-                validation_errors.append(f'{dataset_type.capitalize()} '
-                                         f'validation failed: {error_msg}')
-                print(f'    [ERROR] Validation failed: {error_msg}')
+                        # Successfully validated
+                        dataset_validated = True
+                        # Replace the list with the single successful string
+                        existing_datasets[dataset_type] = file_path
+                        
+                        # Update processing flag
+                        if dataset_type == 'fcst':
+                            process_fcst = False
+                            print('    [INFO] Skipping forecast processing - '
+                                  'using validated dataset')
+                        elif dataset_type == 'ana':
+                            process_ana = False
+                            print('    [INFO] Skipping analysis processing - '
+                                  'using validated dataset')
+                        elif dataset_type == 'clim':
+                            process_clim = False
+                            print('    [INFO] Skipping climatology processing - '
+                                  'using validated dataset')
+                        break # Success, stop checking other candidates
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    print(f'    [WARNING] Validation failed for {file_path}: '
+                          f'{error_msg}')
+                    if file_path != candidate_paths[-1]:
+                        print('    Trying next candidate...')
+            
+            # If all candidates failed
+            if not dataset_validated:
+                validation_errors.append(
+                    f'{dataset_type.capitalize()} validation failed for all '
+                    f'candidates.')
                 # Mark for reprocessing
                 datasets_to_reprocess.append(dataset_type)
 
@@ -2513,29 +2660,36 @@ class BatchDatasetProcessor:
         if datasets_to_process:
             print(f'\n[INFO] Will process these datasets: '
                   f'{", ".join(datasets_to_process)}')
-
+        
         # If check_only mode, write status file and exit
         if check_only:
+
             # Create job directory and status output file
             job_dir = f'output/{info_dir}/jobs'
             os.makedirs(job_dir, exist_ok=True)
             status_file = f'{job_dir}/dataset_status.txt'
+            
             # Write status file
             need_fcst = 'true' if process_fcst else 'false'
             need_ana  = 'true' if process_ana  else 'false'
             need_clim = 'true' if process_clim else 'false'
+            need_reg  = 'true' if reg_stats_needed else 'false'
+            need_glo  = 'true' if glo_stats_needed else 'false'
             with open(status_file, 'w') as f:
                 f.write(f'fcst_needed:{need_fcst}\n')
                 f.write(f'ana_needed:{need_ana}\n') 
                 f.write(f'clim_needed:{need_clim}\n')
+                f.write(f'reg_stats_needed:{need_reg}\n')
+                f.write(f'glo_stats_needed:{need_glo}\n')
+                
             # Print summary
             print(f'[CHECK_ONLY] Dataset status written to: {status_file}')
-            print('[SUCCESS] Dataset check completed')
+            print('[SUCCESS] Dataset check completed\n')
             return {
                 'status': 'check_only_success',
                 'status_file': status_file,
                 'datasets_needed': datasets_to_process
-            }
+            }       
         
         # If all datasets are validated, return success
         if not any([process_fcst, process_ana, process_clim]):
@@ -3356,32 +3510,55 @@ class StatisticsProcessor:
             # Load datasets from files (regular mode)
             print('Loading datasets for statistics...')
             self.datasets = {}
-            for dataset_type, file_path in self.dataset_files.items():
-                if not os.path.exists(file_path):
-                    raise ValueError(
-                        f'{dataset_type} file not found: {file_path}')
-                print(f'  Loading {dataset_type}: {file_path}')
-                self.datasets[dataset_type] = xr.open_dataset(
-                    file_path, decode_timedelta=True)
-                print(f'    Variables: '
-                      f'{list(self.datasets[dataset_type].data_vars.keys())}')
-                print(f'    Dimensions: '
-                      f'{dict(self.datasets[dataset_type].sizes)}')
             
-        # Validate required variables and levels
-        print('  Validating datasets for required variables and levels...')
-        for dataset_type, ds in self.datasets.items():
-            missing_vars = [var for var in self.required_vars 
-                            if var not in ds.data_vars]
-            if missing_vars:
-                raise ValueError(f'{dataset_type} dataset missing required '
-                                 f'variables: {missing_vars}')
-            if 'lev' in ds.coords:
-                missing_levels = [lev for lev in self.required_levels 
-                                  if lev not in ds.lev.values]
-                if missing_levels:
-                    raise ValueError(f'{dataset_type} dataset missing '
-                                     f'required levels: {missing_levels}')
+            for dataset_type, candidate_paths in self.dataset_files.items():
+                if isinstance(candidate_paths, str):
+                    candidate_paths = [candidate_paths]
+                
+                dataset_validated = False
+                for file_path in candidate_paths:
+                    if not os.path.exists(file_path):
+                        print(f'    [WARNING] {dataset_type} file not '
+                              f'found: {file_path}')
+                        continue
+                        
+                    print(f'  Trying {dataset_type}: '
+                          f'{os.path.basename(file_path)}')
+                    try:
+                        ds = xr.open_dataset(file_path, decode_timedelta=True)
+                        
+                        missing_vars = [var for var in self.required_vars 
+                                        if var not in ds.data_vars]
+                        if missing_vars:
+                            raise ValueError(f'Missing required '
+                                             f'variables: {missing_vars}')
+                        
+                        if 'lev' in ds.coords:
+                            missing_levels = [
+                                lev for lev in self.required_levels 
+                                if lev not in ds.lev.values]
+                            if missing_levels:
+                                raise ValueError(f'Missing required '
+                                                 f'levels: {missing_levels}')
+                                
+                        self.datasets[dataset_type] = ds
+                        self.dataset_files[dataset_type] = file_path
+                        dataset_validated = True
+                        print(f'    [OK] Validated {dataset_type} successfully'
+                              f'\n    Variables: {list(ds.data_vars.keys())}'
+                              f'\n    Dimensions: {dict(ds.sizes)}')
+                        break
+                        
+                    except Exception as e:
+                        print(f'    [WARNING] Validation failed: {str(e)}')
+                        if 'ds' in locals():
+                            ds.close()
+                        if file_path != candidate_paths[-1]:
+                            print('    Trying next candidate...')
+                
+                if not dataset_validated:
+                    raise ValueError(f'Failed to find a valid {dataset_type} '
+                                     f'dataset among candidates.')
         print('  [OK] All datasets contain required variables and levels')
         
         # Filter datasets to only include requested pressure levels
@@ -4874,7 +5051,7 @@ def parse_arguments():
     merge_group.add_argument('--clean', action='store_true', 
                              help='Merge chunked statistics files')
     merge_group.add_argument('--type', choices=['reg', 'glo'],
-                             help='stats type to merge: reg or glo')
+                             help='Stats type to merge: reg or glo')
 
     return parser.parse_args()
 
@@ -5022,7 +5199,9 @@ def main():
         if not (args.stats and not args.process) or args.date:
         
             print('\n==================================================')
-            if args.stats:
+            if args.check_only:
+                print('STATUS CHECK')
+            elif args.stats:
                 print('DATASET CREATION AND STATISTICS CALCULATION')
             else:
                 print('DATASET CREATION')
@@ -5201,8 +5380,8 @@ def main():
                     processor.config['FDAYS'], processor.config['NFREQ'])
                 existing_datasets = processor._check_for_existing_datasets(
                     stats_only_mode=True)
-                for dataset_type, file_path in existing_datasets.items():
-                    dataset_files[dataset_type] = file_path
+                for dataset_type, file_paths in existing_datasets.items():
+                    dataset_files[dataset_type] = file_paths
 
             # Check if all datasets and neeeded variables are present
             required_datasets = {'fcst', 'ana', 'clim'}

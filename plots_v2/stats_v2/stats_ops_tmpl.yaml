@@ -15,41 +15,46 @@ parameters:
     regions: [GLO, NHE, TRO, SHE, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL]
 
   # fcst/ana/clim directories/templates should reference initialization and valid dates/times using tags
-  # acceptable tags are: init and valid _YYYY, _MM, _DD, _HH, _YYYYMMDD, _YYYYMMDDHH
-  # shifts in hours can be included like: {init_YYYYMMDD,shift=-3h}
+  # time components: YYYY (year), MM (month), DD (day), HH (hour), NN (minute), SS (second)
+  # these can be combined dynamically with 'init_' or 'valid_' prefixes (e.g., {init_YYYYMMDD}, {valid_HHNNSS}, {init_YYYY-MM-DD_HH})
+  # time shifts can be applied in integer days (d), hours (h), minutes (m), or seconds (s) like: {init_YYYYMMDD,shift=-90m} or {valid_HH,shift=3h}
+  # note: if a directory or template starts with a tag like {expid} or {init_YYYY}, wrap the path in quotes
   # templates for slices and aerosols are optional; if not present or left blank will be assumed to be the same as default
+
+    expid: GEOS.fp # experiment ID (optional, expanded internally in directories/templates)
 
     fcst_model: f5430fp
     fcst_input_dir: /discover/nobackup/projects/gmao/geos_fp_arch/f5430_fp
-    fcst_input_template_default: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/GEOS.fp.fcst.inst3_3d_asm_Np.{init_YYYYMMDD}_{init_HH}+{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
-    fcst_input_template_slices: prog/Y{init_YYYY,shift=-3h}/M{init_MM,shift=-3h}/D{init_DD,shift=-3h}/H{init_HH,shift=-3h}/f5430_fp.prog.sfc.{init_YYYYMMDD,shift=-3h}_{init_HH,shift=-3h}z+{valid_YYYYMMDD}_{valid_HH}z.nc4
-    fcst_input_template_aerosol: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/GEOS.fp.fcst.tavg3_2d_aer_Nx.{init_YYYYMMDD}_{init_HH}+{valid_YYYYMMDD,shift=-2h}_{valid_HH,shift=-2h}30.V01.nc4
+    fcst_input_template_default: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/{expid}.fcst.inst3_3d_asm_Np.{init_YYYYMMDD_HH}+{valid_YYYYMMDD_HHNN}.V01.nc4
+    fcst_input_template_slices:  prog/Y{init_YYYY,shift=-3h}/M{init_MM,shift=-3h}/D{init_DD,shift=-3h}/H{init_HH,shift=-3h}/f5430_fp.prog.sfc.{init_YYYYMMDD_HH,shift=-3h}z+{valid_YYYYMMDD_HH}z.nc4
+    fcst_input_template_aerosol: forecast/Y{init_YYYY}/M{init_MM}/D{init_DD}/H{init_HH}/{expid}.fcst.tavg3_2d_aer_Nx.{init_YYYYMMDD_HH}+{valid_YYYYMMDD_HHNN,shift=-90m}.V01.nc4
 
     ana_model: f5430fp
     ana_input_dir: /discover/nobackup/projects/gmao/gmao_ops/pub/f5430_fp/das
-    ana_input_template_default: Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/GEOS.fp.asm.inst3_3d_asm_Np.{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
-    ana_input_template_slices: Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/GEOS.fp.asm.inst3_2d_asm_Nx.{valid_YYYYMMDD}_{valid_HH}00.V01.nc4
-    ana_input_template_aerosol: Y{valid_YYYY,shift=-2h}/M{valid_MM,shift=-2h}/D{valid_DD,shift=-2h}/GEOS.fp.asm.tavg3_2d_aer_Nx.{valid_YYYYMMDD,shift=-2h}_{valid_HH,shift=-2h}30.V01.nc4
+    ana_input_template_default: Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/{expid}.asm.inst3_3d_asm_Np.{valid_YYYYMMDD_HHNN}.V01.nc4
+    ana_input_template_slices:  Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/{expid}.asm.inst3_2d_asm_Nx.{valid_YYYYMMDD_HHNN}.V01.nc4
+    ana_input_template_aerosol: Y{valid_YYYY,shift=-90m}/M{valid_MM,shift=-90m}/D{valid_DD,shift=-90m}/{expid}.asm.tavg3_2d_aer_Nx.{valid_YYYYMMDD_HHNN,shift=-90m}.V01.nc4
 
     clim_model: MERRA2
     clim_input_dir: /discover/nobackup/projects/gmao/geos_itv/mefrazer/METplus/clim/trimmed
     clim_input_template_default: MERRA-2.inst3_3d_asm_Np.198501_201412.clim_{valid_HH}z.576x361.data.nc4
-    clim_input_template_slices: MERRA-2.inst1_2d_asm_Nx.198501_201412.clim_{valid_HH}z.576x361.data.nc4
+    clim_input_template_slices:  MERRA-2.inst1_2d_asm_Nx.198501_201412.clim_{valid_HH}z.576x361.data.nc4
     clim_input_template_aerosol: geos_it_climatology_{valid_HH}z_2003_2022.nc
 
     # ana_model: ERA5
     # ana_input_dir: /css/era5
-    # ana_input_template_default: pressure_level_hourly/Y{valid_YYYY}/M{valid_MM}/era5_pl-allvar.{valid_YYYYMMDD}_{valid_HH}z.nc4
+    # ana_input_template_default: pressure_level_hourly/Y{valid_YYYY}/M{valid_MM}/era5_pl-allvar.{valid_YYYYMMDD_HH}z.nc4
+    # ana_input_template_slices:  single_level_hourly/Y{valid_YYYY}/M{valid_MM}/D{valid_DD}/era5_slv_1hr_inst_{valid_YYYYMMDD}.nc4
 
     # clim_model: ERA5
     # clim_input_dir: /discover/nobackup/projects/gmao/geos_itv/mefrazer/METplus/clim/trimmed
     # clim_input_template_default: era5_mnth.mrg1_avg.1440x0721.Y1985-2014.T{valid_HH}z.nc4
 
   # Scorecard options (only used with stats_regional which writes the scorecard input files)
-    make_scorecard_files: True # Make .txt files with scorecard input? True or False
-    model:  f5430_fp # model name that will appear in the "forecast" column; used by scorecard code to query database
-    verify: self    # verification source name that will apear in the "verify" column, e.g., gmao or self or ecmwf or era5; used by scorecard code to query database
-    expver: gmao    # forecast model source name that will appear in the "expver" and "source" columns; not used by scorecard code
+    make_scorecard_files: True # make .txt files with scorecard input? True or False
+    model:  f5430_fp           # model name that will appear in the "forecast" column; used by scorecard code to query database
+    verify: self               # verification source name that will apear in the "verify" column, e.g., gmao or self or ecmwf or era5; used by scorecard code to query database
+    expver: gmao               # forecast model source name that will appear in the "expver" and "source" columns; not used by scorecard code
 
   # output grid (fcst/ana/clim will be all be re-gridded to this)
     Nlat: 91        # number of lat points

@@ -12,11 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
-
+- Edited plot.rc to apply a -1 factor and correct titles to aerosol scavenging (*SV) export plots and corrected genplot.gs to avoid qname_not_found in plot titles. 
 ### Removed
 
 ### Deprecated
 
+
+## [3.0.1] - 2026-07-16
+
+### Changed
+
+- Added choices for remapping restart files for o720 (1/2-deg tripolar) and o2880 (1/8-deg tripolar) in MOM6 coupled exps
+
+### Added
+
+- Added new geosgcm_prog exports to plots
+- Added IMERG precip plots
+- Added Milan nodes to fcst_stats
+
+### Fixed
+
+- Corrected plotting to treat HadCRU temperature as T2M not tskin; fixed qname_not_found titles when closeness was called from gencmp.gs; corrected SPEED/UU10M verification RCs.
+- Update `moveplot` and `movestat` for use on polar which is now `noexec`
+- Updated stats.py to accept multi-timestep analysis files and calculate Q2m from D2m and PS.
+- Updated stats.py and yaml templates to accept any datetime tag or shift (including minutes and seconds) and an expid tag. Padded time/memory limits in stats.run based on experience.
+- Updated stats/plots scripts to fix log axes for corcmp zonal plots, add an additional_pairs option for corcmp comparison plots, add a check for pre-existing valid stats files, and fix dataset search to iterate through matches
+- Updated stats.py to allow for for non-datetime forecast lead hour tags in templates and correct a bug preventing saving of stats files.
 
 ## [3.0.0] - 2026-05-28
 
@@ -64,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - stats_v2 directory with scripts to process forecast stats and create stats plots and scorecards
-- support for v14 bcs 
+- support for v14 bcs
 
 ### Changed
 - updated topo path

@@ -16,6 +16,8 @@ parameters:
   # optionally, override experiment fcst names for plot legends:
     fcst_exp0: EXP0
     fcst_exp1: EXP1
+  # additional comparison pairings for zonal plots and montages [ctrl, mod]
+    # additional_pairs: [[1, 2]]
 
   # plotting selections [comma-separated lists]
     levels: [1000, 975, 950, 925, 900, 850, 800, 750, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 10, 7, 5, 3, 1] # pressure levels hPa for which plots will be made
