@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added new diurnal precip plots and python residual plots and optimized plot order.- #259
 
 ### Changed
 
