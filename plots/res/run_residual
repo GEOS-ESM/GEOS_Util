@@ -1,0 +1,32 @@
+#!/bin/csh
+
+echo "[res] ==================================================="
+echo "[res]        Entering run_residual wrapper script        "
+echo "[res] ==================================================="
+
+set source  = "$1"
+set expid   = "$2"
+set output  = "$3"
+set begdate = "$4"
+set enddate = "$5"
+set seasons = "$6"
+set cmpexp  = "$7"
+
+echo "[res] Captured Variables:"
+echo "[res]   SOURCE   : $source"
+echo "[res]   EXPID    : $expid"
+echo "[res]   OUTPUT   : $output"
+echo "[res]   BEGDATE  : $begdate"
+echo "[res]   ENDDATE  : $enddate"
+echo "[res]   SEASONS  : $seasons"
+echo "[res]   CMPEXP   : $cmpexp"
+echo "[res] ==================================================="
+
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+echo "[res] Executing Python script:"
+echo "[res] python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source $source -expid $expid -plotsdir $output -begdate $begdate -enddate $enddate -season '$seasons' -cmpexp '$cmpexp'"
+echo "[res] ---------------------------------------------------"
+
+python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source "$source" -expid "$expid" -plotsdir "$output" -begdate "$begdate" -enddate "$enddate" -season "$seasons" -cmpexp "$cmpexp"

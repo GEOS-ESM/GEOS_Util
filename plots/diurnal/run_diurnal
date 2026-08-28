@@ -1,0 +1,32 @@
+#!/bin/csh
+
+echo "[diurnal] ==================================================="
+echo "[diurnal]        Entering run_diurnal wrapper script         "
+echo "[diurnal] ==================================================="
+
+set source  = "$1"
+set output  = "$2"
+set begdate = "$3"
+set enddate = "$4"
+set seasons = "$5"
+set cmpexp  = "$6"
+
+echo "[diurnal] Captured Variables:"
+echo "[diurnal]   SOURCE   : $source"
+echo "[diurnal]   OUTPUT   : $output"
+echo "[diurnal]   BEGDATE  : $begdate"
+echo "[diurnal]   ENDDATE  : $enddate"
+echo "[diurnal]   SEASONS  : $seasons"
+echo "[diurnal]   CMPEXP   : $cmpexp"
+echo "[diurnal] ==================================================="
+
+# 1. Initialize and load Python for the batch node
+source /usr/share/lmod/lmod/init/csh
+module load python/GEOSpyD
+
+# 2. Execute the Python script, passing the exact flags it expects
+echo "[diurnal] Executing Python script:"
+echo "[diurnal] python -u $GEOSUTIL/plots/diurnal/plot_diurnal_imerg_amp_phs.py -source $source -plotsdir $output -begdate $begdate -enddate $enddate -season '$seasons' -cmpexp '$cmpexp'"
+echo "[diurnal] ---------------------------------------------------"
+
+python -u $GEOSUTIL/plots/diurnal/plot_diurnal_imerg_amp_phs.py -source $source -plotsdir $output -begdate $begdate -enddate $enddate -season $seasons -cmpexp $cmpexp
