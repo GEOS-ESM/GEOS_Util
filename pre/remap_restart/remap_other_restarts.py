@@ -210,13 +210,13 @@ class other_restarts(remap_base):
                 seaicethermo_internal = f
             if "seaicethermo_import" in f:
                 seaicethermo_import = f
-            if "landice" in f:
+            if "landice_internal" in f:
                 landice = f
-            if "lake" in f:
+            if "lake_internal" in f:
                 lake = f
-            if "roue" in f:
+            if "route_internal" in f:
                 route = f
-            if "openwater" in f:
+            if "openwater_internal" in f:
                 openwater = f
 
         in_til = InData_dir + "/" + os.path.basename(in_tile_file)

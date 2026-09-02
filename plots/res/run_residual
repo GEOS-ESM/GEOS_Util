@@ -26,7 +26,7 @@ source /usr/share/lmod/lmod/init/csh
 module load python/GEOSpyD
 
 echo "[res] Executing Python script:"
-echo "[res] python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source $source -expid $expid -plotsdir $output -begdate $begdate -enddate $enddate -season '$seasons' -cmpexp '$cmpexp'"
+python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source "$source" -expid "$expid" -plotsdir "$output" -begdate "$begdate" -enddate "$enddate" -season $seasons -cmpexp $cmpexp
 echo "[res] ---------------------------------------------------"
 
-python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source "$source" -expid "$expid" -plotsdir "$output" -begdate "$begdate" -enddate "$enddate" -season "$seasons" -cmpexp "$cmpexp"
+python -u $GEOSUTIL/plots/res/process_and_plot_residual.py -source "$source" -expid "$expid" -plotsdir "$output" -begdate "$begdate" -enddate "$enddate" -season $seasons -cmpexp $cmpexp
