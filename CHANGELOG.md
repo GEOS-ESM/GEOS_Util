@@ -20,17 +20,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Added new diurnal precip plots and python residual plots and optimized plot order - #259
 
 ### Changed
-- made names of restarts like lake, landice, route more specific to lake_internal, landice_internal and route_internal
+  
 ### Fixed
-- fixed typo "ROUE", it should be "ROUTE"
-- Edited plot.rc to apply a -1 factor and correct titles to aerosol scavenging (*SV) export plots and corrected genplot.gs to avoid qname_not_found in plot titles. 
+  
 ### Removed
 
 ### Deprecated
 
+## [3.0.2] - 2026-09-03
+
+### Added
+- Added new diurnal precip plots and python residual plots and optimized plot order. - #259
+
+### Changed
+- made names of restarts like lake, landice, route more specific to lake_internal, landice_internal and route_internal
+  
+### Fixed
+- fixed typo "ROUE", it should be "ROUTE"
+- Edited plot.rc to apply a -1 factor and correct titles to aerosol scavenging (*SV) export plots and corrected genplot.gs to avoid qname_not_found in plot titles.
+  
 
 ## [3.0.1] - 2026-07-16
 
