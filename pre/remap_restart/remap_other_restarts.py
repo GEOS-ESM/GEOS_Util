@@ -192,8 +192,9 @@ class other_restarts(remap_base):
         seaicethermo_internal = ""
         seaicethermo_import = ""
         landice = ""
-        lake = ""
+        lake  = ""
         route = ""
+        issm  = ""
         openwater = ""
         for rst in restarts_in:
             f = os.path.basename(rst)
@@ -216,6 +217,8 @@ class other_restarts(remap_base):
                 lake = f
             if "route_internal" in f:
                 route = f
+            if "issm_internal" in f:
+                issm = f
             if "openwater_internal" in f:
                 openwater = f
 
@@ -387,7 +390,11 @@ class other_restarts(remap_base):
             commands.append(cmd)
 
         if route:
-            cmd = bindir + "/mk_RouteRestarts.x " + out_til + " " + yyyymmddhh_[0:6]
+            cmd = ("/bin/cp  " + "InData/"+ route + " OutData/")
+            commands.append(cmd)
+
+        if issm:
+            cmd = ("/bin/cp  " + "InData/" + issm + " OutData/")
             commands.append(cmd)
 
         # Create job script with all commands
@@ -499,6 +506,7 @@ endif
     def find_rst(self):
         surf_restarts = [
             "route_internal_rst",
+            "issm_internal_rst",
             "lake_internal_rst",
             "landice_internal_rst",
             "openwater_internal_rst",
