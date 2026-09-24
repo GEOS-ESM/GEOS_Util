@@ -816,7 +816,7 @@ while( n <= numexp )
                   'define zobs'n''season'   = regrid2( cmod'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
                   'define zmod'season'      = regrid2( qmod'season'     ,0.25,0.25,bs_p1,0,-90 )'
 
-     'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.TAG.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'cfile.TAG.1' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climcmp.obsnam' -GC 'GC.1' -MATH 'mathparm
+     'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.TAG.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'cfile.TAG.1' -OBEGDATE 'begdate.k' -OENDDATE 'enddate.k' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climcmp.obsnam' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
 
      if( mathparm != NULL )
          MTH = '_'mathparm
@@ -1204,7 +1204,7 @@ say ''
         flag = ""
 while ( flag = "" )
 
-'closeness -CVAR 'cmod''n' -MVAR 'qmod' -OVAR 'qobs' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'otag.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'odesc.1' -MFILE 'qfile.1' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'ofile.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climobs.ananam' -GC 'GC.1' -MATH 'mathparm
+'closeness -CVAR 'cmod''n' -MVAR 'qmod' -OVAR 'qobs' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'otag.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'odesc.1' -MFILE 'qfile.1' -MBEGDATE 'bdate' -MENDDATE 'edate' -CFILE 'cfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'ofile.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climcmp.cmpnam' -CLIMOBS 'climobs.ananam' -GC 'GC.1' -MATH 'mathparm' -QNAME 'qname.1
 
 if( mathparm != NULL )
     MTH = '_'mathparm

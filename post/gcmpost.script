@@ -1187,30 +1187,106 @@ foreach collection ( $collections )
 
       endif  # Endif for monthlies NUM = 0 check
 
-      # Create/Update Climatology Files for 2 or more years if locals were processed
+# Create/Update Climatology Files for 2 or more years if locals were processed
       # ----------------------------------------------------------------------------
+      set DO_CLIM = FALSE
       if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
          if( $numlocs[$nstream] != 0 && $num >= 24 ) then
             set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
             set month = `echo $date            | cut -c5-6`
-            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-            if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-            endif
-            if( $DDF == "NULL" ) set DDF = clim
+            set DO_CLIM = TRUE
          endif
       else if( $RECDATE != "NULL" ) then
          set date  = $RECDATE
          set month = `echo $date | cut -c5-6`
          set num_recdates = `/bin/ls -1 $monthlies | grep ${month}.$ext | wc -l`
          if( $numlocs[$nstream] != 0 && $num_recdates >= 2 ) then
-            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-            if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-            endif
-            if( $DDF == "NULL" ) set DDF = clim
+            set DO_CLIM = TRUE
          endif
       endif
+
+      if( $DO_CLIM == "TRUE" ) then
+         echo "   Submitting background Climatology batch job for: ${collection}.${month}"
+
+         if( ! $?GEOSBIN ) setenv GEOSBIN $GEOSUTIL/bin
+         if( ! $?GROUP )   setenv GROUP   `cat $HOME/.GROUProot`
+
+         # Check architecture and submit using the platform-specific scheduler
+         if( $HOST == 'discover' ) then
+
+            # Slurm Submission for Discover
+            $batch_cmd << EOF
+#!/bin/csh -f
+#SBATCH --job-name=clim_${collection}_${month}
+#SBATCH --time=00:45:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${BATCHQ}
+#SBATCH --output=$SOURCE/post/gcm_clim.${collection}.o${month}
+
+umask 022
+limit stacksize unlimited
+
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSBIN
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+setenv RUN_CMD "\$GEOSBIN/esma_mpirun -np "
+set NCPUS = 8
+
+\$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus \$NCPUS
+
+if ( -e $SOURCE/${collection}/diurnal ) then
+   \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus \$NCPUS
+endif
+
+exit
+EOF
+
+         else if( $HOST == 'pleiades' ) then
+
+            # PBS Submission for Pleiades
+            $batch_cmd << EOF
+#!/bin/csh -f
+#PBS -N clim_${collection}_${month}
+#PBS -l walltime=00:45:00
+#PBS -l select=1:ncpus=8:mpiprocs=8
+#PBS -W group_list=${GROUP}
+#PBS -q ${BATCHQ}
+#PBS -o $SOURCE/post/gcm_clim.${collection}.o${month}
+#PBS -j oe
+
+umask 022
+limit stacksize unlimited
+
+setenv ARCH \`uname\`
+setenv SITE NAS
+setenv GEOSBIN $GEOSBIN
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+setenv RUN_CMD "mpiexec -np "
+set NCPUS = 8
+
+\$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus \$NCPUS
+
+if ( -e $SOURCE/${collection}/diurnal ) then
+   \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus \$NCPUS
+endif
+
+exit
+EOF
+
+         endif
+
+         if( $DDF == "NULL" ) set DDF = clim
+      endif
+
    endif
 end    # End ForEach Collection Loop
 

@@ -34,13 +34,12 @@ if( mfile = "NULL" )    ; return ; endif
 
 'run getenv "GEOSUTIL"'
          geosutil = result
-                                                                                                   
+                                                                                                                                                    
 'run getenv "VERIFICATION"'
          verification = result
 
 'run getenv "ANALYSIS"'
          analysis = result
-
 
 * Model Experiment Data
 * ---------------------
@@ -74,23 +73,36 @@ if( mfile = "NULL" )    ; return ; endif
 'getinfo latmax'
          latmax = result
 
-                     ' alias ' mname
-                      malias = result
+                    ' alias ' mname
+                    malias = result
 'chckname            'malias
 'makezf 'malias' umod z'
-'set x 1'
-'set y 1'
-'define   umodzg = ave( umodz,lat=-70,lat=-50 )'
-'seasonal umodzg '
- 
-*********************************************************************
+
+* =====================================================================
+* 2. LOOP OVER HEMISPHERES (NH & SH) FOR OBSERVATION DATA PREPARATION
+* =====================================================================
+hlist = "nh sh"
+h = 1
+while ( h <= 2 )
+   hem = subwrd(hlist, h)
+
+   'set x 1'
+   'set y 1'
+
+   if ( hem = "nh" )
+      'define umznh = ave(umodz,lat=30,lat=70)'
+      'seasonal umznh'
+   else
+      'define umzsh = ave(umodz,lat=-70,lat=-30)'
+      'seasonal umzsh'
+   endif
 
   '!remove sedfile'
-  '!touch  sedfile' 
-  '!remove umodzg.ctl'
-  '!remove umodzg.data'
+  '!touch  sedfile'
+  '!remove umz'hem'.ctl'
+  '!remove umz'hem'.data'
    'set gxout fwrite'
-   'set       fwrite umodzg.data'
+   'set       fwrite umz'hem'.data'
 
    'getdates'
    'getinfo   tmin'
@@ -101,9 +113,9 @@ while  ( t <= tmax )
    'set  t   't
    'getinfo  month'
              month = result
-   'd umodzgclim'
-   'd umodzgclim + umodzg'month'std'
-   'd umodzgclim - umodzg'month'std'
+   'd umz'hem'clim'
+   'd umz'hem'clim + umz'hem''month'std'
+   'd umz'hem'clim - umz'hem''month'std'
          t  = t + 1
 endwhile
    'disable fwrite'
@@ -125,15 +137,15 @@ endwhile
             z = z + 1
          endwhile
 
-'!echo "s?qz.data?umodzg.data?g" >> sedfile'
+'!echo "s?qz.data?umz'hem'.data?g" >> sedfile'
 '!echo "s?UNDEF?"'undef'?g >> sedfile'
 '!echo "s?ZDIM?"'zdim'?g >> sedfile'
 '!echo "s?BDATE?"'begdate'?g >> sedfile'
 '!echo "s?LEVS?"'levs'?g  >> sedfile'
 '!/bin/cp 'geosutil'/plots/grads_util/vortex.tmpl .'
-'!sed -f   sedfile vortex.tmpl > umodzg.ctl'
+'!sed -f   sedfile vortex.tmpl > umz'hem'.ctl'
 
-'open umodzg.ctl'
+'open umz'hem'.ctl'
 'getinfo    numfiles'
             modfile = result
 'set dfile 'modfile
@@ -141,21 +153,25 @@ endwhile
 'sety'
 'setz'
 'sett'
-'define modclim  = uz'
-'define modclimp = uzp'
-'define modclimm = uzm'
-'modify modclim  seasonal'
-'modify modclimp seasonal'
-'modify modclimm seasonal'
+'define mclm'hem'  = uz'
+'define mclmp'hem' = uzp'
+'define mclmm'hem' = uzm'
+'modify mclm'hem'  seasonal'
+'modify mclmp'hem' seasonal'
+'modify mclmm'hem' seasonal'
 'close 'modfile
+
+   h = h + 1
+endwhile
+
 'set dfile 'mfile
 'setlons'
 'sety'
 'setz'
 
-*********************************************************************
-****   Loop over Possible Experimental Datasets for Comparison   ****
-*********************************************************************
+* =====================================================================
+* Loop over Possible Experimental Datasets for Comparison
+* =====================================================================
 
 facm = 1
 faco = 1
@@ -167,7 +183,7 @@ faco = 1
 
           dummy = get_cmpexp (cmpexp,num)
             exp = subwrd(dummy,1)
-           type = subwrd(dummy,2)
+            type = subwrd(dummy,2)
 
 while( exp != 'NULL' )
 say ' '
@@ -180,15 +196,15 @@ say 'Comparing with: 'exp
 
 if( analysis != "false" )
     if( type = A )
-       'run setenv "LEVTYPE" 'A
+      'run setenv "LEVTYPE" 'A
     else
-       'run setenv "LEVTYPE" 'D
+      'run setenv "LEVTYPE" 'D
     endif
 else
     if( type = A )
-       'run setenv "LEVTYPE" 'D
+      'run setenv "LEVTYPE" 'D
     else
-       'run setenv "LEVTYPE" 'A
+      'run setenv "LEVTYPE" 'A
     endif
 endif
 
@@ -205,11 +221,11 @@ endif
 '!cat HISTORY.rc | sed -e "s/#.*//g" | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
     'run getvar 'EXPORT' 'GC' 'exp
-               oname = subwrd(result,1)
-               ofile = subwrd(result,2)
-              oscale = subwrd(result,3)
-              obsdsc = subwrd(result,4)
-              obsnam = subwrd(result,5)
+             oname = subwrd(result,1)
+             ofile = subwrd(result,2)
+             oscale = subwrd(result,3)
+             obsdsc = subwrd(result,4)
+             obsnam = subwrd(result,5)
 
 if( analysis != "false" )
    'run setenv "LEVTYPE" 'A
@@ -234,23 +250,35 @@ if( oname != 'NULL' )
 'set lat 'latmin' 'latmax
 'setz'
 
-                     ' alias ' oname
-                      oalias = result
-'chckname            'oalias
+                    ' alias ' oname
+                    oalias = result
+'chckname           'oalias
 'makezf 'oalias' uobs z'
-'set x 1'
-'set y 1'
-'define   uobszg = ave( uobsz,lat=-70,lat=-50 )'
-'seasonal uobszg'
- 
-*********************************************************************
 
-  '!remove sedfile'
-  '!touch  sedfile' 
-  '!remove uobszg.ctl'
-  '!remove uobszg.data'
+* =====================================================================
+* 2. LOOP OVER HEMISPHERES (NH & SH) FOR OBSERVATION DATA PREPARATION
+* =====================================================================
+h = 1
+while ( h <= 2 )
+   hem = subwrd(hlist, h)
+
+   'set x 1'
+   'set y 1'
+
+   if ( hem = "nh" )
+      'define uoznh = ave(uobsz,lat=30,lat=70)'
+      'seasonal uoznh'
+   else
+      'define uozsh = ave(uobsz,lat=-70,lat=-30)'
+      'seasonal uozsh'
+   endif
+
+ '!remove sedfile'
+ '!touch  sedfile'
+ '!remove uoz'hem'.ctl'
+ '!remove uoz'hem'.data'
    'set gxout fwrite'
-   'set       fwrite uobszg.data'
+   'set      fwrite uoz'hem'.data'
 
    'getdates'
    'getinfo   tmin'
@@ -261,10 +289,10 @@ while  ( t <= tmax )
    'set  t   't
    'getinfo  month'
              month = result
-   'd uobszgclim'
-   'd uobszgclim + uobszg'month'std'
-   'd uobszgclim - uobszg'month'std'
-         t  = t + 1
+   'd uoz'hem'clim'
+   'd uoz'hem'clim + uoz'hem''month'std'
+   'd uoz'hem'clim - uoz'hem''month'std'
+             t  = t + 1
 endwhile
    'disable fwrite'
 
@@ -279,21 +307,21 @@ endwhile
          levs = ''
             z  = zmin
          while( z <= zmax )
-           'set z 'z
-           'getinfo level'
+          'set z 'z
+          'getinfo level'
             levs = levs' 'result
             z = z + 1
          endwhile
 
-'!echo "s?qz.data?uobszg.data?g" >> sedfile'
+'!echo "s?qz.data?uoz'hem'.data?g" >> sedfile'
 '!echo "s?UNDEF?"'undef'?g >> sedfile'
 '!echo "s?ZDIM?"'zdim'?g >> sedfile'
 '!echo "s?BDATE?"'begdateo'?g >> sedfile'
 '!echo "s?LEVS?"'levs'?g  >> sedfile'
 '!/bin/cp 'geosutil'/plots/grads_util/vortex.tmpl .'
-'!sed -f   sedfile vortex.tmpl > uobszg.ctl'
+'!sed -f   sedfile vortex.tmpl > uoz'hem'.ctl'
 
-'open uobszg.ctl'
+'open uoz'hem'.ctl'
 'getinfo    numfiles'
             obsfile = result
 'set dfile 'obsfile
@@ -301,19 +329,20 @@ endwhile
 'sety'
 'setz'
 'sett'
-'define obsclim  = uz'
-'define obsclimp = uzp'
-'define obsclimm = uzm'
-'modify obsclim  seasonal'
-'modify obsclimp seasonal'
-'modify obsclimm seasonal'
-'close 'obsfile 
+'define oclm'hem'  = uz'
+'define oclmp'hem' = uzp'
+'define oclmm'hem' = uzm'
+'modify oclm'hem'  seasonal'
+'modify oclmp'hem' seasonal'
+'modify oclmm'hem' seasonal'
+'close 'obsfile
 'set dfile 'ofile
 'setlons'
 'sety'
 'setz'
 
-*********************************************************************
+   h = h + 1
+endwhile
 
 'run getenv "BEGDATEO"'
          begdateo = result
@@ -341,40 +370,52 @@ if( begdate = begdateo & enddate = enddateo )
          climate = 'Actual'
 endif
 
-* Make PLT
-* --------
-                       flag = ""
-               while ( flag = "" )
+* Make PLT (Two-Panel Layout: NH on Top, SH on Bottom)
+* ----------------------------------------------------
+         flag = ""
+         while ( flag = "" )
 
-'set dfile 'mfile
+* Model Dataset Season Counts (Full 12-Month Year: Sep - Sep)
+'set dfile 'mfile 
 'count "SON" 'begdate' 'enddate
- nmod1 =  result
+ nmod1 = result; if (nmod1 = "" | nmod1 = "NULL") ; nmod1 = 1 ; endif
 'count "DJF" 'begdate' 'enddate
- nmod2 =  result
- nmod  = (nmod1+nmod2)/2
+ nmod2 = result; if (nmod2 = "" | nmod2 = "NULL") ; nmod2 = 1 ; endif
+'count "MAM" 'begdate' 'enddate
+ nmod3 = result; if (nmod3 = "" | nmod3 = "NULL") ; nmod3 = 1 ; endif
+'count "JJA" 'begdate' 'enddate
+ nmod4 = result; if (nmod4 = "" | nmod4 = "NULL") ; nmod4 = 1 ; endif
+ nmod  = (nmod1 + nmod2 + nmod3 + nmod4) / 4
 
+* Observation Dataset Season Counts
 'set dfile 'ofile
 'count "SON"'
- nobs1 =  result
+ nobs1 = result; if (nobs1 = "" | nobs1 = "NULL") ; nobs1 = 1 ; endif
 'count "DJF"'
- nobs2 =  result
- nobs  = (nobs1+nobs2)/2
+ nobs2 = result; if (nobs2 = "" | nobs2 = "NULL") ; nobs2 = 1 ; endif
+'count "MAM"'
+ nobs3 = result; if (nobs3 = "" | nobs3 = "NULL") ; nobs3 = 1 ; endif
+'count "JJA"'
+ nobs4 = result; if (nobs4 = "" | nobs4 = "NULL") ; nobs4 = 1 ; endif
+ nobs  = (nobs1 + nobs2 + nobs3 + nobs4) / 4
 
  nextyear = begyear + 1
-'set time SEP'begyear' APR'nextyear
+'set time SEP'begyear' OCT'nextyear
 
 'set x 1'
 'set y 1'
+'c'
+
 'run 'geosutil'/plots/zcmp1/vortex.plt 'nmod' 'nobs' 'expdsc' 'obsdsc' 'obsnam' 'output' 'climate
 
                 if( debug = "debug" )
-                    say "Hit  ENTER  to repeat plot"
-                    say "Type 'next' for  next plot, 'done' for next field"
+                    say "Hit ENTER to repeat plot"
+                    say "Type 'next' for next plot, 'done' for next field"
                     pull flag
                 else
                     flag = "next"
                 endif
-               endwhile
+              endwhile
               'c'
 
 * End check for TDIM.NUM >= 12
@@ -387,7 +428,7 @@ endif
 
 * Check next Comparison Experiment Dataset
 * ----------------------------------------
-    num = num + 1
+num = num + 1
   dummy = get_cmpexp (cmpexp,num)
     exp = subwrd(dummy,1)
    type = subwrd(dummy,2)
@@ -395,34 +436,33 @@ endif
 endwhile
 '!/bin/mv HISTORY.Tmp HISTORY.T'
 
-*********************************************************************
-****   Loop over Possible Verification Datasets for Comparison   ****
-*********************************************************************
+* =====================================================================
+* Loop over Possible Verification Datasets for Comparison
+* =====================================================================
 
 facm = 1
 faco = 1
 
-* Get Plotting Values from Resource File
-* --------------------------------------
 'run getenv "GEOSUTIL"'
          geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
 ' getnumrc 'geosutil'/plots/zcmp1'
-     rcinfo = result
-     numrc  = subwrd( rcinfo,1 )
-       num  = 1
-       cnt  = 0
+    rcinfo = result
+    numrc  = subwrd( rcinfo,1 )
+    if (numrc = "" | numrc = "NULL") ; numrc = 0 ; endif
+      num  = 1
+      cnt  = 0
 while( num <= numrc )
         loc = num + 1
-     rcfile = subwrd( rcinfo,loc )
-              OBS = EXPORT
-     'run getobs 'OBS' 'GC' 'rcfile
-               oname = subwrd(result,1)
-               ofile = subwrd(result,2)
-              oscale = subwrd(result,3)
-              obsdsc = subwrd(result,4)
-              obsnam = subwrd(result,5)
+    rcfile = subwrd( rcinfo,loc )
+             OBS = EXPORT
+    'run getobs 'OBS' 'GC' 'rcfile
+             oname = subwrd(result,1)
+             ofile = subwrd(result,2)
+             oscale = subwrd(result,3)
+             obsdsc = subwrd(result,4)
+             obsnam = subwrd(result,5)
 
 if( analysis != "false" )
    'run setenv "LEVTYPE" 'A
@@ -430,8 +470,6 @@ else
    'run setenv "LEVTYPE" 'D
 endif
 
-* Compute PLOT for Specific Verification
-* --------------------------------------
 if( oname != 'NULL' ) 
 
 'set dfile 'ofile
@@ -447,23 +485,35 @@ if( oname != 'NULL' )
 'set lat 'latmin' 'latmax
 'setz'
 
-                     ' alias ' oname
-                      oalias = result
-'chckname            'oalias
+                    ' alias ' oname
+                    oalias = result
+'chckname           'oalias
 'makezf 'oalias' uobs z'
-'set x 1'
-'set y 1'
-'define   uobszg = ave( uobsz,lat=-70,lat=-50 )'
-'seasonal uobszg'
- 
-*********************************************************************
 
-  '!remove sedfile'
-  '!touch  sedfile' 
-  '!remove uobszg.ctl'
-  '!remove uobszg.data'
+* =====================================================================
+* 2. LOOP OVER HEMISPHERES (NH & SH) FOR OBSERVATION DATA PREPARATION
+* =====================================================================
+h = 1
+while ( h <= 2 )
+   hem = subwrd(hlist, h)
+
+   'set x 1'
+   'set y 1'
+
+   if ( hem = "nh" )
+      'define uoznh = ave(uobsz,lat=30,lat=70)'
+      'seasonal uoznh'
+   else
+      'define uozsh = ave(uobsz,lat=-70,lat=-30)'
+      'seasonal uozsh'
+   endif
+
+ '!remove sedfile'
+ '!touch  sedfile'
+ '!remove uoz'hem'.ctl'
+ '!remove uoz'hem'.data'
    'set gxout fwrite'
-   'set       fwrite uobszg.data'
+   'set      fwrite uoz'hem'.data'
 
    'getdates'
    'getinfo   tmin'
@@ -474,12 +524,13 @@ while  ( t <= tmax )
    'set  t   't
    'getinfo  month'
              month = result
-   'd uobszgclim'
-   'd uobszgclim + uobszg'month'std'
-   'd uobszgclim - uobszg'month'std'
-         t  = t + 1
+   'd uoz'hem'clim'
+   'd uoz'hem'clim + uoz'hem''month'std'
+   'd uoz'hem'clim - uoz'hem''month'std'
+             t  = t + 1
 endwhile
    'disable fwrite'
+
 
 'getinfo undef'
          undef = result
@@ -492,21 +543,21 @@ endwhile
          levs = ''
             z  = zmin
          while( z <= zmax )
-           'set z 'z
-           'getinfo level'
+          'set z 'z
+          'getinfo level'
             levs = levs' 'result
             z = z + 1
          endwhile
 
-'!echo "s?qz.data?uobszg.data?g" >> sedfile'
+'!echo "s?qz.data?uoz'hem'.data?g" >> sedfile'
 '!echo "s?UNDEF?"'undef'?g >> sedfile'
 '!echo "s?ZDIM?"'zdim'?g >> sedfile'
 '!echo "s?BDATE?"'begdateo'?g >> sedfile'
 '!echo "s?LEVS?"'levs'?g  >> sedfile'
 '!/bin/cp 'geosutil'/plots/grads_util/vortex.tmpl .'
-'!sed -f   sedfile vortex.tmpl > uobszg.ctl'
+'!sed -f   sedfile vortex.tmpl > uoz'hem'.ctl'
 
-'open uobszg.ctl'
+'open uoz'hem'.ctl'
 'getinfo    numfiles'
             obsfile = result
 'set dfile 'obsfile
@@ -514,19 +565,20 @@ endwhile
 'sety'
 'setz'
 'sett'
-'define obsclim  = uz'
-'define obsclimp = uzp'
-'define obsclimm = uzm'
-'modify obsclim  seasonal'
-'modify obsclimp seasonal'
-'modify obsclimm seasonal'
-'close 'obsfile 
+'define oclm'hem'  = uz'
+'define oclmp'hem' = uzp'
+'define oclmm'hem' = uzm'
+'modify oclm'hem'  seasonal'
+'modify oclmp'hem' seasonal'
+'modify oclmm'hem' seasonal'
+'close 'obsfile
 'set dfile 'ofile
 'setlons'
 'sety'
 'setz'
 
-*********************************************************************
+   h = h + 1
+endwhile
 
 'run getenv "BEGDATEO"'
          begdateo = result
@@ -554,40 +606,50 @@ if( begdate = begdateo & enddate = enddateo )
          climate = 'Actual'
 endif
 
-* Make PLT
-* --------
-                       flag = ""
-               while ( flag = "" )
+         flag = ""
+         while ( flag = "" )
 
-'set dfile 'mfile
+* Model Dataset Season Counts
+'set dfile 'mfile 
 'count "SON" 'begdate' 'enddate
- nmod1 =  result
+ nmod1 = result; if (nmod1 = "" | nmod1 = "NULL") ; nmod1 = 1 ; endif
 'count "DJF" 'begdate' 'enddate
- nmod2 =  result
- nmod  = (nmod1+nmod2)/2
+ nmod2 = result; if (nmod2 = "" | nmod2 = "NULL") ; nmod2 = 1 ; endif
+'count "MAM" 'begdate' 'enddate
+ nmod3 = result; if (nmod3 = "" | nmod3 = "NULL") ; nmod3 = 1 ; endif
+'count "JJA" 'begdate' 'enddate
+ nmod4 = result; if (nmod4 = "" | nmod4 = "NULL") ; nmod4 = 1 ; endif
+ nmod  = (nmod1 + nmod2 + nmod3 + nmod4) / 4
 
+* Observation Dataset Season Counts
 'set dfile 'ofile
 'count "SON"'
- nobs1 =  result
+ nobs1 = result; if (nobs1 = "" | nobs1 = "NULL") ; nobs1 = 1 ; endif
 'count "DJF"'
- nobs2 =  result
- nobs  = (nobs1+nobs2)/2
+ nobs2 = result; if (nobs2 = "" | nobs2 = "NULL") ; nobs2 = 1 ; endif
+'count "MAM"'
+ nobs3 = result; if (nobs3 = "" | nobs3 = "NULL") ; nobs3 = 1 ; endif
+'count "JJA"'
+ nobs4 = result; if (nobs4 = "" | nobs4 = "NULL") ; nobs4 = 1 ; endif
+ nobs  = (nobs1 + nobs2 + nobs3 + nobs4) / 4
 
  nextyear = begyear + 1
-'set time SEP'begyear' APR'nextyear
+'set time SEP'begyear' OCT'nextyear
 
 'set x 1'
 'set y 1'
+'c'
+
 'run 'geosutil'/plots/zcmp1/vortex.plt 'nmod' 'nobs' 'expdsc' 'obsdsc' 'obsnam' 'output' 'climate
 
                 if( debug = "debug" )
-                    say "Hit  ENTER  to repeat plot"
-                    say "Type 'next' for  next plot, 'done' for next field"
+                    say "Hit ENTER to repeat plot"
+                    say "Type 'next' for next plot, 'done' for next field"
                     pull flag
                 else
                     flag = "next"
                 endif
-               endwhile
+              endwhile
               'c'
 
 * End check for TDIM.NUM >= 12
@@ -607,15 +669,15 @@ endwhile
 return
 
 function getdate (date,month,year)
-       num = 1
-       bit = substr(date,num,1)
+      num = 1
+      bit = substr(date,num,1)
 while( bit != '' )
-       num = num+1
-       bit = substr(date,num,1)
+      num = num+1
+      bit = substr(date,num,1)
 endwhile
-       loc = num-7
-     month = substr(date,loc  ,3)
-      year = substr(date,loc+3,4)
+      loc = num-7
+    month = substr(date,loc  ,3)
+     year = substr(date,loc+3,4)
 return month' 'year
 
 function getmon(month)
@@ -636,15 +698,15 @@ return num
 * Get Next EXP from CMPEXP List
 * -----------------------------
 function get_cmpexp (cmpexp,num)
-      exp  = subwrd(cmpexp,num)
-      len = get_length (exp)
-      bit = substr(exp,len-1,1)
-      if( bit = ":" )
-          type = substr(exp,len,1)
-          exp  = substr(exp,1,len-2)
-      else
-          type = M
-      endif
+     exp  = subwrd(cmpexp,num)
+     len = get_length (exp)
+     bit = substr(exp,len-1,1)
+     if( bit = ":" )
+         type = substr(exp,len,1)
+         exp  = substr(exp,1,len-2)
+     else
+         type = M
+     endif
 return exp' 'type
 
 function get_length (string)
@@ -660,4 +722,3 @@ i = i + 1
 endif
 endwhile
 return length
-
