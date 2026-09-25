@@ -1,17 +1,17 @@
 '''
-@EXPDSC
+{{ EXPDSC }}
 
 ### Put detailed experiment description here ###
 '''
 import os
 from datetime import date
 
-expid='@EXPID'
-cmpexp='@EXPID'
-data_path='@EXPDIR'
+expid='{{ EXPID }}'
+cmpexp='{{ EXPID }}'
+data_path='{{ EXPDIR }}'
 plot_path=data_path+'/plots_ocn'
-basin_mask='@COUPLEDIR/basin_mask/@OGCM_IMx@OGCM_JM/basin_mask.nc'
-grid_spec='@COUPLEDIR/a@AGCM_IMx@AGCM_JM_o@OGCM_IMx@OGCM_JM/INPUT/grid_spec.nc'
+basin_mask='{{ COUPLEDIR }}/basin_mask/{{ OGCM_IM }}x{{ OGCM_JM }}/basin_mask.nc'
+grid_spec='{{ COUPLEDIR }}/a{{ AGCM_IM }}x{{ AGCM_JM }}_o{{ OGCM_IM }}x{{ OGCM_JM }}/INPUT/grid_spec.nc'
 
 start_year=1980
 end_year=1981
