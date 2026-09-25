@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Minor fixes and generalizations to `pchem_species_generation` scripts
+
 ### Removed
 
 ### Deprecated
