@@ -31,7 +31,7 @@
 #        PLOT_JOBS:         15 ... Number of Batch Plot Jobs to Submit for Processing
 # ---------------------------------------------------------------------------------------------------
 
-   PLOT_STATUS: ON
+   PLOT_STATUS: OFF
   PLOT_SEASONS: DJF JJA
 PLOT_FREQUENCY: CLIM
   PLOT_OPTIONS: -cintdiff ON
