@@ -39,7 +39,6 @@ pchem.species.CMIP-5.MERRA2OX.197902-{END_YYYYMM}.z_91x72.nc4
 | `compute_time_ave.sh` | SLURM batch script. Extracts O3 from daily MERRA-2 files and computes monthly time averages using `time_ave.x`. Called by the pipeline only when monthly averages are missing. |
 | `zonal_mean_subsample_o3.py` | Python script. Computes the zonal mean of O3 from a monthly average file, converts units from kg kg⁻¹ to mol mol⁻¹, and subsamples the latitude grid from 361 to 91 points (0.5° → 2°). Called by the pipeline only when zonal mean files are missing. |
 | `generate_merra2ox_species.sh` | Assembles the final pchem species file. Uses CDO to prepare the MERRA-2 and CMIP data, then a Python inline script to splice MERRA-2 OX into the CMIP file. |
-| `run_zonal_mean.sh` | Standalone batch wrapper around `zonal_mean_subsample_o3.py`. Not called by the pipeline; retained for manual use. |
 
 ---
 
@@ -91,6 +90,7 @@ END_MONTH=12
 
 The pipeline always starts at **1979-02** (the beginning of the CMIP file). Set
 `END_YEAR` and `END_MONTH` to the last month you want MERRA-2 ozone to cover.
+The checked-in defaults currently target August 2026; change them for your run.
 
 ---
 
@@ -119,18 +119,24 @@ Only months with neither file trigger the SLURM time-averaging step.
 ### Input data paths (required)
 
 ```bash
-MODEL_BUILD_DIR="${ESMADIR}/install-release"
+MODEL_BUILD_DIR="/discover/nobackup/mathomp4/SystemTests/builds/AGCM/CURRENT/GEOSgcm/install-Release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
-CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM/pchem.species.CMIP-5.1870-2097.z_91x72.nc4"
+CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM"
 LEV_SOURCE="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4"
 ```
 
 | Variable | What it points to |
 |----------|-------------------|
-| `MODEL_BUILD_DIR` | GEOSgcm `install-release` directory. Must contain `bin/g5_modules.sh` and `bin/time_ave.x`. |
+| `MODEL_BUILD_DIR` | Full path to a GEOSgcm install directory. Must contain `bin/g5_modules.sh` and `bin/time_ave.x`. |
 | `MERRA2_DAILY_SOURCE` | Root of the raw MERRA-2 daily files, organised as `Y{YYYY}/M{MM}/MERRA2_400.inst3_3d_asm_Nv.YYYYMMDD.nc4`. Only needed if SLURM time-averaging is triggered. |
 | `CMIP_DIR` | Directory containing `pchem.species.CMIP-5.1870-2097.z_91x72.nc4`. |
 | `LEV_SOURCE` | Path to a NetCDF file whose `lev` variable (float64) is copied verbatim into the output file. |
+
+The `MODEL_BUILD_DIR` shown above is the nightly-test `install-Release` build.
+If using your own build, replace it with the full path to your install directory;
+the directory name and capitalization may differ (for example, `install-release`).
+`compute_time_ave.sh` also accepts this directory as its fifth argument when run
+standalone. The pipeline passes its configured path to that argument.
 
 ---
 
@@ -239,12 +245,14 @@ sbatch compute_time_ave.sh \
 Example:
 ```bash
 sbatch compute_time_ave.sh 2025 1 2025 12 \
-    /path/to/GEOSgcm/install-release \
+    /path/to/your/GEOSgcm/install-directory \
     /path/to/merra2/daily \
     ./monthly_files
 ```
 
-All arguments have hardcoded defaults and are optional when running standalone.
+All arguments have defaults and are optional when running standalone. By default,
+the install directory is the nightly-test `install-Release` path shown above;
+pass your own full install path as the fifth argument if using a different build.
 
 ### `zonal_mean_subsample_o3.py`
 
@@ -271,20 +279,6 @@ bash generate_merra2ox_species.sh 202512 ./monthly_zonal /path/to/cmip /path/to/
 ```
 
 All arguments fall back to hardcoded defaults if omitted.
-
-### `run_zonal_mean.sh`
-
-Standalone batch wrapper around `zonal_mean_subsample_o3.py`. Edit
-`START_YEAR`, `START_MONTH`, `END_YEAR`, `END_MONTH` at the top of the file,
-then run:
-
-```bash
-bash run_zonal_mean.sh START_YEAR START_MONTH END_YEAR END_MONTH
-```
-
-This script is not called by the pipeline but is retained for manual use.
-
----
 
 ## Output
 
