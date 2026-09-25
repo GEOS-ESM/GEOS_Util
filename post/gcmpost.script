@@ -1190,15 +1190,16 @@ foreach collection ( $collections )
       # Create/Update Climatology Files for 2 or more years if locals were processed
       # ----------------------------------------------------------------------------
       if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
-         if( $numlocs[$nstream] != 0 && $num >= 24 ) then
-            set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
-            set month = `echo $date            | cut -c5-6`
-            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-            if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-            endif
-            if( $DDF == "NULL" ) set DDF = clim
-         endif
+         echo "Skipping gcmclim.script execution. Uncomment below for old behavior."
+#         if( $numlocs[$nstream] != 0 && $num >= 24 ) then
+#            set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
+#            set month = `echo $date            | cut -c5-6`
+#            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+#            if( -e $SOURCE/${collection}/diurnal ) then
+#               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
+#            endif
+#            if( $DDF == "NULL" ) set DDF = clim
+#         endif
       else if( $RECDATE != "NULL" ) then
          set date  = $RECDATE
          set month = `echo $date | cut -c5-6`
