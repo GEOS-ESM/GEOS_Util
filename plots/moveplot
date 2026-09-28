@@ -32,7 +32,7 @@ else  # Interactive Job
 # ------------------------------------
    if(! -e ~/.WEBSERVER ) then
 SERVER:
-     set server = NULL 
+     set server = NULL
      echo " "
      echo "Enter WEB Server to use:  train"
      echo "                          polar"
@@ -143,7 +143,7 @@ endif
 if( $plotrc == 'NULL' ) then
     if( -e $source/plot/plot.rc ) set plotrc = $source/plot/plot.rc
 endif
- 
+
      if( -e $source/.HOMDIR ) then
          set homdir = `cat $source/.HOMDIR`
      else
@@ -151,16 +151,16 @@ endif
      endif
 
   set rcfiles  = `/bin/ls -1         $homdir | grep .rc`
-if( $#rcfiles != 0      ) rsync -avx $homdir/*.rc         $webid@${server}:${www}/${expid}/RC     
-if(-e $homdir/RC        ) rsync -avx $homdir/RC/          $webid@${server}:${www}/${expid}/RC/RC/  
-if(-e $homdir/gcm_run.j ) rsync -avx $homdir/gcm_run.j    $webid@${server}:${www}/${expid}/RC     
+if( $#rcfiles != 0      ) rsync -avx $homdir/*.rc         $webid@${server}:${www}/${expid}/RC
+if(-e $homdir/RC        ) rsync -avx $homdir/RC/          $webid@${server}:${www}/${expid}/RC/RC/
+if(-e $homdir/gcm_run.j ) rsync -avx $homdir/gcm_run.j    $webid@${server}:${www}/${expid}/RC
                                                   ssh $webid@${server} "cd ${www}/${expid}/RC ; find . -type d -exec chmod 755 {} \; "
                                                   ssh $webid@${server} "cd ${www}/${expid}/RC ; find . -type f -exec chmod 644 {} \; "
 
 if( -e $source/src ) then
      set srcfiles  = `/bin/ls -1 $source/src`
    if( $#srcfiles != 0 ) then
-                                                   rsync -avx $source/src/*     $webid@${server}:${www}/$expid/SRC    
+                                                   rsync -avx $source/src/*     $webid@${server}:${www}/$expid/SRC
          if( -e $source/src/.AGCM_VERSION    ) scp $source/src/.AGCM_VERSION    $webid@${server}:${www}/$expid/TAG
          if( -e $source/src/${expid}_TAGNAME ) scp $source/src/${expid}_TAGNAME $webid@${server}:${www}/$expid/TAG
          set   TAGNAME = `/bin/ls -1 $source/src | grep AGCM_VERSION`
@@ -236,7 +236,7 @@ foreach season ($seasons)
               chmod +x                                                              awk_command.$datetime
 
               scp awk_command.$datetime $webid@${server}:${www}/${expid}/buttons
-              ssh $webid@${server} "cd ${www}/${expid}/buttons ; ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
+              ssh $webid@${server} "cd ${www}/${expid}/buttons ; csh -f ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
              /bin/rm -f awk_command.$datetime
          endif
         /bin/rm -f LOCKFILE
@@ -269,12 +269,12 @@ wait
               echo '          if( $LOCKAGE > 120 ) /bin/rm -f LOCKFILE '         >> awk_command.$datetime
               echo 'end '                                                        >> awk_command.$datetime
               echo lockfile -3 LOCKFILE                                          >> awk_command.$datetime
-              echo "if( -e add_years.csh ) ./add_years.csh $year"                >> awk_command.$datetime
+              echo "if( -e add_years.csh ) csh -f ./add_years.csh $year"         >> awk_command.$datetime
               echo /bin/rm -f  LOCKFILE                                          >> awk_command.$datetime
               chmod +x                                                              awk_command.$datetime
 
               scp awk_command.$datetime $webid@${server}:${www}/${expid}/buttons
-              ssh $webid@${server} "cd ${www}/${expid}/buttons ; ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
+              ssh $webid@${server} "cd ${www}/${expid}/buttons ; csh -f ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
              /bin/rm -f awk_command.$datetime
          endif
         /bin/rm -f LOCKFILE
@@ -391,12 +391,12 @@ if( $plotrc != NULL ) then
                  echo '          if( $LOCKAGE > 120 ) /bin/rm -f LOCKFILE '         >> awk_command.$datetime
                  echo 'end '                                                        >> awk_command.$datetime
                  echo lockfile -3 LOCKFILE                                          >> awk_command.$datetime
-                 echo "if( -e add_exps.csh ) ./add_exps.csh $cmpexp"                >> awk_command.$datetime
+                 echo "if( -e add_exps.csh ) csh -f ./add_exps.csh $cmpexp"         >> awk_command.$datetime
                  echo /bin/rm -f  LOCKFILE                                          >> awk_command.$datetime
                  chmod +x                                                              awk_command.$datetime
 
                  scp awk_command.$datetime $webid@${server}:${www}/${expid}/buttons
-                 ssh $webid@${server} "cd ${www}/${expid}/buttons ; ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
+                 ssh $webid@${server} "cd ${www}/${expid}/buttons ; csh -f ./awk_command.$datetime ; /bin/rm -f awk_command.$datetime"
                 /bin/rm -f awk_command.$datetime
             endif
            /bin/rm -f LOCKFILE

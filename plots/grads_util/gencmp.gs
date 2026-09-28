@@ -638,7 +638,7 @@ else
              'define zobs'n''season'   = regrid2( obs'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
              'define zmod'season'      = regrid2( mod'season'     ,0.25,0.25,bs_p1,0,-90 )'
 
-             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ALIAS 'alias.1' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -CFILE 'obsfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdate.TAG' -OENDDATE 'enddate.TAG' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climate.n' -CLIMOBS 'climate.TAG' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
+             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ALIAS 'alias.1' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -CFILE 'obsfile.n.1' -CBEGDATE 'begdate.n' -CENDDATE 'enddate.n' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdate.TAG' -OENDDATE 'enddate.TAG' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMEXP 'climexp' -CLIMCMP 'climate.n' -CLIMOBS 'climate.TAG' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL' -QNAME 'qname.1
 
              'myprint -name 'OUTPUT'/hdiag_'ctag.n'_'NAME'.'GC.1'_'LEVEL'_closeness_'ctag.TAG'.'season
 

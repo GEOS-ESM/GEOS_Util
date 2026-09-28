@@ -73,15 +73,19 @@ endif
 end
 set dum = ''
 foreach export ($exports)
-    set tst1 = `echo $export | grep -v   "SLP:DYN" \
-                             | grep -v     "U:DYN" \
-                             | grep -v     "V:DYN" \
-                             | grep -v     "T:DYN" \
-                             | grep -v   "ZLE:DYN" \
-                             | grep -v "OMEGA:DYN" \
-                             | grep -v   "Q:MOIST" \
-                             | grep -v "RH2:MOIST" \
-                             | grep -v  "O3:CHEMISTRY" `
+    set tst1 = `echo $export | grep -v   '^SLP:DYN$' \
+                             | grep -v     '^U:DYN$' \
+                             | grep -v     '^V:DYN$' \
+                             | grep -v     '^T:DYN$' \
+                             | grep -v   '^ZLE:DYN$' \
+                             | grep -v '^OMEGA:DYN$' \
+                             | grep -v     '^W:DYN$' \
+                             | grep -v  '^DIVG:DYN$' \
+                             | grep -v   '^EPV:DYN$' \
+                             | grep -v  '^VORT:DYN$' \
+                             | grep -v     '^Q:MOIST$' \
+                             | grep -v   '^RH2:MOIST$' \
+                             | grep -v    '^O3:CHEMISTRY$' `
     if( $#tst1 != 0 ) then
       set   tst2 = `grep $tst1 $PLOT_SCRIPTS`
       if( $#tst2 == 0 | .$2 == .Check_ALL ) set dum = `echo $dum $tst1`

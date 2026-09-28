@@ -1,0 +1,8 @@
+
+OBSNAM: IMERG
+OBSDSC: IMERG_V07_Monthly_Precipitation
+
+        filename:   'VERIFICATION//IMERG/monthly/imerg.tabl'
+        filetype:   'HDF'
+        fields:     'TPREC'  , 'MOIST' , 'precipitation' , 1
+                    ::

@@ -84,6 +84,10 @@ if( mname = 'T'     ) ; GC = DYN       ; name = tmpu  ; endif
 if( mname = 'Q'     ) ; GC = MOIST     ; name = sphu  ; endif
 if( mname = 'RH2'   ) ; GC = MOIST     ; name = rh    ; endif
 if( mname = 'OMEGA' ) ; GC = DYN       ; name = omega ; endif
+if( mname = 'W'     ) ; GC = DYN       ; name = wwnd  ; endif
+if( mname = 'DIVG'  ) ; GC = DYN       ; name = divg  ; endif
+if( mname = 'EPV'   ) ; GC = DYN       ; name = epv   ; endif
+if( mname = 'VORT'  ) ; GC = DYN       ; name = vort  ; endif
 if( mname = 'ZLE'   ) ; GC = DYN       ; name = hght  ; endif
 if( mname = 'HE'    ) ; GC = DYN       ; name = hghte ; endif
 if( mname = 'CHI'   ) ; GC = DYN       ; name = chi   ; endif
@@ -560,7 +564,7 @@ endif
    if( aqmodmin > aqmodmax ) ; aqmodmax = aqmodmin ; endif
    say 'Absolute QMOD_MAX: ' aqmodmax
 
-if( mname = "OMEGA" )
+if( mname = "OMEGA" | mname = "W" | mname = "EPV" | mname = "DIVG" | mname = "VORT" )
   '  stats  qmod'
      avg = subwrd(result,1)
      std = subwrd(result,2)
@@ -648,7 +652,7 @@ if( mname = "QLTOT" | mname = "QITOT" )
    'shades qmod 0 -cint 'cint' -minval 0'
    'd qmod'
 else
-   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" )
+   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" & mname != "W" & mname != "EPV" & mname != "DIVG" & mname != "VORT" )
    'set clevs 'cvals
    'set ccols 'ccols
    'set clab  'clab
@@ -656,7 +660,7 @@ else
    endif
 endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" & mname != "W" & mname != "EPV" & mname != "DIVG" & mname != "VORT" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
@@ -686,7 +690,7 @@ endif
    if( aqobsmin > aqobsmax ) ; aqobsmax = aqobsmin ; endif
    say 'Absolute QOBS_MAX: ' aqobsmax
 
-if( mname = "OMEGA" )
+if( mname = "OMEGA" | mname = "W" | mname = "EPV" | mname = "DIVG" | mname = "VORT" )
     'shades 'cint
     'd qobso*'scale
 endif
@@ -705,14 +709,14 @@ if( mname = "QLTOT" | mname = "QITOT" )
    'shades qmod 0 -cint 'cint' -minval 0'
    'd qobso'
 else
-   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" )
+   if( mname != "T" & mname != "OMEGA" & mname != "ZLE" & mname != "Q" & mname != "W" & mname != "EPV" & mname != "DIVG" & mname != "VORT" )
    'set clevs 'cvals
    'set ccols 'ccols
    'd qobso'
    endif
 endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" & mname != "T" & mname != "ZLE" & mname != "Q" & mname != "W" & mname != "EPV" & mname != "DIVG" & mname != "VORT" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
@@ -762,7 +766,7 @@ say 'DIMS before Final Regridding: 'result
 
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
-if( mname = "O3" ) ; CINTDIFF = ON ; endif
+if( mname = "O3" | mname = "W" | mname = "EPV" | mname = "DIVG" | mname = "VORT" ) ; CINTDIFF = ON ; endif
 
 if( CINTDIFF = 'NULL' & std_dev != 'true' &  mname != "QLTOT" & mname != "QITOT" )
    'set clevs 'dlevs
