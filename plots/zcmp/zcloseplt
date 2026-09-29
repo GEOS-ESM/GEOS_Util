@@ -540,6 +540,13 @@ if( scale = LOG ) ; 'setlevs' ; endif
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
 
+if( source_n < 0 )
+    zsrc = -1 * source_n
+   'define absdifz = absdifz*1e'zsrc
+else
+   'define absdifz = absdifz/1e'source_n
+endif
+
    'stats absdifz'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
