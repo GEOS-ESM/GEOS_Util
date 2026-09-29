@@ -31,14 +31,15 @@ set -euo pipefail
 # ===========================================================================
 
 END_YEAR=2026
-END_MONTH=6
+END_MONTH=8
 
 # Read-only archive directories (never written to by this script)
 MONTHLY_ARCHIVE_DIR="/discover/nobackup/projects/gmao/SIteam/pchem_species_inputs/monthly_ave"   # pre-existing monthly time-averaged files
 ZONAL_ARCHIVE_DIR="/discover/nobackup/projects/gmao/SIteam/pchem_species_inputs/monthly_zonal"       # pre-existing zonal mean files
 
 # Input data paths passed through to sub-scripts
-MODEL_BUILD_DIR="${ESMADIR}/install-release"
+# Point this at your GEOSgcm install directory if not using the nightly build below.
+MODEL_BUILD_DIR="/discover/nobackup/mathomp4/SystemTests/builds/AGCM/CURRENT/GEOSgcm/install-Release"
 MERRA2_DAILY_SOURCE="/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10"
 CMIP_DIR="/discover/nobackup/projects/gmao/bcs_shared/fvInput/ExtData/esm/tiles/v12/PCHEM"             # directory containing the CMIP input species file
 LEV_SOURCE="${CMIP_DIR}/pchem.species.CMIP-5.MERRA2OX.197902-201706.z_91x72.nc4"   # file whose lev variable (float64) is copied into the output
@@ -92,6 +93,7 @@ zonal_file() {
 [[ "${END_YEAR}"  =~ ^[0-9]{4}$   ]] || die "END_YEAR must be a 4-digit year, got '${END_YEAR}'"
 [[ "${END_MONTH}" =~ ^[0-9]{1,2}$ ]] || die "END_MONTH must be a numeric month, got '${END_MONTH}'"
 (( 10#$END_MONTH >= 1 && 10#$END_MONTH <= 12 )) || die "END_MONTH must be between 1 and 12"
+END_MONTH=$((10#$END_MONTH))
 
 # Pipeline always starts at 1979-02 (beginning of the CMIP file)
 START_YEAR=1979
