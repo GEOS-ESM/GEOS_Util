@@ -11,7 +11,7 @@
 #SBATCH -o gcm_run.o%j
 
 umask 022
-limit stacksize unlimited
+ulimit -s unlimited
 
 set -euo pipefail
 # Positional args:
@@ -19,11 +19,12 @@ set -euo pipefail
 #   $2  START_MONTH
 #   $3  END_YEAR
 #   $4  END_MONTH
-#   $5  MODEL_BUILD_DIR  (path to GEOSgcm install-release)
+#   $5  MODEL_BUILD_DIR  (path to GEOSgcm install directory)
 #   $6  SOURCE_ROOT      (path to raw MERRA-2 daily input files)
 #   $7  MONTHLY_OUT_DIR  (directory to write monthly average output files)
-model_build="${5:-${ESMADIR}/install-release}"
-source $model_build/bin/g5_modules.sh
+# Pass your own install directory as $5 if not using this nightly build.
+model_build="${5:-/discover/nobackup/mathomp4/SystemTests/builds/AGCM/CURRENT/GEOSgcm/install-Release}"
+source "$model_build/bin/g5_modules.sh"
 
 source_root="${6:-/discover/nobackup/projects/gmao/merra2/data/products/d5124_m2_jan10}"
 monthly_out_dir="${7:-monthly_files}"
@@ -47,6 +48,9 @@ if (( 10#$start_month < 1 || 10#$start_month > 12 || 10#$end_month < 1 || 10#$en
   printf 'Error: start_month and end_month must be between 1 and 12.\n' >&2
   exit 1
 fi
+
+start_month=$((10#$start_month))
+end_month=$((10#$end_month))
 
 start_total=$((10#$start_year * 12 + 10#$start_month))
 end_total=$((10#$end_year * 12 + 10#$end_month))
