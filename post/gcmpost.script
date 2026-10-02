@@ -1112,9 +1112,16 @@ wait
 #######################################################################
 
 @ nstream = 0
+@ begloc  = 1
+set CLIM_COLLECTIONS         = ()
+set CLIM_DIURNAL_COLLECTIONS = ()
+set CLIM_MONTHS              = ()
+set CLIM_YYYYMM              = "000000"
 foreach collection ( $collections )
    set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
    @ nstream   =                   $nstream  + 1
+   @ endloc    = $begloc + $numdates[$nstream] - 1
+   set streamdates = `echo $dates[${begloc}-${endloc}]`
 
    if( ($MOVEFILES == "TRUE") | ( $RECDATE  != "NULL") ) then
 
@@ -1187,32 +1194,268 @@ foreach collection ( $collections )
 
       endif  # Endif for monthlies NUM = 0 check
 
-      # Create/Update Climatology Files for 2 or more years if locals were processed
+# Create/Update Climatology Files for 2 or more years if locals were processed
       # ----------------------------------------------------------------------------
+      set DO_CLIM = FALSE
       if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
          if( $numlocs[$nstream] != 0 && $num >= 24 ) then
-            set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
-            set month = `echo $date            | cut -c5-6`
-            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-            if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-            endif
-            if( $DDF == "NULL" ) set DDF = clim
+            set DO_CLIM = TRUE
          endif
       else if( $RECDATE != "NULL" ) then
          set date  = $RECDATE
          set month = `echo $date | cut -c5-6`
          set num_recdates = `/bin/ls -1 $monthlies | grep ${month}.$ext | wc -l`
          if( $numlocs[$nstream] != 0 && $num_recdates >= 2 ) then
-            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-            if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-            endif
-            if( $DDF == "NULL" ) set DDF = clim
+            set DO_CLIM = TRUE
          endif
       endif
+
+      # Determine Processing Pathway
+      # -----------------------------------------------------------------------
+      #   Pathway 2 : RECDATE set AND exactly one collection
+      #               (gcm_post.j's own "-rec_plt @YYYYMM -collections @COLLECTION"
+      #               callback upon async time-average completion)
+      #   Pathway 1 : RECDATE == NULL (normal -movefiles auto-detection)
+      #   Pathway 3 : RECDATE set AND more than one collection
+      #               (manual, broad -recover/-rec_plt invocation)
+      # -----------------------------------------------------------------------
+      set CLIM_PATHWAY2 = FALSE
+      if( $RECDATE != "NULL" && $#collections == 1 ) set CLIM_PATHWAY2 = TRUE
+
+      # Pathway 1 Exclusion: Async (non-monthly_attribute) collections are never
+      # auto-triggered here. They are handled exclusively via their own Pathway 2
+      # callback, which fires only once their own monthly-mean file truly exists.
+      # -----------------------------------------------------------------------
+      if( $DO_CLIM == "TRUE" && $RECDATE == "NULL" && ${#monthly_attribute} == 0 ) set DO_CLIM = FALSE
+
+      if( $DO_CLIM == "TRUE" && $CLIM_PATHWAY2 == "TRUE" ) then
+
+         # ---------------------------------------------------------------
+         # Pathway 2: Immediate, Uniquely-Named, Single-Collection Submission
+         # ---------------------------------------------------------------
+         if( $DDF == "NULL" ) set DDF = clim
+
+         if( $HOST == 'discover' ) then
+
+            set CLIM_STATUS = `grep CLIM_STATUS: $SOURCE/plot/plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
+            if( $#CLIM_STATUS == 0 ) set CLIM_STATUS = "ON"
+
+            if( $CLIM_STATUS == "ON" ) then
+
+               set CLIM_PARTITION = `grep '#SBATCH --partition=' $SOURCE/post/gcm_post.j | cut -d'=' -f2`
+               set CLIM_QOS       = `grep '#SBATCH --qos='       $SOURCE/post/gcm_post.j | cut -d'=' -f2`
+
+               set CLIMJOB2 = $SOURCE/post/gcmclim.${collection}.j${RECDATE}
+               set CLIMLOG2 = $SOURCE/post/gcmclim.${collection}.o${RECDATE}
+               /bin/rm -f $CLIMJOB2
+               /bin/rm -f $CLIMLOG2
+
+cat > $CLIMJOB2 << EOF
+#!/bin/csh -f
+#SBATCH --job-name=gcmclim.${collection}.${RECDATE}
+#SBATCH --time=02:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${CLIM_PARTITION}
+#SBATCH --qos=${CLIM_QOS}
+#SBATCH --output=${CLIMLOG2}
+
+umask 022
+limit stacksize unlimited
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSUTIL/bin
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus 1
+
+exit
+EOF
+               chmod 755 $CLIMJOB2
+               sbatch $CLIMJOB2
+
+            endif # End CLIM_STATUS == ON
+
+         else if( $HOST == 'pleiades' ) then
+
+            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+
+         endif
+
+      else if( $DO_CLIM == "TRUE" ) then
+
+         # ---------------------------------------------------------------
+         # Pathway 1/3: Accumulate for Combined Submission After Loop
+         # ---------------------------------------------------------------
+         set CLIM_COLLECTIONS = `echo $CLIM_COLLECTIONS $collection`
+         if( -e $SOURCE/${collection}/diurnal ) set CLIM_DIURNAL_COLLECTIONS = `echo $CLIM_DIURNAL_COLLECTIONS $collection`
+
+         if( $RECDATE != "NULL" && $CLIMO != "TRUE" ) then
+            if( $RECDATE > $CLIM_YYYYMM ) set CLIM_YYYYMM = $RECDATE
+            set newmonths = $month
+         else
+            # Only accept months backed by a REAL, existing monthly-mean file for
+            # THIS exact collection+YYYYMM (avoids triggering on a partial/incomplete
+            # month, e.g. a just-started next month with only raw holding files)
+            # -------------------------------------------------------------------------
+            set real_dates = ""
+            foreach mf ( $monthlies )
+               set rdate = `echo $mf | cut -d "." -f${date_node}`
+               set real_dates = `echo $real_dates $rdate`
+            end
+
+            set newmonths = ""
+            foreach sdate ( $streamdates )
+               if( $sdate != 0 ) then
+                  set isdate = `echo $real_dates | grep -w $sdate`
+                  if( "$isdate" != "" ) then
+                     if( $sdate > $CLIM_YYYYMM ) set CLIM_YYYYMM = $sdate
+                     set mm = `echo $sdate | cut -c5-6`
+                     set newmonths = `echo $newmonths $mm`
+                  endif
+               endif
+            end
+         endif
+
+         foreach nm ( $newmonths )
+            set found = `echo $CLIM_MONTHS | grep -w $nm`
+            if( "$found" == "" ) set CLIM_MONTHS = `echo $CLIM_MONTHS $nm`
+         end
+
+         if( $DDF == "NULL" ) set DDF = clim
+
+      endif
+
    endif
+   @ begloc = $endloc + 1
 end    # End ForEach Collection Loop
+
+#######################################################################
+#     Submit Climatology Batch Jobs for All Eligible Collections
+#######################################################################
+
+if( $#CLIM_COLLECTIONS != 0 ) then
+
+   if( $HOST == 'discover' ) then
+
+      set CLIM_STATUS = `grep CLIM_STATUS: $SOURCE/plot/plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
+      if( $#CLIM_STATUS == 0 ) set CLIM_STATUS = "ON"
+
+      if( $CLIM_STATUS == "ON" ) then
+
+         set CLIM_PARTITION = `grep '#SBATCH --partition=' $SOURCE/post/gcm_post.j | cut -d'=' -f2`
+         set CLIM_QOS       = `grep '#SBATCH --qos='       $SOURCE/post/gcm_post.j | cut -d'=' -f2`
+
+         # Submit Monthly/Seasonal/Annual Climatology Job
+         # ------------------------------------------------
+         set CLIMJOB = $SOURCE/post/gcmclim.j${CLIM_YYYYMM}
+         set CLIMLOG = $SOURCE/post/gcmclim.o${CLIM_YYYYMM}
+         /bin/rm -f $CLIMJOB
+         /bin/rm -f $CLIMLOG
+
+cat > $CLIMJOB << EOF
+#!/bin/csh -f
+#SBATCH --job-name=gcmclim.${CLIM_YYYYMM}
+#SBATCH --time=02:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=$#CLIM_COLLECTIONS
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${CLIM_PARTITION}
+#SBATCH --qos=${CLIM_QOS}
+#SBATCH --output=${CLIMLOG}
+
+umask 022
+limit stacksize unlimited
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSUTIL/bin
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+foreach c ( $CLIM_COLLECTIONS )
+   srun --exclusive --job-name=\$c -N1 -n1 \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection \$c -month $CLIM_MONTHS -ncpus 1 |& perl -e 'use Fcntl qw(:flock); local \$/; my \$x = <STDIN>; open(my \$h, ">>", "$CLIMLOG") or die \$\!; flock(\$h, LOCK_EX) or die \$\!; print \$h "\n===== BEGIN \$ARGV[0] =====\n", \$x, "===== END \$ARGV[0] =====\n"; close(\$h);' \$c &
+end
+wait
+
+sleep 15
+
+echo ""
+echo "===== TASK SUMMARY ====="
+sacct -j \$SLURM_JOB_ID --format=JobID,JobName%20,State,ExitCode,Elapsed,MaxRSS --units=M
+
+exit
+EOF
+         chmod 755 $CLIMJOB
+         sbatch $CLIMJOB
+
+         # Submit Diurnal Climatology Job (Separate Job, Same Trigger Months)
+         # ----------------------------------------------------------------------
+         if( $#CLIM_DIURNAL_COLLECTIONS != 0 ) then
+
+            set CLIMDIURNALJOB = $SOURCE/post/gcmclim_diurnal.j${CLIM_YYYYMM}
+            set CLIMDIURNALLOG = $SOURCE/post/gcmclim_diurnal.o${CLIM_YYYYMM}
+            /bin/rm -f $CLIMDIURNALJOB
+            /bin/rm -f $CLIMDIURNALLOG
+
+cat > $CLIMDIURNALJOB << EOF
+#!/bin/csh -f
+#SBATCH --job-name=gcmclim_diurnal.${CLIM_YYYYMM}
+#SBATCH --time=04:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=$#CLIM_DIURNAL_COLLECTIONS
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${CLIM_PARTITION}
+#SBATCH --qos=${CLIM_QOS}
+#SBATCH --output=${CLIMDIURNALLOG}
+
+umask 022
+limit stacksize unlimited
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSUTIL/bin
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+foreach c ( $CLIM_DIURNAL_COLLECTIONS )
+   srun --exclusive --job-name=\$c -N1 -n1 \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection \$c -month $CLIM_MONTHS -diurnal -ncpus 1 |& perl -e 'use Fcntl qw(:flock); local \$/; my \$x = <STDIN>; open(my \$h, ">>", "$CLIMDIURNALLOG") or die \$\!; flock(\$h, LOCK_EX) or die \$\!; print \$h "\n===== BEGIN \$ARGV[0] =====\n", \$x, "===== END \$ARGV[0] =====\n"; close(\$h);' \$c &
+end
+wait
+
+sleep 15
+
+echo ""
+echo "===== TASK SUMMARY ====="
+sacct -j \$SLURM_JOB_ID --format=JobID,JobName%20,State,ExitCode,Elapsed,MaxRSS --units=M
+
+exit
+EOF
+            chmod 755 $CLIMDIURNALJOB
+            sbatch $CLIMDIURNALJOB
+
+         endif
+
+      endif # End CLIM_STATUS == ON
+
+   else if( $HOST == 'pleiades' ) then
+
+      # Pleiades: Reverted to Original Synchronous/Inline Calls (Ungated, Untested)
+      # -------------------------------------------------------------------------------
+      foreach c ( $CLIM_COLLECTIONS )
+         $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $c -month $CLIM_MONTHS -ncpus $NCPUS
+      end
+
+      foreach c ( $CLIM_DIURNAL_COLLECTIONS )
+         $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $c -month $CLIM_MONTHS -diurnal -ncpus $NCPUS
+      end
+
+   endif
+
+endif # End CLIM_COLLECTIONS != 0
 
       # Create DDF File for TEM_Diags
       # -----------------------------
