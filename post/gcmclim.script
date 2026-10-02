@@ -21,15 +21,16 @@ USAGE:
       echo " "
       echo "Usage:"
       echo "gcmclim.script -source SOURCE [-collection COLLECTION]"
-      echo "                              [-month MM]"
+      echo "                              [-month MM [MM2 MM3 ...]]"
       echo "                              [-diurnal]"
       echo "                              [-ncpus NCPUS]"
       echo "                              [-nostrict]"
       echo " "
       echo "where:   SOURCE     is your location of your Experiment"
       echo "         COLLECTION is the  Collection Name from HISTORY.rc (Default: ALL)"
-      echo "         MM         is an optional parameter [1-12] to only update"
-      echo "                    files affected by month MM"
+      echo "         MM         is an optional parameter [1-12] (one or more values,"
+      echo "                    space-separated) to only update files affected by"
+      echo "                    the given month(s). Default/-99: ALL months"
       echo "         -diurnal   is an optional parameter to process"
       echo "                    monthly mean diurnal files"
       echo "         -nostrict  is an optional parameter to Disable STRICT time processing"
@@ -48,7 +49,7 @@ endif
      set filetype    = 'monthly'
      set diurnal     = ''
 @    nostrict        =   0
-@        MM          = -99
+     set MMs         = ( -99 )
 @ nargs = $#argv
 @    n  = 1
 while( $n <= $nargs )
@@ -60,7 +61,22 @@ while( $n <= $nargs )
                                           set collections = $argv[$m]
        endif
        if( "$argv[$n]" == "-month"      ) then
-                                          @            MM = $argv[$m]
+                    @ n = $n + 1
+                                      set MMs  = ""
+                                      set next = $argv[$n]
+                                      set bit  = `echo $next | cut -c1-1`
+                                      while( "$bit" != "-" | "$next" == "-99" )
+                                         set MMs = `echo $MMs $next`
+                                          @   n  = $n + 1
+                                         if( $n <= $nargs ) then
+                                             set next = $argv[$n]
+                                             set bit  = `echo $next | cut -c1-1`
+                                         else
+                                             set bit  = "-"
+                                             set next = "-"
+                                         endif
+                                      end
+                                             @ n = $n - 1
        endif
        if( "$argv[$n]" == "-ncpus"      ) then
                                           set       NCPUS = $argv[$m]
@@ -78,8 +94,16 @@ while( $n <= $nargs )
      @ n = $n + 1
 end
 if( $source == 'NULL' ) goto USAGE
-if( $MM > 12 )          goto USAGE
 
+# Validate Month List and Collapse Mixed Lists Containing -99
+# -------------------------------------------------------------
+set have99 = 0
+foreach mm ($MMs)
+   if( $mm > 12 ) goto USAGE
+   if( $mm == -99 ) set have99 = 1
+end
+if( $have99 == 1 ) set MMs = ( -99 )
+echo "DEBUG: MMs=$MMs  numMMs=$#MMs"
 
 # Set HOMDIR
 # ----------
@@ -128,10 +152,14 @@ if( "$diurnal" != "" ) set climdir = $source/$collection/diurnal
 
 cd $climdir
 
-if( $MM > 0 & $MM < 10 ) then
-    set length = `echo $MM | awk '{print length}'`
-    if($length < 2 )set MM = 0$MM
-endif
+@ mi = 1
+while( $mi <= $#MMs )
+    if( $MMs[$mi] > 0 & $MMs[$mi] < 10 ) then
+        set length = `echo $MMs[$mi] | awk '{print length}'`
+        if( $length < 2 ) set MMs[$mi] = 0$MMs[$mi]
+    endif
+    @ mi = $mi + 1
+end
 
 
 # Extract EXPID
@@ -149,8 +177,8 @@ set fname = $expid.$collection.$filetype
 
 # Extract Extension (last node) from Monthly Mean Files
 # -----------------------------------------------------
-if( $MM != -99 ) then
-set files = `/bin/ls -1 $fname.*$MM.nc4 | grep -v clim | grep -v nc4-partial`
+if( $#MMs == 1 & $MMs[1] != -99 ) then
+set files = `/bin/ls -1 $fname.*$MMs[1].nc4 | grep -v clim | grep -v nc4-partial`
 else
 set files = `/bin/ls -1 $fname.* | grep -v clim | grep -v nc4-partial`
 endif
@@ -196,7 +224,13 @@ while( $n <= 12 )
        set curmonth = `echo $nymd | cut -c5-6`
        set curdate  = ${curyear}${curmonth}
 
-       if( $MM == -99 | $MM == $curmonth ) then
+       set MONTH_MATCH = 0
+       if( $MMs[1] == -99 ) set MONTH_MATCH = 1
+       foreach mm ($MMs)
+          if( $mm == $curmonth ) set MONTH_MATCH = 1
+       end
+
+       if( $MONTH_MATCH == 1 ) then
            /bin/rm -f $fname.clim.M$curmonth.$ext
            /bin/rm -f clim.tabl   # to ensure a complete, updated clim.tabl for plots
            set files = `/bin/ls -1 $fname.*$curmonth.$ext | grep -v clim`
@@ -256,7 +290,13 @@ foreach MON (01 02 03 04 05 06 07 08 09 10 11 12)
       if( $MON1 == "12" ) set SEASON = DJF
                           set season = `echo $SEASON | tr "[:upper:]" "[:lower:]"`
 
-      if( $MM == -99 | $MM == $MON1 | $MM == $MON2 | $MM == $MON3 ) then
+      set SEASON_MATCH = 0
+      if( $MMs[1] == -99 ) set SEASON_MATCH = 1
+      foreach mm ($MMs)
+         if( $mm == $MON1 | $mm == $MON2 | $mm == $MON3 ) set SEASON_MATCH = 1
+      end
+
+      if( $SEASON_MATCH == 1 ) then
 
       if( `echo $SEASONS` =~ \*${SEASON}\* ) then
           /bin/rm -f $fname.clim.$SEASON.$ext
@@ -394,4 +434,3 @@ if( "$diurnal" == "" ) then
 endif
 
 end # End Collections Loop
-

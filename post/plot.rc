@@ -6,6 +6,9 @@
 #      PLOT_STATUS:        ON .... Enables   Plot Package
 #                         OFF .... Disables  Plot Package
 #
+#      CLIM_STATUS:        ON .... Enables   Automatic Monthly Climatology Processing (gcmclim)
+#                         OFF .... Disables  Automatic Monthly Climatology Processing (gcmclim)
+#
 #   PLOT_FREQUENCY:      CLIM .... Produces Plots based on ALL years available within EXPID (i.e., the Climatology of the EXPID)
 #                      YEARLY .... Produces Plots for each individual year available within EXPID
 #
@@ -32,7 +35,7 @@
 # ---------------------------------------------------------------------------------------------------
 
    PLOT_STATUS: OFF
-  PLOT_SEASONS: DJF JJA
+   CLIM_STATUS: OFF
 PLOT_FREQUENCY: CLIM
   PLOT_OPTIONS: -cintdiff ON
    PLOT_CMPEXP:
