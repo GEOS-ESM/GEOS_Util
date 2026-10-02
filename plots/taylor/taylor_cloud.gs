@@ -125,7 +125,7 @@ endif
 '   open 'verification'/surface_fields/coads/coadsgrads2.tabl'
 'getinfo  numfiles'
           coadfile = result
-'   open 'verification'/Clouds_radiation/isccp/isccp.tabl'
+'xdfopen 'verification'/Clouds_radiation/isccp_hgm/isccp_hgm.tabl'
 'getinfo  numfiles'
           isccpfile = result
 

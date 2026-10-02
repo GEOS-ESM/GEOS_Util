@@ -146,14 +146,6 @@ cd $GEOSUTIL/plots/$dir
 if (! -l VERIFICATION.GSSTF.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
 end
 
-# VERIFICATION.ECINTERIM
-# ---------------------------
-set dirs = `echo hcmp lcmp zcmp zcmp1 tseries precip`
-foreach dir ($dirs)
-cd $GEOSUTIL/plots/$dir
-if (! -l VERIFICATION.ECINTERIM.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECINTERIM.rc  .
-end
-
 # VERIFICATION.ECANA
 # -----------------------
 set dirs = `echo hcmp lcmp zcmp`
