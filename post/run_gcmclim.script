@@ -1,0 +1,191 @@
+#!/bin/csh -f
+
+# This script performs a full, all-months (-99) Climatology processing
+# of EVERY collection discovered in SOURCE's HISTORY.rc. Intended for
+# manual/recovery use (e.g., when CLIM_STATUS: OFF, or to recompute
+# everything from scratch).
+#
+# Submits two independent batch jobs on discover:
+#    1) Monthly/Seasonal/Annual Climatology  (all collections)
+#    2) Diurnal Climatology                  (collections with a diurnal/ subdirectory)
+#
+# Arguments (all optional):
+#    -source     SOURCE      Experiment source directory (Default: current directory)
+#                             Must contain HISTORY.rc and post/gcm_post.j
+#    -partition  PARTITION   Slurm partition (Default: read from post/gcm_post.j)
+#    -qos        QOS         Slurm QOS       (Default: read from post/gcm_post.j)
+# -------------------------------------------------------------------------
+
+if ( ! $?GEOSUTIL ) then
+      echo " "
+      echo "Environment variable GEOSUTIL must be defined before use\!"
+      echo " "
+      exit 1
+endif
+
+# Process Input String
+# --------------------
+     set SOURCE    = $cwd
+     set PARTITION = 'NULL'
+     set QOS       = 'NULL'
+
+@ nargs = $#argv
+@    n  = 1
+while( $n <= $nargs )
+   if( "$argv[$n]" == "-source" || "$argv[$n]" == "-partition" || "$argv[$n]" == "-qos" ) then
+      @ m = $n + 1
+      if( $m > $nargs ) then
+         echo " "
+         echo "Option $argv[$n] requires an argument\!"
+         echo " "
+         exit 1
+      endif
+      if( "$argv[$n]" == "-source"    ) set SOURCE    = "$argv[$m]"
+      if( "$argv[$n]" == "-partition" ) set PARTITION = "$argv[$m]"
+      if( "$argv[$n]" == "-qos"       ) set QOS       = "$argv[$m]"
+      @ n = $m
+   endif
+   @ n = $n + 1
+end
+
+if ( ! -e $SOURCE/HISTORY.rc ) then
+      echo " "
+      echo "HISTORY.rc not found: $SOURCE/HISTORY.rc"
+      echo " "
+      exit 1
+endif
+
+if( ! $?GEOSBIN ) setenv GEOSBIN $GEOSUTIL/bin
+if( ! $?GROUP )   setenv GROUP   `cat $HOME/.GROUProot`
+
+if( "$PARTITION" == 'NULL' || "$QOS" == 'NULL' ) then
+   if ( ! -e $SOURCE/post/gcm_post.j ) then
+      echo " "
+      echo "gcm_post.j not found: $SOURCE/post/gcm_post.j"
+      echo "Supply -partition and -qos explicitly, or restore the file."
+      echo " "
+      exit 1
+   endif
+endif
+
+if( "$PARTITION" == 'NULL' ) set PARTITION = `grep '#SBATCH --partition=' $SOURCE/post/gcm_post.j | head -1 | cut -d'=' -f2`
+if( "$QOS"       == 'NULL' ) set QOS       = `grep '#SBATCH --qos='       $SOURCE/post/gcm_post.j | head -1 | cut -d'=' -f2`
+
+if( "$PARTITION" == "" ) then
+   echo " "
+   echo "Slurm partition not specified and not found in: $SOURCE/post/gcm_post.j"
+   echo "Re-run with: -partition PARTITION"
+   echo " "
+   exit 1
+endif
+
+if( "$QOS" == "" ) then
+   echo " "
+   echo "Slurm QOS not specified and not found in: $SOURCE/post/gcm_post.j"
+   echo "Re-run with: -qos QOS"
+   echo " "
+   exit 1
+endif
+
+# Discover Collections (and Diurnal-Eligible Subset) from HISTORY.rc
+# --------------------------------------------------------------------
+set COLLECTIONS         = `$GEOSUTIL/post/get_streams $SOURCE/HISTORY.rc`
+set DIURNAL_COLLECTIONS = ()
+foreach c ( $COLLECTIONS )
+   if( -e $SOURCE/$c/diurnal ) set DIURNAL_COLLECTIONS = ( $DIURNAL_COLLECTIONS $c )
+end
+
+echo "COLLECTIONS: $COLLECTIONS"
+echo "DIURNAL_COLLECTIONS: $DIURNAL_COLLECTIONS"
+
+# Submit Monthly/Seasonal/Annual Climatology Job
+# ------------------------------------------------
+set CLIMJOB = $SOURCE/post/run_gcmclim.j
+set CLIMLOG = $SOURCE/post/run_gcmclim.o
+/bin/rm -f $CLIMJOB
+/bin/rm -f $CLIMLOG
+
+cat > $CLIMJOB << EOF
+#!/bin/csh -f
+#SBATCH --job-name=run_gcmclim
+#SBATCH --time=02:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=$#COLLECTIONS
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${PARTITION}
+#SBATCH --qos=${QOS}
+#SBATCH --output=${CLIMLOG}
+
+umask 022
+limit stacksize unlimited
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSBIN
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+foreach c ( $COLLECTIONS )
+   srun --exclusive --job-name=\$c -N1 -n1 \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection \$c -month -99 -ncpus 1 |& perl -e 'use Fcntl qw(:flock); local \$/; my \$x = <STDIN>; open(my \$h, ">>", "$CLIMLOG") or die \$\!; flock(\$h, LOCK_EX) or die \$\!; print \$h "\n===== BEGIN \$ARGV[0] =====\n", \$x, "===== END \$ARGV[0] =====\n"; close(\$h);' \$c &
+end
+wait
+
+sleep 15
+
+echo ""
+echo "===== TASK SUMMARY ====="
+sacct -j \$SLURM_JOB_ID --format=JobID,JobName%20,State,ExitCode,Elapsed,MaxRSS --units=M
+
+exit
+EOF
+chmod 755 $CLIMJOB
+sbatch $CLIMJOB
+
+# Submit Diurnal Climatology Job
+# ---------------------------------
+if( $#DIURNAL_COLLECTIONS != 0 ) then
+
+   set CLIMDIURNALJOB = $SOURCE/post/run_gcmclim_diurnal.j
+   set CLIMDIURNALLOG = $SOURCE/post/run_gcmclim_diurnal.o
+   /bin/rm -f $CLIMDIURNALJOB
+   /bin/rm -f $CLIMDIURNALLOG
+
+cat > $CLIMDIURNALJOB << EOF
+#!/bin/csh -f
+#SBATCH --job-name=run_gcmclim_diurnal
+#SBATCH --time=04:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=$#DIURNAL_COLLECTIONS
+#SBATCH --account=${GROUP}
+#SBATCH --partition=${PARTITION}
+#SBATCH --qos=${QOS}
+#SBATCH --output=${CLIMDIURNALLOG}
+
+umask 022
+limit stacksize unlimited
+setenv ARCH \`uname\`
+setenv SITE NCCS
+setenv GEOSBIN $GEOSBIN
+setenv GEOSUTIL $GEOSUTIL
+
+if ( -e \$GEOSBIN/g5_modules ) source \$GEOSBIN/g5_modules
+
+foreach c ( $DIURNAL_COLLECTIONS )
+   srun --exclusive --job-name=\$c -N1 -n1 \$GEOSUTIL/post/gcmclim.script -source $SOURCE -collection \$c -month -99 -diurnal -ncpus 1 |& perl -e 'use Fcntl qw(:flock); local \$/; my \$x = <STDIN>; open(my \$h, ">>", "$CLIMDIURNALLOG") or die \$\!; flock(\$h, LOCK_EX) or die \$\!; print \$h "\n===== BEGIN \$ARGV[0] =====\n", \$x, "===== END \$ARGV[0] =====\n"; close(\$h);' \$c &
+end
+wait
+
+sleep 15
+
+echo ""
+echo "===== TASK SUMMARY ====="
+sacct -j \$SLURM_JOB_ID --format=JobID,JobName%20,State,ExitCode,Elapsed,MaxRSS --units=M
+
+exit
+EOF
+   chmod 755 $CLIMDIURNALJOB
+   sbatch $CLIMDIURNALJOB
+
+endif
+
+exit 0
