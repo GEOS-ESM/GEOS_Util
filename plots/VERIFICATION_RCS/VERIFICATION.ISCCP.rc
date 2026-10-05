@@ -1,9 +1,9 @@
 
 OBSNAM: ISCCP
-OBSDSC: ISCCP_N36_Monthly_Data
+OBSDSC: ISCCP_HGM_Monthly_Data
 
-        filename:   'VERIFICATION/Clouds_radiation/isccp/isccp.tabl'
-        filetype:   'BIN'
+        filename:   'VERIFICATION/Clouds_radiation/isccp_hgm/isccp_hgm.tabl'
+        filetype:   'HDF'
         fields:     'CLDTT'    , 'SOLAR'         , 'CLDTOT'      , 0.01 ,
                     'CLDLO'    , 'SOLAR'         , 'CLDLOW'      , 0.01 ,
                     'CLDMD'    , 'SOLAR'         , 'CLDMID'      , 0.01 ,
