@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [3.0.4] - 2026-10-05
+
+### Changed
+
 - Updated vortex/zonal-mean comparison plots to handle NH vs SH separately and improve seasonal climatology
 - Changed post-processing workflow in `post/gcmpost.script` so climatology files are now batched as background jobs instead of running inline
 - Set plotting status to `OFF` in `post/plot.rc` to disable automatic spawning of plot jobs
@@ -20,10 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Minor fixes and generalizations to `pchem_species_generation` scripts
-
-### Removed
-
-### Deprecated
 
 ## [3.0.3] - 2026-09-23
 
