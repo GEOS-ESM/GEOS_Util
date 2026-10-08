@@ -143,6 +143,7 @@ set (post_progs
    getdates
    gcmclim.script
    check_clim
+   run_gcmclim.script
    )
 
 install (
