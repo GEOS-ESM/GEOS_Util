@@ -394,6 +394,7 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               shutil.move(yaml_file, new_name)
               break
    yaml = ruamel.yaml.YAML()
+   yaml.width = 4096
    out_dir = os.path.dirname(yaml_file)
    if not os.path.exists(out_dir) : os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
