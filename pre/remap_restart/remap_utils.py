@@ -607,6 +607,8 @@ def get_config_from_answers(answers, config_tpl = False):
 
 def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
    if grid is not None : return grid
+   if agrid is None or ogrid is None:
+      raise ValueError("get_resolutions needs agrid and ogrid unless grid is given")
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):

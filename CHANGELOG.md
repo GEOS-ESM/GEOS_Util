@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `shutil.remove` calls (now `os.remove`) in `remap_other_restarts.py`
 - Fixed a `TypeError` in `remap_utils.py` when `bc_version` is missing
 - Fixed a trailing space after `bc_base:` in the generated `remap_params.yaml`
+- `get_resolutions` in `remap_utils.py` now raises a clear error if `agrid` or `ogrid` is missing
 
 ### Removed
 

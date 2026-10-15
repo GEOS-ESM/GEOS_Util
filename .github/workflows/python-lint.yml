@@ -19,9 +19,6 @@ jobs:
   ty:
     name: ty
     runs-on: ubuntu-latest
-    # Informational for now: get_resolutions in remap_utils.py still has
-    # known diagnostics. Remove continue-on-error once ty is clean.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v6
