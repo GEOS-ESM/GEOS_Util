@@ -87,7 +87,7 @@ message_bc_ops     = '''\n
  -----------------|----------------------|-----------------------------------------
  v14: v14         | future               | 11.11.0          ... present
  v12: v12         | future               | 11.10.0          ... 11.10.x
- NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
  Other: Additional choices used in model or DAS development.\n\n'''
