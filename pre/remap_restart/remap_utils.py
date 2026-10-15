@@ -99,7 +99,7 @@ message_bc_other   = '''\n
  BCs version | GCM tags            | Description
  ------------|---------------------|------------------------------------------------------------
  v11         | testing only        | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
- v12         | 11.10.0 ... 11.10.2 | Last released v12 tag is 11.10.2
+ v12         | 11.10.0 ... 11.10.2 | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
  v13         | testing only        | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
  v15_BETA    | testing only        | As in v14 but with v2 topography for atmosphere\n\n'''
 
