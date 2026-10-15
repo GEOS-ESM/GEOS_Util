@@ -91,7 +91,7 @@ class remap_base:
          f = expid + os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_rst.'+suffix
          cmd = '/bin/cp ' + rst + ' ' + out_dir+'/'+f
          print('\n'+cmd)
-         subprocess.call(shlex.split(cmd))
+         subprocess.run(shlex.split(cmd), check=True)
 
        return True
 

@@ -95,7 +95,7 @@ class analysis(remap_base):
           shutil.move(f,f_orig)
           cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
           print(cmd)
-          subprocess.call(shlex.split(cmd))
+          subprocess.run(shlex.split(cmd), check=True)
 
      for f in local_fs:
        fname = os.path.basename(f)
@@ -117,7 +117,7 @@ class analysis(remap_base):
        rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z.bin' + label
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
-       subprocess.call(shlex.split(cmd))
+       subprocess.run(shlex.split(cmd), check=True)
      print( "cd " + cwdir)
      os.chdir(cwdir)
 

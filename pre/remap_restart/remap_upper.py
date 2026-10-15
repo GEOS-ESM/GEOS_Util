@@ -132,17 +132,17 @@ class upperair(remap_base):
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       subprocess.run(shlex.split(cmd), check=True)
 
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
-     subprocess.call(shlex.split(cmd))
+     subprocess.run(shlex.split(cmd), check=True)
 
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
-     subprocess.call(shlex.split(cmd))
+     subprocess.run(shlex.split(cmd), check=True)
 
      agrid  = config['output']['shared']['agrid']
      if agrid[0].upper() == 'C':
@@ -389,15 +389,16 @@ endif
          if (ntasks < NPE ):
            print(f"\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ")
 
-       subprocess.call(['chmod', '755', script_name])
+       subprocess.run(['chmod', '755', script_name], check=True)
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       os.system(script_name + ' 1>' + log_name+ ' 2>&1')
+       with open(log_name, "w") as log_f:
+          subprocess.run([script_name], stdout=log_f, stderr=subprocess.STDOUT, check=True)
      elif GEOS_SITE == "NAS" :
        print('qsub -W  block=true '+ script_name +'\n')
-       subprocess.call(['qsub', '-W','block=true', script_name])
+       subprocess.run(['qsub', '-W','block=true', script_name], check=True)
      else:
        print('sbatch -W '+ script_name +'\n')
-       subprocess.call(['sbatch', '-W', script_name])
+       subprocess.run(['sbatch', '-W', script_name], check=True)
 
 #
 #    post process

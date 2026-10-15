@@ -476,15 +476,16 @@ endif
 
         if interactive:
             print("interactive mode\n")
-            subprocess.call(["chmod", "755", script_name])
+            subprocess.run(["chmod", "755", script_name], check=True)
             print(script_name + "  1>" + log_name + "  2>&1")
-            os.system(script_name + " 1>" + log_name + " 2>&1")
+            with open(log_name, "w") as log_f:
+               subprocess.run([script_name], stdout=log_f, stderr=subprocess.STDOUT, check=True)
         elif GEOS_SITE == "NAS":
             print("qsub -W block=true " + script_name + "\n")
-            subprocess.call(["qsub", "-W", "block=true", script_name])
+            subprocess.run(["qsub", "-W", "block=true", script_name], check=True)
         else:
             print("sbatch -W " + script_name + "\n")
-            subprocess.call(["sbatch", "-W", script_name])
+            subprocess.run(["sbatch", "-W", script_name], check=True)
 
         suffix = "_rst." + suffix
         for out_rst in glob.glob("OutData/*_rst*"):
