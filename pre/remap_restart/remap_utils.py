@@ -31,9 +31,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v14', 'v12', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v14', 'NL3', 'ICA', 'Other']
 
-choices_bc_other   = ['v11', 'v13', 'v15_BETA']
+choices_bc_other   = ['v12', 'v11', 'v13', 'v15_BETA']
 
 choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v11', 'v12', 'v13','v14', 'v15_BETA']
 
@@ -86,7 +86,6 @@ message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
  v14: v14         | future               | 11.11.0          ... present
- v12: v12         | future               | 11.10.0          ... 11.10.x
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -97,10 +96,12 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 
 
 message_bc_other   = '''\n
-
-          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
-          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
-     v15_BETA:     As in v14 but with v2 topography for atmosphere \n\n'''     
+ BCs version | GCM tags            | Description
+ ------------|---------------------|------------------------------------------------------------
+ v12         | 11.10.0 ... 11.10.2 | Last released v12 tag is 11.10.2
+ v11         | testing only        | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
+ v13         | testing only        | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
+ v15_BETA    | testing only        | As in v14 but with v2 topography for atmosphere\n\n'''
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
