@@ -14,6 +14,7 @@ import ruamel.yaml
 from remap_utils import (
   GEOS_SITE,
   MERRA2_RST_BASE,
+  catch_model,
   choices_bc_base,
   choices_bc_ops,
   choices_bc_other,
@@ -507,7 +508,7 @@ def ask_questions():
    if answers.get('input:air:nlevel'):
        del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers.get("input:shared:MERRA-2") and not answers.get("input:shared:GEOS-IT"):
-      answers["input:surface:catch_model"] = catch_model(answers)  # noqa: F821  FIXME: catch_model is not defined anywhere
+      answers["input:surface:catch_model"] = catch_model(answers)
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]

@@ -287,7 +287,7 @@ def fvcore_info(x):
        sys.exit("This stretched cubed-sphere grid is not supported ")
   return True
 
-  ymdh = x['input:shared:yyyymmddhh']
+def catch_model(x):
   rst_dir = x.get('input:shared:rst_dir')
   if not rst_dir : return False
 
