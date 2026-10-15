@@ -198,7 +198,7 @@ class other_restarts(remap_base):
             f = os.path.basename(rst)
             dest = InData_dir + "/" + f
             if os.path.exists(dest):
-                shutil.remove(dest)
+                os.remove(dest)
             print("\nCopy " + rst + " to " + dest)
             shutil.copy(rst, dest)
             if "saltwater_internal" in f:
@@ -224,9 +224,9 @@ class other_restarts(remap_base):
         out_til = OutData_dir + "/" + os.path.basename(out_tile_file)
 
         if os.path.exists(in_til):
-            shutil.remove(in_til)
+            os.remove(in_til)
         if os.path.exists(out_til):
-            shutil.remove(out_til)
+            os.remove(out_til)
         print("\n Copy " + in_tile_file + " to " + in_til)
         shutil.copy(in_tile_file, in_til)
         print("\n Copy " + out_tile_file + " to " + out_til)
