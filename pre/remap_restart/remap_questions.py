@@ -44,23 +44,15 @@ def default_partition(x):
 def validate_merra2_time(text):
    if len(text) == 10 :
       hh = text[8:]
-      if hh in ['03','09','15','21']:
-         return True
-      else:
-         return False
-   else:
-     return False
+      return hh in ['03','09','15','21']
+   return False
 
 def validate_geosit_time(text):
    if len(text) == 10 :
       dd = text[6:8]
       hh = text[8:]
-      if dd in ['14','28'] and hh in ['21']:
-         return True
-      else:
-         return False
-   else:
-     return False
+      return dd in ['14','28'] and hh in ['21']
+   return False
 
 def SITE_MERRA2(x):
   if GEOS_SITE == "NAS":

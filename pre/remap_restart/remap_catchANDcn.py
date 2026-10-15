@@ -285,9 +285,7 @@ def ask_catch_questions():
      nonlocal catch_input_shared_rst_dir
      rst_dir   = catch_input_shared_rst_dir + '/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
      rst_files = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')
-     if len(rst_files) !=1 :
-       return False
-     return True
+     return len(rst_files) == 1
 
    questions =[
         {

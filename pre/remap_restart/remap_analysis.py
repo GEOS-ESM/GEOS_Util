@@ -79,12 +79,10 @@ class analysis(remap_base):
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp)
        shutil.copy(f,f_tmp)
-       if out_name.find('satbias') != -1 :
-         if (aqua):
+       if out_name.find('satbias') != -1 and aqua:
             with open(f) as f_in, open(f_tmp, 'w') as f_:
-               for line in f_in:
-                  # This is unlikely to be the case with new files
-                  f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
+               # This is unlikely to be the case with new files
+               f_.writelines(line.replace('airs281SUBSET_aqua', 'airs281_aqua      ') for line in f_in)
 
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
@@ -182,10 +180,10 @@ class analysis(remap_base):
        delt = timedelta(hours = h-3)
        new_time = rst_time + delt
        yyyy = "Y"+str(new_time.year)
-       mm   = 'M%02d'%new_time.month
-       ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
-       hh   = '%02d'%h
-       newhh= '%02d'%new_time.hour
+       mm   = f'M{new_time.month:02d}'
+       ymd  = f'{new_time.year:04d}{new_time.month:02d}{new_time.day:02d}'
+       hh   = f'{h:02d}'
+       newhh= f'{new_time.hour:02d}'
        m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
        # bkg files
        for ftype in ['sfc', 'eta']:
@@ -226,8 +224,8 @@ class analysis(remap_base):
     delt = timedelta(hours = 3)
     new_time = rst_time - delt
     yyyy = "Y"+str(new_time.year)
-    mm   = 'M%02d'%new_time.month
-    ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
+    mm   = f'M{new_time.month:02d}'
+    ymdh = f'{new_time.year:04d}{new_time.month:02d}{new_time.day:02d}{new_time.hour:02d}'
     m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
     fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
     f = m2_rst_dir+'/'+fname

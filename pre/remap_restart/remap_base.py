@@ -74,8 +74,7 @@ class remap_base:
        if diff != 0: return False
 
        # for catchment, even tile files are the same, if bc is different, it still need remap
-       if (catch) :
-          if in_bc_version != out_bc_version : return False
+       if catch and in_bc_version != out_bc_version : return False
 
        expid = config['output']['shared']['expid']
        if (expid) :

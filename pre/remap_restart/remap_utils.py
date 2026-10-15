@@ -229,7 +229,7 @@ def init_geosit(x):
 
 
 def fvcore_info(x):
-  if 'input:shared:agrid' in x.keys():
+  if 'input:shared:agrid' in x:
      return True
   rst_dir = x.get('input:shared:rst_dir')
   if not rst_dir : return False
@@ -366,17 +366,16 @@ def get_zoom(x):
       zoom_ = '2'
       return zoom_
    agrid = None
-   if 'input:shared:agrid' in x.keys():
+   if 'input:shared:agrid' in x:
       agrid = x.get('input:shared:agrid')
-   elif 'input' in x.keys():
+   elif 'input' in x:
       agrid = x['input']['shared']['agrid']
-   if agrid:
-      if (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
-         lat = int(agrid[1:])
-         zoom = lat /90.0
-         zoom = max(zoom, 1)
-         zoom = min(zoom, 8)
-         zoom_= str(int(zoom))
+   if agrid and agrid[0].upper() == 'C':     # for cube-sphere: agrid = C90, C180, C1440, ...
+      lat = int(agrid[1:])
+      zoom = lat /90.0
+      zoom = max(zoom, 1)
+      zoom = min(zoom, 8)
+      zoom_= str(int(zoom))
    return zoom_
 
 def get_account():
@@ -554,10 +553,10 @@ def get_command_line_from_answers(answers):
 
 def flatten_nested(nested_dict, result=None, prefix=''):
   if result is None:
-    result = dict()
+    result = {}
   for k, v in nested_dict.items():
-    new_k = ':'.join((prefix, k)) if prefix else k
-    if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
+    new_k = f'{prefix}:{k}' if prefix else k
+    if not (isinstance(v, (dict, OrderedDict))):
       result.update({new_k: v})
     else:
       flatten_nested(v, result, new_k)
