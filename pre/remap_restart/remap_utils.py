@@ -85,7 +85,7 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v14: v14         | future               | 11.11.0          ... present
+ v14: v14         | future               | 11.11            ... present
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -99,8 +99,9 @@ message_bc_other   = '''\n
  BCs version | GCM tags            | Description
  ------------|---------------------|------------------------------------------------------------
  v11         | testing only        | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
- v12         | 11.10.0 ... 11.10.2 | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+ v12         | 11.10               | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
  v13         | testing only        | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
+ v14         | 11.11 ...           | As in v13 but with GPM 2.0 peat
  v15_BETA    | testing only        | As in v14 but with v2 topography for atmosphere\n\n'''
 
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
