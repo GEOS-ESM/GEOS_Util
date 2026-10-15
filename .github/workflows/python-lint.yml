@@ -1,0 +1,33 @@
+name: Python Lint
+
+on:
+  pull_request:
+    paths:
+      - 'pre/remap_restart/**'
+      - '.github/workflows/python-lint.yml'
+
+jobs:
+  ruff:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: pre/remap_restart
+
+  ty:
+    name: ty
+    runs-on: ubuntu-latest
+    # Informational for now: get_resolutions in remap_utils.py still has
+    # known diagnostics. Remove continue-on-error once ty is clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v6
+      - name: Run ty
+        working-directory: pre/remap_restart
+        run: |
+          uv venv
+          uv pip install ty numpy netCDF4 scipy pyyaml ruamel.yaml questionary
+          uv run ty check --python .venv .

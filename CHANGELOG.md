@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `ruff.toml` for `pre/remap_restart`
+- Added a GitHub Action (`python-lint.yml`) that runs `ruff` and `ty` on `pre/remap_restart`
 - Added Python ignores (`__pycache__/`, `.ruff_cache/`, `.pytest_cache/`, `.venv/`) to the root `.gitignore`
 
 ### Changed
