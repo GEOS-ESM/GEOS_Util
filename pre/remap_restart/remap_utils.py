@@ -9,6 +9,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 from collections import OrderedDict
 
 import netCDF4 as nc
@@ -166,7 +167,7 @@ def init_merra2(x):
 
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
-     exit("Error. MERRA-2 data < 1979 not available\n")
+     sys.exit("Error. MERRA-2 data < 1979 not available\n")
   elif (yyyymm < 199201):
      expid = "d5124_m2_jan79"
   elif (yyyymm < 200106):
@@ -202,7 +203,7 @@ def init_geosit(x):
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
 
   if yyyymm < 199701:
-      exit("Error. GEOS-IT data < 1997 not available\n")
+      sys.exit("Error. GEOS-IT data < 1997 not available\n")
   elif 199612 <= yyyymm <= 200712:
       expid = "d5294_geosit_jan98"
   elif 200801 <= yyyymm < 201801:
@@ -210,7 +211,7 @@ def init_geosit(x):
   elif yyyymm >= 201801:
       expid = "d5294_geosit_jan18"  # For any date starting from 201801 and beyond
   else:
-      exit("Error. GEOS-IT data not available for this date\n")
+      sys.exit("Error. GEOS-IT data not available for this date\n")
 
   x['input:shared:expid']        = expid
   x['input:shared:omodel']       = 'data'
@@ -258,7 +259,7 @@ def fvcore_info(x):
   ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
   if (lat != lon*6) :
       print("(N_lon, N_lat) = ", lon, lat)
-      exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+      sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
   x['input:shared:yyyymmddhh'] = ymdh
   x['input:shared:agrid'] = "C"+str(lon)
   print("The input fvcore restart has atm grid: " + "C" + str(lon) + '\n')
@@ -283,7 +284,7 @@ def fvcore_info(x):
      elif f_ == STRETCH_GRID['SG002'] :
        x['input:shared:stretch'] = 'SG002'
      else:
-       exit("This stretched cubed-sphere grid is not supported ")
+       sys.exit("This stretched cubed-sphere grid is not supported ")
   return True
 
   ymdh = x['input:shared:yyyymmddhh']

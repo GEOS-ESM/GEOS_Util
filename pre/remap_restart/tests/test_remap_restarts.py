@@ -8,6 +8,7 @@
 import glob
 import os
 import subprocess as sp
+import sys
 
 import ruamel.yaml
 
@@ -60,7 +61,7 @@ if __name__ == '__main__' :
 
   if GEOS_SITE != "NCCS" :
      print("Test baseline data are only available at NCCS.  Please run tests on Discover.")
-     exit()
+     sys.exit()
   yaml = ruamel.yaml.YAML()
   stream =''
   cases_yaml = 'test_remap_cases.yaml'

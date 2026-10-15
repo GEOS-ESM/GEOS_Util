@@ -6,6 +6,7 @@
 #
 #
 import os
+import sys
 
 import questionary
 import ruamel.yaml
@@ -30,7 +31,7 @@ def echo_bcs(x,opt):
   x[opt+':shared:bc_base']  = base
   land_dir  = get_landdir(base, bcv, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
   if  not os.path.isdir(land_dir):
-     exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
+     sys.exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
   print("\n Land BCs for " + opt + " restarts: " + land_dir )
   return False
 

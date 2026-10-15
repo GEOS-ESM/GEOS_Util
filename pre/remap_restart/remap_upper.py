@@ -13,6 +13,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 
 from remap_base import remap_base
 from remap_bin2nc import bin2nc
@@ -140,7 +141,7 @@ class upperair(remap_base):
      if agrid[0].upper() == 'C':
        imout = int(agrid[1:])
      else:
-       exit("Only support cs grid so far")
+       sys.exit("Only support cs grid so far")
 
      if (imout <90):
        NPE =   12; nwrit = 1
@@ -205,7 +206,7 @@ class upperair(remap_base):
           target_lat  = STRETCH_GRID['SG002'][1]
           target_lon  = STRETCH_GRID['SG002'][2]
         else:
-          exit("This stretched grid option is not supported " + str(stretch))
+          sys.exit("This stretched grid option is not supported " + str(stretch))
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
@@ -222,7 +223,7 @@ class upperair(remap_base):
           target_lat  = STRETCH_GRID['SG002'][1]
           target_lon  = STRETCH_GRID['SG002'][2]
         else:
-          exit("This stretched grid option is not supported " + str(stretch))
+          sys.exit("This stretched grid option is not supported " + str(stretch))
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
