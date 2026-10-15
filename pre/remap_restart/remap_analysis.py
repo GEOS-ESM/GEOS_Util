@@ -120,6 +120,8 @@ class analysis(remap_base):
        subprocess.run(shlex.split(cmd), check=True)
      print( "cd " + cwdir)
      os.chdir(cwdir)
+     print("remove " + tmpdir)
+     shutil.rmtree(tmpdir)
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()

@@ -419,6 +419,8 @@ endif
         f.write(time)
      print('cd ' + cwdir)
      os.chdir(cwdir)
+     print('remove ' + out_dir + '/upper_data')
+     shutil.rmtree(out_dir + '/upper_data')
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()

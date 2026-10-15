@@ -269,6 +269,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
      print( "cd " + cwdir)
      os.chdir(cwdir)
+     print('remove ' + InData_dir)
+     shutil.rmtree(InData_dir)
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()

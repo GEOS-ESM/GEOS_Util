@@ -498,6 +498,9 @@ endif
             shutil.move(out_rst, out_dir + "/" + filename)
         print("cd " + cwdir)
         os.chdir(cwdir)
+        for scratch in (InData_dir, OutData_dir):
+            print("remove " + scratch)
+            shutil.rmtree(scratch)
 
         if self.config["input"]["shared"]["MERRA-2"]:
             self.remove_merra2()
