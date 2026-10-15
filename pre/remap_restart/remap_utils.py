@@ -3,17 +3,17 @@
 # remap_restarts package:
 #   remap_utils.py contains utility functions and definitions
 #
-import os
-import subprocess
-import ruamel.yaml
-from collections import OrderedDict
-import shutil
-import questionary
 import glob
-import shlex
-import netCDF4 as nc
-import linecache
+import os
 import re
+import shlex
+import shutil
+import subprocess
+from collections import OrderedDict
+
+import netCDF4 as nc
+import questionary
+import ruamel.yaml
 
 # shared global variables
 
@@ -53,7 +53,7 @@ GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
-message_stretch =  f'''\n
+message_stretch =  '''\n
  Select parameters of stretched cubed-sphere grid for new restarts:
 
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
@@ -81,7 +81,7 @@ message_expid       = "Enter experiment ID for new restarts:  (Added as prefix t
 message_bc_base_in  = "BCs base directory for input restarts: \n"
 message_bc_base_new = "BCs base directory for new restarts: \n"
 
-message_bc_ops     = f'''\n
+message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
  v12: v12         | future               | 12.0             ... present
@@ -97,7 +97,7 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 # in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
 #v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
 
-message_bc_other   = f'''\n
+message_bc_other   = '''\n
 
           v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
           v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
@@ -108,7 +108,7 @@ message_bc_other   = f'''\n
 message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
 message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
 
-message_agrid_list = f'''
+message_agrid_list = '''
  C12   C180    C1120
  C24   C360    C1440
  C48   C720    C2880
@@ -375,8 +375,8 @@ def get_zoom(x):
       if (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
          lat = int(agrid[1:])
          zoom = lat /90.0
-         if zoom < 1 : zoom = 1
-         if zoom > 8 : zoom = 8
+         zoom = max(zoom, 1)
+         zoom = min(zoom, 8)
          zoom_= str(int(zoom))
    return zoom_
 
@@ -616,7 +616,7 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
    oname = ''
    if (agrid[0].upper() == 'C'):
       n = int(agrid[1:])
-      aname ='CF{:04d}x6C'.format(n)
+      aname =f'CF{n:04d}x6C'
 
    if (ogrid[0].upper() == 'C'):
       oname = aname
@@ -625,11 +625,11 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
       s0 = int(xy[0])
       s1 = int(xy[1])
       if omodel == 'data':
-         oname = 'DE{:04d}xPE{:04d}'.format(s0,s1)
+         oname = f'DE{s0:04d}xPE{s1:04d}'
       if omodel == 'MOM5':
-         oname = 'M5TP{:04d}x{:04d}'.format(s0,s1)
+         oname = f'M5TP{s0:04d}x{s1:04d}'
       if omodel == 'MOM6':
-         oname = 'M6TP{:04d}x{:04d}'.format(s0,s1)
+         oname = f'M6TP{s0:04d}x{s1:04d}'
    if stretch:
       aname = aname + '-' + stretch
 

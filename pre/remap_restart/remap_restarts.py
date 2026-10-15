@@ -10,20 +10,20 @@
 #   source g5_modules       [csh]
 #
 import sys
-import argparse
 import textwrap
-import ruamel.yaml
+
 import questionary
-from remap_utils import *
-from remap_questions import *
+import ruamel.yaml
+
+from remap_analysis import *
+from remap_catchANDcn import *
 from remap_command_line import *
-from remap_upper import *
 from remap_other_restarts import *
-from remap_analysis  import *
-from remap_catchANDcn  import *
+from remap_questions import *
+from remap_upper import *
+from remap_utils import *
 
-
-program_description = textwrap.dedent(f'''
+program_description = textwrap.dedent('''
       USAGE:
 
       This script provides four options for remapping GEOS restart files:

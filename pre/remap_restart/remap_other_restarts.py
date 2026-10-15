@@ -9,25 +9,23 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import glob
 import os
-import subprocess as sp
 import shutil
 import subprocess
-import glob
-import ruamel.yaml
-import shlex
-import netCDF4 as nc
+import subprocess as sp
+
 from remap_base import remap_base
+from remap_bin2nc import bin2nc
 from remap_utils import (
-    get_label,
-    get_geomdir,
-    get_zoom,
-    get_landdir,
-    job_directive,
     GEOS_SITE,
     MERRA2_RST_BASE,
+    get_geomdir,
+    get_label,
+    get_landdir,
+    get_zoom,
+    job_directive,
 )
-from remap_bin2nc import bin2nc
 
 
 class other_restarts(remap_base):

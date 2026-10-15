@@ -8,16 +8,16 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import glob
 import os
-import ruamel.yaml
-import subprocess
 import shlex
 import shutil
-import glob
+import subprocess
+
 from remap_base import remap_base
-from remap_utils import *
 from remap_bin2nc import bin2nc
-import netCDF4 as nc
+from remap_utils import *
+
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -380,7 +380,7 @@ endif
            ntasks = nnodes * ncpus
          ntasks = int(ntasks)
          if (ntasks < NPE ):
-           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+           print(f"\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ")
 
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')

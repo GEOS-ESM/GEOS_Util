@@ -5,19 +5,18 @@
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
-import os
-import sys, getopt
-import ruamel.yaml
-import questionary
 import glob
+import os
 import subprocess as sp
-import remap_restarts
 
-from remap_utils          import *
-from remap_upper          import *
+import ruamel.yaml
+
+from remap_analysis import *
+from remap_catchANDcn import *
 from remap_other_restarts import *
-from remap_analysis       import *
-from remap_catchANDcn     import *
+from remap_upper import *
+from remap_utils import *
+
 
 def compare(base, result):
   #1) comparing nc4

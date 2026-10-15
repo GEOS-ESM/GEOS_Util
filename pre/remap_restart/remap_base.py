@@ -4,12 +4,13 @@
 #  remap_base.py does [???]
 #
 import os
-import ruamel.yaml
 import shutil
 import subprocess
+
 from remap_utils import *
 
-class remap_base(object):
+
+class remap_base:
   def __init__(self, **configs):
      for key, value in configs.items():
         if (key == 'params_file'):

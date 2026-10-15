@@ -8,17 +8,18 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import fileinput
+import fnmatch
+import glob
 import os
-from datetime import datetime, timedelta
-import subprocess
 import shlex
 import shutil
-import glob
-import fileinput
-import ruamel.yaml
+import subprocess
+from datetime import datetime, timedelta
+
 from remap_base import remap_base
-from remap_utils import get_label, MERRA2_RST_BASE
-import fnmatch
+from remap_utils import MERRA2_RST_BASE, get_label
+
 
 class analysis(remap_base):
   def __init__(self, **configs):

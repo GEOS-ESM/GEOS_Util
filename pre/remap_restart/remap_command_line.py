@@ -4,15 +4,13 @@
 #   remap_command_line.py parses and converts the command-line arguments and converts the information
 #   into matching "Answers" for the questionary (remap_questions.py)
 #
-import os
-import subprocess
-import shlex
-import ruamel.yaml
-import shutil
-import questionary
-import glob
 import argparse
+import os
+
+import ruamel.yaml
+
 from remap_utils import *
+
 
 def parse_args(program_description):
 

@@ -8,17 +8,18 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
-import os
-import sys
-import subprocess
-import shutil
 import glob
-import ruamel.yaml
-import shlex
 import mimetypes
+import os
+import shutil
+import subprocess
+import sys
+
 import netCDF4 as nc
+
 from remap_base import remap_base
 from remap_utils import *
+
 
 class catchANDcn(remap_base):
   def __init__(self, **configs):
@@ -223,7 +224,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
          ntasks = int(ntasks)
 
          if (ntasks < NPE):
-           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+           print(f"\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ")
 
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')

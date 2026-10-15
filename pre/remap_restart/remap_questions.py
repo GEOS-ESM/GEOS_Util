@@ -6,9 +6,12 @@
 #
 #
 import os
-import ruamel.yaml
+
 import questionary
+import ruamel.yaml
+
 from remap_utils import *
+
 
 def echo_level(x):
   if x["output:air:nlevel"] != str(x.get("input:air:nlevel")) :
@@ -378,7 +381,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+            "message": '''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
                         (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,
