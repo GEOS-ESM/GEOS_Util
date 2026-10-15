@@ -361,9 +361,8 @@ endif
 
      script_name = './remap_upper.j'
 
-     upper = open(script_name,'wt')
-     upper.write(remap_upper_script)
-     upper.close()
+     with open(script_name,'wt') as upper:
+        upper.write(remap_upper_script)
 
      interactive = None
      if GEOS_SITE == 'NAS':

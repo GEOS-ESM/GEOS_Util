@@ -203,9 +203,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
      script_name = './mk_catchANDcn.j'
 
-     catch_scrpt = open(script_name,'wt')
-     catch_scrpt.write(catch1script)
-     catch_scrpt.close()
+     with open(script_name,'wt') as catch_scrpt:
+        catch_scrpt.write(catch1script)
 
      interactive = None
      if GEOS_SITE == 'NAS':

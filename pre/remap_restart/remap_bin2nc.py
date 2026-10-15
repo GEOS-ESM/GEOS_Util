@@ -115,9 +115,8 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
      bintype=np.float64
   
   
-  f=open(yamlfile,'r')
-  
-  data=safe_load(f)
+  with open(yamlfile,'r') as f:
+     data=safe_load(f)
   
   dimensions = data["dimensions"]
   variables = data["variables"]

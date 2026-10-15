@@ -8,7 +8,6 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
-import fileinput
 import fnmatch
 import glob
 import os
@@ -82,11 +81,10 @@ class analysis(remap_base):
        shutil.copy(f,f_tmp)
        if out_name.find('satbias') != -1 :
          if (aqua):
-            f_ = open(f_tmp, 'w')
-            for line in fileinput.input(f):
-               # This is unlikely to be the case with new files
-               f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
-            f_.close()
+            with open(f) as f_in, open(f_tmp, 'w') as f_:
+               for line in f_in:
+                  # This is unlikely to be the case with new files
+                  f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
 
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
