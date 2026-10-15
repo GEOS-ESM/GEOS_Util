@@ -31,7 +31,7 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v12', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v14', 'NL3', 'ICA', 'Other']
 
 choices_bc_other   = ['v11', 'v12', 'v13', 'v14', 'v15_BETA']
 
@@ -85,7 +85,7 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v12: v12         | future               | 12.0             ... present
+ v14: v14         | future               | 11.11.0          ... present
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
  ----------------------------------------------------------------------------------
@@ -94,9 +94,6 @@ message_bc_ops     = '''\n
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
-# v12 used to be in the "other" section but is now the default, but we preserve this information
-# in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
-#v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
 
 message_bc_other   = '''\n
 
