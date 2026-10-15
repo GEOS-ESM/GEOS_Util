@@ -17,7 +17,14 @@ import sys
 
 from remap_base import remap_base
 from remap_bin2nc import bin2nc
-from remap_utils import *
+from remap_utils import (
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  STRETCH_GRID,
+  get_label,
+  get_topodir,
+  job_directive,
+)
 
 
 class upperair(remap_base):

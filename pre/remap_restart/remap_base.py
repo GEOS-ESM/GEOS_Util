@@ -4,10 +4,13 @@
 #  remap_base.py does [???]
 #
 import os
+import shlex
 import shutil
 import subprocess
 
-from remap_utils import *
+import netCDF4 as nc
+
+from remap_utils import GEOSIT_RST_BASE, get_config_from_file
 
 
 class remap_base:

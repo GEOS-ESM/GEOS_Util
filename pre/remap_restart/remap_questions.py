@@ -11,7 +11,49 @@ import sys
 import questionary
 import ruamel.yaml
 
-from remap_utils import *
+from remap_utils import (
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  choices_bc_base,
+  choices_bc_ops,
+  choices_bc_other,
+  choices_ogrid_cpld,
+  choices_ogrid_data,
+  choices_omodel,
+  choices_res_SG001,
+  choices_res_SG002,
+  choices_stretch,
+  data_ocean_default,
+  fvcore_info,
+  get_account,
+  get_command_line_from_answers,
+  get_config_from_answers,
+  get_default_bc_base,
+  get_landdir,
+  get_zoom,
+  init_geosit,
+  init_merra2,
+  message_account,
+  message_agrid_in,
+  message_agrid_new,
+  message_bc_base_in,
+  message_bc_base_new,
+  message_bc_ops_in,
+  message_bc_ops_new,
+  message_bc_other_in,
+  message_bc_other_new,
+  message_expid,
+  message_ogrid_in,
+  message_out_dir,
+  message_partition,
+  message_qos,
+  message_reservation,
+  message_stretch,
+  remove_ogrid_comment,
+  show_wemin_default,
+  validate_agrid,
+  wemin_default,
+)
 
 
 def echo_level(x):
@@ -465,7 +507,7 @@ def ask_questions():
    if answers.get('input:air:nlevel'):
        del answers['input:air:nlevel']
    if answers["output:surface:remap"] and not answers.get("input:shared:MERRA-2") and not answers.get("input:shared:GEOS-IT"):
-      answers["input:surface:catch_model"] = catch_model(answers)
+      answers["input:surface:catch_model"] = catch_model(answers)  # noqa: F821  FIXME: catch_model is not defined anywhere
    answers["output:surface:remap_water"] = answers["output:surface:remap"]
    answers["output:surface:remap_catch"] = answers["output:surface:remap"]
    del answers["output:surface:remap"]

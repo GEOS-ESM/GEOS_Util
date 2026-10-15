@@ -7,16 +7,18 @@
 #
 import glob
 import os
+import shlex
+import subprocess
 import subprocess as sp
 import sys
 
 import ruamel.yaml
 
-from remap_analysis import *
-from remap_catchANDcn import *
-from remap_other_restarts import *
-from remap_upper import *
-from remap_utils import *
+from remap_analysis import analysis
+from remap_catchANDcn import catchANDcn
+from remap_other_restarts import other_restarts
+from remap_upper import upperair
+from remap_utils import GEOS_SITE, get_account
 
 
 def compare(base, result):

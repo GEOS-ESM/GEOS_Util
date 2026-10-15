@@ -16,9 +16,40 @@ import subprocess
 import sys
 
 import netCDF4 as nc
+import questionary
 
 from remap_base import remap_base
-from remap_utils import *
+from remap_utils import (
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  choices_bc_base,
+  choices_bc_ops,
+  choices_bc_other,
+  choices_ogrid_data,
+  config_to_yaml,
+  data_ocean_default,
+  get_account,
+  get_config_from_answers,
+  get_default_bc_base,
+  get_geomdir,
+  get_label,
+  get_landdir,
+  job_directive,
+  message_account,
+  message_agrid_new,
+  message_bc_base_new,
+  message_bc_ops_new,
+  message_bc_other_new,
+  message_datetime,
+  message_expid,
+  message_ogrid_new,
+  message_out_dir,
+  message_partition,
+  message_qos,
+  print_config,
+  remove_ogrid_comment,
+  validate_agrid,
+)
 
 
 class catchANDcn(remap_base):
