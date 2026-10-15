@@ -9,10 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `ruff.toml` for `pre/remap_restart`
+- Added Python ignores (`__pycache__/`, `.ruff_cache/`, `.pytest_cache/`, `.venv/`) to the root `.gitignore`
+
 ### Changed
 - Updated plot seasons in plot.rc
+- Cleaned up `pre/remap_restart` Python code per ruff: explicit imports in place of star imports, context managers for file handling, `sys.exit()` in place of `exit()`, and other style fixes
+- `remap_restarts` now makes v14 the default BCs version in the interactive questions; v12 remains in the main menu, and v11, v13 and v15_BETA remain under "Other"
+- `remap_restarts` now removes its scratch directories (`InData/`, `OutData/`, `upper_data/`, `ana_data/`) after a successful remap
+- Subprocess failures in `remap_restarts` now raise an error instead of being ignored
+- `remap_params.yaml` is now written without line wrapping
 
 ### Fixed
+
+- Fixed `shutil.remove` calls (now `os.remove`) in `remap_other_restarts.py`
+- Fixed a `TypeError` in `remap_utils.py` when `bc_version` is missing
+- Fixed a trailing space after `bc_base:` in the generated `remap_params.yaml`
 
 ### Removed
 
