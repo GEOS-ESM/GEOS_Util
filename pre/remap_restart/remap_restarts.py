@@ -13,7 +13,6 @@ import sys
 import textwrap
 
 import questionary
-import ruamel.yaml
 
 from remap_analysis import *
 from remap_catchANDcn import *
@@ -58,11 +57,9 @@ program_description = textwrap.dedent('''
     ''')
 def main():
 
-  question_flag = False
   config        = ''
-  yaml = ruamel.yaml.YAML()
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
-  cmdl, extra_args = parse_args(program_description)
+  cmdl, _ = parse_args(program_description)
   answers = {}
   config_yaml =''
   noprompt = False
@@ -78,7 +75,6 @@ def main():
   if (len(sys.argv) == 1 or answers) :
       if not answers:
          answers = ask_questions()
-         question_flag = True
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
       # just for debugging

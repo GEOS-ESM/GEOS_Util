@@ -57,11 +57,7 @@ class analysis(remap_base):
      os.chdir(tmpdir)
 
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     yyyy_ = yyyymmddhh_[0:4]
-     mm_   = yyyymmddhh_[4:6]
-     dd_   = yyyymmddhh_[6:8]
      hh_   = yyyymmddhh_[8:10]
-     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
      expid_in  = config['input']['shared']['expid']
      expid_out = config['output']['shared']['expid']
      if (expid_out) :

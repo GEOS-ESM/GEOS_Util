@@ -442,7 +442,6 @@ endif
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
     yyyy_ = yyyymmddhh_[0:4]
     mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'

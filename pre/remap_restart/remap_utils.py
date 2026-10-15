@@ -286,9 +286,7 @@ def fvcore_info(x):
        exit("This stretched cubed-sphere grid is not supported ")
   return True
 
-def catch_model(x):
   ymdh = x['input:shared:yyyymmddhh']
-  time = ymdh[0:8] + '_'+ymdh[8:10]
   rst_dir = x.get('input:shared:rst_dir')
   if not rst_dir : return False
 
@@ -383,8 +381,8 @@ def get_zoom(x):
 def get_account():
    cmd = 'id -gn'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (accounts, err) = p.communicate()
-   p_status = p.wait()
+   (accounts, _) = p.communicate()
+   p.wait()
    accounts = accounts.decode().split()
    return accounts[0]
 
@@ -640,8 +638,8 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
 def get_default_bc_base():
    cmd = 'uname -n'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (node, err) = p.communicate()
-   p_status = p.wait()
+   (node, _) = p.communicate()
+   p.wait()
    node = node.decode().split()
    node0 = node[0]
    discover = ['dirac', 'borg','warp', 'discover']

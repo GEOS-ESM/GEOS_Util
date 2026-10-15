@@ -27,7 +27,7 @@ def parse_args(program_description):
 
     p_config.add_argument('-c', '--config_file',  help='YAML config file')
 
-    p_landonly  = p_sub.add_parser(
+    p_sub.add_parser(
      'land_only',
      help = "Remap land (catch[cn]) restart only; global domain only; ens0000 only.\n",
     )

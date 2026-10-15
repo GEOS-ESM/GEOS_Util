@@ -34,8 +34,8 @@ def compare(base, result):
      cmd = NCCMP + ' -dmgs '+ b + ' ' + r
      print(cmd)
      p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-     (out, err) = p.communicate()
-     rc = p.wait()
+     (out, _) = p.communicate()
+     p.wait()
      out = out.decode().split()
      if "identical." in out :
         print('identical')
