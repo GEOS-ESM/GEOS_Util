@@ -5,19 +5,21 @@
 # Newer GEOS code should load a module with GEOSpyD Python3 if not run:
 #   module load python/GEOSpyD/Min4.10.3_py3.9
 #
-import os
-import sys, getopt
-import ruamel.yaml
-import questionary
 import glob
+import os
+import shlex
+import subprocess
 import subprocess as sp
-import remap_restarts
+import sys
 
-from remap_utils          import *
-from remap_upper          import *
-from remap_other_restarts import *
-from remap_analysis       import *
-from remap_catchANDcn     import *
+import ruamel.yaml
+
+from remap_analysis import analysis
+from remap_catchANDcn import catchANDcn
+from remap_other_restarts import other_restarts
+from remap_upper import upperair
+from remap_utils import GEOS_SITE, get_account
+
 
 def compare(base, result):
   #1) comparing nc4
@@ -35,8 +37,8 @@ def compare(base, result):
      cmd = NCCMP + ' -dmgs '+ b + ' ' + r
      print(cmd)
      p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-     (out, err) = p.communicate()
-     rc = p.wait()
+     (out, _) = p.communicate()
+     p.wait()
      out = out.decode().split()
      if "identical." in out :
         print('identical')
@@ -61,7 +63,7 @@ if __name__ == '__main__' :
 
   if GEOS_SITE != "NCCS" :
      print("Test baseline data are only available at NCCS.  Please run tests on Discover.")
-     exit()
+     sys.exit()
   yaml = ruamel.yaml.YAML()
   stream =''
   cases_yaml = 'test_remap_cases.yaml'

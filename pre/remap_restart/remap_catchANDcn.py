@@ -8,17 +8,50 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
-import os
-import sys
-import subprocess
-import shutil
 import glob
-import ruamel.yaml
-import shlex
 import mimetypes
+import os
+import shutil
+import subprocess
+import sys
+
 import netCDF4 as nc
+import questionary
+
 from remap_base import remap_base
-from remap_utils import *
+
+from remap_utils import ( #isort: skip
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  choices_bc_base,
+  choices_bc_ops,
+  choices_bc_all,
+  choices_ogrid_data,
+  config_to_yaml,
+  data_ocean_default,
+  get_account,
+  get_config_from_answers,
+  get_default_bc_base,
+  get_geomdir,
+  get_label,
+  get_landdir,
+  job_directive,
+  message_account,
+  message_agrid_new,
+  message_bc_base_new,
+  message_bc_ops_new,
+  message_bc_all_new,
+  message_datetime,
+  message_expid,
+  message_ogrid_new,
+  message_out_dir,
+  message_partition,
+  message_qos,
+  print_config,
+  remove_ogrid_comment,
+  validate_agrid,
+)
+
 
 class catchANDcn(remap_base):
   def __init__(self, **configs):
@@ -202,9 +235,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
      script_name = './mk_catchANDcn.j'
 
-     catch_scrpt = open(script_name,'wt')
-     catch_scrpt.write(catch1script)
-     catch_scrpt.close()
+     with open(script_name,'wt') as catch_scrpt:
+        catch_scrpt.write(catch1script)
 
      interactive = None
      if GEOS_SITE == 'NAS':
@@ -223,20 +255,23 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
          ntasks = int(ntasks)
 
          if (ntasks < NPE):
-           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+           print(f"\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ")
 
-       subprocess.call(['chmod', '755', script_name])
+       subprocess.run(['chmod', '755', script_name], check=True)
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       os.system(script_name + ' 1>' + log_name+ ' 2>&1')
+       with open(log_name, "w") as log_f:
+          subprocess.run([script_name], stdout=log_f, stderr=subprocess.STDOUT, check=True)
      elif GEOS_SITE == "NAS" :
        print('qsub -W  block=true '+ script_name +'\n')
-       subprocess.call(['qsub', '-W','block=true', script_name])
+       subprocess.run(['qsub', '-W','block=true', script_name], check=True)
      else:
        print('sbatch -W '+ script_name +'\n')
-       subprocess.call(['sbatch', '-W', script_name])
+       subprocess.run(['sbatch', '-W', script_name], check=True)
 
      print( "cd " + cwdir)
      os.chdir(cwdir)
+     print('remove ' + InData_dir)
+     shutil.rmtree(InData_dir)
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()
@@ -249,7 +284,6 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
     yyyy_ = yyyymmddhh_[0:4]
     mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
@@ -286,9 +320,7 @@ def ask_catch_questions():
      nonlocal catch_input_shared_rst_dir
      rst_dir   = catch_input_shared_rst_dir + '/rs/ens0000/Y'+yyyy +'/M'+mm+'/'
      rst_files = glob.glob(rst_dir+'*catch*_internal_rst.'+yyyy+mm+dd+'_'+hh+'00')
-     if len(rst_files) !=1 :
-       return False
-     return True
+     return len(rst_files) == 1
 
    questions =[
         {
@@ -336,8 +368,8 @@ def ask_catch_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_other_new,
-            "choices": choices_bc_other,
+            "message": message_bc_all_new,
+            "choices": choices_bc_all,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other',
         },
 
