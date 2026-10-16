@@ -31,11 +31,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v14', 'NL3', 'ICA', 'GM4', 'Other']
+choices_bc_ops     = ['v14', 'NL3', 'ICA', 'GM4', 'All']
 
-choices_bc_other   = ['v15_BETA', 'v14', 'v13', 'v12', 'v11', 'NL3', 'ICA', 'GM4']
-
-choices_bc_cmd     = choices_bc_other
+choices_bc_all     = ['v15_BETA', 'v14', 'v13', 'v12', 'v11', 'NL3', 'ICA', 'GM4']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -90,13 +88,13 @@ message_bc_ops     = '''\n
  NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
  v14: v14         | future               | 11.11            ... present
  ----------------------------------------------------------------------------------
- Other: Additional choices used in model or DAS development.\n\n'''
+ All: All choices, incl. older BCs used only in model or DAS development.\n\n'''
 
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
 
-message_bc_other   = '''\n
+message_bc_all   = '''\n
  BCs version | GCM tags                   | Description
  ------------|----------------------------|------------------------------------------------------------
  GM4         | MERRA-2                    | See Mahanama et al. 2015, GMAO TM Vol. 39 (Section 1: "last decade")
@@ -108,8 +106,8 @@ message_bc_other   = '''\n
  v14         | 11.11 ...                  | As in v13 but with GPM 2.0 peat
  v15_BETA    | testing only               | As in v14 but with v2 topography for atmosphere\n\n'''
 
-message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
-message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
+message_bc_all_in  = ("Select BCs version of input restarts:\n" + message_bc_all)
+message_bc_all_new = ("Select BCs version for new restarts:\n"  + message_bc_all)
 
 message_agrid_list = '''
  C12   C180    C1120

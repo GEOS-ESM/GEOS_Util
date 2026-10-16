@@ -17,7 +17,7 @@ from remap_utils import (
   catch_model,
   choices_bc_base,
   choices_bc_ops,
-  choices_bc_other,
+  choices_bc_all,
   choices_ogrid_cpld,
   choices_ogrid_data,
   choices_omodel,
@@ -41,8 +41,8 @@ from remap_utils import (
   message_bc_base_new,
   message_bc_ops_in,
   message_bc_ops_new,
-  message_bc_other_in,
-  message_bc_other_new,
+  message_bc_all_in,
+  message_bc_all_new,
   message_expid,
   message_ogrid_in,
   message_out_dir,
@@ -321,8 +321,8 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": message_bc_other_in,
-            "choices": choices_bc_other,
+            "message": message_bc_all_in,
+            "choices": choices_bc_all,
             "when": lambda x: x["input:shared:bc_version"] == 'Other',
         },
 
@@ -347,8 +347,8 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_other_new,
-            "choices": choices_bc_other,
+            "message": message_bc_all_new,
+            "choices": choices_bc_all,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
         },
 
@@ -356,7 +356,7 @@ def ask_questions():
             "type": "select",
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
-            "choices": choices_bc_other,
+            "choices": choices_bc_all,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
         },
 

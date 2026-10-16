@@ -24,7 +24,7 @@ from remap_utils import (
   MERRA2_RST_BASE,
   choices_bc_base,
   choices_bc_ops,
-  choices_bc_other,
+  choices_bc_all,
   choices_ogrid_data,
   config_to_yaml,
   data_ocean_default,
@@ -39,7 +39,7 @@ from remap_utils import (
   message_agrid_new,
   message_bc_base_new,
   message_bc_ops_new,
-  message_bc_other_new,
+  message_bc_all_new,
   message_datetime,
   message_expid,
   message_ogrid_new,
@@ -367,8 +367,8 @@ def ask_catch_questions():
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_other_new,
-            "choices": choices_bc_other,
+            "message": message_bc_all_new,
+            "choices": choices_bc_all,
             "when": lambda x:  x["output:shared:bc_version"] == 'Other',
         },
 

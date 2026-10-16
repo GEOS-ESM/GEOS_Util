@@ -10,7 +10,7 @@ import os
 import ruamel.yaml
 
 from remap_utils import (
-    choices_bc_cmd,
+    choices_bc_all,
     choices_catchmodel,
     choices_ogrid_cmd,
     choices_omodel,
@@ -62,8 +62,8 @@ def parse_args(program_description):
     p_command.add_argument('-expid',             help='Experiment ID of input restarts')
     p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
 
-    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_cmd)
-    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_cmd)
+    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_all)
+    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_all)
 
     p_command.add_argument('-in_wemin',          help='Min. snow water equivalent param. used with input restarts')
     p_command.add_argument('-out_wemin',         help='Min. snow water equivalent param. to be used with new restarts')
