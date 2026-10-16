@@ -19,7 +19,8 @@ import netCDF4 as nc
 import questionary
 
 from remap_base import remap_base
-from remap_utils import (
+
+from remap_utils import ( #isort: skip
   GEOS_SITE,
   MERRA2_RST_BASE,
   choices_bc_base,

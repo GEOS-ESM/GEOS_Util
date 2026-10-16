@@ -11,7 +11,7 @@ import sys
 import questionary
 import ruamel.yaml
 
-from remap_utils import (
+from remap_utils import ( #isort: skip
   GEOS_SITE,
   MERRA2_RST_BASE,
   catch_model,
