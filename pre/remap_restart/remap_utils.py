@@ -31,11 +31,11 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v14', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v14', 'NL3', 'ICA', 'GM4', 'Other']
 
-choices_bc_other   = ['v15_BETA', 'v13', 'v12', 'v11']
+choices_bc_other   = ['v15_BETA', 'v14', 'v13', 'v12', 'v11', 'NL3', 'ICA', 'GM4']
 
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v11', 'v12', 'v13','v14', 'v15_BETA']
+choices_bc_cmd     = choices_bc_other
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -85,9 +85,10 @@ message_bc_base_new = "BCs base directory for new restarts: \n"
 message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v14: v14         | future               | 11.11            ... present
- NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
+ GM4: Ganymed-4   | 5_12_4 (MERRA-2)     | MERRA-2
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
+ v14: v14         | future               | 11.11            ... present
  ----------------------------------------------------------------------------------
  Other: Additional choices used in model or DAS development.\n\n'''
 
@@ -98,8 +99,9 @@ message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts
 message_bc_other   = '''\n
  BCs version | GCM tags                   | Description
  ------------|----------------------------|------------------------------------------------------------
- ICA         | Icarus, Jason    ... 10.18 | See Mahanama et al. 2015 GMAO Tech Memo Vol. 39
- NL3         | Icarus_NL, 10.19 ... 11.9  | See Mahanama et al. 2015 GMAO Tech Memo Vol. 39
+ GM4         | MERRA-2                    | See Mahanama et al. 2015, GMAO TM Vol. 39 (Section 1: "last decade")
+ ICA         | Icarus, Jason    ... 10.18 | As in GM4 but with minor bug fixes
+ NL3         | Icarus_NL, 10.19 ... 11.9  | See Mahanama et al. 2015, GMAO TM Vol. 39 (Section 1: "updates")
  v11         | testing only               | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
  v12         | 11.10                      | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
  v13         | testing only               | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
