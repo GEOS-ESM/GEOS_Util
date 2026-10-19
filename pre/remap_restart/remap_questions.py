@@ -349,7 +349,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_all_new,
             "choices": choices_bc_all,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v11', 'v12', 'v13', 'v14'],
         },
 
         {
@@ -357,7 +357,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "\nSelect BCs version for new restarts:\n",
             "choices": choices_bc_all,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
+            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v11', 'v12', 'v13', 'v14'],
         },
 
         {
