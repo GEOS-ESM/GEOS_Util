@@ -8,17 +8,17 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import fnmatch
+import glob
 import os
-from datetime import datetime, timedelta
-import subprocess
 import shlex
 import shutil
-import glob
-import fileinput
-import ruamel.yaml
+import subprocess
+from datetime import datetime, timedelta
+
 from remap_base import remap_base
-from remap_utils import get_label, MERRA2_RST_BASE
-import fnmatch
+from remap_utils import MERRA2_RST_BASE, get_label
+
 
 class analysis(remap_base):
   def __init__(self, **configs):
@@ -56,11 +56,7 @@ class analysis(remap_base):
      os.chdir(tmpdir)
 
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     yyyy_ = yyyymmddhh_[0:4]
-     mm_   = yyyymmddhh_[4:6]
-     dd_   = yyyymmddhh_[6:8]
      hh_   = yyyymmddhh_[8:10]
-     rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
      expid_in  = config['input']['shared']['expid']
      expid_out = config['output']['shared']['expid']
      if (expid_out) :
@@ -83,13 +79,10 @@ class analysis(remap_base):
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp)
        shutil.copy(f,f_tmp)
-       if out_name.find('satbias') != -1 :
-         if (aqua):
-            f_ = open(f_tmp, 'w')
-            for line in fileinput.input(f):
+       if out_name.find('satbias') != -1 and aqua:
+            with open(f) as f_in, open(f_tmp, 'w') as f_:
                # This is unlikely to be the case with new files
-               f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
-            f_.close()
+               f_.writelines(line.replace('airs281SUBSET_aqua', 'airs281_aqua      ') for line in f_in)
 
      nlevel    = config['output']['air']['nlevel']
      agrid_out = config['output']['shared']['agrid']
@@ -102,7 +95,7 @@ class analysis(remap_base):
           shutil.move(f,f_orig)
           cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
           print(cmd)
-          subprocess.call(shlex.split(cmd))
+          subprocess.run(shlex.split(cmd), check=True)
 
      for f in local_fs:
        fname = os.path.basename(f)
@@ -124,9 +117,11 @@ class analysis(remap_base):
        rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd_+'_'+hh_+'z.bin' + label
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
-       subprocess.call(shlex.split(cmd))
+       subprocess.run(shlex.split(cmd), check=True)
      print( "cd " + cwdir)
      os.chdir(cwdir)
+     print("remove " + tmpdir)
+     shutil.rmtree(tmpdir)
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()
@@ -187,10 +182,10 @@ class analysis(remap_base):
        delt = timedelta(hours = h-3)
        new_time = rst_time + delt
        yyyy = "Y"+str(new_time.year)
-       mm   = 'M%02d'%new_time.month
-       ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
-       hh   = '%02d'%h
-       newhh= '%02d'%new_time.hour
+       mm   = f'M{new_time.month:02d}'
+       ymd  = f'{new_time.year:04d}{new_time.month:02d}{new_time.day:02d}'
+       hh   = f'{h:02d}'
+       newhh= f'{new_time.hour:02d}'
        m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
        # bkg files
        for ftype in ['sfc', 'eta']:
@@ -231,8 +226,8 @@ class analysis(remap_base):
     delt = timedelta(hours = 3)
     new_time = rst_time - delt
     yyyy = "Y"+str(new_time.year)
-    mm   = 'M%02d'%new_time.month
-    ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
+    mm   = f'M{new_time.month:02d}'
+    ymdh = f'{new_time.year:04d}{new_time.month:02d}{new_time.day:02d}{new_time.hour:02d}'
     m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
     fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
     f = m2_rst_dir+'/'+fname

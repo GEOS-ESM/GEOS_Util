@@ -8,16 +8,24 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import glob
 import os
-import ruamel.yaml
-import subprocess
 import shlex
 import shutil
-import glob
+import subprocess
+import sys
+
 from remap_base import remap_base
-from remap_utils import *
 from remap_bin2nc import bin2nc
-import netCDF4 as nc
+from remap_utils import (
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  STRETCH_GRID,
+  get_label,
+  get_topodir,
+  job_directive,
+)
+
 
 class upperair(remap_base):
   def __init__(self, **configs):
@@ -124,23 +132,23 @@ class upperair(remap_base):
        f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
        cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
-       subprocess.call(shlex.split(cmd))
+       subprocess.run(shlex.split(cmd), check=True)
 
      # link topo file
 
      cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
-     subprocess.call(shlex.split(cmd))
+     subprocess.run(shlex.split(cmd), check=True)
 
      cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
-     subprocess.call(shlex.split(cmd))
+     subprocess.run(shlex.split(cmd), check=True)
 
      agrid  = config['output']['shared']['agrid']
      if agrid[0].upper() == 'C':
        imout = int(agrid[1:])
      else:
-       exit("Only support cs grid so far")
+       sys.exit("Only support cs grid so far")
 
      if (imout <90):
        NPE =   12; nwrit = 1
@@ -205,7 +213,7 @@ class upperair(remap_base):
           target_lat  = STRETCH_GRID['SG002'][1]
           target_lon  = STRETCH_GRID['SG002'][2]
         else:
-          exit("This stretched grid option is not supported " + str(stretch))
+          sys.exit("This stretched grid option is not supported " + str(stretch))
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
@@ -222,7 +230,7 @@ class upperair(remap_base):
           target_lat  = STRETCH_GRID['SG002'][1]
           target_lon  = STRETCH_GRID['SG002'][2]
         else:
-          exit("This stretched grid option is not supported " + str(stretch))
+          sys.exit("This stretched grid option is not supported " + str(stretch))
 
         # note "reversed" order of args (relative to order in definition of STRETCH_GRID)
 
@@ -360,9 +368,8 @@ endif
 
      script_name = './remap_upper.j'
 
-     upper = open(script_name,'wt')
-     upper.write(remap_upper_script)
-     upper.close()
+     with open(script_name,'wt') as upper:
+        upper.write(remap_upper_script)
 
      interactive = None
      if GEOS_SITE == 'NAS':
@@ -380,17 +387,18 @@ endif
            ntasks = nnodes * ncpus
          ntasks = int(ntasks)
          if (ntasks < NPE ):
-           print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+           print(f"\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ")
 
-       subprocess.call(['chmod', '755', script_name])
+       subprocess.run(['chmod', '755', script_name], check=True)
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       os.system(script_name + ' 1>' + log_name+ ' 2>&1')
+       with open(log_name, "w") as log_f:
+          subprocess.run([script_name], stdout=log_f, stderr=subprocess.STDOUT, check=True)
      elif GEOS_SITE == "NAS" :
        print('qsub -W  block=true '+ script_name +'\n')
-       subprocess.call(['qsub', '-W','block=true', script_name])
+       subprocess.run(['qsub', '-W','block=true', script_name], check=True)
      else:
        print('sbatch -W '+ script_name +'\n')
-       subprocess.call(['sbatch', '-W', script_name])
+       subprocess.run(['sbatch', '-W', script_name], check=True)
 
 #
 #    post process
@@ -411,6 +419,8 @@ endif
         f.write(time)
      print('cd ' + cwdir)
      os.chdir(cwdir)
+     print('remove ' + out_dir + '/upper_data')
+     shutil.rmtree(out_dir + '/upper_data')
 
      if self.config['input']['shared']['MERRA-2']:
         self.remove_merra2()
@@ -442,7 +452,6 @@ endif
     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
     yyyy_ = yyyymmddhh_[0:4]
     mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
     hh_   = yyyymmddhh_[8:10]
 
     suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'

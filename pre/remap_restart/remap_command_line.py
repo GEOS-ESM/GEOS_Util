@@ -4,15 +4,26 @@
 #   remap_command_line.py parses and converts the command-line arguments and converts the information
 #   into matching "Answers" for the questionary (remap_questions.py)
 #
-import os
-import subprocess
-import shlex
-import ruamel.yaml
-import shutil
-import questionary
-import glob
 import argparse
-from remap_utils import *
+import os
+
+import ruamel.yaml
+
+from remap_utils import (
+    choices_bc_all,
+    choices_catchmodel,
+    choices_ogrid_cmd,
+    choices_omodel,
+    choices_stretch,
+    fvcore_info,
+    get_account,
+    get_config_from_answers,
+    get_zoom,
+    init_geosit,
+    init_merra2,
+    wemin_default,
+)
+
 
 def parse_args(program_description):
 
@@ -29,7 +40,7 @@ def parse_args(program_description):
 
     p_config.add_argument('-c', '--config_file',  help='YAML config file')
 
-    p_landonly  = p_sub.add_parser(
+    p_sub.add_parser(
      'land_only',
      help = "Remap land (catch[cn]) restart only; global domain only; ens0000 only.\n",
     )
@@ -51,8 +62,8 @@ def parse_args(program_description):
     p_command.add_argument('-expid',             help='Experiment ID of input restarts')
     p_command.add_argument('-newid', default="", help='Experiment ID for new restarts')
 
-    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_cmd)
-    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_cmd)
+    p_command.add_argument('-bcvin',             help='Boundary conditions version of input restarts', choices= choices_bc_all)
+    p_command.add_argument('-bcvout',            help='Boundary conditions version for new restarts',  choices= choices_bc_all)
 
     p_command.add_argument('-in_wemin',          help='Min. snow water equivalent param. used with input restarts')
     p_command.add_argument('-out_wemin',         help='Min. snow water equivalent param. to be used with new restarts')
