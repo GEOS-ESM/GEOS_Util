@@ -103,7 +103,7 @@ message_bc_all   = '''\n
  v11         | testing only               | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
  v12         | 11.10                      | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
  v13         | testing only               | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
- v14         | 11.11 ...                  | As in v13 but with GPM 2.0 peat
+ v14         | 11.11 ...                  | As in v13 but with GPM 2.0 peat   \n\n'''
 
 message_bc_all_in  = ("Select BCs version of input restarts:\n" + message_bc_all)
 message_bc_all_new = ("Select BCs version for new restarts:\n"  + message_bc_all)
