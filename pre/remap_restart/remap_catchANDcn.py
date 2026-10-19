@@ -370,7 +370,7 @@ def ask_catch_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_all_new,
             "choices": choices_bc_all,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other',
+            "when": lambda x:  x["output:shared:bc_version"] == 'All',
         },
 
         {
