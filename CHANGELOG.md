@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
 - Updated plot seasons in plot.rc
+- Remove old node specifications in `g5fcst_stats.pl`
 
 ### Fixed
 
