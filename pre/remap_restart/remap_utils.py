@@ -58,12 +58,14 @@ message_stretch =  f'''\n
 
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
  -----  --------------  ---------  ---------
- SG001      2.5            39.5       -98.35
+  SG001      5.0            39.5       -98.35
  SG002      3.0            39.5       -98.35
  \n\n'''
 
 STRETCH_GRID = {}
-STRETCH_GRID['SG001'] = ['2.50', '39.50', '-98.35']
+# ONE-OFF (test branch): SG001 temporarily overridden to stretch factor 5.0 (was 2.50) for
+# /discover/nobackup/borescan/for_carlos/bcs_v14_c540_stretch5, which is named SG001 on disk.
+STRETCH_GRID['SG001'] = ['5.00', '39.50', '-98.35']
 STRETCH_GRID['SG002'] = ['3.00', '39.50', '-98.35']
 
 choices_stretch    = [False, 'SG001', 'SG002']
@@ -717,6 +719,10 @@ def get_topodir(bc_base, bc_version, agrid=None, ogrid=None, omodel=None, stretc
     )
 
     if topo_base == bc_base_str:
+        # ONE-OFF: self-contained BCs dir with <bc_base>/<bc_version>/TOPO/<grid>/smoothed
+        local_topo = os.path.join(bc_base_str, bc_version_str, 'TOPO', agrid_name, 'smoothed')
+        if os.path.isdir(local_topo):
+            return local_topo
         raise SystemExit(
             f"ERROR: Cannot derive make_bcs_inputs atmosphere path from:\n"
             f"  {bc_base_str}\n"
