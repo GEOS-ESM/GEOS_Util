@@ -178,11 +178,17 @@ echo " "
 if( "$season" == "" ) then
     set all_seasons = ''
 
-    # Check corcmp directory
-    if( -e $pltdir/corcmp & ( $plots == NULL | $plots == corcmp ) ) then
-        cd $pltdir/corcmp
-        set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
-        set all_seasons = "$all_seasons $found_seasons"
+    # Check corcmp* directories (plain corcmp and any corcmp_<something>)
+    if( $plots == NULL | $plots == corcmp ) then
+        set nonomatch
+        foreach CORCMP ($pltdir/corcmp*)
+            if( -d $CORCMP ) then
+                cd $CORCMP
+                set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
+                set all_seasons = "$all_seasons $found_seasons"
+            endif
+        end
+        unset nonomatch
     endif
 
     # Check pltsys directories
@@ -194,15 +200,21 @@ if( "$season" == "" ) then
         endif
     end
 
-    # Check syscmp directories
-    foreach DSC ($DSCS)
-        if( $DSC != $DSCS[1] ) then
-            if( -e $pltdir/$DSCS[1].$DSC & ( $plots == NULL | $plots == syscmp ) ) then
-                cd $pltdir/$DSCS[1].$DSC
-                set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
-                set all_seasons = "$all_seasons $found_seasons"
-            endif
-        endif
+    # Check syscmp directories (all unique pairs, either name order)
+    @ i = 1
+    while ( $i < $#DSCS )
+        @ j = $i + 1
+        while ( $j <= $#DSCS )
+            foreach PAIR ($DSCS[$i].$DSCS[$j] $DSCS[$j].$DSCS[$i])
+                if( -e $pltdir/$PAIR & ( $plots == NULL | $plots == syscmp ) ) then
+                    cd $pltdir/$PAIR
+                    set found_seasons = `/bin/ls -1 *gif | sed 's/.*_\([^_.]*\)_montage.*/\1/; s/.*_\([^_.]*\)\..*/\1/' | sort -u`
+                    set all_seasons = "$all_seasons $found_seasons"
+                endif
+            end
+            @ j = $j + 1
+        end
+        @ i = $i + 1
     end
 
     # Final unique sort of all collected seasons
@@ -222,14 +234,21 @@ foreach season ($seasons)
 
     # corcmp files
     # ------------
-    if( -e $pltdir/corcmp & ( $plots == NULL | $plots == corcmp ) ) then
-        cd $pltdir/corcmp
-        set files = `/bin/ls -1 *${season}*gif`
-        if( $#files > 0 ) then
-            ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/corcmp
-            echo Syncing ${season} Files from $pltdir/corcmp to $webid@${server}:${www}/${webdir}/${season}/corcmp
-            rsync -avx *${season}*gif $webid@${server}:${www}/${webdir}/${season}/corcmp
-        endif
+    if( $plots == NULL | $plots == corcmp ) then
+        set nonomatch
+        foreach CORCMP ($pltdir/corcmp*)
+            if( -d $CORCMP ) then
+                set CORCMPNAME = `basename $CORCMP`
+                cd $CORCMP
+                set files = `/bin/ls -1 *${season}*gif`
+                if( $#files > 0 ) then
+                    ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$CORCMPNAME
+                    echo Syncing ${season} Files from $CORCMP to $webid@${server}:${www}/${webdir}/${season}/$CORCMPNAME
+                    rsync -avx *${season}*gif $webid@${server}:${www}/${webdir}/${season}/$CORCMPNAME
+                endif
+            endif
+        end
+        unset nonomatch
     endif
 
     # pltsys files
@@ -249,19 +268,25 @@ foreach season ($seasons)
 
     # syscmp files
     # ------------
-    foreach DSC ($DSCS)
-        if( $DSC != $DSCS[1] ) then
-            if( -e $pltdir/$DSCS[1].$DSC & ( $plots == NULL | $plots == syscmp ) ) then
-                cd $pltdir/$DSCS[1].$DSC
-                set files = `/bin/ls -1 *${season}*gif`
-                if( $#files > 0 ) then
-                    ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSCS[1].$DSC
-                    echo Syncing ${season} Files from $pltdir/$DSCS[1].$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSCS[1].$DSC
-                    rsync -avx *${season}*gif $webid@${server}:${www}/${webdir}/${season}/$DSCS[1].$DSC
-                    ssh $webid@${server} "cd ${www}/${webdir}/${season} ; csh -f ../../move_stats $DSCS[1].$DSC $season"
+    @ i = 1
+    while ( $i < $#DSCS )
+        @ j = $i + 1
+        while ( $j <= $#DSCS )
+            foreach PAIR ($DSCS[$i].$DSCS[$j] $DSCS[$j].$DSCS[$i])
+                if( -e $pltdir/$PAIR & ( $plots == NULL | $plots == syscmp ) ) then
+                    cd $pltdir/$PAIR
+                    set files = `/bin/ls -1 *${season}*gif`
+                    if( $#files > 0 ) then
+                        ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$PAIR
+                        echo Syncing ${season} Files from $pltdir/$PAIR to $webid@${server}:${www}/${webdir}/${season}/$PAIR
+                        rsync -avx *${season}*gif $webid@${server}:${www}/${webdir}/${season}/$PAIR
+                        ssh $webid@${server} "cd ${www}/${webdir}/${season} ; csh -f ../../move_stats $PAIR $season"
+                    endif
                 endif
-            endif
-        endif
+            end
+            @ j = $j + 1
+        end
+        @ i = $i + 1
     end
 end
 
