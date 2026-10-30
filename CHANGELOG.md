@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added plots for EDMF
+- Added new column and cloud variables and fixed bugs.
 
 ### Changed
 - Updated plot seasons in plot.rc

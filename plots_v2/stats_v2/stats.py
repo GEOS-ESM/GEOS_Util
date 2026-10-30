@@ -2,7 +2,7 @@
 '''
 Batch Forecast Processor with Statistics Calculation
 Processes forecast, analysis, and climatology data 
-and calculates regional (for cormcmp) and global (for syscmp) statistics
+and calculates regional (for corcmp) and global (for syscmp) statistics
 '''
 
 # ================== IMPORTS ==================
@@ -61,25 +61,97 @@ UNITLESS_STATS     = ['acorr']
 
 # ================== VARIABLE METADATA ==================
 
-ALL_COLL_NMS = ['default', 'slices', 'aerosol']
+ALL_COLL_NMS = ['default', 'slices', 'columns', 'clouds', 'aerosol']
 
-VARS_LONG_MAP = {'H': 'Heights', 'U': 'U-Wind', 'V': 'V-Wind',
-                 'T': 'Temperature', 'Q': 'Specific Humidity',
-                 'P': 'Sea-Level Pressure', 'PS': 'Surface Pressure',
-                 'Q2M': '2m Specific Humidity', 'T2M': '2m Temperature', 
-                 'U10M': '10m U-Wind', 'V10M': '10m V-Wind', 
-                 'D2M': '2m Dew Point', 
-                 'AOD': 'Total Aerosol Extinction AOT [550 nm]', 
-                 'LOGAOD': 'log(AOD+0.01)', 'PM25': 'PM2.5 Total Mass'}
-
-VARS_UNIT_MAP = {'H': 'm', 'U': 'm/s', 'V': 'm/s', 'T': 'K', 'Q': 'g/kg',
-                 'P': 'hPa', 'PS': 'hPa', 'Q2M': 'g/kg', 'T2M': 'K', 
-                 'U10M': 'm/s', 'V10M': 'm/s', 'D2M': 'K', 'AOD': '', 
-                 'LOGAOD': '', 'PM25': 'µg/m3'}
-
-VARS_SCALE_MAP = {'H': 1., 'U': 1., 'V': 1., 'T': 1., 'Q': 1000., 'P': 1./100.,
-                  'PS': 1./100., 'Q2M': 1000., 'T2M': 1., 'U10M': 1., 
-                  'V10M': 1., 'D2M': 1., 'AOD': 1., 'LOGAOD': 1., 'PM25': 1E6}
+VARS_META_MAP = {
+    'H':      {
+        'long': 'Heights', 
+        'unit': 'm', 
+       'scale': 1.},
+    'U':      {
+        'long': 'U-Wind', 
+        'unit': 'm/s', 
+       'scale': 1.},
+    'V':      {
+        'long': 'V-Wind', 
+        'unit': 'm/s', 
+       'scale': 1.},
+    'T':      {
+        'long': 'Temperature', 
+        'unit': 'K', 
+       'scale': 1.},
+    'Q':      {
+        'long': 'Specific Humidity', 
+        'unit': 'g/kg', 
+       'scale': 1000.},
+    'P':      {
+        'long': 'Sea-Level Pressure', 
+        'unit': 'hPa', 
+       'scale': 1./100.},
+    'PS':     {
+        'long': 'Surface Pressure', 
+        'unit': 'hPa', 
+       'scale': 1./100.},
+    'Q2M':    {
+        'long': '2m Specific Humidity', 
+        'unit': 'g/kg', 
+       'scale': 1000.},
+    'T2M':    {
+        'long': '2m Temperature', 
+        'unit': 'K', 
+       'scale': 1.},
+    'U10M':   {
+        'long': '10m U-Wind', 
+        'unit': 'm/s', 
+       'scale': 1.},
+    'V10M':   {
+        'long': '10m V-Wind', 
+        'unit': 'm/s', 
+       'scale': 1.},
+    'D2M':    {
+        'long': '2m Dew Point', 
+        'unit': 'K', 
+       'scale': 1.,},
+    'TQI':    {
+        'long': 'Total Precipitable Ice Water', 
+        'unit': 'g/m2', 
+       'scale': 1000.},
+    'TQL':    {
+        'long': 'Total Precipitable Liquid Water', 
+        'unit': 'g/m2', 
+       'scale': 1000.},
+    'TQV':    {
+        'long': 'Total Precipitable Water Vapor', 
+        'unit': 'kg/m2', 
+       'scale': 1.},
+    'TCC':    {
+        'long': 'Total Cloud Cover', 
+        'unit': '', 
+       'scale': 1.},
+    'MUCAPE': {
+        'long': 'Convective Available Potential Energy', 
+        'unit': 'J/kg', 
+       'scale': 1.},
+    'MUCIN':  {
+        'long': 'Convective Inhibition', 
+        'unit': 'J/kg', 
+       'scale': 1.},
+    'CBH':    {
+        'long': 'Cloud Base Height', 
+        'unit': 'm', 
+       'scale': 1.},
+    'AOD':    {
+        'long': 'Total Aerosol Extinction AOT [550 nm]', 
+        'unit': '', 
+       'scale': 1.},
+    'LOGAOD': {
+        'long': 'log(AOD+0.01)', 
+        'unit': '', 
+       'scale': 1.},
+    'PM25':   {
+        'long': 'PM2.5 Total Mass', 
+        'unit': 'µg/m3', 
+       'scale': 1E6}}
 
 # Calculable variables and their dependencies 
 # Note: see _calculate_variables() method for equations
@@ -952,7 +1024,6 @@ class BatchDatasetProcessor:
         coll_files = {}
         coll_valid_times = {}
         searched_paths = {}  # Store paths that were searched but not found
-        used_files = set()
         colls_without_templates = []
         
         # Use specified collections or find all collections with variables
@@ -984,11 +1055,8 @@ class BatchDatasetProcessor:
                 templates, base_dir, f'{context_info} collection={coll_nm}',
                 init_date, valid_time)
             if file_path:
-                # Only add if we have not seen this file before
-                if file_path not in used_files:
-                    coll_files[coll_nm] = file_path
-                    coll_valid_times[coll_nm] = file_valid_time
-                    used_files.add(file_path)
+                coll_files[coll_nm] = file_path
+                coll_valid_times[coll_nm] = file_valid_time
             else:
                 # Store the searched paths for this missing collection
                 searched_paths[coll_nm] = paths
@@ -1227,7 +1295,7 @@ class BatchDatasetProcessor:
                                              - all_found_vars)
                         if unfound_calc_vars:
                             print('    Checking for dependencies of calculable'
-                                  'variables...')
+                                  ' variables...')
                             for coll_nm in colls_for_file:
                                 if coll_nm in coll_results:
                                     coll_result = coll_results[coll_nm]
@@ -1640,13 +1708,32 @@ class BatchDatasetProcessor:
         if not found_vars:
             # No variables to process for these collections
             return {}, colls_for_file
-        # Select pressure levels only if needed
-        needs_pressure_levels = any('lev' in ds[var].dims for var in 
-                                    found_vars.values() if var != 'calculated')
+        # # Select pressure levels only if needed
+        # needs_pressure_levels = any('lev' in ds[var].dims for var in 
+        #                             found_vars.values() if var != 'calculated')
+        # if needs_pressure_levels:
+        #     ds_levels = self._select_pressure_levels(ds, found_vars)
+        # else:
+        #     ds_levels = ds
+
+        # Get 3D variables from config for this file's collections
+        # (same rule as validation: based on 3d_vars_* lists, not file dims)
+        requested_3d_vars = set()
+        for coll_nm in colls_for_file:
+            if coll_nm in self.var_colls:
+                requested_3d_vars.update(self.var_colls[coll_nm]['3d'])
+        # Select pressure levels only if a config-defined 3D var is present
+        needs_pressure_levels = any(var in requested_3d_vars 
+                                    for var in found_vars)
         if needs_pressure_levels:
             ds_levels = self._select_pressure_levels(ds, found_vars)
         else:
             ds_levels = ds
+            # 2D-only file: squeeze out any degenerate (size-1) level dim
+            for level_coord in ['level', 'lev', 'pressure']:
+                if (level_coord in ds_levels.dims 
+                        and ds_levels.sizes[level_coord] == 1):
+                    ds_levels = ds_levels.squeeze(level_coord, drop=True)
 
         # Get regridder
         regridder = self._get_regridder(ds_levels, file_type, 
@@ -2240,6 +2327,7 @@ class BatchDatasetProcessor:
                     lead_datasets.append(forecast_dict[init_date][fhour])
         
                 init_ds = xr.concat(lead_datasets, dim='lead')
+                init_ds = init_ds.reindex(lead=leads)
                 init_ds = init_ds.assign_coords(init_date=init_date)
                 init_date_datasets.append(init_ds)
             combined_fcst = xr.concat(init_date_datasets, dim='init_date')
@@ -2761,7 +2849,7 @@ class BatchDatasetProcessor:
                             f'collection {coll_nm}: some templates contain '
                             f'valid_* variables (single-lead) while others do '
                             f'not (multi-lead). All templates in a collection '
-                            f'use the same mode.'
+                            f'must use the same mode.'
                         )
                     coll_modes[coll_nm] = (
                         'single_lead' if has_valid_vars else 'multi_lead')
@@ -2859,8 +2947,8 @@ class BatchDatasetProcessor:
                             missing_paths['fcst'][missing_key][
                                 coll] = fcst_paths.get(
                                     coll, ['No search paths recorded'])
-                    else:
-                        # Store found collections for this (init_date, fhour)
+                    # Store found collections for this (init_date, fhour) even if some are missing
+                    if fcst_files:
                         all_files['fcst'][key] = fcst_files
         # Process multi-lead collections  
         if multi_lead_colls:
@@ -2967,7 +3055,17 @@ class BatchDatasetProcessor:
                 else:
                     all_files['clim'][cycle] = clim_files
         
-        # Check for missing files and exit if any found
+
+        # Allow missing forecast files specifically at lead=0 (to be NaNs)
+        if process_fcst and 'fcst' in missing_files:
+            ignored_missing = [m for m in missing_files['fcst'] 
+                               if 'fhour=0' in m]
+            if ignored_missing:
+                print(f'\n[WARNING] Ignoring {len(ignored_missing)} missing '
+                      f'forecast files at lead=0 (will be filled with NaNs).')
+            missing_files['fcst'] = [m for m in missing_files['fcst'] 
+                                     if 'fhour=0' not in m]
+        # Check for unacceptable missing files and exit if any found
         total_missing = 0
         for dataset_type, missing_list in missing_files.items():
             if (dataset_type == 'fcst' and process_fcst or
@@ -3046,7 +3144,7 @@ class BatchDatasetProcessor:
                         files_by_coll[coll_nm].add(file_path)
                         all_unique_files.add(file_path)
                 print(f'  {file_type.capitalize()}: {len(all_unique_files)} '
-                      f'unique files across {len(files_by_coll)} collections')
+                      f' files across {len(files_by_coll)} collections')
                 # Show files by collection
                 for coll_nm in sorted(files_by_coll.keys()):
                     coll_files_set = files_by_coll[coll_nm]
@@ -3405,23 +3503,19 @@ class BatchDatasetProcessor:
             print('[INFO] Applying variable scaling and metadata...')
             for var_nms in filtered_ds.data_vars:
                 if var_nms != 'grid_weights':
-                    var_upper = var_nms.upper()
-                    # Apply scaling
-                    if var_upper in VARS_SCALE_MAP:
-                        scale_factor = VARS_SCALE_MAP[var_upper]
+                    var_upper = var_nms.upper()          
+                    # Apply scaling and add metadata
+                    if var_upper in VARS_META_MAP:
+                        scale_factor = VARS_META_MAP[var_upper]['scale']
                         if scale_factor != 1.0:
                             filtered_ds[var_nms] = filtered_ds[var_nms
                                                                ] * scale_factor
                             print(f'[INFO] Applied scaling factor '
                                   f'{scale_factor} to {var_nms}')
-                    # Add metadata
-                    if var_upper in VARS_LONG_MAP:
-                        filtered_ds[var_nms].attrs['long_name'
-                                                   ] = VARS_LONG_MAP[var_upper]
-                    if var_upper in VARS_UNIT_MAP:
-                        filtered_ds[var_nms].attrs['units'
-                                                   ] = VARS_UNIT_MAP[var_upper]            
-            
+                        filtered_ds[var_nms].attrs[
+                            'long_name'] = VARS_META_MAP[var_upper]['long']
+                        filtered_ds[var_nms].attrs[
+                            'units'] = VARS_META_MAP[var_upper]['unit']
             # Save merged dataset
             print(f'[INFO] Saving merged dataset to {output_file}...')
             # Save with compression
@@ -3609,6 +3703,12 @@ class StatisticsProcessor:
                                            (sample_2d_var, nan_mask_2d)]:
                 if var_name and var_name in dataset.data_vars:
                     var_data = dataset[var_name]
+                    if ds_nm == 'fcst':
+                        # Exclude lead=0, which may be structurally missing 
+                        # for certain diagnostic collections (e.g. time-averaged 
+                        # fields with no valid window at initialization)
+                        var_data = var_data.where(var_data['lead'] != 0, 
+                                                  drop=True)
                     dims = ['init_date', 'lead'
                             ] if ds_nm == 'fcst' else ['time']
                     is_nan = var_data.isnull().any(dim=dims)
@@ -3631,6 +3731,29 @@ class StatisticsProcessor:
                 else:
                     weights = base_weights.where(~mask)
                 weights.name = f'enhanced_grid_weights_{dims_info.lower()}'
+                sample_var_nm = (
+                    sample_3d_var if weight_type == 'weights_3d' 
+                    else sample_2d_var)
+                if weight_type == 'weights_3d':
+                    fully_masked = bool(weights.isnull().all())
+                else:
+                    fully_masked = bool(
+                        weights.isnull().all(dim=['lat', 'lon']))
+                if fully_masked:
+                    if weight_type == 'weights_3d':
+                        raise ValueError(
+                            f'{dims_info} grid weights are fully masked '
+                            f'(NaN) at every level, lat, and lon, based on '
+                            f'sample variable "{sample_var_nm}". This would '
+                            f'silently produce all-NaN statistics for '
+                            f'every {dims_info} variable.')
+                    else:
+                        raise ValueError(
+                            f'{dims_info} grid weights are fully masked '
+                            f'(NaN) at every lat and lon, based on sample '
+                            f'variable "{sample_var_nm}". This would '
+                            f'silently produce all-NaN statistics for '
+                            f'every {dims_info} variable.')
                 self.enhanced_weights[weight_type] = weights
                 print(f'    Created {dims_info} weights: '
                       f'{dict(weights.sizes)}')
@@ -4515,8 +4638,8 @@ class StatisticsProcessor:
         all_stats = {}
         for var in self.stats_arrays.keys():
             var_upper = var.upper()
-            var_unit = VARS_UNIT_MAP.get(var_upper, 'unknown')
-            var_long_nm = VARS_LONG_MAP.get(var_upper)
+            var_unit = VARS_META_MAP.get(var_upper, {}).get('unit', 'unknown')
+            var_long_nm = VARS_META_MAP.get(var_upper, {}).get('long')
             for stat_key, stat_array in self.stats_arrays[var].items():
                 # Skip avg and glo variables if skip_avg
                 if skip_avg and (stat_key.endswith('_avg') 
@@ -4658,6 +4781,8 @@ class StatisticsProcessor:
             'de3d': self.config.get('3d_vars_default', []),
             'de2d': self.config.get('2d_vars_default', []),
             'sl2d': self.config.get('2d_vars_slices',  []), 
+            'co2d': self.config.get('2d_vars_columns', []),
+            'cl2d': self.config.get('2d_vars_clouds',  []),
             'ae2d': self.config.get('2d_vars_aerosol', [])
         }
         collections = [coll for coll, vars_list in fvars.items() if vars_list]
@@ -4676,8 +4801,9 @@ class StatisticsProcessor:
             'rms_bar': 'rms_bar', 'rms_dis': 'rms_dis', 'rms_dsp': 'rms_dsp'}
         
         def reverse_scaling(var, stat_key, value):
-            '''Helper: revert Q and PM vars to SI units for scorecards'''
-            if var.upper() in ['Q', 'Q2M'] and stat_key != 'acorr':
+            '''Helper: revert vars to SI units for scorecards'''
+            if var.upper() in ['Q', 'Q2M', 'TQI', 'TQL'
+                               ] and stat_key != 'acorr':
                 if stat_key in ['rms_dis', 'rms_dsp']:  # squared stats
                     return value * 1E-6
                 else:
@@ -4912,8 +5038,9 @@ class StatisticsProcessor:
                     base_stat = var.split('_', 1)[1]
                     var_upper = (var.split('_', 1)[0]).upper()
                     # Include units and long_names
-                    var_unit = VARS_UNIT_MAP.get(var_upper, 'unknown')
-                    var_long_nm = VARS_LONG_MAP.get(var_upper)
+                    var_unit = VARS_META_MAP.get(var_upper, {}).get(
+                        'unit', 'unknown')
+                    var_long_nm = VARS_META_MAP.get(var_upper, {}).get('long')
                     if base_stat in STATS_LONG_NAMES:
                         stat_long_nm = (f'{STATS_LONG_NAMES[base_stat]} of '
                                         f'{var_long_nm}')
@@ -5015,7 +5142,8 @@ def parse_arguments():
     process_group.add_argument('--collection', dest='target_coll', 
                                default=None, 
                                help=('Process only specific collection (e.g., '
-                                     'default, slices, aerosol)'))
+                                     'default, slices, columns, clouds, '
+                                     'aerosol)'))
     process_group.add_argument('--info_dir', default=None, 
                                help='Directory with date range and timestamp')
     process_group.add_argument('--date_start_idx', type=int, 
@@ -5245,8 +5373,9 @@ def main():
                     for var in ds.data_vars:
                         if var != 'grid_weights':
                             var_upper = var.upper()
-                            if var_upper in VARS_SCALE_MAP:
-                                scale_factor = VARS_SCALE_MAP[var_upper]
+                            if var_upper in VARS_META_MAP:
+                                scale_factor = VARS_META_MAP[var_upper][
+                                    'scale']
                                 if scale_factor != 1.0:
                                     ds[var] = ds[var] * scale_factor
                 print('\n[INFO] Single-forecast mode: Keeping datasets in '
@@ -5306,17 +5435,15 @@ def main():
                                 # Skip in collection-specific mode
                                 if not skip_calc_mode: 
                                     var_upper = var.upper()
-                                    if var_upper in VARS_SCALE_MAP:
+                                    if var_upper in VARS_META_MAP:
                                         scale_factor = (
-                                            VARS_SCALE_MAP[var_upper])
+                                            VARS_META_MAP[var_upper]['scale'])
                                         if scale_factor != 1.0:
                                             var_data = var_data * scale_factor
-                                    if var_upper in VARS_LONG_MAP:
                                         var_data.attrs['long_name'] = (
-                                            VARS_LONG_MAP[var_upper])
-                                    if var_upper in VARS_UNIT_MAP:
+                                            VARS_META_MAP[var_upper]['long'])
                                         var_data.attrs['units'] = (
-                                            VARS_UNIT_MAP[var_upper])
+                                            VARS_META_MAP[var_upper]['unit'])
                                 data_vars[var] = var_data
                         clean_coords = {coord: ds.coords[coord] for coord 
                                         in cds_to_keep if coord in ds.coords}
