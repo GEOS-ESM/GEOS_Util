@@ -47,25 +47,114 @@ colors = ['black',   # black
           '#228B22'] # forest green
 
 # Variables metadata
-vars_title_map = {'H': 'hght', 'U': 'uwnd', 'V': 'vwnd', 'T': 'tmpu', 
-                  'Q': 'sphu', 'P': 'slp', 'PS': 'sfcp', 'Q2M': 'sphu', 
-                  'T2M': 'tmpu', 'U10M': 'uwnd', 'V10M': 'vwnd', 'D2M': 'dwpt',
-                  'AOD': 'aod', 'LOGAOD': 'lnaod', 'PM25': 'pm25'}
-vars_long_map = {'H': 'Heights', 'U': 'U-Wind', 'V': 'V-Wind', 
-                 'T': 'Temperature', 'Q': 'Specific Humidity',
-                 'P': 'Sea-Level Pressure', 'PS': 'Surface Pressure',
-                 'Q2M': '2m Specific Humidity', 'T2M': '2m Temperature', 
-                 'U10M': '10m U-Wind', 'V10M': '10m V-Wind', 
-                 'D2M': '2m Dew Point', 
-                 'AOD': 'Total Aerosol Extinction AOT [550 nm]', 
-                 'LOGAOD': 'log(AOD+0.01)', 'PM25': 'PM2.5 Total Mass'}
-vars_unit_map = {'H': 'm', 'U': 'm/s', 'V': 'm/s', 'T': 'K', 'Q': 'g/kg', 
-                 'P': 'hPa', 'PS': 'hPa', 'Q2M': 'g/kg', 'T2M': 'K', 
-                 'U10M': 'm/s', 'V10M': 'm/s', 'D2M': 'K', 'AOD': '', 
-                 'LOGAOD': '', 'PM25': 'µg/m3'}
+vars_meta_map = {
+    'H':      {
+        'long': 'Heights', 
+       'title': 'hght',
+        'unit': 'm'},
+    'U':      {
+        'long': 'U-Wind', 
+       'title': 'uwnd',
+        'unit': 'm/s'},
+    'V':      {
+        'long': 'V-Wind', 
+       'title': 'vwnd',
+        'unit': 'm/s'},
+    'T':      {
+        'long': 'Temperature', 
+       'title': 'tmpu',
+        'unit': 'K'},
+    'Q':      {
+        'long': 'Specific Humidity', 
+       'title': 'sphu',
+        'unit': 'g/kg'},
+    'P':      {
+        'long': 'Sea-Level Pressure', 
+       'title': 'slp',
+        'unit': 'hPa'},
+    'PS':     {
+        'long': 'Surface Pressure', 
+       'title': 'sfcp',
+        'unit': 'hPa'},
+    'Q2M':    {
+        'long': '2m Specific Humidity', 
+       'title': 'sphu',
+        'unit': 'g/kg'},
+    'T2M':    {
+        'long': '2m Temperature', 
+       'title': 'tmpu',
+        'unit': 'K'},
+    'U10M':   {
+        'long': '10m U-Wind', 
+       'title': 'uwnd',
+        'unit': 'm/s'},
+    'V10M':   {
+        'long': '10m V-Wind', 
+       'title': 'vwnd',
+        'unit': 'm/s'},
+    'D2M':    {
+        'long': '2m Dew Point', 
+       'title': 'dwpt',
+        'unit': 'K'},
+    'TQI':    {
+        'long': 'Total Precipitable Ice Water', 
+       'title': 'tqi',
+        'unit': 'g/m2'},
+    'TQL':    {
+        'long': 'Total Precipitable Liquid Water', 
+       'title': 'tql',
+        'unit': 'g/m2'},
+    'TQV':    {
+        'long': 'Total Precipitable Water Vapor', 
+       'title': 'tqv',
+        'unit': 'kg/m2'},
+    'TCC':    {
+        'long': 'Total Cloud Cover', 
+       'title': 'tcc',
+        'unit': ''},
+    'MUCAPE': {
+        'long': 'Convective Available Potential Energy', 
+       'title': 'cape',
+        'unit': 'J/kg'},
+    'MUCIN':  {
+        'long': 'Convective Inhibition', 
+       'title': 'cin',
+        'unit': 'J/kg'},
+    'CBH':    {
+        'long': 'Cloud Base Height', 
+       'title': 'cbh',
+        'unit': 'm'},
+    'AOD':    {
+        'long': 'Total Aerosol Extinction AOT [550 nm]', 
+       'title': 'aod',
+        'unit': ''},
+    'LOGAOD': {
+        'long': 'log(AOD+0.01)', 
+       'title': 'lnaod',
+        'unit': ''},
+    'PM25':   {
+        'long': 'PM2.5 Total Mass', 
+       'title': 'pm25',
+        'unit': 'µg/m3'}}
 
 # 3d variables min/max magnitude for zonal RMS plots
 vars_range_map = {'H': 4, 'U': 0.4, 'V': 0.4, 'T': 0.2, 'Q': 0.1}  
+
+# Collection mappings (replacing separate lev_nms, is_3d, and yaml param names)
+coll_map = {
+    'de3d': {'param': '3d_vars_default', 'lev_nm': None, 'is_3d': True,  
+             'var_fmt': 'upper', 'show_lev': True},
+    'de2d': {'param': '2d_vars_default', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'show_lev': True},
+    'sl2d': {'param': '2d_vars_slices',  'lev_nm': 2000, 'is_3d': False, 
+             'var_fmt': 'mixed', 'show_lev': False},
+    'co2d': {'param': '2d_vars_columns', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'show_lev': False},
+    'cl2d': {'param': '2d_vars_clouds',  'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'show_lev': False},
+    'ae2d': {'param': '2d_vars_aerosol', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'show_lev': False}
+}
 
 # Regions metadata
 region_short_map = {'GLO': 'global',  'NHE': 'n.hem',   'TRO': 'tropics',
@@ -241,13 +330,9 @@ def load_stats_data(yaml_file: str, process: str, part: int
     else:
         plot_stats = ['acorr', 'rms']  
 
-    # Initialize variable lists from config
-    fvars = {
-        'de3d': params.get('3d_vars_default', []),
-        'de2d': params.get('2d_vars_default', []),
-        'sl2d': params.get('2d_vars_slices',  []),
-        'ae2d': params.get('2d_vars_aerosol', [])
-    }
+    # Initialize variable lists from config using coll_map
+    fvars = {coll: params.get(info['param'], []) 
+             for coll, info in coll_map.items()}
     
     # Check that at least some variables are specified
     all_vars = []
@@ -255,32 +340,29 @@ def load_stats_data(yaml_file: str, process: str, part: int
         all_vars.extend(var_list)
     if not all_vars:
         sys.exit('ERROR: No variables specified. At least one of '
-                 '3d_vars_default, 2d_vars_default, 2d_vars_slices, or '
-                 '2d_vars_aerosol must be provided.')
+                 '3d_vars_default, 2d_vars_default, 2d_vars_slices, etc.,'
+                 'must be provided.')
     
     # Determine which collections are non-empty and store them
     collections = [coll for coll, vars_list in fvars.items() if vars_list]
-    # Create dictionary to track which collections are 3D
-    is_3d = {coll: (int(coll[-2]) == 3) for coll in collections}
     
-    # Format variable names based on collection prefix
+    # Create dictionary to track which collections are 3D
+    is_3d = {coll: coll_map[coll]['is_3d'] for coll in collections}
+    
+    # Format variable names based on collection map instructions
     for key in fvars:
-        if key.startswith('de') or key.startswith('ae'):
-            # For collections beginning with 'de' or 'ae', make all uppercase
+        fmt_type = coll_map[key]['var_fmt']
+        if fmt_type == 'upper':
             fvars[key] = [var.upper() for var in fvars[key]]
-        elif key.startswith('sl'):
-            # For 'sl', format as uppercase before numbers, lowercase after
+        elif fmt_type == 'mixed':
             formatted_vars = []
             for var in fvars[key]:
-                # Find the first digit in the variable name
                 match = re.search(r'\d', var)
                 if match:
                     digit_pos = match.start()
-                    # Uppercase before the digit, lowercase after
                     new_var = var[:digit_pos].upper() + var[digit_pos:].lower()
                     formatted_vars.append(new_var)
                 else:
-                    # If no digit found, return an error
                     sys.exit(f'ERROR: Variable "{var}" in collection "{key}" '
                              f'must contain at least one digit.')
             fvars[key] = formatted_vars
@@ -460,6 +542,10 @@ def load_stats_data(yaml_file: str, process: str, part: int
         fcst_names.append(exp_fcst)
         ana_names.append(exp_ana)
         clim_names.append(exp_clim)
+    # Apply selfver override if requested
+    selfver = params.get('selfver', False)
+    if selfver:
+        ana_names = ['SELF'] * len(ana_names)
     
     # Extract timing parameters for compatibility checking
     exp_lens = []
@@ -681,7 +767,7 @@ def load_stats_data(yaml_file: str, process: str, part: int
                             for date in available_requested]
             ds = ds.isel(init_date=date_indices)
             print(f'Date validation: {original_date_count} → '
-                  f'{len(available_requested)} dates (after removing extras)')
+                  f'{len(available_requested)} dates')
             
             # Track the valid dates for this experiment
             experiment_valid_dates.append(available_requested)
@@ -939,7 +1025,8 @@ def load_stats_data(yaml_file: str, process: str, part: int
     data['out_suffix'] = out_suffix
     data['plot_RMS_decomp'] = plot_RMS_decomp
     data['colormap'] = params.get('corcmp_colormap', 'bwr')
-    data['additional_pairs'] = params.get('additional_pairs', [])
+    data['comparison_pairs'] = params.get('comparison_pairs', None)
+    data['selfver'] = params.get('selfver', False)
     
     return data
 
@@ -1018,13 +1105,13 @@ def plot_lev(s, reg, coll, v, var, z, lev):
             
             # Plot confidence intervals in lower panel
             cil_vals, ciu_vals = [{} for _ in range(2)]
-            for conf in conf_levels:
+            for sig in sig_levs_lev:
                 if is_3d[coll]:  # 3d
-                    cil_vals[conf] = cil[conf][coll][(0, m)][:, s, v, z]
-                    ciu_vals[conf] = ciu[conf][coll][(0, m)][:, s, v, z]
+                    cil_vals[sig] = cil[coll][(0, m)][sig][:, s, v, z]
+                    ciu_vals[sig] = ciu[coll][(0, m)][sig][:, s, v, z]
                 else:  # 2d
-                    cil_vals[conf] = cil[conf][coll][(0, m)][:, s, v]
-                    ciu_vals[conf] = ciu[conf][coll][(0, m)][:, s, v]
+                    cil_vals[sig] = cil[coll][(0, m)][sig][:, s, v]
+                    ciu_vals[sig] = ciu[coll][(0, m)][sig][:, s, v]
                     
             base_width = fcst_interval/24.
             for i in range(nleads):
@@ -1032,19 +1119,19 @@ def plot_lev(s, reg, coll, v, var, z, lev):
                 if len(models) == 2:
                     rect_colors = ['lawngreen', 'tomato', 'deepskyblue']
                     width_factors = [0.9, 0.7, 0.5]
-                    for c, conf in enumerate(conf_levels[:3]):  # 
-                        plot_rectangle(axl, i, x_vals, cil_vals[conf], 
-                                         ciu_vals[conf],rect_colors[c], 
+                    for c, sig in enumerate(sig_levs_lev[:3]): 
+                        plot_rectangle(axl, i, x_vals, cil_vals[sig], 
+                                         ciu_vals[sig],rect_colors[c], 
                                          width_factors[c]*base_width)
                     axl.errorbar(x_vals, np.zeros(len(x_vals)), fmt='none', 
-                                 yerr=[abs(cil_vals[conf_levels[3]]), 
-                                       abs(ciu_vals[conf_levels[3]])], 
+                                 yerr=[abs(cil_vals[sig_levs_lev[3]]), 
+                                       abs(ciu_vals[sig_levs_lev[3]])], 
                                  linewidth=0.5, capthick=0.5, ecolor='black', 
                                  capsize=3)
-                # For 3 or more models: single rectangle in model's color
+                # For 3 or more models: single rectangle (95%) in model's color
                 else:
-                    plot_rectangle(axl, i, x_vals, cil_vals[conf_levels[2]], 
-                                    ciu_vals[conf_levels[2]], colors[m], 
+                    plot_rectangle(axl, i, x_vals, cil_vals[sig_levs_lev[0]], 
+                                    ciu_vals[sig_levs_lev[0]], colors[m], 
                                     0.9*base_width)
         
     # Plot synoptic confidence intervals (95%) as dashed lines in upper panel
@@ -1076,14 +1163,17 @@ def plot_lev(s, reg, coll, v, var, z, lev):
         axu.set_ylim(ymin, ymax)
 
     # Add title and region/variable/season/year texts
-    u = vars_unit_map.get(var.upper())
+    u = vars_meta_map.get(var.upper(), {}).get('unit')
+    unit_str = f' ({u})' if u else ''
     region = region_long_map.get(reg)
-    if coll[:2] == 'de':
+
+    if coll_map[coll]['show_lev']:
         axu.set_title(f'Forecasts Statistics ({nfcsts}) \n{lev}-mb '
-                      f'{long[coll][v]} ({u}) {region}', fontsize=12)
-    elif coll[:2] == 'sl' or coll[:2] == 'ae':
+                      f'{long[coll][v]}{unit_str} {region}', fontsize=12)
+    else:
         axu.set_title(f'Forecasts Statistics ({nfcsts}) \n'
-                      f'{long[coll][v]} ({u}) {region}', fontsize=12) 
+                      f'{long[coll][v]}{unit_str} {region}', fontsize=12)
+
     axu.text(-0.2, 1.1, f'{reg}\n{var}', transform=axu.transAxes,
                   fontsize=14, va='center', ha='left')
     axu.text(-0.2, 0.1, seas_yr, transform=axu.transAxes,
@@ -1105,7 +1195,7 @@ def plot_lev(s, reg, coll, v, var, z, lev):
     main_legend = axl.legend(handles, leg_labels, fontsize=8, labelspacing=0.4, 
                              handlelength=2, handletextpad=0.5, 
                              loc='upper center', bbox_to_anchor=(0.5, -0.15), 
-                             ncol=4, frameon=False)
+                             ncol=3, frameon=False)
     
     # If only 2 models, add CI legend for the lower plot
     if len(models) == 2:
@@ -1114,11 +1204,11 @@ def plot_lev(s, reg, coll, v, var, z, lev):
         for i in range(3):
             legend_elements.append(
                 Rectangle((0,0), 0.6, 0.4, facecolor=rect_colors[i], 
-                          label=f'{int(conf_levels[i]*100)}% CI'))
+                          label=f'{int(sig_levs_lev[i]*100)}% CI'))
         # Add error bar for 4th confidence level (99%)
         legend_elements.append(Line2D([0], [0], color='black', linewidth=0.5,
                                     marker='_', markersize=6, 
-                                    label=f'{int(conf_levels[3]*100)}% CI'))
+                                    label=f'{int(sig_levs_lev[3]*100)}% CI'))
         # Add legend (must add artists for both for visibility)
         ci_legend = axl.legend(handles=legend_elements, loc='lower left', 
                                fontsize=6, handlelength=1, handleheight=0.2, 
@@ -1163,7 +1253,8 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
     ctl_nm = models[ctl] if ctl is not None else models[mod]
     
     # Info for title
-    u = vars_unit_map.get(var.upper())
+    u = vars_meta_map.get(var.upper(), {}).get('unit')
+    unit_str = f' ({u})' if u else ''
     region = region_long_map.get(reg)
     
     # Make comparison plot (color mesh of diffs with significance shading)
@@ -1208,12 +1299,12 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
         cbar.minorticks_off()
         cbar.ax.xaxis.set_tick_params(pad=2)
         
-        # Create a mask from CIs for each selected sig level (95%, 99%, 99.99%)
+        # Create a mask from CIs for each sig level (95%, 99%, 99.99%)
         mask = {}
-        for conf in conf_levels[2:]:  
-            mask[conf] = (
-                (z_vals.T < cil[conf][coll][(ctl, mod)][:, s, v, :].T) | (
-                 z_vals.T > ciu[conf][coll][(ctl, mod)][:, s, v, :].T))
+        for sig in sig_levs_zon:  
+            mask[sig] = (
+                (z_vals.T < cil[coll][(ctl, mod)][sig][:, s, v, :].T) | (
+                 z_vals.T > ciu[coll][(ctl, mod)][sig][:, s, v, :].T))
         
         # Apply patches to areas corresponding to masks (centered on level)
         e_colors = ['#2a2a2a', '#3a3a3a', 'dimgrey']  # Dark grey to light
@@ -1233,8 +1324,8 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
                     y_beg = (levs[i]+levs[i-1])/2
                     y_size = y_beg - levs[i]
                 # Apply patch corresponding to strongest sig level passed
-                for c, conf in enumerate(reversed(conf_levels[2:])):
-                    if mask[conf][i, j]:
+                for c, sig in enumerate(reversed(sig_levs_zon)):
+                    if mask[sig][i, j]:
                         rect = plt.Rectangle(
                             (x_beg, y_beg), x_size, -y_size, linewidth=0, 
                             facecolor='none', edgecolor=e_colors[c], 
@@ -1247,7 +1338,7 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
         ctl_title_nm = f'{ctl_nm.replace("_", " (")}-ver)'
         ax.set_title(f'{mod_title_nm} - {ctl_title_nm} ({nfcsts})\n'
                      f'{stat_nms[s]} Difference [dot: >95%, diag: >99%,'
-                     f' hatch: >99.99%]\n{long[coll][v]} ({u}) {region}', 
+                     f' hatch: >99.99%]\n{long[coll][v]}{unit_str} {region}', 
                      fontsize=12)
     
     # Make individual plot (simple lines contour)
@@ -1275,7 +1366,7 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
         # Add title
         mod_title_nm = f'{models[mod].replace("_", " (")}-ver)'
         ax.set_title(f'{mod_title_nm} ({nfcsts}) {stat_lbls[s]}\n'
-                     f'{long[coll][v]} ({u}) {region}', fontsize=12)
+                     f'{long[coll][v]}{unit_str} {region}', fontsize=12)
     
     # Format axes, labels, and ticks
     ax.invert_yaxis()
@@ -1320,14 +1411,13 @@ def plot_zon(mod, ctl, s, reg, coll, v, var, vmin, vmax):
         print(plotnm)
         plt.savefig(f'{plotsdir}{plotnm}', dpi=dpi)
 
-def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
+def calc_syn_ci(ctl_data, mod_data_all, coll):
     '''
-    Calculate synoptic confidence intervals for full experiment list
+    Calculate synoptic confidence intervals (95%) for full experiment list
     Parameters:
     - ctl_data: control data
     - mod_data_all: list of non-control model data arrays
     - coll: collection CIs are calculated for
-    - sig: significance level CIs are caluclated for (i.e., 0.95)
     Returns lower/upper confidence intervals (centered on control exp values)
     '''
     
@@ -1340,6 +1430,7 @@ def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
                               for _ in range(2)]
     
     # Create CIs, looping through leads and stats
+    t_crit_syn = t_crit[0.95]
     for l in range(nleads):
         for s in range(nstats):
             if s == 0:  # ACORR
@@ -1363,9 +1454,8 @@ def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
                 var_tr = np.mean(varm_tr, axis=0)
                 # Calculate standard error from average of ctl/other variances
                 se_tr = ((varctl_tr + var_tr) / 2 / nfcsts)**(1/2)
-                # Calculate t-critical value (two-sided) and CIs
-                t_crit = stats.t.ppf((1 + sig) / 2, nfcsts-1)
-                dx = se_tr * t_crit
+                # Calculate CIs from two-sided t-critical value
+                dx = se_tr * t_crit_syn
                 # Back-transform CIs around control, then subtract control
                 ci_lower[l, s] = (
                     ((np.exp(2 * (ctl_tr_mean - dx)) - 1) / 
@@ -1396,9 +1486,8 @@ def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
                 var_tr = (varctl_tr + np.mean(varm_tr, axis=0)) / 2 
                 # Calculate standard error from sum of control/other variances
                 se_tr = (var_tr / nfcsts)**(1/2)
-                # Calculate t-critical value (two-sided) and CIs
-                t_crit = stats.t.ppf((1 + sig) / 2, nfcsts - 1)
-                dx = se_tr * t_crit
+                # Calculate Calculate CIs from two-sided t-critical value
+                dx = se_tr * t_crit_syn
                 # Back-transform CIs around control, then subtract control
                 ci_lower[l, s] = ((np.maximum(0, ctl_tr_mean - dx))**(1/2) - 
                                   (np.maximum(0, ctl_tr_mean))**(1/2))
@@ -1410,23 +1499,24 @@ def calc_syn_ci(ctl_data, mod_data_all, coll, sig):
             ci_upper[l, s] = ci_upper[l, s] + ctl_mean
     return ci_lower, ci_upper
 
-def calc_ci(ctl_data, mod_data, coll, sig):
+def calc_ci(ctl_data, mod_data, coll):
     '''
     Calculate asymmetric confidence intervals for model-control differences
     Parameters:
     - ctl_data, mod_data: control and comparison model experiment data
     - coll: collection CIs are calculated for
-    - sig: significance level CIs are caluclated for (i.e., 0.95)
-    Returns lower/upper confidence intervals for differences (centered on zero)
+    Returns lower/upper confidence intervals for differences (centered on 
+    zero), each a dict keyed by significance level
     '''
 
-    # Initialize confidence interval arrays
+    # Initialize confidence interval dicts (one array per significance level)
     if is_3d[coll]:
-        ci_lower, ci_upper = [np.zeros((nleads, nstats, nvars[coll], nlevs)) 
+        ci_lower, ci_upper = [{sig: np.zeros((nleads, nstats, nvars[coll], 
+                               nlevs)) for sig in sig_levs_ci} 
                               for _ in range(2)]
     else:
-        ci_lower, ci_upper = [np.zeros((nleads, nstats, nvars[coll])) 
-                              for _ in range(2)]
+        ci_lower, ci_upper = [{sig: np.zeros((nleads, nstats, nvars[coll])) 
+                               for sig in sig_levs_ci} for _ in range(2)]
     
     # Create CIs, looping through leads and stats
     for l in range(nleads):
@@ -1445,20 +1535,20 @@ def calc_ci(ctl_data, mod_data, coll, sig):
                 # Calculate variance and standard error of transformed diffs
                 vard_tr = stats.tvar(diffs_tr, axis=0)
                 se_tr = (vard_tr / nfcsts)**(1/2)
-                # Calculate t-critical value (two-sided) and CIs
-                t_crit = stats.t.ppf((1 + sig) / 2, nfcsts - 1)
-                dx = se_tr * t_crit
-                # Back-transform CIs around control, then subtract control
-                ci_lower[l, s] = (
-                    ((np.exp(2 * (ctl_tr_mean - dx)) - 1) / 
-                     (np.exp(2 * (ctl_tr_mean - dx)) + 1)) - 
-                    ((np.exp(2 * ctl_tr_mean) - 1) / 
-                     (np.exp(2 * ctl_tr_mean) + 1)))
-                ci_upper[l, s] = (
-                    ((np.exp(2 * (ctl_tr_mean + dx)) - 1) / 
-                     (np.exp(2 * (ctl_tr_mean + dx)) + 1)) - \
-                    ((np.exp(2 * ctl_tr_mean) - 1) / 
-                     (np.exp(2 * ctl_tr_mean) + 1)))
+                # Calculate CIs for each needed significance level
+                for sig in sig_levs_ci:
+                    dx = se_tr * t_crit[sig]
+                    # Back-transform CIs around control, then subtract control
+                    ci_lower[sig][l, s] = (
+                        ((np.exp(2 * (ctl_tr_mean - dx)) - 1) / 
+                         (np.exp(2 * (ctl_tr_mean - dx)) + 1)) - 
+                        ((np.exp(2 * ctl_tr_mean) - 1) / 
+                         (np.exp(2 * ctl_tr_mean) + 1)))
+                    ci_upper[sig][l, s] = (
+                        ((np.exp(2 * (ctl_tr_mean + dx)) - 1) / 
+                         (np.exp(2 * (ctl_tr_mean + dx)) + 1)) - \
+                        ((np.exp(2 * ctl_tr_mean) - 1) / 
+                         (np.exp(2 * ctl_tr_mean) + 1)))
             else:  # RMS  
                 # Apply power transform to control and model
                 ctl_tr = (ctl_data[:, l, s, :])**2 
@@ -1469,14 +1559,16 @@ def calc_ci(ctl_data, mod_data, coll, sig):
                 # Calculate variance and standard error of transformed diffs
                 vard_tr = stats.tvar(diffs_tr, axis=0)
                 se_tr = (vard_tr / nfcsts)**(1/2)
-                # Calculate t-critical value (two-sided) and CIs
-                t_crit = stats.t.ppf((1 + sig) / 2, nfcsts - 1)
-                dx = se_tr * t_crit
-                # Back-transform CIs around control, then subtract control
-                ci_lower[l, s] = ((np.maximum(0, ctl_tr_mean - dx))**(1/2) - 
-                                  (np.maximum(0, ctl_tr_mean))**(1/2))
-                ci_upper[l, s] = ((np.maximum(0, ctl_tr_mean + dx))**(1/2) - 
-                                  (np.maximum(0, ctl_tr_mean))**(1/2))
+                # Calculate CIs for each needed significance level
+                for sig in sig_levs_ci:
+                    dx = se_tr * t_crit[sig]
+                    # Back-transform CIs around control, then subtract control
+                    ci_lower[sig][l, s] = (
+                        (np.maximum(0, ctl_tr_mean - dx))**(1/2) - 
+                        (np.maximum(0, ctl_tr_mean))**(1/2))
+                    ci_upper[sig][l, s] = (
+                        (np.maximum(0, ctl_tr_mean + dx))**(1/2) - 
+                        (np.maximum(0, ctl_tr_mean))**(1/2))
     return ci_lower, ci_upper
 
 def plot_3d_coll(coll):
@@ -1496,7 +1588,7 @@ def plot_3d_coll(coll):
                 plot_lev(n, reg, coll, v, var, l, lev)
                 plt.close('all')
             # Create comparison zonal plots 
-            for ctl, mod in comparison_pairs:
+            for ctl, mod in cmp_pairs:
                 plot_zon(mod, ctl, n, reg, coll, v, var, vmin[n], vmax[n])
                 plt.close('all')
             # Create individual zonal plots
@@ -1600,7 +1692,7 @@ def make_montages(mont_nms, mont_vars, mont_title, stat_mont_regs,
     - z: top level (100, 10, or 1 where 10 or 1 imply log y-axis)
     '''
     
-    for ctl, mod in comparison_pairs:
+    for ctl, mod in cmp_pairs:
         mnm = (f'{models[mod].replace("_", "-")}_'
                f'{models[ctl].replace("_", "-")}')
         # Loop through stats
@@ -1696,17 +1788,52 @@ regions = data['regions']
 plot_RMS_decomp = data['plot_RMS_decomp']
 nstats = len(data['plot_stats'])
 
-# Construct explicit comparison pairs (default: all against exp0)
-comparison_pairs = [(0, mod) for mod in range(1, nexps)]
-for pair in data['additional_pairs']:
-    if (len(pair) == 2 and all(0 <= p < nexps for p in pair) 
-        and pair[0] != pair[1]):
-        t_pair = tuple(pair)
-        if t_pair not in comparison_pairs:
-            comparison_pairs.append(t_pair)
-    else:
-        print(f'WARNING: Invalid additional_pair {pair} skipped. '
-              f'Must be two unique indices between 0 and {nexps-1}.')
+# Construct comparison pairs for zonal plots based on configuration:
+# - If not specified (None): compare all experiments against exp0
+# - If empty string (""): no comparison plots
+# - If specified with pairs: use only those pairs (format: "0,2; 1,2")
+if data['comparison_pairs'] is None:
+    # Default: all experiments compared against exp0
+    cmp_pairs = [(0, mod) for mod in range(1, nexps)]
+elif data['comparison_pairs'] == "":
+    # Explicitly no comparisons
+    cmp_pairs = []
+else:
+    # Parse specified pairs from string format "0,2; 1,2"
+    cmp_pairs = []
+    for pair_str in data['comparison_pairs'].split(';'):
+        pair_str = pair_str.strip()
+        if not pair_str:
+            continue
+        try:
+            parts = pair_str.split(',')
+            if len(parts) != 2:
+                print(f'WARNING: Invalid comparison_pair "{pair_str}" skipped. '
+                      f'Must have exactly 2 elements.')
+                continue
+            ctl = int(parts[0].strip())
+            mod = int(parts[1].strip())
+            if not (0 <= ctl < nexps and 0 <= mod < nexps):
+                print(f'WARNING: Invalid comparison_pair ({ctl},{mod}) skipped. '
+                      f'Indices must be between 0 and {nexps-1}.')
+                continue
+            if ctl == mod:
+                print(f'WARNING: Invalid comparison_pair ({ctl},{mod}) skipped. '
+                      f'Cannot compare experiment to itself.')
+                continue
+            t_pair = (ctl, mod)
+            if t_pair not in cmp_pairs:
+                cmp_pairs.append(t_pair)
+        except ValueError:
+            print(f'WARNING: Invalid comparison_pair "{pair_str}" skipped. '
+                  f'Must contain integers.')
+            continue
+
+# Construct CI pairs (union of all vs exp0 plus cmp_pairs)
+ci_pairs = [(0, mod) for mod in range(1, nexps)]
+for pair in cmp_pairs:
+    if pair not in ci_pairs:
+        ci_pairs.append(pair)
 
 # Collect plot label info
 if process == 'plot': 
@@ -1722,8 +1849,10 @@ for m in range(nexps):
 # Collect variable metadata
 (title, long) = [{} for _ in range(2)]
 for coll in collections:
-    title[coll] = [vars_title_map.get(var.upper()) for var in fvars[coll]]
-    long[coll] = [vars_long_map.get(var.upper()) for var in fvars[coll]]
+    title[coll] = [vars_meta_map.get(var.upper(), {}).get('title') 
+                   for var in fvars[coll]]
+    long[coll]  = [vars_meta_map.get(var.upper(), {}).get('long') 
+                   for var in fvars[coll]]
     
 # Define stats names
 stat_lbls   = ['Anomaly Correlation', 'Root Mean Square Error', 
@@ -1771,10 +1900,20 @@ cmap = mcolors.ListedColormap(c_cmap)
 # Collect plot saving info and make plots directory
 dpi = data['plot_dpi']
 output_dir = os.path.join(os.getcwd(), f'output/plots_{data["out_suffix"]}')
-plotsdir = Path(f'{output_dir}/corcmp')
+# Determine corcmp directory name based on analysis
+if len(set(data['ana_names'])) == 1:
+    # All experiments use same analysis - include in directory name
+    corcmp_dir_suffix = data['ana_names'][0]
+    plotsdir = Path(f'{output_dir}/corcmp_{corcmp_dir_suffix}')
+else:
+    # Mixed analyses - use plain "corcmp" and warn
+    print('WARNING: Experiments use different analyses: '
+          f'{", ".join(set(data["ana_names"]))}')
+    print('Using standard directory name: corcmp/')
+    plotsdir = Path(f'{output_dir}/corcmp')
 plotsdir.mkdir(parents=True, exist_ok=True)
 plotsdir = f'{plotsdir}/'
-print(f'\nCreated plots directory: {plotsdir}')
+print(f'Created plots directory: {plotsdir}')
 
 # Make corcmp.rc file
 with open(f'{output_dir}/corcmp.rc', 'w') as f:
@@ -1784,40 +1923,38 @@ print('Created corcmp.rc')
 
 # ================== MAIN SCRIPT: PLOTTING ==================
 
+
 if process == 'plot': 
-    # Create plots by region
+    # Determine needed significance levels and corresponding t-critical values
+    sig_levs = [0.68, 0.90, 0.95, 0.99, 0.9999]
+    sig_levs_lev = sig_levs[:4] if nexps == 2 else [0.95]
+    sig_levs_zon = [0.95, 0.99, 0.9999] if cmp_pairs else []
+    sig_levs_ci = sorted(set(sig_levs_lev) | set(sig_levs_zon))
+    t_crit = {sig: stats.t.ppf((1 + sig) / 2, nfcsts - 1) 
+              for sig in sig_levs_ci}
     for reg in regions:
         # Initialize confidence interval dictionaries
-        conf_levels = [0.68, 0.90, 0.95, 0.99, 0.9999]
         cil, ciu = [{} for _ in range(2)]
-        for conf in conf_levels: 
-            cil[conf] = {}
-            ciu[conf] = {}
+        for coll in collections:
+            cil[coll] = {}
+            ciu[coll] = {}
+        # Calculate difference CIs for each ctl/mod pair and collection
+        for ctl, mod in ci_pairs:
             for coll in collections:
-                cil[conf][coll] = {}
-                ciu[conf][coll] = {}
-        # Calculate difference CIs for each ctl/mod pair and confidence level
-        for ctl, mod in comparison_pairs:
-            # Loop through confidence levels and collections
-            for conf in conf_levels:
-                for coll in collections:
-                    if len(fvars[coll]) > 0:
-                        (cil[conf][coll][(ctl, mod)], 
-                         ciu[conf][coll][(ctl, mod)]
-                         ) = calc_ci(data['raw'][coll][ctl][reg], 
-                                     data['raw'][coll][mod][reg], coll, conf)
-
+                if len(fvars[coll]) > 0:
+                    cil[coll][(ctl, mod)], ciu[coll][(ctl, mod)] = calc_ci(
+                        data['raw'][coll][ctl][reg], 
+                        data['raw'][coll][mod][reg], coll)
         # Calculate synoptic CIs for full experiment list
         cisynl, cisynu = [{} for _ in range(2)]
         for c, coll in enumerate(collections):
             cisynl[coll], cisynu[coll] = calc_syn_ci(
                 data['raw'][coll][0][reg],[data['raw'][coll][i][
-                    reg] for i in range(1, nexps)], coll, 0.95)
+                    reg] for i in range(1, nexps)], coll)
         # Plot each collection
-        lev_nms = {'de2d': 1000,'sl2d': 2000, 'ae2d': 1000}
         for coll in collections:
             if is_3d[coll]: plot_3d_coll(coll)
-            else: plot_2d_coll(coll, lev_nms[coll])
+            else: plot_2d_coll(coll, coll_map[coll]['lev_nm'])
         # Create RMS decomp montages: per lev_plot/var/reg [2x2]
         if plot_RMS_decomp:
             print('\nMaking rms decomp montages:')
@@ -1827,7 +1964,7 @@ if process == 'plot':
                 if is_3d[coll]: 
                     mont_levs = [f'{lev}' for lev in levs]
                 else:
-                    mont_levs = [f'{lev_nms[coll]}']
+                    mont_levs = [f'{coll_map[coll]["lev_nm"]}']
                 make_rmsd_montages(mont_nms, fvars[coll], title[coll], reg, 
                                    mont_levs)
                 plt.close('all')

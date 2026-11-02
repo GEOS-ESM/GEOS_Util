@@ -78,7 +78,7 @@ echo "Using SBATCH parameters: account = $account, partition = $partition, qos =
 
 # Set timing/memory parameters
 
-set corcmp_time  = 01:00:00
+set corcmp_time  = 01:30:00
 set montage_time = 00:30:00
 set corcmp_mem   = 4G
 set montage_mem  = 4G
@@ -124,14 +124,14 @@ foreach plot_type (corcmp syscmp)
     if ("$plot_type" == "corcmp" && ! $plots_corcmp) continue
     if ("$plot_type" == "syscmp" && ! $plots_syscmp) continue
     echo "Checking $plot_type files..."
-    
+
     # Set the experiment prefix based on plot type
     if ("$plot_type" == "corcmp") then
         set exp_prefix = "cor_exp"
     else
         set exp_prefix = "sys_exp"
     endif
-    
+
     # Find all experiment entries that exist and store their filepaths
     set found_numbers = ()
     set found_filepaths = ()
@@ -146,7 +146,7 @@ foreach plot_type (corcmp syscmp)
         else
             if ($?nonomatch) unset nonomatch
         endif
-        
+
         if ("$filepath" != "") then
             set found_numbers = ($found_numbers $i)
             set found_filepaths = ($found_filepaths "$filepath")
@@ -164,20 +164,20 @@ foreach plot_type (corcmp syscmp)
             endif
             @ expected++
         end
-        
+
         # Now check that the files actually exist - handle multiple files per experiment
         set filepath_idx = 1
         foreach num ($found_numbers)
             set filepath = "$found_filepaths[$filepath_idx]"
-            
+
             # Always split by comma first (handles both single files and lists)
             set file_specs = (`echo "$filepath" | sed 's/,/ /g'`)
             set all_files = ()
-            
+
             # Process each file specification (could be single file or wildcard)
             foreach spec ($file_specs)
                 set spec = `echo $spec | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//'`  # trim whitespace
-                
+
                 # Use safer wildcard expansion with nonomatch
                 set nonomatch_save = $?nonomatch
                 set nonomatch
@@ -188,21 +188,21 @@ foreach plot_type (corcmp syscmp)
                 else
                     if ($?nonomatch) unset nonomatch
                 endif
-                
+
                 # Check if expansion failed (pattern returned unchanged and file doesn't exist)
                 if ($#expanded_files == 1 && "$expanded_files[1]" == "$spec" && ! -f "$spec") then
                     set expanded_files = ()
                 endif
-                
+
                 if ($#expanded_files == 0) then
                     echo "Error: No files match pattern for ${exp_prefix}${num}: $spec"
                     exit 1
                 endif
-                
+
                 # Add each expanded file to all_files, checking for duplicates
                 foreach file ($expanded_files)
                     set is_duplicate = 0
-                    
+
                     # Only check for duplicates if all_files is not empty
                     if ($#all_files > 0) then
                         foreach existing_file ($all_files)
@@ -213,13 +213,13 @@ foreach plot_type (corcmp syscmp)
                             endif
                         end
                     endif
-                    
+
                     if ($is_duplicate == 0) then
                         set all_files = ($all_files $file)
                     endif
                 end
             end
-            
+
             # Check that all expanded files exist
             foreach file ($all_files)
                 if (! -f "$file") then
@@ -228,7 +228,7 @@ foreach plot_type (corcmp syscmp)
                 endif
                 echo "  Found: $file"
             end
-            
+
             @ filepath_idx++
         end
     endif
@@ -366,13 +366,81 @@ if ($plots_syscmp) then
     # Calculate individual jobs count for syscmp
     @ INDIV_JOBS_COUNT = $NUM_MODELS * ($NUM_3D_VARS + 1)
 
-    # Calculate comparison jobs count
-    if ( $NUM_MODELS > 1 ) then
-        @ COMP_JOBS_COUNT = ($NUM_MODELS - 1) * ($NUM_3D_VARS + 1)
+    # Parse and validate comparison_pairs from YAML
+    echo "Reading comparison_pairs configuration..."
+    set comparison_pairs_line = `grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*comparison_pairs:" | sed 's/#.*//'`
+    
+    # First check: if only one model, skip comparisons regardless of config
+    if ( $NUM_MODELS < 2 ) then
+        echo "  Only one model found - skipping all comparison plots"
+        set pairs_list = ()
+    else if ( "$comparison_pairs_line" == "" ) then
+        # Not specified - use default (all vs exp0)
+        set pairs_list = ()
+        @ i = 1
+        while ( $i < $NUM_MODELS )
+            set pairs_list = ($pairs_list "0,$i")
+            @ i++
+        end
+        echo "  comparison_pairs not specified, using default: all vs exp0"
+        foreach pair ($pairs_list)
+            echo "    [$pair]"
+        end
     else
-        @ COMP_JOBS_COUNT = 0
+        # Extract the value after "comparison_pairs:" and remove quotes
+        set pairs_value = `echo "$comparison_pairs_line" | sed 's/^[^:]*:[[:space:]]*//' | tr -d '"'`
+        
+        # Check if empty string
+        if ( "$pairs_value" == "" ) then
+            echo '  comparison_pairs: "" - no comparison plots will be created'
+            set pairs_list = ()
+        else
+            # Parse specified pairs from format "0,2; 1,2"
+            # Split by semicolon
+            set pairs_list = (`echo "$pairs_value" | tr ';' '\n'`)
+            echo "  comparison_pairs specified: $pairs_value"
+            echo "  Found ${#pairs_list} comparison pair(s):"
+            
+            # Validate each pair
+            foreach pair ($pairs_list)
+                # Remove spaces
+                set pair = `echo "$pair" | tr -d ' '`
+                
+                # Check format: should be "X,Y"
+                set comma_count = `echo "$pair" | tr -cd ',' | wc -c`
+                if ( $comma_count != 1 ) then
+                    echo "Error: Invalid comparison pair format: $pair"
+                    echo "  Each pair must have exactly 2 elements like 0,1"
+                    echo "  Expected format: \"0,2; 1,2\""
+                    exit 1
+                endif
+                
+                # Extract ctl and mod
+                set ctl = `echo $pair | cut -d',' -f1`
+                set mod = `echo $pair | cut -d',' -f2`
+                
+                # Validate indices are numbers and in range
+                if ( $ctl >= $NUM_MODELS || $mod >= $NUM_MODELS ) then
+                    echo "Error: Invalid comparison pair [$ctl,$mod]"
+                    echo "  Only $NUM_MODELS models available (valid indices: 0-`expr $NUM_MODELS - 1`)"
+                    exit 1
+                endif
+                
+                # Validate indices are different
+                if ( $ctl == $mod ) then
+                    echo "Error: Invalid comparison pair [$ctl,$mod]"
+                    echo "  Cannot compare an experiment to itself"
+                    exit 1
+                endif
+                
+                echo "    [$ctl,$mod]"
+            end
+        endif
     endif
-
+    
+    # Calculate comparison jobs count based on validated pairs
+    @ COMP_JOBS_COUNT = ${#pairs_list} * ($NUM_3D_VARS + 1)
+    
     echo "Creating syscmp job scripts for $NUM_MODELS models and $NUM_3D_VARS 3D variables (plus 2D variables)..."
     echo "Total individual jobs: $INDIV_JOBS_COUNT"
     echo "Total comparison jobs: $COMP_JOBS_COUNT"
@@ -406,14 +474,14 @@ EOF
     while ( $i < $NUM_MODELS )
         @ total_parts = $NUM_3D_VARS + 1
         @ part = 0
-        
+
         # Generate jobs for each part (0 through NUM_3D_VARS)
         while ( $part < $total_parts )
             echo 'if( $ID == '"`printf %3d $job_id` ) python -u ${plots_syscmp_path} --exp $i --config ${versioned_yaml} --process indiv --part $part" >> ${job_dir}/syscmp_indiv.j
             @ job_id++
             @ part++
         end
-        
+
         @ i++
     end
 
@@ -444,27 +512,26 @@ cd $work_dir
 EOF
 
         # Add the comparison plotting jobs
-        @ j = 1
-        @ comp_id = 1  # Start comp_id from 1 for the new array
-
-        while ( $j < $NUM_MODELS )
-            # Calculate the total number of parts needed for this model
+        @ comp_id = 1
+        
+        foreach pair ($pairs_list)
+            # Extract ctl and mod from pair (format: "0,1")
+            set ctl = `echo $pair | cut -d',' -f1`
+            set mod = `echo $pair | cut -d',' -f2`
+            
+            # Generate jobs for each part (0 through NUM_3D_VARS)
             @ total_parts = $NUM_3D_VARS + 1
             @ part = 0
-
-            # Generate jobs for each part (0 through NUM_3D_VARS)
             while ( $part < $total_parts )
-                echo 'if( $ID == '"`printf %3d $comp_id` ) python -u ${plots_syscmp_path} --exp $j --config ${versioned_yaml} --process comp --part $part" >> ${job_dir}/syscmp_comp.j
+                echo 'if( $ID == '"`printf %3d $comp_id` ) python -u ${plots_syscmp_path} --ctl $ctl --mod $mod --config ${versioned_yaml} --process comp --part $part" >> ${job_dir}/syscmp_comp.j
                 @ comp_id++
                 @ part++
             end
-
-            @ j++
         end
 
         echo 'Created '${job_dir}'/syscmp_comp.j with '$COMP_JOBS_COUNT' comparison jobs'
     else
-        echo 'Skipping comparison job script (only one model found)'
+        echo 'Skipping comparison job script (no comparison pairs to create)'
     endif
 
 endif
@@ -492,7 +559,7 @@ endif
 if ($plots_syscmp) then
     echo "Submitting syscmp individual jobs (syscmp_indiv.j)..."
     sbatch ${job_dir}/syscmp_indiv.j
-    
+
     if ( $COMP_JOBS_COUNT > 0 ) then
         echo "Submitting syscmp comparison jobs (syscmp_comp.j)..."
         sbatch ${job_dir}/syscmp_comp.j

@@ -90,34 +90,29 @@ endif
 echo "Using SBATCH parameters: account = $account, partition = $partition, qos = $qos"
 
 # Set timing/memory parameters
-
 set fcst_default_time = 01:00:00
-set fcst_slices_time  = 00:30:00
-set fcst_aerosol_time = 01:00:00
-set ana_default_time  = 01:00:00
-set ana_slices_time   = 00:30:00
-set ana_aerosol_time  = 00:30:00
-set clim_default_time = 00:15:00
-set clim_slices_time  = 00:10:00
-set clim_aerosol_time = 00:10:00
+set fcst_2d_time      = 01:00:00
+set ana_default_time  = 01:30:00
+set ana_2d_time       = 00:30:00
+set clim_default_time = 00:45:00
+set clim_2d_time      = 00:10:00
 set merge_time        = 00:10:00
 
-set default_mem  = 16G
-set slices_mem   = 8G
-set aerosol_mem  = 8G
-set merge_mem    = 32G
+set default_mem = 16G
+set mem_2d      = 8G
+set merge_mem   = 32G
 
-set regional_time  = 04:00:00
+set regional_time  = 03:00:00
 set global_time    = 02:00:00
-set reg_clean_time = 00:10:00
-set glo_clean_time = 01:30:00
+set reg_clean_time = 00:30:00
+set glo_clean_time = 02:00:00
 
 set regional_mem  = 8G
 set global_mem    = 64G
 set reg_clean_mem = 16G
 set glo_clean_mem = 256G
 
-set stats_chunk_size = 2
+set stats_chunk_size = 1
 
 # ============================================================================
 # STEP 1: DETERMINE NEEDS AND SETUP
@@ -147,7 +142,7 @@ echo "It is not recommended to process more than the equivalent of 31 init dates
 echo ""
 
 # STEP 1B: CHECK EXISTING DATASETS
-echo "Checking for existing stats files and datasets..."
+echo "Checking existing datasets..."
 
 # Run check-only mode
 python -u ${stats_py_path} --config ${versioned_yaml} --check_only --info_dir ${sts_dir}
@@ -165,6 +160,11 @@ set need_ana = `grep "ana_needed:" $status_file | cut -d: -f2`
 set need_clim = `grep "clim_needed:" $status_file | cut -d: -f2`
 set need_reg_stats = `grep "reg_stats_needed:" $status_file | cut -d: -f2`
 set need_glo_stats = `grep "glo_stats_needed:" $status_file | cut -d: -f2`
+
+if ("$need_reg_stats" == "false" && "$need_glo_stats" == "false") then
+    echo "All requested stats files found/validated. Nothing to do. Exiting."
+    exit 0
+endif
 
 echo "Dataset generation needed:"
 echo "  Forecast: $need_fcst"
@@ -226,25 +226,18 @@ foreach dataset_type (fcst ana clim)
         endif
     endif
 
-    # Check for slices template with content AND variables
-    grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_slices:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
-    if ($status == 0) then
-        # Check if 2d_vars_slices has variables (not empty [])
-        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_slices:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+    # Check for optional 2D collections
+    foreach coll (slices aerosol columns clouds)
+        # Check for template with content AND variables
+        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_${coll}:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
         if ($status == 0) then
-            set collections = ($collections slices)
+            # Check if 2d_vars_${coll} has variables (not empty [])
+            grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_${coll}:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
+            if ($status == 0) then
+                set collections = ($collections $coll)
+            endif
         endif
-    endif
-
-    # Check for aerosol template with content AND variables
-    grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*${dataset_type}_input_template_aerosol:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -q '[^[:space:]]'
-    if ($status == 0) then
-        # Check if 2d_vars_aerosol has variables (not empty [])
-        grep -v '^[[:space:]]*#' ${versioned_yaml} | grep "^[[:space:]]*2d_vars_aerosol:" | sed 's/.*://' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*\[\][[:space:]]*$' | grep -q '[A-Za-z]'
-        if ($status == 0) then
-            set collections = ($collections aerosol)
-        endif
-    endif
+    end
 
     # Store collections for this dataset type
     if ("$dataset_type" == "fcst") then
@@ -296,21 +289,22 @@ set run_regional = 0
 set run_global = 0
 
 if ("$stats_types" == "regional" || "$stats_types" == "both") then
-    if ("$need_reg_stats" == "true") set run_regional = 1
+    set run_regional = 1
 endif
 
 if ("$stats_types" == "global" || "$stats_types" == "both") then
-    if ("$need_glo_stats" == "true") set run_global = 1
+    set run_global = 1
 endif
 
-# Check for early exit if absolutely nothing is needed
-if ($need_fcst == "false" && $need_ana == "false" && $need_clim == "false" && $run_regional == 0 && $run_global == 0) then
-    echo "============================================================================"
-    echo "SUCCESS: All requested final stats files already exist and are valid."
-    echo "Bypassing dataset creation and halting pipeline - no jobs to submit."
-    echo "============================================================================"
-    exit 0
+# Override based on actual needs from status file
+if ("$need_reg_stats" == "false") then
+    set run_regional = 0
 endif
+
+if ("$need_glo_stats" == "false") then
+    set run_global = 0
+endif
+
 echo "Stats types to run: $stats_types (regional=$run_regional, global=$run_global)"
 echo ""
 
@@ -368,17 +362,11 @@ foreach dataset_type (fcst ana clim)
                     # Flag default for chunking
                     set fcst_chunk_collections = ($fcst_chunk_collections $collection)
                 else
-                    # Create regular jobs for non-default collections (e.g., slices and aerosol)
+                    # Create regular jobs for non-default collections (slices, aerosol, columns, clouds)
                     set job_script = "${job_dir}/stats_${dataset_type}_${collection}.j"
                     set fcst_job_scripts = ($fcst_job_scripts $job_script)
-                    # Select time and memory parameters accordingly
-                    if ("$collection" == "slices") then
-                        set coll_mem  = $slices_mem
-                        set coll_time = $fcst_slices_time
-                    else if ("$collection" == "aerosol") then
-                        set coll_mem  = $aerosol_mem
-                        set coll_time = $fcst_aerosol_time
-                    endif
+                    set coll_mem  = $mem_2d
+                    set coll_time = $fcst_2d_time
                     
                     cat << EOF > $job_script
 #!/bin/csh -e
@@ -412,30 +400,24 @@ EOF
             foreach collection ($collections)
                 set job_script = "${job_dir}/stats_${dataset_type}_${collection}.j"
                 
-                # Add to appropriate type array and select time and memory parameters accordingly
+                # Add to appropriate type array and select time/memory parameters
                 if ("$dataset_type" == "ana") then
                     set ana_job_scripts = ($ana_job_scripts $job_script)
                     if ("$collection" == "default") then
                         set coll_time = $ana_default_time
                         set coll_mem  = $default_mem
-                    else if ("$collection" == "slices") then
-                        set coll_time = $ana_slices_time
-                        set coll_mem  = $slices_mem
-                    else if ("$collection" == "aerosol") then
-                        set coll_time = $ana_aerosol_time
-                        set coll_mem  = $aerosol_mem
+                    else
+                        set coll_time = $ana_2d_time
+                        set coll_mem  = $mem_2d
                     endif
                 else if ("$dataset_type" == "clim") then
                     set clim_job_scripts = ($clim_job_scripts $job_script)
                     if ("$collection" == "default") then
                         set coll_time = $clim_default_time
                         set coll_mem  = $default_mem
-                    else if ("$collection" == "slices") then
-                        set coll_time = $clim_slices_time
-                        set coll_mem  = $slices_mem
-                    else if ("$collection" == "aerosol") then
-                        set coll_time = $clim_aerosol_time
-                        set coll_mem  = $aerosol_mem
+                    else
+                        set coll_time = $clim_2d_time
+                        set coll_mem  = $mem_2d
                     endif
                 endif
                 
