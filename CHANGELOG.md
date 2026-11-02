@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added plots for EDMF
+- Added new column and cloud variables and fixed bugs.
 
 - Added `ruff.toml` for `pre/remap_restart`
 - Added a GitHub Action (`python-lint.yml`) that runs `ruff` and `ty` on `pre/remap_restart`

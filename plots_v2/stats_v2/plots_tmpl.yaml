@@ -16,26 +16,30 @@ parameters:
   # optionally, override experiment fcst names for plot legends:
     fcst_exp0: EXP0
     fcst_exp1: EXP1
-  # additional comparison pairings for zonal plots and montages [ctrl, mod]
-    # additional_pairs: [[1, 2]]
+  # if selfver is true, analysis names will be overriden with "SELF":
+    selfver: False
+  # optionally, override comparison pairings for zonal plots and montages [ctrl, mod] (use "" for none), for example: "0,2; 1,2"; default is each exp compared to exp0 as control
+    # comparison_pairs: "0,2; 1,2"
 
   # plotting selections [comma-separated lists]
     levels: [1000, 975, 950, 925, 900, 850, 800, 750, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 10, 7, 5, 3, 1] # pressure levels hPa for which plots will be made
-    3d_vars_default: [H, Q, T, U, V] # chosen from among [H, Q, T, U, V]
-    2d_vars_default: [P, PS] # chosen from among [P, PS]
-    2d_vars_slices:  [Q2m, T2m, U10m, V10m, D2m] # chosen from among [Q2m, T2m, U10m, V10m, D2m]
-    2d_vars_aerosol: [AOD, PM25, LOGAOD] # chosen from among [AOD, PM25, LOGAOD]
-    regions: [GLO, NHE, TRO, SHE, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] -- ignored for syscmp
+    3d_vars_default: [H, Q, T, U, V]                  # chosen from among [H, Q, T, U, V]
+    2d_vars_default: [P, PS]                          # chosen from among [P, PS]
+    2d_vars_slices:  [Q2m, T2m, U10m, V10m, D2m]      # chosen from among [Q2m, T2m, U10m, V10m, D2m]
+    # 2d_vars_columns: [TQI, TQL, TQV]                  # chosen from among [TQI, TQL, TQV]
+    # 2d_vars_clouds:  [TCC, MUCAPE, MUCIN, CBH]        # chosen from among [TCC, MUCAPE, MUCIN, CBH]
+    # 2d_vars_aerosol: [AOD, PM25, LOGAOD]              # chosen from among [AOD, PM25, LOGAOD]
+    regions: [GLO, NHE, TRO, SHE, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] # chosen from among [GLO, NHE, TRO, SHE, NWQ, NEQ, SWQ, SEQ, NAM, EUR, NPO, SPO, XPO, CUS, LND, NHL, TRL, SHL] -- ignored for syscmp
 
   # plotting info
     season: TBD # e.g., DEC or DJF or JUL-AUG-SEP
     year: 2025 # e.g., 2024
     plot_dpi: 300
-    plot_RMS_decomp: TRUE # only used with corcmp: make RMS_RANDOM, _BIAS, _AMPLITUDE, and _PHASE plots (traditional RMS and ACORR plots are always made)
+    plot_RMS_decomp: True # only used with corcmp: make RMS_RANDOM, _BIAS, _AMPLITUDE, and _PHASE plots (traditional RMS and ACORR plots are always made)
     corcmp_colormap: bwr             # bwr, RdBu_r, or custom_spectral
     syscmp_colormap: custom_spectral # bwr, RdBu_r, or custom_spectral
 
-  # dates and times to plot (optional; will default to datetime specs in control model)
+  # dates and times to plot (optional; will default to datetime specs in control model for comparison plots and each model's specs for individual plots)
     fcst_length: 5 # days (whole numbers only)
     fcst_interval: 12 # hours (whole numbers only)
     fcst_spacing: 1 # days between forecasts beginning on start_date

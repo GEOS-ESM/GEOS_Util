@@ -64,23 +64,111 @@ c_cmap = [  # Custom spectral-like colormap
 ]
         
 # Variables metadata
-vars_title_map = {'H': 'hght', 'U': 'uwnd', 'V': 'vwnd', 'T': 'tmpu', 
-                  'Q': 'sphu', 'P': 'slp', 'PS': 'sfcp', 'Q2M': 'sphu', 
-                  'T2M': 'tmpu', 'U10M': 'uwnd', 'V10M': 'vwnd', 
-                  'D2M': 'dwpt', 'AOD': 'aod', 'LOGAOD': 'lnaod', 
-                  'PM25': 'pm25'}
-vars_long_map = {'H': 'Heights', 'U': 'U-Wind', 'V': 'V-Wind', 
-                 'T': 'Temperature', 'Q': 'Specific Humidity',
-                 'P': 'Sea-Level Pressure', 'PS': 'Surface Pressure',
-                 'Q2M': '2m Specific Humidity', 'T2M': '2m Temperature', 
-                 'U10M': '10m U-Wind', 'V10M': '10m V-Wind', 
-                 'D2M': '2m Dew Point', 
-                 'AOD': 'Total Aerosol Extinction AOT [550 nm]', 
-                 'LOGAOD': 'log(AOD+0.01)', 'PM25': 'PM2.5 Total Mass'}
-vars_unit_map = {'H': 'm', 'U': 'm/s', 'V': 'm/s', 'T': 'K', 'Q': 'g/kg', 
-                 'P': 'hPa', 'PS': 'hPa', 'Q2M': 'g/kg', 'T2M': 'K', 
-                 'U10M': 'm/s', 'V10M': 'm/s', 'D2M': 'K', 'AOD': '', 
-                 'LOGAOD': '', 'PM25': 'µg/m3'}
+vars_meta_map = {
+    'H':      {
+        'long': 'Heights', 
+       'title': 'hght',
+        'unit': 'm'},
+    'U':      {
+        'long': 'U-Wind', 
+       'title': 'uwnd',
+        'unit': 'm/s'},
+    'V':      {
+        'long': 'V-Wind', 
+       'title': 'vwnd',
+        'unit': 'm/s'},
+    'T':      {
+        'long': 'Temperature', 
+       'title': 'tmpu',
+        'unit': 'K'},
+    'Q':      {
+        'long': 'Specific Humidity', 
+       'title': 'sphu',
+        'unit': 'g/kg'},
+    'P':      {
+        'long': 'Sea-Level Pressure', 
+       'title': 'slp',
+        'unit': 'hPa'},
+    'PS':     {
+        'long': 'Surface Pressure', 
+       'title': 'sfcp',
+        'unit': 'hPa'},
+    'Q2M':    {
+        'long': '2m Specific Humidity', 
+       'title': 'sphu',
+        'unit': 'g/kg'},
+    'T2M':    {
+        'long': '2m Temperature', 
+       'title': 'tmpu',
+        'unit': 'K'},
+    'U10M':   {
+        'long': '10m U-Wind', 
+       'title': 'uwnd',
+        'unit': 'm/s'},
+    'V10M':   {
+        'long': '10m V-Wind', 
+       'title': 'vwnd',
+        'unit': 'm/s'},
+    'D2M':    {
+        'long': '2m Dew Point', 
+       'title': 'dwpt',
+        'unit': 'K'},
+    'TQI':    {
+        'long': 'Total Precipitable Ice Water', 
+       'title': 'tqi',
+        'unit': 'g/m2'},
+    'TQL':    {
+        'long': 'Total Precipitable Liquid Water', 
+       'title': 'tql',
+        'unit': 'g/m2'},
+    'TQV':    {
+        'long': 'Total Precipitable Water Vapor', 
+       'title': 'tqv',
+        'unit': 'kg/m2'},
+    'TCC':    {
+        'long': 'Total Cloud Cover', 
+       'title': 'tcc',
+        'unit': ''},
+    'MUCAPE': {
+        'long': 'Convective Available Potential Energy', 
+       'title': 'cape',
+        'unit': 'J/kg'},
+    'MUCIN':  {
+        'long': 'Convective Inhibition', 
+       'title': 'cin',
+        'unit': 'J/kg'},
+    'CBH':    {
+        'long': 'Cloud Base Height', 
+       'title': 'cbh',
+        'unit': 'm'},
+    'AOD':    {
+        'long': 'Total Aerosol Extinction AOT [550 nm]', 
+       'title': 'aod',
+        'unit': ''},
+    'LOGAOD': {
+        'long': 'log(AOD+0.01)', 
+       'title': 'lnaod',
+        'unit': ''},
+    'PM25':   {
+        'long': 'PM2.5 Total Mass', 
+       'title': 'pm25',
+        'unit': 'µg/m3'}}
+
+# Collection mappings
+coll_map = {
+    'de3d': {'param': '3d_vars_default', 'lev_nm': None, 'is_3d': True,  
+             'var_fmt': 'upper', 'level_label': 'Level: {lev} mb'},
+    'de2d': {'param': '2d_vars_default', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'level_label': 'Level: 1000 mb'},
+    'sl2d': {'param': '2d_vars_slices',  'lev_nm': 2000, 'is_3d': False, 
+             'var_fmt': 'mixed', 'level_label': 'Level: {var_lev}m'},
+    'co2d': {'param': '2d_vars_columns', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'level_label': ''},
+    'cl2d': {'param': '2d_vars_clouds',  'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'level_label': ''},
+    'ae2d': {'param': '2d_vars_aerosol', 'lev_nm': 1000, 'is_3d': False, 
+             'var_fmt': 'upper', 'level_label': ''}
+}
 
 # Lists of levels/styles for signiicance contours on comp plots
 # Lists can be empty but must be defined. Levels should be like 0.9 or 0.95.
@@ -128,15 +216,16 @@ def check_coastline_data():
     Script execution halted.''')
         sys.exit(1)
 
-def load_stats_data(yaml_file: str, exp: int, process: str, part: int
-                    ) -> Dict[str, Any]:
+def load_stats_data(yaml_file: str, exp_or_ctl: int, mod: int, process: str, 
+                    part: int) -> Dict[str, Any]:
     '''
     Load statistics data from files specified in the YAML configuration.
     Validates that all requested init dates, leads, variables, levels, and 
     statistics exist for each experiment file.
     Parameters (come directly from script arguments):
     - yaml_file: YAML config file (full path)
-    - exp: integer selecting model from config
+    - exp_or_ctl: integer selecting model from config (exp for indiv, ctl for comp)
+    - mod: integer selecting comparison model (only used for comp mode)
     - process: 'indiv' or 'comp' (individual or comparison plots)
     - part: integer selecting variable(s) (0: all 2d vars, 1+: each 3d var)
     
@@ -238,8 +327,8 @@ def load_stats_data(yaml_file: str, exp: int, process: str, part: int
         all_exp_file_lists.append(file_list)
         exp_idx += 1
     
-    # Filter experiments based on exp parameter and check for required specs
-    if exp is None:  # No exp parameter
+    # Filter experiments based on parameters and check for required specs
+    if exp_or_ctl is None and mod is None:  # No parameters
         # Process all experiments
         original_exp_indices = list(range(len(all_exp_file_lists)))
         exp_file_lists = all_exp_file_lists
@@ -249,12 +338,12 @@ def load_stats_data(yaml_file: str, exp: int, process: str, part: int
         if process == 'comp' and len(exp_file_lists) < 2:
             sys.exit('ERROR: At least exp0 and exp1 must be specified in '
                      'config for comp plots')
-    else:  # Specified exp parameter
+    else:  # Specified parameters
         # Filter to specific experiment(s)
         if process == 'indiv': 
-            exp_ids = [exp]
+            exp_ids = [exp_or_ctl]
         elif process == 'comp': 
-            exp_ids = [0, exp]
+            exp_ids = [exp_or_ctl, mod]
         exp_file_lists = []
         original_exp_indices = []
         for exp_id in exp_ids:
@@ -297,38 +386,38 @@ def load_stats_data(yaml_file: str, exp: int, process: str, part: int
         'ae2d': params.get('2d_vars_aerosol', [])
     }
     
+    # Initialize variable lists from config using coll_map
+    fvars = {coll: params.get(info['param'], []) 
+             for coll, info in coll_map.items()}
+    
     # Check that at least some variables are specified
     all_vars = []
     for var_list in fvars.values():
         all_vars.extend(var_list)
     if not all_vars:
         sys.exit('ERROR: No variables specified. At least one of '
-                 '3d_vars_default, 2d_vars_default, 2d_vars_slices or'
-                 '2d_vars_aerosol must be provided.')
+                 '3d_vars_default, 2d_vars_default, 2d_vars_slices, etc., '
+                 'must be provided.')
     
     # Determine which collections are non-empty and store them
     collections = [coll for coll, vars_list in fvars.items() if vars_list]
     # Create dictionary to track which collections are 3D
-    is_3d = {coll: (int(coll[-2]) == 3) for coll in collections}
+    is_3d = {coll: coll_map[coll]['is_3d'] for coll in collections}
     
-    # Format variable names based on collection prefix
+    # Format variable names based on collection map instructions
     for key in fvars:
-        if key.startswith('de') or key.startswith('ae'):
-            # For collections beginning with 'de' or 'ae', make all uppercase
+        fmt_type = coll_map[key]['var_fmt']
+        if fmt_type == 'upper':
             fvars[key] = [var.upper() for var in fvars[key]]
-        elif key.startswith('sl'):
-            # For 'sl', format as uppercase before numbers, lowercase after
+        elif fmt_type == 'mixed':
             formatted_vars = []
             for var in fvars[key]:
-                # Find the first digit in the variable name
                 match = re.search(r'\d', var)
                 if match:
                     digit_pos = match.start()
-                    # Uppercase before the digit, lowercase after
                     new_var = var[:digit_pos].upper() + var[digit_pos:].lower()
                     formatted_vars.append(new_var)
                 else:
-                    # If no digit found, return an error
                     sys.exit(f'ERROR: Variable "{var}" in collection "{key}" '
                              f'must contain at least one digit.')
             fvars[key] = formatted_vars
@@ -530,6 +619,10 @@ def load_stats_data(yaml_file: str, exp: int, process: str, part: int
         fcst_names.append(exp_fcst)
         ana_names.append(exp_ana)
         clim_names.append(exp_clim)
+    # Apply selfver override if requested
+    selfver = params.get('selfver', False)
+    if selfver:
+        ana_names = ['SELF'] * len(ana_names)
     
     # Extract timing and resolution parameters for compatibility checking
     exp_flex_configs = []
@@ -1009,6 +1102,7 @@ def load_stats_data(yaml_file: str, exp: int, process: str, part: int
     data['plot_dpi'] = plot_dpi
     data['out_suffix'] = out_suffix
     data['syscmp_colormap'] = params.get('syscmp_colormap', 'custom_spectral')
+    data['selfver'] = params.get('selfver', False)
     
     return data
 
@@ -1093,17 +1187,20 @@ def setup_plot_metadata(coll, v, lev, zonal, lead, plot_type):
     # Distinguish between level and zonal plots
     if zonal == 0:  # level
         pre = f'/stats_{title[coll][v]}_{suffix}_GLO_{lev}_{season}'
-        if is_3d[coll]:  # 3d vars
-            ending = f'{long[coll][v]}  Level: {lev} mb  Hour: {lead}'
-        else:  # 2d vars
-            if coll[:2] == 'de':
-                ending = f'{long[coll][v]}  Level: 1000 mb  Hour: {lead}'
-            elif coll[:2] == 'sl':
-                ending = (f'{long[coll][v]}  Level: {lev_levs[coll][v]}m  '
-                          f'Hour: {lead}')
-            elif coll[:2] == 'ae':
-                ending = (f'{long[coll][v]}  Level: surface  '
-                          f'Hour: {lead}')
+        # Determine the correct level label format
+        level_label = coll_map[coll]['level_label']
+        # Format the label if it contains string placeholders (like {lev})
+        if '{lev}' in level_label:
+            level_text = level_label.format(lev=lev)
+        elif '{var_lev}' in level_label:
+            level_text = level_label.format(var_lev=lev_levs[coll][v])
+        else:
+            level_text = level_label
+        # Build the ending string
+        if level_text:
+            ending = f'{long[coll][v]}  {level_text}  Hour: {lead}'
+        else:
+            ending = f'{long[coll][v]}  Hour: {lead}'
         gs = gridspec.GridSpec(5, ncols, figure=fig, hspace=0.0, 
                                height_ratios=[1, 0.05, 0.12, 1, 0.05])
     else:  # zonal
@@ -1154,10 +1251,8 @@ def generate_masks(base_raw, comp_raw, v, sig_levs, dim):
             numerator, np.nan), where=denominator!=0)
         # Create mask for each significance level
         for s, sig in enumerate(sig_levs):
-            # Calculate t-critical value (two-sided)
-            t_crit = stats.t.ppf((1 + sig) / 2, nfcsts - 1)
             # Create significance mask (where |t| >= t_crit)
-            sig_masks[s] = np.abs(t_values) >= t_crit
+            sig_masks[s] = np.abs(t_values) >= t_crit[sig]
         masks[i] = sig_masks
     return masks
 
@@ -1328,7 +1423,7 @@ def plot_indiv(m, model, l, lead, v, var, z, lev, zonal, coll, cmax, cmin,
     base_glo = data['glo'][coll][m][l]
     
     # Setup plot metadata
-    u = vars_unit_map.get(var.upper())
+    u = vars_meta_map.get(var.upper(), {}).get('unit')
     pre, ending, gs, fig = setup_plot_metadata(coll, v, lev, zonal, lead, 
                                                'indiv')
 
@@ -1479,7 +1574,7 @@ def plot_comp(m, model, l, lead, v, var, z, lev, zonal, coll, MEmax, Amax,
     comp_glo = data['glo'][coll][0][l]
     
     # Setup plot metadata  
-    u = vars_unit_map.get(var.upper())
+    u = vars_meta_map.get(var.upper(), {}).get('unit')
     pre, ending, gs, fig = setup_plot_metadata(coll, v, lev, zonal, lead, 
                                                'comp')
     
@@ -1747,15 +1842,14 @@ def create_2d_plots(plot_type, m, model, leads, v, var, coll):
     '''
     
     plot_func = globals()[f'plot_{plot_type}']  # plot_indiv() or plot_comp()
-    lev_nms = {'de2d': 1000,'sl2d': 2000, 'ae2d': 1000}
     # Make level plots and create animations, looping through leads
     for n, lead in enumerate(leads):
         if plot_type == 'indiv':
             if n == 0:  # Get limits once
                 limits = get_limits_indiv(data['avg'][coll][m][-1], f'{v},:,:')
             # Establish arguments for plot_indiv()
-            args = [m, model, n, lead, v, var, 0, lev_nms[coll], 0, coll, 
-                    *limits]
+            args = [m, model, n, lead, v, var, 0, coll_map[coll]['lev_nm'], 0, 
+                    coll, *limits]
         else:  # comp
             if n == 0:  # Get limits once
                 limits = get_limits_comp(data['avg'][coll][m][-1, :], 
@@ -1766,8 +1860,8 @@ def create_2d_plots(plot_type, m, model, leads, v, var, coll):
                                    data['raw'][coll][0][:, n, :], 
                                    v, sig_levs, 2)
             # Establish arguments for plot_comp()
-            args = [m, model, n, lead, v, var, 0, lev_nms[coll], 0, coll, 
-                    *limits, masks]
+            args = [m, model, n, lead, v, var, 0, coll_map[coll]['lev_nm'], 0, 
+                    coll, *limits, masks]
         # Create plot
         pre = plot_func(*args)
         plt.close('all')
@@ -1790,15 +1884,32 @@ parser.add_argument('--config', default='plots.yaml',
 parser.add_argument('--process', required=True,choices=['indiv', 'comp'], 
                     help='indiv or comp')
 parser.add_argument('--part', required=False, help='split up plots by var')
-parser.add_argument('--exp', required=False, help='index of experiment')
+parser.add_argument('--exp', required=False, type=int, 
+                    help='experiment index (for indiv mode)')
+parser.add_argument('--ctl', required=False, type=int, 
+                    help='control experiment index (for comp mode)')
+parser.add_argument('--mod', required=False, type=int, 
+                    help='comparison experiment index (for comp mode)')
 args = parser.parse_args()
+
 config = args.config
-exp = int(args.exp) if args.exp is not None else None
+exp = args.exp
+ctl = args.ctl
+mod = args.mod
 process = args.process
 part = int(args.part) if args.part is not None else None
 
+# Validation
+if process == 'indiv' and exp is None:
+    sys.exit('ERROR: --exp required for indiv mode')
+if process == 'comp' and (ctl is None or mod is None):
+    sys.exit('ERROR: --ctl and --mod required for comp mode')
+
 # Load and validate data
-data = load_stats_data(config, exp, process, part)
+if process == 'indiv':
+    data = load_stats_data(config, exp, None, process, part)
+elif process == 'comp':
+    data = load_stats_data(config, ctl, mod, process, part)
 
 # Collect Date/time info
 date_nms = data['date_nms']
@@ -1835,8 +1946,10 @@ for m in range(nexps):
 # Collect variable metadata
 (title, long, unit, lev_levs) = [{} for _ in range(4)]
 for coll in collections:
-    title[coll] = [vars_title_map.get(var.upper()) for var in fvars[coll]]
-    long[coll] = [vars_long_map.get(var.upper()) for var in fvars[coll]]
+    title[coll] = [vars_meta_map.get(var.upper(), {}).get('title') 
+                   for var in fvars[coll]]
+    long[coll]  = [vars_meta_map.get(var.upper(), {}).get('long') 
+                   for var in fvars[coll]]
     if coll[:2] == 'sl': 
         lev_levs[coll] = [re.search(r'\d+', s).group() for s in fvars[coll]]
 
@@ -1912,6 +2025,8 @@ if process == 'indiv':
  
 # Make comparison plots
 if process == 'comp':
+    # T-critical values for each significance level
+    t_crit = {sig: stats.t.ppf((1 + sig) / 2, nfcsts - 1) for sig in sig_levs}
     for m in range(nexps)[1:]:
         for coll in collections:
             if is_3d[coll]: # 3d vars
