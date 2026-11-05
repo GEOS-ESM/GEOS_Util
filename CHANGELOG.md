@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated plot seasons in plot.rc
 
 ### Fixed
+- Fixed stats_v2/stats.py to handle infinite values (like D2m over Antarctica)
 
 ### Removed
 
