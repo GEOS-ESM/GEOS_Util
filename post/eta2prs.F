@@ -652,7 +652,7 @@ c ----------------
       subroutine eta2prs ( dp,ps,ptop,q2d,q3d,name2d,titl2d,unit2d,mame3d,titl3d,unit3d,n2d,n3d,undef,
      .                     im,jm,lm,plev,mlev,im_out,jm_out,latin,lonin,lonbeg,nymd,nhms,ninc,
      .                     id,hdf,create,filename,quad,edges,ftype,underg )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use GEOS_UtilsMod, only: GEOS_Qsat
       implicit none
       include 'alias.com'
@@ -1793,7 +1793,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 C    
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  i,j,l,im,jm,lm,flag
 
@@ -1996,7 +1996,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
 C***********************************************************************        
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer im,jm,lm
 

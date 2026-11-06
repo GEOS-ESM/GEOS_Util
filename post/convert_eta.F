@@ -417,7 +417,7 @@ c ------------------------------------------------
      .                     id,create,filename,imo,jmo,lmo,grid,
      .                     psname,dpname,uname,vname,tname,qname,ozname,phisname,topo,Ldtoa)
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
 
@@ -2817,7 +2817,7 @@ c *****   allows for different topographies between Analysis and Model.     ****
 c *****                                                                     *****
 c *******************************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,lm1,lm2,nt
