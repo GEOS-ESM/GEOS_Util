@@ -1,5 +1,5 @@
       program  main
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
 
@@ -533,7 +533,7 @@ c            ----------------------------------------------
       subroutine get_ana_data  ( id,ps,u,v,t,q,h,phis,
      .                           im,jm,lm,nymd,nhms,
      .                           imana,jmana,lmana,undef,plevs )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  id,im,jm,lm,nymd,nhms,rc
       integer  imana,jmana,lmana
@@ -1361,7 +1361,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,lm1,lm2,nq
@@ -1467,8 +1467,8 @@ c -------------------------------
       subroutine put_fveta ( ps,dp,u,v,thv,q,phis,
      .                       im,jm,lm,nq,nymd,nhms,tag,ext,lonbeg,
      .                       timeinc,precision )
-      use MAPL_BaseMod, only: MAPL_UNDEF      
-      use MAPL_ConstantsMod
+      use MAPL_Constants, only: MAPL_UNDEF
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit  none
 
