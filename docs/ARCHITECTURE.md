@@ -1,15 +1,31 @@
 # GEOS_Util architecture
 
 **Audience:** coding agents and developers working on the GEOS_Util repository.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GEOS_Util` @ `5b87f93` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GEOS_Util` @ `0fbacb5` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
+> **Build status on this line:** not built, not ported. On
+> `release/MAPL-v3`, `../CMakeLists.txt` (GMAO_Shared) builds only `GMAO_mpeu`,
+> `GMAO_hermes` (light) and `GEOS_Shared`, under the comment "not yet ported to
+> MAPL3"; `GEOS_Util` appears only in a commented-out list. The code in this
+> repository is the MAPL2 code, kept for a later port. The code differs from
+> the MAPL2 line in two ways only: (1) the MAPL constants import (`use
+> MAPL_Constants` instead of `use MAPL_ConstantsMod`, and `MAPL_UNDEF` from
+> `MAPL_Constants` instead of `MAPL_BaseMod`) in `post/*.F*` and
+> `plots/zonal.f`; (2) in `post/rs_hinterp.F`, gFTL iteration over `vars` uses
+> `ftn_begin()`/`ftn_end()`/`iter%first()` instead of
+> `begin()`/`end()`/`iter%key()`. The claims in these documents are otherwise
+> the MAPL2-line claims, and describe the sources as they are, not a built
+> result.
+> `GMAO_gfio` is named only in commented-out blocks of `../CMakeLists.txt`,
+> and `GMAO_transf` only in its commented-out list; neither is built on this line. `post` links `GMAO_gfio_r4`, so `post` could not be built here as is.
+
 ## Placement
-Nested repository of GMAO_Shared (parent: `../../docs/ARCHITECTURE.md`,
-`../../AGENTS.md`); the GEOSgcm fixture lists it in its
+Nested repository of GMAO_Shared. On this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch. Parent: `../../docs/ARCHITECTURE.md`,
+`../../AGENTS.md`; the GEOSgcm fixture lists it in its
 repository table (`../../../../../docs/ARCHITECTURE.md`).
 GEOS_Util is a set of tools, not gridded components.
 
@@ -23,6 +39,7 @@ GEOS_Util is a set of tools, not gridded components.
 | `coupled_diagnostics/` | Python ocean/sea-ice diagnostics (two generations) | [coupled_diagnostics](../coupled_diagnostics/ARCHITECTURE.md) |
 
 ## Build structure
+This describes the build files as written (not reached on this line).
 `CMakeLists.txt` sets `alldirs` to `pre plots post coupled_diagnostics` and
 calls `esma_add_subdirectories`. `plots_v2` is absent from the list.
 
@@ -34,6 +51,8 @@ calls `esma_add_subdirectories`. `plots_v2` is absent from the list.
 | `coupled_diagnostics/` | Nothing | All subdirectories under `<prefix>/coupled_diagnostics` |
 
 ### Dependencies on other repositories
+(Not reached on this line.)
+
 | Directory | Links |
 |---|---|
 | `post/` | `MAPL`, `GEOS_Shared`, GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture), GMAO_gfio (`../../GMAO_gfio/ARCHITECTURE.md` in the fixture) (`GMAO_gfio_r4`; `_r8` for `convert_aerosols.x`), `ESMF::ESMF` for `stats.x` |
