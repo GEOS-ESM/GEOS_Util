@@ -25,6 +25,8 @@ from scipy.stats import t
 HOST = 'edb1'
 USER = 'gmao_web'
 DB = {'fc_ops':'gmao_stats', 'fc_exp':'semper'}
+# Placeholder values used to represent missing/NaN statistics
+NAN_PLACEHOLDERS = (1.7e+38, 9.9999999E+14)
 
 ##############################################################################
 # Database Connection Class (moved from connection.py)
@@ -94,10 +96,6 @@ class Connection(object):
 
 # Define variable fields and display names/mapping
 
-std_fields = ['h', 'p', 'q', 't', 'u', 'v']
-sfc_fields = ['t2m', 'q2m', 'd2m', 'u10m', 'v10m']
-aer_fields = ['aod', 'logaod', 'pm25']
-
 std_var_display = {'h': 'Geopotential\nHeight', 'p': 'SLP',
                    'q': 'Specific\nHumidity', 't': 'Temperature',
                    'u': 'U-Wind', 'v': 'V-Wind'}
@@ -105,6 +103,14 @@ sfc_var_display = {'t2m': 'T2m', 'q2m': 'Q2m', 'd2m': 'Dewpoint 2m',
                    'u10m': 'U10m', 'v10m': 'V10m'}
 aer_var_display = {'aod': 'total AOD', 'logaod': 'log(AOD+0.01)', 
                    'pm25': 'PM2.5'}
+slv_var_display = {'tqv': 'Column Vapor', 'tql': 'Column Liquid',
+                   'tqi': 'Column Ice', 'tcc': 'Cloud Cover'}
+
+# Field lists derived from display dict keys (order preserved, Python 3.7+)
+std_fields = list(std_var_display.keys())
+sfc_fields = list(sfc_var_display.keys())
+aer_fields = list(aer_var_display.keys())
+slv_fields = list(slv_var_display.keys())
 
 sfc_to_std = {'t2m': 't', 'q2m': 'q', 'd2m': 'q', 'u10m': 'u', 'v10m': 'v'}
 
@@ -193,9 +199,14 @@ def get_with_fallback(connection, expver, verify, **kwargs):
     # Return results (empty or not)
     return results
 
+def has_valid_data(data):
+    '''Check if query results contain at least one usable (non-placeholder) 
+    value'''
+    return any(value not in NAN_PLACEHOLDERS for _, value in data)
+
 def validate_data_availability(exp, cntrl, args_exp, args_cntrl, ver_exp, 
                                ver_cntrl, dates, domains, stats, skip_surface, 
-                               skip_aerosol):
+                               skip_aerosol, skip_slv):
     '''Validate all data availability'''
     
     # Define datasets to check
@@ -209,7 +220,7 @@ def validate_data_availability(exp, cntrl, args_exp, args_cntrl, ver_exp,
             data = get_with_fallback(
                 connection, exp_name, verify, variable='h', level=500,
                 domain_name=domains[0], statistic=stats[0], date=date)
-            if not data:
+            if not has_valid_data(data):
                 print(f'ERROR: Missing H@500 data for {dataset_type} '
                       f'{exp_name} with verify {verify} on date {date}')
                 sys.exit(2)
@@ -232,12 +243,12 @@ def validate_data_availability(exp, cntrl, args_exp, args_cntrl, ver_exp,
                 datasets[0][0], datasets[0][1], datasets[0][2], variable=var, 
                 level=level, domain_name=domains[0], statistic=stats[0], 
                 date=first_date)
-            if exp_data: exp_levels.append(level)
+            if has_valid_data(exp_data): exp_levels.append(level)
             cntrl_data = get_with_fallback(
                 datasets[1][0], datasets[1][1], datasets[1][2], variable=var, 
                 level=level, domain_name=domains[0], statistic=stats[0], 
                 date=first_date)
-            if cntrl_data: cntrl_levels.append(level)
+            if has_valid_data(cntrl_data): cntrl_levels.append(level)
         
         # Find available levels as intersection and report missing levels
         avail_levs[var] = sorted(list(set(exp_levels) & set(cntrl_levels)))
@@ -274,7 +285,7 @@ def validate_data_availability(exp, cntrl, args_exp, args_cntrl, ver_exp,
                     connection, exp_name, verify, variable=var, level=0,
                     domain_name=domains[0], statistic=stats[0], 
                     date=first_date)
-                if data:
+                if has_valid_data(data):
                     dataset_has_var.append(True)
                 else:
                     dataset_has_var.append(False)
@@ -290,18 +301,24 @@ def validate_data_availability(exp, cntrl, args_exp, args_cntrl, ver_exp,
                       f'{" and ".join(missing_in)}')
         return available_vars
     
-    # Check surface and aerosol variables
+    # Check surface, single-level, and aerosol variables
     avail_sfc_vars = []
+    avail_slv_vars = []
     avail_aer_vars = []
     if not skip_surface:
         print('Checking surface variable availability (first date only)...')
         avail_sfc_vars = check_lev0_var_availability(sfc_fields, 'Surface')
+    if not skip_slv:
+        print('Checking single-level variable availability (first date '
+              'only)...')
+        avail_slv_vars = check_lev0_var_availability(slv_fields, 'SLV')
     if not skip_aerosol:
         print('Checking aerosol variable availability (first date only)...')
         avail_aer_vars = check_lev0_var_availability(aer_fields, 'Aerosol')
     
-    # Return lists of available surface and aerosol variables and levels
-    return avail_sfc_vars, avail_aer_vars, avail_levs
+    # Return lists of available surface, single-level, and aerosol
+    # variables, and levels
+    return avail_sfc_vars, avail_slv_vars, avail_aer_vars, avail_levs
 
 def create_scorecard(card, args_exp, args_cntrl, ver_exp, ver_cntrl, bdate, 
                      edate, bdate_code, edate_code, n_fcst, land_only):
@@ -403,16 +420,20 @@ def make_card(region, data):
     sfc_to_std = metadata.get('surface_vars', {})
     sfc_vars_to_show = [var for var in sfc_vars if var in data_without_meta]
     
+    # Single-level variables display info
+    slv_vars = metadata.get('slv_vars', {})
+    slv_vars_to_show = [var for var in slv_vars if var in data_without_meta]
+    
     # Aerosol variables display info
     aer_vars = metadata.get('aerosol_vars', {})
     aer_vars_to_show = [var for var in aer_vars if var in data_without_meta]
 
     # Create figure and gridspec
     g_cols = 11  # Number of columns
-    card = plt.figure(figsize=(6, 10), constrained_layout=False)
-    max_possible_rows = 50 # 6 header rows + 8 rows for each of 5 reg vars 
+    card = plt.figure(figsize=(6, 10.8), constrained_layout=False)
+    max_possible_rows = 54 # 6 header rows + 8 rows for each of 5 reg vars 
                            # (7 levels plus P or corresponding sfc vars) 
-                           # + D2m row + 3 aer var rows
+                           # + D2m row + 4 slv var rows + 3 aer var rows
     gs = gridspec.GridSpec(ncols=g_cols, nrows=max_possible_rows, figure=card)
     all_axes = {}
 
@@ -472,6 +493,19 @@ def make_card(region, data):
             all_axes[f'{sfc_var}_rms'] = card.add_subplot(
                 gs[sfc_row:sfc_row+1, 8:11])
         current_row += var_height
+        
+    # Create axes for single-level variables
+    for slv_var in slv_vars_to_show:
+        # Create variable name column level, COR, and RMS axes
+        all_axes[f'{slv_var}_name'] = card.add_subplot(
+            gs[current_row:current_row+1, 0:3])
+        all_axes[f'{slv_var}_level'] = card.add_subplot(
+            gs[current_row:current_row+1, 3:5])
+        all_axes[f'{slv_var}_cor'] = card.add_subplot(
+            gs[current_row:current_row+1, 5:8])
+        all_axes[f'{slv_var}_rms'] = card.add_subplot(
+            gs[current_row:current_row+1, 8:11])
+        current_row += 1
         
     # Create axes for aerosol variables
     for aer_var in aer_vars_to_show:
@@ -541,8 +575,9 @@ def make_card(region, data):
                     transform=all_axes[f'{std_var}_level_{level}'].transAxes, 
                     fontweight='normal', fontsize=10)    
     
-    # Set surface and aerosol variable names and levels
+    # Set surface, single-level, and aerosol variable names and levels
     for var_list, display_dict in [(sfc_vars_to_show, sfc_var_display), 
+                                   (slv_vars_to_show, slv_var_display),
                                    (aer_vars_to_show, aer_var_display)]:
         for var in var_list:
             # Set the variable name
@@ -579,10 +614,22 @@ def make_card(region, data):
                 all_axes[f'{std_var}_level_{level}'].set_facecolor(
                     (61.0/255, 97.0/255, 212.0/255, color_intensity))    
 
-    # Set surface and aerosol level background colors (darkest; same as SLP)
-    for var in sfc_vars_to_show + aer_vars_to_show:
+    # Set surface level background colors (darkest; same as SLP)
+    for var in sfc_vars_to_show:
         all_axes[f'{var}_level'].set_facecolor(
             (61.0/255, 97.0/255, 212.0/255, 0.7))
+    
+    # Set single-level and aerosol block background colors. These blocks
+    # alternate starting from white, since V10m (directly above) is dark:
+    # if both blocks are shown, single-level is white and aerosol is dark;
+    # if only one is shown, it is white.
+    optional_blocks = [block for block in
+                       [slv_vars_to_show, aer_vars_to_show] if block]
+    for block_index, block_vars in enumerate(optional_blocks):
+        alpha = 0.7 if block_index % 2 else 0.0
+        for var in block_vars:
+            all_axes[f'{var}_level'].set_facecolor(
+                (61.0/255, 97.0/255, 212.0/255, alpha))
     
     # Display symbols for standard variables
     for std_var in std_fields:
@@ -605,8 +652,8 @@ def make_card(region, data):
                                     transform=ax.transAxes, 
                                     fontweight='normal', fontsize=10)    
 
-    # Display symbols for surface and aerosol variables
-    for var in sfc_vars_to_show + aer_vars_to_show:
+    # Display symbols for surface, single-level, and aerosol variables
+    for var in sfc_vars_to_show + slv_vars_to_show + aer_vars_to_show:
         for test in ['cor', 'rms']:
             if (0 in data_without_meta[var] 
                 and test in data_without_meta[var][0]):
@@ -717,11 +764,11 @@ def add_regional_images(land_only, f_name):
 
     # Define size and positional parameters (in pixels)
     card_w  = 500  # card width
-    card_h  = 950  # card height
+    card_h  = 1026  # card height
     start_x = 25  # x-position of left edge of left-most card
     del_x   = 495   # horizontal delta between left edges of cards
     y_pos   = 135   # y-postion of top of cards
-    box     = (350, 500, -50, -50)  # left, upper, right_offset, bottom_offset
+    box     = (350, 540, -50, -54)  # left, upper, right_offset, bottom_offset
 
     # Setup regions
     card_suffix = '_card_cli_temp.png'
@@ -751,7 +798,7 @@ def add_regional_images(land_only, f_name):
 	
     # Crop off bottom whitespace of full image
     width, height = bg.size
-    cropped_height = height - 200  
+    cropped_height = height - 131
     bg = bg.crop((0, 0, width, cropped_height))
     
     # Save and close scorecard
@@ -763,8 +810,8 @@ def add_regional_images(land_only, f_name):
     
 def generate_scorecard_data(
         db_exp, args_exp, exp, args_cntrl, cntrl, ver_exp, ver_cntrl, 
-        bdate, edate, avail_sfc_vars, avail_aer_vars, avail_levs, 
-        land_only):
+        bdate, edate, avail_sfc_vars, avail_slv_vars, avail_aer_vars, 
+        avail_levs, land_only):
     '''Perform calculations and process data for the scorecards'''
     
     # Domains and stats
@@ -794,6 +841,12 @@ def generate_scorecard_data(
     for sfc_var, is_available in available_sfc.items():
         if is_available:
             iter_levels.append((sfc_var, 0))
+    
+    # Add available single-level variables
+    available_slv = {var: True for var in avail_slv_vars}
+    for slv_var, is_available in available_slv.items():
+        if is_available:
+            iter_levels.append((slv_var, 0))
     
     # Add available aerosol variables  
     available_aer = {var: True for var in avail_aer_vars}
@@ -860,9 +913,12 @@ def generate_scorecard_data(
         for l, lev in enumerate([.9999, .99, .95]):
             
             # Perform statistical significance testing (mask missing values)
-            diffs, lower, upper = score.significance(
-                np.ma.masked_values(c_data, 1.7e+38),
-                np.ma.masked_values(e_data, 1.7e+38), lev)
+            c_masked = np.ma.asarray(c_data, dtype=float)
+            e_masked = np.ma.asarray(e_data, dtype=float)
+            for placeholder in NAN_PLACEHOLDERS:
+                c_masked = np.ma.masked_values(c_masked, placeholder)
+                e_masked = np.ma.masked_values(e_masked, placeholder)
+            diffs, lower, upper = score.significance(c_masked, e_masked, lev)
                 
             # Create dictionary structure 
             if domain not in card: 
@@ -919,6 +975,12 @@ def generate_scorecard_data(
                 related_std_var = sfc_to_std.get(sfc_var)
                 sfc_vars_available[sfc_var] = related_std_var
         
+        # Store available single-level variables
+        slv_vars_available = {}
+        for slv_var, is_available in available_slv.items():
+            if is_available and slv_var in card[domain]:
+                slv_vars_available[slv_var] = True
+        
         # Store available aerosol variables
         aer_vars_available = {}
         for aer_var, is_available in available_aer.items():
@@ -927,6 +989,7 @@ def generate_scorecard_data(
         
         # Store all availability info
         card[domain]['_meta']['surface_vars'] = sfc_vars_available
+        card[domain]['_meta']['slv_vars'] = slv_vars_available
         card[domain]['_meta']['aerosol_vars'] = aer_vars_available
         card[domain]['_meta']['avail_levs'] = avail_levs
 
@@ -1062,6 +1125,9 @@ def parse_args(args=None):
         '--skip_surface', action='store_true',
         help='skip surface variables (t2m, q2m, d2m, u10m, v10m)')
     parser.add_argument(
+        '--skip_slv', action='store_true',
+        help='skip single-level variables (tqv, tql, tqi, tcc)')
+    parser.add_argument(
         '--skip_aerosol', action='store_true', 
         help='skip aerosol variables (aod, logaod, pm25)')
     parser.add_argument('--exp_display', 
@@ -1129,14 +1195,17 @@ def main(arguments=[]):
     stats = ['cor', 'rms']
     
     # Validate data availability
-    avail_sfc_vars, avail_aer_vars, avail_levs = validate_data_availability(
-        exp, cntrl, exp_name, cntrl_name, ver_exp, ver_cntrl, dates, domains, 
-        stats, args.skip_surface, args.skip_aerosol)
+    avail_sfc_vars, avail_slv_vars, avail_aer_vars, avail_levs = (
+        validate_data_availability(
+            exp, cntrl, exp_name, cntrl_name, ver_exp, ver_cntrl, dates, 
+            domains, stats, args.skip_surface, args.skip_aerosol, 
+            args.skip_slv))
     
     # Generate scorecard data
     card = generate_scorecard_data(
         db_exp, exp_name, exp, cntrl_name, cntrl, ver_exp, ver_cntrl, 
-        bdate, edate, avail_sfc_vars, avail_aer_vars, avail_levs, args.land)
+        bdate, edate, avail_sfc_vars, avail_slv_vars, avail_aer_vars, 
+        avail_levs, args.land)
     
     # Update display names if arguments were provided
     exp_display       = (args.exp_display if args.exp_display 
