@@ -6,9 +6,56 @@
 #
 #
 import os
-import ruamel.yaml
+import sys
+
 import questionary
-from remap_utils import *
+import ruamel.yaml
+
+from remap_utils import ( #isort: skip
+  GEOS_SITE,
+  MERRA2_RST_BASE,
+  catch_model,
+  choices_bc_base,
+  choices_bc_ops,
+  choices_bc_all,
+  choices_ogrid_cpld,
+  choices_ogrid_data,
+  choices_omodel,
+  choices_res_SG001,
+  choices_res_SG002,
+  choices_stretch,
+  data_ocean_default,
+  fvcore_info,
+  get_account,
+  get_command_line_from_answers,
+  get_config_from_answers,
+  get_default_bc_base,
+  get_landdir,
+  get_zoom,
+  init_geosit,
+  init_merra2,
+  message_account,
+  message_agrid_in,
+  message_agrid_new,
+  message_bc_base_in,
+  message_bc_base_new,
+  message_bc_ops_in,
+  message_bc_ops_new,
+  message_bc_all_in,
+  message_bc_all_new,
+  message_expid,
+  message_ogrid_in,
+  message_out_dir,
+  message_partition,
+  message_qos,
+  message_reservation,
+  message_stretch,
+  remove_ogrid_comment,
+  show_wemin_default,
+  validate_agrid,
+  wemin_default,
+)
+
 
 def echo_level(x):
   if x["output:air:nlevel"] != str(x.get("input:air:nlevel")) :
@@ -27,7 +74,7 @@ def echo_bcs(x,opt):
   x[opt+':shared:bc_base']  = base
   land_dir  = get_landdir(base, bcv, agrid=agrid, ogrid=ogrid, omodel=omodel, stretch=stretch)
   if  not os.path.isdir(land_dir):
-     exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
+     sys.exit("cannot find grid subdirectory for agrid=" + agrid + " and ogrid=" + ogrid + " under " + base+'/'+bcv+'/land/')
   print("\n Land BCs for " + opt + " restarts: " + land_dir )
   return False
 
@@ -40,23 +87,15 @@ def default_partition(x):
 def validate_merra2_time(text):
    if len(text) == 10 :
       hh = text[8:]
-      if hh in ['03','09','15','21']:
-         return True
-      else:
-         return False
-   else:
-     return False
+      return hh in ['03','09','15','21']
+   return False
 
 def validate_geosit_time(text):
    if len(text) == 10 :
       dd = text[6:8]
       hh = text[8:]
-      if dd in ['14','28'] and hh in ['21']:
-         return True
-      else:
-         return False
-   else:
-     return False
+      return dd in ['14','28'] and hh in ['21']
+   return False
 
 def SITE_MERRA2(x):
   if GEOS_SITE == "NAS":
@@ -282,9 +321,9 @@ def ask_questions():
         {
             "type": "select",
             "name": "input:shared:bc_version",
-            "message": message_bc_other_in,
-            "choices": choices_bc_other,
-            "when": lambda x: x["input:shared:bc_version"] == 'Other',
+            "message": message_bc_all_in,
+            "choices": choices_bc_all,
+            "when": lambda x: x["input:shared:bc_version"] == 'All',
         },
 
         {
@@ -292,7 +331,7 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": message_bc_ops_new,
             "choices": choices_bc_ops,
-            "default": "v12",
+            "default": "v14",
             "when": lambda x: x.get("input:shared:MERRA-2") or x.get("input:shared:GEOS-IT"),
         },
 
@@ -301,24 +340,16 @@ def ask_questions():
             "name": "output:shared:bc_version",
             "message": "Select BCs version for new restarts:\n",
             "choices": choices_bc_ops,
-            "default": "v12",
+            "default": "v14",
             "when": lambda x: not x.get("input:shared:MERRA-2") and not x.get("input:shared:GEOS-IT"),
         },
 
         {
             "type": "select",
             "name": "output:shared:bc_version",
-            "message": message_bc_other_new,
-            "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] not in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
-        },
-
-        {
-            "type": "select",
-            "name": "output:shared:bc_version",
-            "message": "\nSelect BCs version for new restarts:\n",
-            "choices": choices_bc_other,
-            "when": lambda x:  x["output:shared:bc_version"] == 'Other' and x["input:shared:bc_version"] in ['v11', 'v12', 'v13', 'v14', 'v15_BETA'],
+            "message": message_bc_all_new,
+            "choices": choices_bc_all,
+            "when": lambda x: x.get("output:shared:bc_version") == "All",
         },
 
         {
@@ -378,7 +409,7 @@ def ask_questions():
         {
             "type": "confirm",
             "name": "output:air:agcm_import_rst",
-            "message": f'''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
+            "message": '''Remap agcm_import_rst (a.k.a. IAU) file needed for REPLAY runs?
                         (NOTE: Preferred method is to regenerate IAU file,
                                but IF requested, remapping will be performed.)''',
             "default": False,
