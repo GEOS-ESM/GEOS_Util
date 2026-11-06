@@ -24,7 +24,7 @@ elsewhere; paths inside this repository do not change.
 > and `GMAO_transf` only in its commented-out list; neither is built on this line. `post` links `GMAO_gfio_r4`, so `post` could not be built here as is.
 
 ## Placement
-Nested repository of GMAO_Shared. On this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch. Parent: `../../docs/ARCHITECTURE.md`,
+Nested repository of GMAO_Shared. Parent: `../../docs/ARCHITECTURE.md`,
 `../../AGENTS.md`; the GEOSgcm fixture lists it in its
 repository table (`../../../../../docs/ARCHITECTURE.md`).
 GEOS_Util is a set of tools, not gridded components.

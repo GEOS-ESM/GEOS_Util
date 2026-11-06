@@ -20,8 +20,6 @@ increments). It is not a gridded component.
 
 `GMAO_gfio` is named only in commented-out blocks of `../CMakeLists.txt`, and `GMAO_transf` only in its commented-out list; neither is built on this line. `post` links `GMAO_gfio_r4`, so `post` could not be built here as is. This section describes the build files as written (not reached on this line).
 
-On this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch.
-
 From `CMakeLists.txt` (parent repository GMAO_Shared; library docs: GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture), GMAO_gfio (`../../GMAO_gfio/ARCHITECTURE.md` in the fixture), GMAO_transf (`../../GMAO_transf/ARCHITECTURE.md` in the fixture)):
 
 - Libraries: `${this}` (`dynamics_lattice_module.F mpi_util.F mymalloc.F PWSSSP.F windfix.F timer.F gmap.F alias.F fft.F`; depends on `GEOS_Shared MAPL GMAO_hermes`) and `post_nompi` (`dynamics_lattice_module.F mpi_util.F mymalloc.F timer.F`; depends on `MAPL GMAO_hermes`). Both are compiled with `-Dmpi`. `flat2hdf.x` and `stats.x` link `post_nompi` (which depends on GMAO_hermes).

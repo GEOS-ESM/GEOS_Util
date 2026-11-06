@@ -13,8 +13,7 @@ resolution or boundary-condition version, generating SST/sea-ice (ocean
 external data) files, and generating a MERRA-2 ozone pchem file. They are
 tools, not gridded components. Library dependencies are described in
 `../../GMAO_hermes/ARCHITECTURE.md` and the other GMAO_Shared documents
-(`../../docs/ARCHITECTURE.md`). On this line the parent's documents are not
-written yet; the MAPL2-line versions are on its `develop` branch.
+(`../../docs/ARCHITECTURE.md`).
 
 ## 2. Build and install
 `pre/CMakeLists.txt` calls `esma_add_subdirectories` on three directories:
