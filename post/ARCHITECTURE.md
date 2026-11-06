@@ -18,7 +18,7 @@ increments). It is not a gridded component.
 
 ## 2. Build and install
 
-From `CMakeLists.txt` (parent repository GMAO_Shared; library docs: [GMAO_hermes](../../GMAO_hermes/ARCHITECTURE.md), [GMAO_gfio](../../GMAO_gfio/ARCHITECTURE.md), [GMAO_transf](../../GMAO_transf/ARCHITECTURE.md)):
+From `CMakeLists.txt` (parent repository GMAO_Shared; library docs: GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture), GMAO_gfio (`../../GMAO_gfio/ARCHITECTURE.md` in the fixture), GMAO_transf (`../../GMAO_transf/ARCHITECTURE.md` in the fixture)):
 
 - Libraries: `${this}` (`dynamics_lattice_module.F mpi_util.F mymalloc.F PWSSSP.F windfix.F timer.F gmap.F alias.F fft.F`; depends on `GEOS_Shared MAPL GMAO_hermes`) and `post_nompi` (`dynamics_lattice_module.F mpi_util.F mymalloc.F timer.F`; depends on `MAPL GMAO_hermes`). Both are compiled with `-Dmpi`. `flat2hdf.x` and `stats.x` link `post_nompi` (which depends on GMAO_hermes).
 - Executables from `<name>.F` with `DEFINITIONS mpi`: `makeiau hdf2rs gg2fv eta2prs eta2rst rs_hinterp convert_eta rs2hdf AI_prs2eta ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta merra2scm rsg3_vinterp era5_prs2eta` (each `.x`).

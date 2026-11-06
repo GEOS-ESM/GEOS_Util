@@ -16,10 +16,10 @@ templates in `src/Applications/@GEOSgcm_App` (`gcm_run.j`, `gcm_post.j`, ...) ca
 (the installation directory) and substitutes it.
 
 ## Place in the GEOSgcm fixture
-Nested repository of GMAO_Shared: [`../AGENTS.md`](../AGENTS.md) and
-[`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md). Fixture:
-[`../../../../AGENTS.md`](../../../../AGENTS.md) and
-[`../../../../docs/ARCHITECTURE.md`](../../../../docs/ARCHITECTURE.md).
+Nested repository of GMAO_Shared: `../AGENTS.md` and
+`../docs/ARCHITECTURE.md`. Fixture:
+`../../../../AGENTS.md` and
+`../../../../docs/ARCHITECTURE.md`.
 
 ## Documents
 | Document | Content |

@@ -8,9 +8,9 @@ Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 ## Placement
-Nested repository of GMAO_Shared (parent: [`../../docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md),
-[`../../AGENTS.md`](../../AGENTS.md)); the GEOSgcm fixture lists it in its
-repository table ([`../../../../../docs/ARCHITECTURE.md`](../../../../../docs/ARCHITECTURE.md)).
+Nested repository of GMAO_Shared (parent: `../../docs/ARCHITECTURE.md`,
+`../../AGENTS.md`); the GEOSgcm fixture lists it in its
+repository table (`../../../../../docs/ARCHITECTURE.md`).
 GEOS_Util is a set of tools, not gridded components.
 
 ## Directory map
@@ -36,15 +36,15 @@ calls `esma_add_subdirectories`. `plots_v2` is absent from the list.
 ### Dependencies on other repositories
 | Directory | Links |
 |---|---|
-| `post/` | `MAPL`, `GEOS_Shared`, [GMAO_hermes](../../GMAO_hermes/ARCHITECTURE.md), [GMAO_gfio](../../GMAO_gfio/ARCHITECTURE.md) (`GMAO_gfio_r4`; `_r8` for `convert_aerosols.x`), `ESMF::ESMF` for `stats.x` |
+| `post/` | `MAPL`, `GEOS_Shared`, GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture), GMAO_gfio (`../../GMAO_gfio/ARCHITECTURE.md` in the fixture) (`GMAO_gfio_r4`; `_r8` for `convert_aerosols.x`), `ESMF::ESMF` for `stats.x` |
 | `pre/` | `MAPL`, `NetCDF::NetCDF_Fortran`; optional f2py modules |
 | `plots/` | `MAPL` (`zonal`) |
 | `coupled_diagnostics/` | Python modules only; no library link |
 
-No GEOS_Util CMake target links [GMAO_transf](../../GMAO_transf/ARCHITECTURE.md)
+No GEOS_Util CMake target links GMAO_transf (`../../GMAO_transf/ARCHITECTURE.md` in the fixture)
 (grep of the `CMakeLists.txt` files); `post/` carries its own copies of some
 utility modules (see traps). Other library documents:
-[GMAO_etc](../../GMAO_etc/ARCHITECTURE.md), [GMAO_mpeu](../../GMAO_mpeu/ARCHITECTURE.md).
+GMAO_etc (`../../GMAO_etc/ARCHITECTURE.md` in the fixture), GMAO_mpeu (`../../GMAO_mpeu/ARCHITECTURE.md` in the fixture).
 
 ## Which job script calls which tool
 All paths in `src/Applications` unless stated.
@@ -66,12 +66,12 @@ SST/ice tools, or `pchem_species_generation` (*Unverified:* use by GEOSadas or b
 
 ## Cross-directory and cross-repository traps
 - Two `tick` programs: `post/tick` (perl, installed to `post/`) and the GMAO_etc
-  one installed to `bin/` ([GMAO_etc](../../GMAO_etc/ARCHITECTURE.md)). Callers use both
+  one installed to `bin/` (GMAO_etc (`../../GMAO_etc/ARCHITECTURE.md` in the fixture)). Callers use both
   `$GEOSUTIL/post/tick` and `$GEOSBIN/tick`. See [post](../post/ARCHITECTURE.md).
 - `post/` has `dynamics_lattice_module.F`, `mpi_util.F`, `mymalloc.F`, `timer.F`,
   also present in GMAO_transf as separate sources in separate libraries
-  ([GMAO_transf](../../GMAO_transf/ARCHITECTURE.md)). `pre/prepare_ocnExtData` has its own `hermes_m_tick.f90`
-  next to GMAO_hermes ([GMAO_hermes](../../GMAO_hermes/ARCHITECTURE.md)).
+  (GMAO_transf (`../../GMAO_transf/ARCHITECTURE.md` in the fixture)). `pre/prepare_ocnExtData` has its own `hermes_m_tick.f90`
+  next to GMAO_hermes (GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture)).
 - `gcmpost.script` calls `time_ave_nompi.x`, which no CMake target builds.
 - `plots_v2` scripts expect `$GEOSUTIL` but are not installed
   ([plots_v2](../plots_v2/ARCHITECTURE.md)).
@@ -95,5 +95,5 @@ SST/ice tools, or `pchem_species_generation` (*Unverified:* use by GEOSadas or b
 - [`coupled_diagnostics/`](../coupled_diagnostics/ARCHITECTURE.md)
 
 ## Parent
-GMAO_Shared: [`../../docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md),
-[`../../AGENTS.md`](../../AGENTS.md).
+GMAO_Shared: `../../docs/ARCHITECTURE.md`,
+`../../AGENTS.md`.

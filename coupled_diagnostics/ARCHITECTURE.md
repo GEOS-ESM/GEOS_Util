@@ -7,7 +7,7 @@
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
-This repository: [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md). Parent repository GMAO_Shared: [`../../docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+This repository: [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md). Parent repository GMAO_Shared: `../../docs/ARCHITECTURE.md`.
 
 ## 1. Purpose
 

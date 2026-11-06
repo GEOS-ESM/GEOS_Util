@@ -96,7 +96,7 @@ user end date: `compute_time_ave.sh` (SLURM time-averaging),
   `SaltIntSplitter.x` in GEOSgcm_GridComp
   (`GEOSsurface_GridComp/Utils/mk_restarts/CMakeLists.txt`, `exe_srcs`);
   `dyn2dyn.x` in GMAO_hermes (`../../GMAO_hermes/CMakeLists.txt`, target
-  `dyn2dyn.x`; [document](../../GMAO_hermes/ARCHITECTURE.md)); `mkdrstdate.x`
+  `dyn2dyn.x`; document (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture)); `mkdrstdate.x`
   in GMAO_etc (`../../GMAO_etc/CMakeLists.txt`, target `mkdrstdate.x`).
 - `prepare_ocnExtData` and `NSIDC-OSTIA_SST-ICE_blend` executables and scripts:
   no caller found in the GEOSgcm fixture (`src` grep for `SST_ICE_bcs`,
