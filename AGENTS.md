@@ -30,7 +30,7 @@ templates in `src/Applications/@GEOSgcm_App` (`gcm_run.j`, `gcm_post.j`, ...) ca
 (the installation directory) and substitutes it.
 
 ## Place in the GEOSgcm fixture
-Nested repository of GMAO_Shared. On this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch. Parent: `../AGENTS.md` and
+Nested repository of GMAO_Shared. Parent: `../AGENTS.md` and
 `../docs/ARCHITECTURE.md`. Fixture:
 `../../../../AGENTS.md` and
 `../../../../docs/ARCHITECTURE.md`.
