@@ -1,5 +1,5 @@
       program  main
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta 
       implicit none
 
@@ -693,7 +693,7 @@ c            ----------------------------------------------
       subroutine get_ana_data  ( id,ps,u,v,t,q,h,phis,
      .                           im,jm,lm,nymd,nhms,lonbeg,
      .                           imana,jmana,lmana,undef,plevs )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  id,im,jm,lm,nymd,nhms,rc
       integer  imana,jmana,lmana
@@ -1323,7 +1323,7 @@ C***********************************************************************
 C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 C***********************************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       use m_set_eta, only: set_eta
       implicit none
       integer  im,jm,nq,lm1,lm2
@@ -4434,7 +4434,7 @@ C ****    JM ...... NUMBER OF LATITUDINAL  POINTS      ****
 C ****                                                 ****
 C *********************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  im,jm
 
