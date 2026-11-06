@@ -1,9 +1,9 @@
 # plots_v2/ architecture
 
 **Audience:** coding agents and developers working on the GEOS_Util forecast-statistics scripts (`plots_v2/`).
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GEOS_Util` @ `5b87f93` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `plots_v2/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GEOS_Util` @ `0fbacb5` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `plots_v2/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
@@ -14,7 +14,7 @@ elsewhere; paths inside this repository do not change.
 ## Build and install
 
 - No `CMakeLists.txt` in `plots_v2/` or `stats_v2/`.
-- The top `GEOS_Util/CMakeLists.txt` sets `alldirs` to `pre plots post coupled_diagnostics` (lines 1-6) and calls `esma_add_subdirectories`. `plots_v2` is not listed, so **nothing here is built or installed** by the fixture build.
+- The top `GEOS_Util/CMakeLists.txt` sets `alldirs` to `pre plots post coupled_diagnostics` and calls `esma_add_subdirectories`. `plots_v2` is not listed, so **nothing here is built or installed** by the fixture build.
 - Scripts are used in place from the source tree (`$GEOSUTIL/plots_v2/stats_v2/...`) or copied to a working directory.
 
 ## Contents (`stats_v2/`)

@@ -1,9 +1,9 @@
 # plots: GrADS/csh plotting and verification package
 
 **Audience:** coding agents and developers working on the GEOS_Util GrADS plotting package (`plots/`).
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GEOS_Util` @ `5b87f93` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `plots/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GEOS_Util` @ `0fbacb5` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `plots/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 

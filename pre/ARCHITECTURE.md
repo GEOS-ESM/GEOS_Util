@@ -1,9 +1,9 @@
 # pre/ (GEOS_Util pre-processing tools)
 
 **Audience:** coding agents and developers working on the GEOS_Util pre-processing tools (`pre/`).
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GEOS_Util` @ `5b87f93` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `pre/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GEOS_Util` @ `0fbacb5` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `pre/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
@@ -13,7 +13,8 @@ resolution or boundary-condition version, generating SST/sea-ice (ocean
 external data) files, and generating a MERRA-2 ozone pchem file. They are
 tools, not gridded components. Library dependencies are described in
 `../../GMAO_hermes/ARCHITECTURE.md` and the other GMAO_Shared documents
-(`../../docs/ARCHITECTURE.md`).
+(`../../docs/ARCHITECTURE.md`). On this line the parent's documents are not
+written yet; the MAPL2-line versions are on its `develop` branch.
 
 ## 2. Build and install
 `pre/CMakeLists.txt` calls `esma_add_subdirectories` on three directories:

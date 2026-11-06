@@ -1,9 +1,9 @@
 # post/ — post-processing, restart and initial-condition tools
 
 **Audience:** coding agents and developers working on the GEOS_Util post-processing, restart and initial-condition tools (`post/`).
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GEOS_Util` @ `5b87f93` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `post/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GEOS_Util` @ `0fbacb5` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GEOS_Util`, checked out at `src/Shared/@GMAO_Shared/@GEOS_Util`; this directory is `post/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
@@ -18,10 +18,14 @@ increments). It is not a gridded component.
 
 ## 2. Build and install
 
+`GMAO_gfio` is named only in commented-out blocks of `../CMakeLists.txt`, and `GMAO_transf` only in its commented-out list; neither is built on this line. `post` links `GMAO_gfio_r4`, so `post` could not be built here as is. This section describes the build files as written (not reached on this line).
+
+On this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch.
+
 From `CMakeLists.txt` (parent repository GMAO_Shared; library docs: GMAO_hermes (`../../GMAO_hermes/ARCHITECTURE.md` in the fixture), GMAO_gfio (`../../GMAO_gfio/ARCHITECTURE.md` in the fixture), GMAO_transf (`../../GMAO_transf/ARCHITECTURE.md` in the fixture)):
 
 - Libraries: `${this}` (`dynamics_lattice_module.F mpi_util.F mymalloc.F PWSSSP.F windfix.F timer.F gmap.F alias.F fft.F`; depends on `GEOS_Shared MAPL GMAO_hermes`) and `post_nompi` (`dynamics_lattice_module.F mpi_util.F mymalloc.F timer.F`; depends on `MAPL GMAO_hermes`). Both are compiled with `-Dmpi`. `flat2hdf.x` and `stats.x` link `post_nompi` (which depends on GMAO_hermes).
-- Executables from `<name>.F` with `DEFINITIONS mpi`: `makeiau hdf2rs gg2fv eta2prs eta2rst rs_hinterp convert_eta rs2hdf AI_prs2eta ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta merra2scm rsg3_vinterp era5_prs2eta` (each `.x`).
+- Executables from `<name>.F` with `DEFINITIONS mpi`: `makeiau hdf2rs gg2fv eta2prs eta2rst rs_hinterp convert_eta rs2hdf AI_prs2eta ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta merra2scm rsg3_vinterp era5_prs2eta` (each `.x`). On this line `rs_hinterp.F` iterates the gFTL `vars` container with `ftn_begin()`/`ftn_end()`/`iter%first()` (MAPL2 line: `begin()`/`end()`/`iter%key()`).
 - Other executables: `binarytile.x`, `rs_numtiles.x`, `rs_vinterp.x`, `rs_vinterp_scm.x` (`.F90`); `time_ave.x` and `Create_TEM_Diag.x` (share the `tem_lib` OBJECT library built from `TEM.F90`); `stats.x` (`stats.F90`, links `post_nompi`, big-endian flag); `convert_aerosols.x` (links `GMAO_gfio_r8 MAPL_cfio_r8`); `3CH_mpi.x` (`3CH.F90`).
 - Link dependencies: most programs link `GMAO_gfio_r4` (`GMAO_gfio_r8` for `convert_aerosols.x`), `MAPL`, and `GMAO_hermes`.
 - Installed to `bin/`: `ecmwf2geos.pl`, `g5fcst_stats.pl`, `ncep2geos.pl`, `ec2grd.csh`, plus the executables above.
