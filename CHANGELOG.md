@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated plot seasons in plot.rc
 
 ### Fixed
+- Updated CMakeLists for plots_v2 directory under install
 
 ### Removed
 
