@@ -402,7 +402,7 @@ c ------------------------
 
       subroutine make_psi( u0,v0,th0,w0,upvp0,upwp0,vpthp0,p0,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv,undef,
      .                     upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,vstar,veddy,wstar,wmean,weddy,p,delp)
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer j,k,L,jm,lm
       real undef,dphi,a,g,pi,phi,pk0,H
@@ -778,7 +778,7 @@ c -------------------------------------------------------------------
       end
 
       subroutine stream ( v0,p0,jm,lm,s,undef )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer j,k,L,jm,lm
       real pi,dp,a,g,const,phi,undef
@@ -854,7 +854,7 @@ c -------------------------------------------------------------------
       return
       end
       subroutine residual ( v0,vpthp0,th0,w0,p0,jm,lm,res,vstar,wstar,wmean,weddy,undef )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer j,k,L,jm,lm
       real pi,dp,a,g,H,ps,ts,rhos,z,phi,undef
@@ -1089,7 +1089,7 @@ c -------------
       end
 
       subroutine make_w ( v0,p0,jm,lm,w,undef )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer j,k,L,jm,lm
        
@@ -1259,7 +1259,7 @@ c -------------------------------------------------------------------
     ! ************************************************************************************************************
 
       subroutine compute_d_dphi( q,jm,lm,undef,dqdphi )
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer j,L,jm,lm
       real      q(jm,lm)
@@ -1304,7 +1304,7 @@ c -------------------------------------------------------------------
     ! ************************************************************************************************************
 
       subroutine map1_cubic( km, pe1, q1, kn, pe2, q2, jm, Method, undef)
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
 
       real,    intent(in) :: undef

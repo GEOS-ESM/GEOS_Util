@@ -367,7 +367,7 @@ C ****    JM ...... NUMBER OF LATITUDINAL  POINTS      ****
 C ****                                                 ****
 C *********************************************************
 
-      use MAPL_ConstantsMod
+      use MAPL_Constants
       implicit none
       integer  im,jm
 

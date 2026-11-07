@@ -2436,7 +2436,7 @@
 
       subroutine read_anal( nymd,nhms,fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,ana_files,num_ana_files,undef )
       use stats_mod
-      use MAPL_ConstantsMod 
+      use MAPL_Constants 
       implicit none
       type(fields) :: fields_2d(n2d)
       type(fields) :: fields_3d(n3d)
