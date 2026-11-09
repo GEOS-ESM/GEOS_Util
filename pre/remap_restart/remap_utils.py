@@ -3,17 +3,18 @@
 # remap_restarts package:
 #   remap_utils.py contains utility functions and definitions
 #
-import os
-import subprocess
-import ruamel.yaml
-from collections import OrderedDict
-import shutil
-import questionary
 import glob
-import shlex
-import netCDF4 as nc
-import linecache
+import os
 import re
+import shlex
+import shutil
+import subprocess
+import sys
+from collections import OrderedDict
+
+import netCDF4 as nc
+import questionary
+import ruamel.yaml
 
 # shared global variables
 
@@ -30,11 +31,9 @@ choices_bc_base  =[ "NCCS/Discover : /discover/nobackup/projects/gmao/bcs_shared
 # define "choices", "message" strings, and "validate" lists that are used multiple times
 #   (and related definitions, even if they are used just once).
 
-choices_bc_ops     = ['v12', 'NL3', 'ICA', 'Other']
+choices_bc_ops     = ['v14', 'NL3', 'ICA', 'GM4', 'All']
 
-choices_bc_other   = ['v11', 'v12', 'v13', 'v14', 'v15_BETA']
-
-choices_bc_cmd     = ['NL3', 'ICA', 'GM4', 'v11', 'v12', 'v13','v14', 'v15_BETA']
+choices_bc_all     = ['v14', 'v13', 'v12', 'v11', 'NL3', 'ICA', 'GM4']
 
 choices_omodel     = ['data', 'MOM5', 'MOM6']
 
@@ -53,7 +52,7 @@ GEOSIT_RST_BASE = '/discover/nobackup/projects/gmao/geos-it/dao_ops/archive/'
 # the following needs more cleanup; e.g., first define list of SGxxx names and parameters (i.e., STRETCH_GRID),
 #   then assemble message_stretch and choices_stretch using this definition
 
-message_stretch =  f'''\n
+message_stretch =  '''\n
  Select parameters of stretched cubed-sphere grid for new restarts:
 
  Name   Stretch_Factor  Focus_Lat  Focus_Lon
@@ -81,34 +80,35 @@ message_expid       = "Enter experiment ID for new restarts:  (Added as prefix t
 message_bc_base_in  = "BCs base directory for input restarts: \n"
 message_bc_base_new = "BCs base directory for new restarts: \n"
 
-message_bc_ops     = f'''\n
+message_bc_ops     = '''\n
  BCs version      | ADAS tags            | GCM tags typically used with BCs version
  -----------------|----------------------|-----------------------------------------
- v12: v12         | future               | 12.0             ... present
- NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.7
+ GM4: Ganymed-4   | 5_12_4 (MERRA-2)     | MERRA-2
  ICA: Icarus      | 5_17_0 ... 5_24_0_p1 | Icarus, Jason    ... 10.18
+ NL3: Icarus-NLv3 | 5_25_1 ... present   | Icarus_NL, 10.19 ... 11.9
+ v14: v14         | future               | 11.11            ... present
  ----------------------------------------------------------------------------------
- Other: Additional choices used in model or DAS development.\n\n'''
+ All: All choices, incl. older BCs used only in model or DAS development.\n\n'''
 
 message_bc_ops_in  = ("Select boundary conditions (BCs) version of input restarts:\n" + message_bc_ops)
 message_bc_ops_new = ("Select boundary conditions (BCs) version for new restarts:\n"  + message_bc_ops)
 
-# v12 used to be in the "other" section but is now the default, but we preserve this information
-# in a comment since v14 will probably soon be the new default and we'll want to move v12 back to "other".
-#v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
 
-message_bc_other   = f'''\n
+message_bc_all   = '''\n
+ BCs version | GCM tags                   | Description
+ ------------|----------------------------|------------------------------------------------------------
+ GM4         | MERRA-2                    | See Mahanama et al. 2015, GMAO TM Vol. 39 (Section 1: "last decade")
+ ICA         | Icarus, Jason    ... 10.18 | As in GM4 but with minor bug fixes
+ NL3         | Icarus_NL, 10.19 ... 11.9  | See Mahanama et al. 2015, GMAO TM Vol. 39 (Section 1: "updates")
+ v11         | testing only               | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2
+ v12         | 11.10                      | NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix
+ v13         | testing only               | As in v12 + mean land elevation fix + MOM6 v2 (OM4) bathymetry
+ v14         | 11.11 ...                  | As in v13 but with GPM 2.0 peat   \n\n'''
 
-          v11:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2\n
-          v12:     NL3 + JPL veg height + PEATMAP + MODIS snow alb v2 + Argentina peatland fix \n
-          v13:     As in v12 + mean land elevation fix + MOM6 v2 (OM4) ocean-seaice bathymetry \n
-          v14:     As in v13 but with GPM 2.0 peat \n
-     v15_BETA:     As in v14 but with v2 topography for atmosphere \n\n'''     
+message_bc_all_in  = ("Select BCs version of input restarts:\n" + message_bc_all)
+message_bc_all_new = ("Select BCs version for new restarts:\n"  + message_bc_all)
 
-message_bc_other_in  = ("Select BCs version of input restarts:\n" + message_bc_other)
-message_bc_other_new = ("Select BCs version for new restarts:\n"  + message_bc_other)
-
-message_agrid_list = f'''
+message_agrid_list = '''
  C12   C180    C1120
  C24   C360    C1440
  C48   C720    C2880
@@ -166,7 +166,7 @@ def init_merra2(x):
 
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
   if yyyymm < 197901 :
-     exit("Error. MERRA-2 data < 1979 not available\n")
+     sys.exit("Error. MERRA-2 data < 1979 not available\n")
   elif (yyyymm < 199201):
      expid = "d5124_m2_jan79"
   elif (yyyymm < 200106):
@@ -202,7 +202,7 @@ def init_geosit(x):
   yyyymm = int(x.get('input:shared:yyyymmddhh')[0:6])
 
   if yyyymm < 199701:
-      exit("Error. GEOS-IT data < 1997 not available\n")
+      sys.exit("Error. GEOS-IT data < 1997 not available\n")
   elif 199612 <= yyyymm <= 200712:
       expid = "d5294_geosit_jan98"
   elif 200801 <= yyyymm < 201801:
@@ -210,7 +210,7 @@ def init_geosit(x):
   elif yyyymm >= 201801:
       expid = "d5294_geosit_jan18"  # For any date starting from 201801 and beyond
   else:
-      exit("Error. GEOS-IT data not available for this date\n")
+      sys.exit("Error. GEOS-IT data not available for this date\n")
 
   x['input:shared:expid']        = expid
   x['input:shared:omodel']       = 'data'
@@ -228,7 +228,7 @@ def init_geosit(x):
 
 
 def fvcore_info(x):
-  if 'input:shared:agrid' in x.keys():
+  if 'input:shared:agrid' in x:
      return True
   rst_dir = x.get('input:shared:rst_dir')
   if not rst_dir : return False
@@ -258,7 +258,7 @@ def fvcore_info(x):
   ymdh = fvrst.variables['time'].units.split('since ')[1].split(":")[0].replace('-','').replace(' ', "")
   if (lat != lon*6) :
       print("(N_lon, N_lat) = ", lon, lat)
-      exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+      sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
   x['input:shared:yyyymmddhh'] = ymdh
   x['input:shared:agrid'] = "C"+str(lon)
   print("The input fvcore restart has atm grid: " + "C" + str(lon) + '\n')
@@ -283,12 +283,10 @@ def fvcore_info(x):
      elif f_ == STRETCH_GRID['SG002'] :
        x['input:shared:stretch'] = 'SG002'
      else:
-       exit("This stretched cubed-sphere grid is not supported ")
+       sys.exit("This stretched cubed-sphere grid is not supported ")
   return True
 
 def catch_model(x):
-  ymdh = x['input:shared:yyyymmddhh']
-  time = ymdh[0:8] + '_'+ymdh[8:10]
   rst_dir = x.get('input:shared:rst_dir')
   if not rst_dir : return False
 
@@ -367,24 +365,23 @@ def get_zoom(x):
       zoom_ = '2'
       return zoom_
    agrid = None
-   if 'input:shared:agrid' in x.keys():
+   if 'input:shared:agrid' in x:
       agrid = x.get('input:shared:agrid')
-   elif 'input' in x.keys():
+   elif 'input' in x:
       agrid = x['input']['shared']['agrid']
-   if agrid:
-      if (agrid[0].upper() == 'C'):     # for cube-sphere: agrid = C90, C180, C1440, ...
-         lat = int(agrid[1:])
-         zoom = lat /90.0
-         if zoom < 1 : zoom = 1
-         if zoom > 8 : zoom = 8
-         zoom_= str(int(zoom))
+   if agrid and agrid[0].upper() == 'C':     # for cube-sphere: agrid = C90, C180, C1440, ...
+      lat = int(agrid[1:])
+      zoom = lat /90.0
+      zoom = max(zoom, 1)
+      zoom = min(zoom, 8)
+      zoom_= str(int(zoom))
    return zoom_
 
 def get_account():
    cmd = 'id -gn'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (accounts, err) = p.communicate()
-   p_status = p.wait()
+   (accounts, _) = p.communicate()
+   p.wait()
    accounts = accounts.decode().split()
    return accounts[0]
 
@@ -400,6 +397,7 @@ def config_to_yaml(config, yaml_file, noprompt = False):
               shutil.move(yaml_file, new_name)
               break
    yaml = ruamel.yaml.YAML()
+   yaml.width = 4096
    out_dir = os.path.dirname(yaml_file)
    if not os.path.exists(out_dir) : os.mkdir(out_dir)
    with open(yaml_file, "w") as f:
@@ -555,10 +553,10 @@ def get_command_line_from_answers(answers):
 
 def flatten_nested(nested_dict, result=None, prefix=''):
   if result is None:
-    result = dict()
+    result = {}
   for k, v in nested_dict.items():
-    new_k = ':'.join((prefix, k)) if prefix else k
-    if not (isinstance(v, dict) or isinstance(v, OrderedDict)):
+    new_k = f'{prefix}:{k}' if prefix else k
+    if not (isinstance(v, (dict, OrderedDict))):
       result.update({new_k: v})
     else:
       flatten_nested(v, result, new_k)
@@ -597,13 +595,13 @@ def get_config_from_answers(answers, config_tpl = False):
        config[keys[0]][keys[1]][keys[2]] = value
 
    # Do the inputs have a split saltwater?
-   input_bc_version = config['input']['shared'].get('bc_version')
+   input_bc_version = config['input']['shared'].get('bc_version', '')
    config['input']['surface']['split_saltwater'] = True
    if 'Ganymed' in input_bc_version or 'GM4' in input_bc_version:
      config['input']['surface']['split_saltwater'] = False
 
    # Do the outputs need a split saltwater?
-   output_bc_version = config['output']['shared'].get('bc_version')
+   output_bc_version = config['output']['shared'].get('bc_version', '')
    config['output']['surface']['split_saltwater'] = True
    if 'Ganymed' in output_bc_version or 'GM4' in output_bc_version:
      config['output']['surface']['split_saltwater'] = False
@@ -612,11 +610,13 @@ def get_config_from_answers(answers, config_tpl = False):
 
 def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None):
    if grid is not None : return grid
+   if agrid is None or ogrid is None:
+      raise ValueError("get_resolutions needs agrid and ogrid unless grid is given")
    aname = ''
    oname = ''
    if (agrid[0].upper() == 'C'):
       n = int(agrid[1:])
-      aname ='CF{:04d}x6C'.format(n)
+      aname =f'CF{n:04d}x6C'
 
    if (ogrid[0].upper() == 'C'):
       oname = aname
@@ -625,11 +625,11 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
       s0 = int(xy[0])
       s1 = int(xy[1])
       if omodel == 'data':
-         oname = 'DE{:04d}xPE{:04d}'.format(s0,s1)
+         oname = f'DE{s0:04d}xPE{s1:04d}'
       if omodel == 'MOM5':
-         oname = 'M5TP{:04d}x{:04d}'.format(s0,s1)
+         oname = f'M5TP{s0:04d}x{s1:04d}'
       if omodel == 'MOM6':
-         oname = 'M6TP{:04d}x{:04d}'.format(s0,s1)
+         oname = f'M6TP{s0:04d}x{s1:04d}'
    if stretch:
       aname = aname + '-' + stretch
 
@@ -640,8 +640,8 @@ def get_resolutions(agrid=None, ogrid=None, omodel=None, stretch=None, grid=None
 def get_default_bc_base():
    cmd = 'uname -n'
    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (node, err) = p.communicate()
-   p_status = p.wait()
+   (node, _) = p.communicate()
+   p.wait()
    node = node.decode().split()
    node0 = node[0]
    discover = ['dirac', 'borg','warp', 'discover']
