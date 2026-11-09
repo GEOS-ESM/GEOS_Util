@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `remap_params.yaml` is now written without line wrapping
 
 ### Fixed
+- Updated CMakeLists for plots_v2 directory under install
 
 - Fixed `shutil.remove` calls (now `os.remove`) in `remap_other_restarts.py`
 - Fixed a `TypeError` in `remap_utils.py` when `bc_version` is missing
