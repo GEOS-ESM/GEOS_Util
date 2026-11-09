@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `remap_params.yaml` is now written without line wrapping
 
 ### Fixed
+- Fixed stats_v2/stats.py to handle infinite values (like D2m over Antarctica)
 - Updated CMakeLists for plots_v2 directory under install
 
 - Fixed `shutil.remove` calls (now `os.remove`) in `remap_other_restarts.py`

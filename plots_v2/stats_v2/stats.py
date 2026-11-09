@@ -2474,6 +2474,11 @@ class BatchDatasetProcessor:
             print(f'  [INFO] Removing non-essential variables/coordinates: '
                   f'{vars_to_drop}')
             dataset = dataset.drop_vars(vars_to_drop)
+        # Replace non-finite values (inf/-inf) with NaN
+        for var_nms in dataset.data_vars:
+            if var_nms != 'grid_weights':
+                dataset[var_nms] = dataset[var_nms].where(
+                    np.isfinite(dataset[var_nms]))
         # Add regrid_method as global attribute (removing from individual vars)
         dataset.attrs['regrid_method'] = 'conservative_normed'
         for var_nms in dataset.data_vars:
