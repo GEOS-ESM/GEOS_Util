@@ -9,25 +9,23 @@
 #   source g5_modules.sh    [bash]
 #   source g5_modules       [csh]
 #
+import glob
 import os
-import subprocess as sp
 import shutil
 import subprocess
-import glob
-import ruamel.yaml
-import shlex
-import netCDF4 as nc
+import subprocess as sp
+
 from remap_base import remap_base
+from remap_bin2nc import bin2nc
 from remap_utils import (
-    get_label,
-    get_geomdir,
-    get_zoom,
-    get_landdir,
-    job_directive,
     GEOS_SITE,
     MERRA2_RST_BASE,
+    get_geomdir,
+    get_label,
+    get_landdir,
+    get_zoom,
+    job_directive,
 )
-from remap_bin2nc import bin2nc
 
 
 class other_restarts(remap_base):
@@ -200,7 +198,7 @@ class other_restarts(remap_base):
             f = os.path.basename(rst)
             dest = InData_dir + "/" + f
             if os.path.exists(dest):
-                shutil.remove(dest)
+                os.remove(dest)
             print("\nCopy " + rst + " to " + dest)
             shutil.copy(rst, dest)
             if "saltwater_internal" in f:
@@ -226,9 +224,9 @@ class other_restarts(remap_base):
         out_til = OutData_dir + "/" + os.path.basename(out_tile_file)
 
         if os.path.exists(in_til):
-            shutil.remove(in_til)
+            os.remove(in_til)
         if os.path.exists(out_til):
-            shutil.remove(out_til)
+            os.remove(out_til)
         print("\n Copy " + in_tile_file + " to " + in_til)
         shutil.copy(in_tile_file, in_til)
         print("\n Copy " + out_tile_file + " to " + out_til)
@@ -478,15 +476,16 @@ endif
 
         if interactive:
             print("interactive mode\n")
-            subprocess.call(["chmod", "755", script_name])
+            subprocess.run(["chmod", "755", script_name], check=True)
             print(script_name + "  1>" + log_name + "  2>&1")
-            os.system(script_name + " 1>" + log_name + " 2>&1")
+            with open(log_name, "w") as log_f:
+               subprocess.run([script_name], stdout=log_f, stderr=subprocess.STDOUT, check=True)
         elif GEOS_SITE == "NAS":
             print("qsub -W block=true " + script_name + "\n")
-            subprocess.call(["qsub", "-W", "block=true", script_name])
+            subprocess.run(["qsub", "-W", "block=true", script_name], check=True)
         else:
             print("sbatch -W " + script_name + "\n")
-            subprocess.call(["sbatch", "-W", script_name])
+            subprocess.run(["sbatch", "-W", script_name], check=True)
 
         suffix = "_rst." + suffix
         for out_rst in glob.glob("OutData/*_rst*"):
@@ -499,6 +498,9 @@ endif
             shutil.move(out_rst, out_dir + "/" + filename)
         print("cd " + cwdir)
         os.chdir(cwdir)
+        for scratch in (InData_dir, OutData_dir):
+            print("remove " + scratch)
+            shutil.rmtree(scratch)
 
         if self.config["input"]["shared"]["MERRA-2"]:
             self.remove_merra2()
@@ -541,7 +543,6 @@ endif
         yyyymmddhh_ = str(self.config["input"]["shared"]["yyyymmddhh"])
         yyyy_ = yyyymmddhh_[0:4]
         mm_ = yyyymmddhh_[4:6]
-        dd_ = yyyymmddhh_[6:8]
         hh_ = yyyymmddhh_[8:10]
 
         suffix = yyyymmddhh_[0:8] + "_" + hh_ + "z.bin"

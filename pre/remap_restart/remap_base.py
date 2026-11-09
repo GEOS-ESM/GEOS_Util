@@ -4,12 +4,16 @@
 #  remap_base.py does [???]
 #
 import os
-import ruamel.yaml
+import shlex
 import shutil
 import subprocess
-from remap_utils import *
 
-class remap_base(object):
+import netCDF4 as nc
+
+from remap_utils import GEOSIT_RST_BASE, get_config_from_file
+
+
+class remap_base:
   def __init__(self, **configs):
      for key, value in configs.items():
         if (key == 'params_file'):
@@ -73,8 +77,7 @@ class remap_base(object):
        if diff != 0: return False
 
        # for catchment, even tile files are the same, if bc is different, it still need remap
-       if (catch) :
-          if in_bc_version != out_bc_version : return False
+       if catch and in_bc_version != out_bc_version : return False
 
        expid = config['output']['shared']['expid']
        if (expid) :
@@ -88,7 +91,7 @@ class remap_base(object):
          f = expid + os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_rst.'+suffix
          cmd = '/bin/cp ' + rst + ' ' + out_dir+'/'+f
          print('\n'+cmd)
-         subprocess.call(shlex.split(cmd))
+         subprocess.run(shlex.split(cmd), check=True)
 
        return True
 
