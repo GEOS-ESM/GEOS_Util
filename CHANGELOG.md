@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Python ignores (`__pycache__/`, `.ruff_cache/`, `.pytest_cache/`, `.venv/`) to the root `.gitignore`
 
 ### Changed
+
 - Updated plot seasons in plot.rc
+- Remove old node specifications in `g5fcst_stats.pl`
 - Cleaned up `pre/remap_restart` Python code per ruff: explicit imports in place of star imports, context managers for file handling, `sys.exit()` in place of `exit()`, and other style fixes
 - `remap_restarts` now makes v14 the default BCs version in the interactive questions; v12 remains in the main menu, and v11, v13 and v15_BETA remain under "Other"
 - `remap_restarts` now removes its scratch directories (`InData/`, `OutData/`, `upper_data/`, `ana_data/`) after a successful remap
