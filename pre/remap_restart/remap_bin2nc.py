@@ -7,10 +7,11 @@
 # remapped.  The set of yaml config files "bin2nc_merra2_*.yaml" include hard-wired
 # variables names, long names, and tile/grid dimensions specific to MERRA-2 restarts.
 
-from yaml import safe_load, load, dump
-from netCDF4 import Dataset
 import numpy as np
+from netCDF4 import Dataset
 from scipy.io import FortranFile
+from yaml import dump, safe_load
+
 
 def writeCVars(coordVars,dimensions):
 
@@ -73,36 +74,36 @@ def defineDimVars(fid,dims):
    for d in dims:
        if d=="lon":
           newVar=fid.createVariable(d,'f8',d)
-          setattr(newVar,'units','degrees_east')
-          setattr(newVar,'long_name','Longitude')
+          newVar.units = 'degrees_east'
+          newVar.long_name = 'Longitude'
           coordVars.update([(d,newVar)])
        if d=="lat":
           newVar=fid.createVariable(d,'f8',d)
-          setattr(newVar,'units','degrees_north')
-          setattr(newVar,'long_name','Latitude')
+          newVar.units = 'degrees_north'
+          newVar.long_name = 'Latitude'
           coordVars.update([(d,newVar)])
        if d=="lev":
           newVar=fid.createVariable(d,'f8',d)
-          setattr(newVar,'units','layer')
-          setattr(newVar,'long_name','sigma_at_layer_midpoints')
-          setattr(newVar,'standard_name','atmosphere_hybrid_sigma_pressure_coordinate')
-          setattr(newVar,'coordinate','eta')
-          setattr(newVar,'positive','down')
-          setattr(newVar,'formulaTerms','ap: ak b: bk ps: ps p0: p00')
+          newVar.units = 'layer'
+          newVar.long_name = 'sigma_at_layer_midpoints'
+          newVar.standard_name = 'atmosphere_hybrid_sigma_pressure_coordinate'
+          newVar.coordinate = 'eta'
+          newVar.positive = 'down'
+          newVar.formulaTerms = 'ap: ak b: bk ps: ps p0: p00'
           coordVars.update([(d,newVar)])
        if d=="edge":
           newVar=fid.createVariable(d,'f8',d)
-          setattr(newVar,'units','level')
-          setattr(newVar,'long_name','sigma_at_layer edge')
-          setattr(newVar,'standard_name','atmosphere_hybrid_sigma_pressure_coordinate')
-          setattr(newVar,'coordinate','eta')
-          setattr(newVar,'positive','down')
-          setattr(newVar,'formulaTerms','ap: ak b: bk ps: ps p0: p00')
+          newVar.units = 'level'
+          newVar.long_name = 'sigma_at_layer edge'
+          newVar.standard_name = 'atmosphere_hybrid_sigma_pressure_coordinate'
+          newVar.coordinate = 'eta'
+          newVar.positive = 'down'
+          newVar.formulaTerms = 'ap: ak b: bk ps: ps p0: p00'
           coordVars.update([(d,newVar)])
        if d=="time":
           newVar=fid.createVariable(d,'f8',d)
-          setattr(newVar,'units','minutes since ')
-          setattr(newVar,'long_name','time')
+          newVar.units = 'minutes since '
+          newVar.long_name = 'time'
           coordVars.update([(d,newVar)])
 
    return coordVars
@@ -114,9 +115,8 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
      bintype=np.float64
   
   
-  f=open(yamlfile,'r')
-  
-  data=safe_load(f)
+  with open(yamlfile,'r') as f:
+     data=safe_load(f)
   
   dimensions = data["dimensions"]
   variables = data["variables"]
@@ -142,8 +142,8 @@ def bin2nc(binfile, ncfile, yamlfile, isDouble=False, hasHeader=False, debug=Fal
       units = v['units']
       dims = v['dimension']
       newVar = ncfid.createVariable(sname,'f4',dims)
-      setattr(newVar,'long_name',lname)
-      setattr(newVar,'units',units)
+      newVar.long_name = lname
+      newVar.units = units
       vars.update([(sname,newVar)])
   
   writeCVars(cVars,dimensions)
