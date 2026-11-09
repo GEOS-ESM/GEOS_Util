@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #=======================================================================
-# name - g5fcst_stats.pl 
+# name - g5fcst_stats.pl
 # purpose - script to submit jobs to calculate forecast statistics
 #
 # key global variables -
@@ -142,8 +142,8 @@ $secs_per_day  = 24 * $secs_per_hour;
                 if ($nxonly eq "yes") {
                    $fname = "$vexpid.$vanatype.${vdate}_${vhh}${vmn}z";
                 } else {
-                   $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";                 
-                }     
+                   $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
+                }
                 $ffile0 = "$fdir/$fname$ncsuffix";
             }
             else {
@@ -178,7 +178,7 @@ $secs_per_day  = 24 * $secs_per_hour;
                 if ($nxonly eq "yes" ) {
                    push @alist, "$vexpid.$vanatype.${vdate}_${vhh}${vmn}z";
                 } else {
-                   push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z"; 
+                   push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
                 }
             }
 
@@ -236,7 +236,7 @@ $secs_per_day  = 24 * $secs_per_hour;
             }
             else {
                 push @fcst_fnames, $ffile0 if $ffile0;
-                push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix"; 
+                push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix";
                 if ($nxonly eq "yes" ) {
                      push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix";
                 } else {
@@ -248,7 +248,7 @@ $secs_per_day  = 24 * $secs_per_hour;
             push @fcst_fnames, $ffile0 if $ffile0;
             push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix";
             if ($nxonly eq "yes" ) {
-               push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix" 
+               push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix"
             } else {
                push @ana_fnames, "$vexpid.asm.inst3d_met_p.*$ncsuffix";
                push @ana_fnames, "$vexpid.ana.inst3d_met_p.*$ncsuffix";
@@ -388,15 +388,15 @@ sub init {
     $expid = shift @ARGV;
     $idate = shift @ARGV;
     $ndays = shift @ARGV;
-    
+
     # landonly option
     #----------------
     $landonly = $landonly_dflt unless $landonly;
-  
+
     #nxonly option
     #--------------
     $nxonly = $nxonly_dflt unless $nxonly;
-           
+
     # initial fcst hour and offset
     #-----------------------------
     unless ($ihh) {
@@ -475,7 +475,7 @@ sub init {
     $progdir = "$EXP_ARCHIVE/$expid/prog" unless $progdir;
     until (-d $progdir) {
         unless ($noprompt) {
-            print "forecase prog directory does not exist: $progdir\n\n";
+            print "forecast prog directory does not exist: $progdir\n\n";
             $progdir = query("forecast prog directory:", $progdir);
         }
         else { die "forecast prog directory does not exist: $progdir;" }
@@ -574,7 +574,7 @@ sub init {
     #--------------
     $fv_etcdir = dirname($Bin) ."/etc";
     if ($nxonly eq "yes" ) {
-        die "Error. Cannot find $fv_etcdir/statsNx.rc" unless -e "$fv_etcdir/statsNx.rc"; 
+        die "Error. Cannot find $fv_etcdir/statsNx.rc" unless -e "$fv_etcdir/statsNx.rc";
     } else {
         die "Error. Cannot find $fv_etcdir/stats.rc" unless -e "$fv_etcdir/stats.rc";
     }
@@ -680,10 +680,10 @@ sub submit_calcjob {
     my ($mynodes,$usrnodes);
     my ($qos, $partition);
     my ($ntspn, $npn);
-    my ($landonly, $landmaskdirfile); 
+    my ($landonly, $landmaskdirfile);
     my ($nxonly);
     my ($whichrc);
-    
+
     @levels_19 = ( 1000.0, 975.0, 950.0, 925.0,
                     900.0, 850.0, 800.0, 750.0,
                     700.0, 600.0, 500.0, 400.0,
@@ -722,12 +722,12 @@ sub submit_calcjob {
      $landmaskdirfile = "$jobdir/landmaskfile.nc4";
      die "Error. Cannot find $landmaskdirfile" unless -e "$landmaskdirfile";
     }
-    
+
     $whichrc = "stats.rc";
     if ($nxonly eq "yes") {
      @levs = @levels_1;
      $whichrc = "statsNx.rc";
-     print "whichrc: $whichrc\n"; 
+     print "whichrc: $whichrc\n";
     }
 
     foreach (@fcstlist, @vanalist) { push @rmfilelist, basename($_) };
@@ -744,28 +744,11 @@ sub submit_calcjob {
     $logfile1 = "$jobdir/$jobtype.log.$jobdate.o%j.txt";
     $logfile2 = "$logdir/$expid.$jobtype.log.$jobdate.txt";
     $npn = `facter processorcount`; chomp($npn);
-    if ( $npn == 40 ) {
-      $mynodes = "sky";
-      $ntspn   = 36;
-      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
-      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
-    } elsif ( $npn == 48 ) {
-      $mynodes = "cas";
-      $ntspn   = 42;
-      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
-      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
-    } elsif ( $npn == 128 ) {
+    if ( $npn == 128 ) {
       $mynodes = "mil";
       $ntspn   = 42;
-      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
-      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
-    } else {
-      $mynodes = "hasw";
-      $ntspn   = 24;
-      $qos     = "";
-      $partition = "";
-#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use HASW
-#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use HASW
+      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use MIL
+      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use MIL
     }
     if ( $usrnodes ne "null" ) { $mynodes = $usrnodes }; # overwrite with specification from command line
 
@@ -886,7 +869,7 @@ sub submit_archivejob {
     # if processing one day, then archive only one day
     #-------------------------------------------------
     if ($ndays == 1) { $dtFLG = "-date $vdate0 -syntime ${vhh0}0000" }
-    else             { $dtFLG = "" }    
+    else             { $dtFLG = "" }
 
     # write archive jobfile
     #----------------------
@@ -1065,13 +1048,13 @@ OPTIONS [defaults in brackets]
                        [dirname(\$FVHOME) or \$NOBACKUP]
     -noarchive         do not archive outputs [archives by default]
 
-    -landonly          calculate stats only over land surface (yes/no) 
+    -landonly          calculate stats only over land surface (yes/no)
                        [no by default]
 
-    -nxonly            calculate stats of 2d Nx collection only (yes/no) 
-                       [no by default] 
+    -nxonly            calculate stats of 2d Nx collection only (yes/no)
+                       [no by default]
 
-    -nodes nodesname   specify nodes (e.g., sky, hasw, or cas)
+    -nodes nodesname   specify nodes (e.g., mil)
     -das               check for DAS hidden files before attempting to fetch files
                        and set no prompt; requires \$FVHOME environment variable;
 

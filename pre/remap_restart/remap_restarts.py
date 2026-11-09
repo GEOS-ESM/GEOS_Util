@@ -10,20 +10,25 @@
 #   source g5_modules       [csh]
 #
 import sys
-import argparse
 import textwrap
-import ruamel.yaml
+
 import questionary
-from remap_utils import *
-from remap_questions import *
-from remap_command_line import *
-from remap_upper import *
-from remap_other_restarts import *
-from remap_analysis  import *
-from remap_catchANDcn  import *
 
+from remap_analysis import analysis
+from remap_catchANDcn import catchANDcn, remap_land_only
+from remap_command_line import get_answers_from_command_line, parse_args
+from remap_other_restarts import other_restarts
+from remap_questions import ask_questions
+from remap_upper import upperair
+from remap_utils import (
+  config_to_yaml,
+  get_command_line_from_answers,
+  get_config_from_answers,
+  print_config,
+  write_cmd,
+)
 
-program_description = textwrap.dedent(f'''
+program_description = textwrap.dedent('''
       USAGE:
 
       This script provides four options for remapping GEOS restart files:
@@ -58,11 +63,9 @@ program_description = textwrap.dedent(f'''
     ''')
 def main():
 
-  question_flag = False
   config        = ''
-  yaml = ruamel.yaml.YAML()
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
-  cmdl, extra_args = parse_args(program_description)
+  cmdl, _ = parse_args(program_description)
   answers = {}
   config_yaml =''
   noprompt = False
@@ -78,7 +81,6 @@ def main():
   if (len(sys.argv) == 1 or answers) :
       if not answers:
          answers = ask_questions()
-         question_flag = True
       cmd = get_command_line_from_answers(answers)
       write_cmd(answers['output:shared:out_dir'], cmd)
       # just for debugging
