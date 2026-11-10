@@ -1,0 +1,16 @@
+target-version = "py312"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "I"]
+ignore = [
+    "E501",   # long lines
+    "E701",   # multiple statements (colon)
+    "E702",   # multiple statements (semicolon)
+    "W291",   # trailing whitespace
+    "W293",   # whitespace on blank lines
+    "UP015",  # redundant open modes
+    "SIM105", # contextlib.suppress
+    "SIM108", # ternary
+    "B905",   # zip without strict
+]
