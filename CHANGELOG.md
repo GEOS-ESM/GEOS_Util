@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `ruff.toml` for `pre/remap_restart`
 - Added a GitHub Action (`python-lint.yml`) that runs `ruff` and `ty` on `pre/remap_restart`
 - Added Python ignores (`__pycache__/`, `.ruff_cache/`, `.pytest_cache/`, `.venv/`) to the root `.gitignore`
+- `remap_restarts` now extracts archived restart tarballs named `<expid>.rst.YYYYMMDD_HHz.tar` into `<out_dir>/rst_tmp_<ymdh>/` when no unpacked `fvcore_internal` restart is present in the input directory
 
 ### Changed
 
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a `TypeError` in `remap_utils.py` when `bc_version` is missing
 - Fixed a trailing space after `bc_base:` in the generated `remap_params.yaml`
 - `get_resolutions` in `remap_utils.py` now raises a clear error if `agrid` or `ogrid` is missing
+- Fixed `KeyError: 'input:shared:stretch'` in `remap_utils.py` when `fvcore_info()` did not populate `input:shared:stretch`, and exit with a clear error if no `fvcore_internal` restart or matching `.rst.YYYYMMDD_HHz.tar` tarball is found
 
 ### Removed
 
