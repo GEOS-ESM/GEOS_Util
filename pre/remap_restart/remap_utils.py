@@ -235,6 +235,23 @@ def fvcore_info(x):
   x['input:shared:rst_dir'] = rst_dir.strip() # remove extra space
 
   files = glob.glob(rst_dir+'/*fvcore_internal*')
+
+  # Operations archive form: <expid>.rst.YYYYMMDD_HHz.tar. Untar into the output dir (not removed afterwards).
+  ymdh    = x.get('input:shared:yyyymmddhh')
+  out_dir = x.get('output:shared:out_dir')
+  if len(files) == 0 and ymdh and out_dir:
+    tars = glob.glob(rst_dir+'/*.rst.'+ymdh[0:8]+'_'+ymdh[8:10]+'z.tar')
+    if len(tars) == 1:
+      tmp_dir = out_dir+'/rst_tmp_'+ymdh+'/'
+      os.makedirs(tmp_dir, exist_ok=True)
+      print("Untarring " + tars[0] + " to " + tmp_dir + '\n')
+      subprocess.run(['tar', '-xf', tars[0], '-C', tmp_dir], check=True)
+      rst_dir = tmp_dir.rstrip('/')
+      x['input:shared:rst_dir'] = rst_dir
+      files = glob.glob(rst_dir+'/*fvcore_internal*')
+    if len(files) == 0:
+      sys.exit("Error. No fvcore_internal restart (or <expid>.rst."+ymdh[0:8]+"_"+ymdh[8:10]+"z.tar) found in " + rst_dir)
+
   if len (files) == 0 : return False
 
   fname =''
@@ -484,7 +501,7 @@ def get_command_line_from_answers(answers):
    if answers["output:shared:stretch"]:
      out_stretch = ' -out_stretch ' + answers["output:shared:stretch"]
    in_stretch  = ''
-   if answers["input:shared:stretch"]:
+   if answers.get("input:shared:stretch"):
      in_stretch  = ' -in_stretch ' + answers["input:shared:stretch"]
 
    zoom   = " -zoom "      + answers["input:surface:zoom"]
